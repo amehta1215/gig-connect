@@ -4,6 +4,8 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
 
+@import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
+
 @layer base {
   :root {
     --background: 0 0% 2%;
@@ -15,7 +17,7 @@
     --popover: 0 0% 5%;
     --popover-foreground: 0 0% 96%;
 
-    --primary: 6 100% 50%;
+    --primary: 5 100% 61%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 10%;
