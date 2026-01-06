@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Plus, MapPin, Users, Music, Edit, Trash2, Building2 } from 'lucide-react';
+import { Plus, MapPin, Users, Music, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface VenueListing {
@@ -123,7 +123,7 @@ export default function VenueListings() {
 
   const handleSave = async () => {
     if (!venueProfileId || !formData.venue_name) {
-      toast.error('Venue name is required');
+      toast.error('Venue name required');
       return;
     }
 
@@ -156,9 +156,9 @@ export default function VenueListings() {
     }
 
     if (error) {
-      toast.error('Failed to save listing');
+      toast.error('Failed');
     } else {
-      toast.success(editingListing ? 'Listing updated' : 'Listing created');
+      toast.success(editingListing ? 'Updated' : 'Created');
       setIsDialogOpen(false);
       resetForm();
       fetchListings(venueProfileId);
@@ -167,7 +167,7 @@ export default function VenueListings() {
   };
 
   const handleDelete = async (listingId: string) => {
-    if (!confirm('Are you sure you want to delete this listing?')) return;
+    if (!confirm('Delete this listing?')) return;
 
     const { error } = await supabase
       .from('venue_listings')
@@ -175,9 +175,9 @@ export default function VenueListings() {
       .eq('id', listingId);
 
     if (error) {
-      toast.error('Failed to delete listing');
+      toast.error('Failed');
     } else {
-      toast.success('Listing deleted');
+      toast.success('Deleted');
       setListings(listings.filter(l => l.id !== listingId));
     }
   };
@@ -194,84 +194,81 @@ export default function VenueListings() {
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-4xl md:text-5xl text-gradient">Listings</h1>
-          <p className="text-muted-foreground mt-1">Manage your venue rooms</p>
-        </div>
+        <h1 className="font-display section-title text-foreground">LISTINGS</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => openDialog()}>
+            <Button onClick={() => openDialog()} className="font-display tracking-widest">
               <Plus className="h-4 w-4 mr-2" />
-              Add Listing
+              ADD
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
             <DialogHeader>
-              <DialogTitle className="font-display text-2xl">
-                {editingListing ? 'Edit Listing' : 'Create Listing'}
+              <DialogTitle className="font-display text-2xl tracking-wide">
+                {editingListing ? 'EDIT' : 'NEW LISTING'}
               </DialogTitle>
             </DialogHeader>
 
             <div className="space-y-6 mt-4">
               {/* General Info */}
               <div className="space-y-4">
-                <h3 className="font-display text-lg text-primary">General</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="venue_name">Venue Name *</Label>
+                <h3 className="font-display text-sm text-primary tracking-widest">GENERAL</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="venue_name" className="text-xs uppercase tracking-wider text-muted-foreground">Venue *</Label>
                     <Input
                       id="venue_name"
                       value={formData.venue_name}
                       onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
-                      placeholder="The Blue Note"
+                      className="bg-background border-border"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="room_name">Room Name</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="room_name" className="text-xs uppercase tracking-wider text-muted-foreground">Room</Label>
                     <Input
                       id="room_name"
                       value={formData.room_name}
                       onChange={(e) => setFormData({ ...formData, room_name: e.target.value })}
-                      placeholder="Main Stage"
+                      className="bg-background border-border"
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="location" className="text-xs uppercase tracking-wider text-muted-foreground">Location</Label>
                     <Input
                       id="location"
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      placeholder="New York, NY"
+                      className="bg-background border-border"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="capacity">Capacity</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="capacity" className="text-xs uppercase tracking-wider text-muted-foreground">Capacity</Label>
                     <Input
                       id="capacity"
                       type="number"
                       value={formData.capacity}
                       onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                      placeholder="200"
+                      className="bg-background border-border"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Genres</Label>
-                  <div className="flex flex-wrap gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">Genres</Label>
+                  <div className="flex flex-wrap gap-1">
                     {availableGenres.map((genre) => (
                       <button
                         key={genre}
                         type="button"
                         onClick={() => toggleGenre(genre)}
-                        className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                        className={`px-3 py-1 text-xs font-display tracking-wider transition-colors ${
                           formData.genres.includes(genre)
                             ? 'bg-primary text-primary-foreground'
                             : 'bg-secondary text-muted-foreground hover:text-foreground'
                         }`}
                       >
-                        {genre}
+                        {genre.toUpperCase()}
                       </button>
                     ))}
                   </div>
@@ -280,46 +277,46 @@ export default function VenueListings() {
 
               {/* Additional Info */}
               <div className="space-y-4">
-                <h3 className="font-display text-lg text-primary">Additional Info</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
+                <h3 className="font-display text-sm text-primary tracking-widest">DETAILS</h3>
+                <div className="space-y-1">
+                  <Label htmlFor="bio" className="text-xs uppercase tracking-wider text-muted-foreground">Bio</Label>
                   <Textarea
                     id="bio"
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    placeholder="Tell artists about this space..."
-                    rows={3}
+                    className="bg-background border-border"
+                    rows={2}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="backline_info">Backline Info</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="backline_info" className="text-xs uppercase tracking-wider text-muted-foreground">Backline</Label>
                   <Textarea
                     id="backline_info"
                     value={formData.backline_info}
                     onChange={(e) => setFormData({ ...formData, backline_info: e.target.value })}
-                    placeholder="Equipment available..."
+                    className="bg-background border-border"
                     rows={2}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="house_rules">House Rules</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="house_rules" className="text-xs uppercase tracking-wider text-muted-foreground">Rules</Label>
                   <Textarea
                     id="house_rules"
                     value={formData.house_rules}
                     onChange={(e) => setFormData({ ...formData, house_rules: e.target.value })}
-                    placeholder="Important rules and guidelines..."
+                    className="bg-background border-border"
                     rows={2}
                   />
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-border">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
+              <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="font-display tracking-widest">
+                  CANCEL
                 </Button>
-                <Button onClick={handleSave} disabled={saving}>
-                  {saving ? 'Saving...' : editingListing ? 'Update' : 'Create'}
+                <Button onClick={handleSave} disabled={saving} className="font-display tracking-widest">
+                  {saving ? '...' : editingListing ? 'UPDATE' : 'CREATE'}
                 </Button>
               </div>
             </div>
@@ -329,43 +326,39 @@ export default function VenueListings() {
 
       {/* Listings Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-48 bg-card rounded-xl animate-pulse" />
+            <div key={i} className="h-48 bg-card animate-pulse" />
           ))}
         </div>
       ) : listings.length === 0 ? (
-        <div className="text-center py-16 bg-card rounded-xl border border-border">
-          <div className="w-16 h-16 mx-auto bg-secondary rounded-full flex items-center justify-center mb-4">
-            <Building2 className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="font-display text-2xl mb-2">No listings yet</h3>
-          <p className="text-muted-foreground mb-6">Create your first listing to start receiving applications</p>
-          <Button onClick={() => openDialog()}>
+        <div className="text-center py-16 bg-card border border-border">
+          <h3 className="font-display text-xl text-muted-foreground mb-4">NO LISTINGS</h3>
+          <Button onClick={() => openDialog()} className="font-display tracking-widest">
             <Plus className="h-4 w-4 mr-2" />
-            Add Listing
+            ADD
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {listings.map((listing) => (
             <div
               key={listing.id}
-              className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-colors"
+              className="bg-card border border-border overflow-hidden hover:border-primary/50 transition-colors"
             >
               {/* Image placeholder */}
-              <div className="aspect-video bg-secondary flex items-center justify-center">
-                <Music className="h-12 w-12 text-muted-foreground" />
+              <div className="aspect-[4/3] bg-secondary flex items-center justify-center bg-heat">
+                <Music className="h-12 w-12 text-primary/30" />
               </div>
 
               {/* Content */}
-              <div className="p-4">
-                <h3 className="font-display text-xl text-foreground">{listing.venue_name}</h3>
+              <div className="p-3">
+                <h3 className="font-display text-xl text-foreground tracking-wide">{listing.venue_name}</h3>
                 {listing.room_name && (
-                  <p className="text-sm text-muted-foreground">{listing.room_name}</p>
+                  <p className="text-xs text-muted-foreground">{listing.room_name}</p>
                 )}
                 
-                <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                   {listing.location && (
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
@@ -381,11 +374,11 @@ export default function VenueListings() {
                 </div>
 
                 {listing.genres && listing.genres.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {listing.genres.slice(0, 3).map((genre) => (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {listing.genres.slice(0, 2).map((genre) => (
                       <span
                         key={genre}
-                        className="text-xs bg-secondary px-2 py-0.5 rounded-full"
+                        className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider"
                       >
                         {genre}
                       </span>
@@ -394,20 +387,19 @@ export default function VenueListings() {
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-2 mt-4">
+                <div className="flex gap-2 mt-3">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 font-display tracking-widest text-xs border-border"
                     onClick={() => openDialog(listing)}
                   >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
+                    EDIT
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border"
                     onClick={() => handleDelete(listing.id)}
                   >
                     <Trash2 className="h-4 w-4" />

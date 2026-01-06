@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -11,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search, MapPin, Users, Music, Filter } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface VenueListing {
   id: string;
@@ -26,8 +25,8 @@ interface VenueListing {
 
 const genres = ['Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
 const capacityRanges = [
-  { label: 'Any capacity', value: 'any' },
-  { label: 'Under 100', value: '0-100' },
+  { label: 'Any', value: 'any' },
+  { label: '<100', value: '0-100' },
   { label: '100-300', value: '100-300' },
   { label: '300-500', value: '300-500' },
   { label: '500+', value: '500+' },
@@ -81,97 +80,85 @@ export default function FindVenues() {
 
   const FiltersContent = () => (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label>Location</Label>
-        <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="City or neighborhood"
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+      <div className="relative">
+        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Location"
+          value={selectedLocation}
+          onChange={(e) => setSelectedLocation(e.target.value)}
+          className="pl-10 bg-background"
+        />
       </div>
 
-      <div className="space-y-2">
-        <Label>Genre</Label>
-        <Select value={selectedGenre} onValueChange={setSelectedGenre}>
-          <SelectTrigger>
-            <SelectValue placeholder="All genres" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All genres</SelectItem>
-            {genres.map((genre) => (
-              <SelectItem key={genre} value={genre}>{genre}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Select value={selectedGenre} onValueChange={setSelectedGenre}>
+        <SelectTrigger className="bg-background">
+          <SelectValue placeholder="Genre" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All</SelectItem>
+          {genres.map((genre) => (
+            <SelectItem key={genre} value={genre}>{genre}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
-      <div className="space-y-2">
-        <Label>Capacity</Label>
-        <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
-          <SelectTrigger>
-            <SelectValue placeholder="Any capacity" />
-          </SelectTrigger>
-          <SelectContent>
-            {capacityRanges.map((range) => (
-              <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
+        <SelectTrigger className="bg-background">
+          <SelectValue placeholder="Capacity" />
+        </SelectTrigger>
+        <SelectContent>
+          {capacityRanges.map((range) => (
+            <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="font-display text-4xl md:text-5xl text-gradient">Find Venues</h1>
-        <p className="text-muted-foreground mt-1">Discover your next stage</p>
-      </div>
+      <h1 className="font-display section-title text-foreground">VENUES</h1>
 
       {/* Search and Filters */}
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search venues..."
+            placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-card border-border"
           />
         </div>
 
         {/* Desktop Filters */}
-        <div className="hidden lg:flex gap-3">
-          <div className="relative w-48">
+        <div className="hidden lg:flex gap-2">
+          <div className="relative w-40">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Location"
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-card border-border"
             />
           </div>
           <Select value={selectedGenre} onValueChange={setSelectedGenre}>
-            <SelectTrigger className="w-36">
-              <Music className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Genre" />
+            <SelectTrigger className="w-32 bg-card border-border">
+              <Music className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All genres</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               {genres.map((genre) => (
                 <SelectItem key={genre} value={genre}>{genre}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
-            <SelectTrigger className="w-36">
-              <Users className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Capacity" />
+            <SelectTrigger className="w-28 bg-card border-border">
+              <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {capacityRanges.map((range) => (
@@ -184,15 +171,12 @@ export default function FindVenues() {
         {/* Mobile Filters */}
         <Sheet>
           <SheetTrigger asChild className="lg:hidden">
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="border-border">
               <Filter className="h-4 w-4" />
             </Button>
           </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Filters</SheetTitle>
-            </SheetHeader>
-            <div className="mt-6">
+          <SheetContent className="bg-card border-border">
+            <div className="mt-8">
               <FiltersContent />
             </div>
           </SheetContent>
@@ -201,42 +185,38 @@ export default function FindVenues() {
 
       {/* Results */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-card rounded-xl h-64 animate-pulse" />
+            <div key={i} className="bg-card h-56 animate-pulse" />
           ))}
         </div>
       ) : filteredVenues.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="w-16 h-16 mx-auto bg-secondary rounded-full flex items-center justify-center mb-4">
-            <Search className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="font-display text-2xl mb-2">No venues found</h3>
-          <p className="text-muted-foreground">Try adjusting your search or filters</p>
+        <div className="text-center py-20">
+          <h3 className="font-display text-2xl text-muted-foreground">NO VENUES</h3>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredVenues.map((venue) => (
             <div
               key={venue.id}
-              className="group bg-card hover:bg-card-hover border border-border rounded-xl overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 cursor-pointer"
+              className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer"
             >
               {/* Image */}
-              <div className="aspect-video bg-secondary relative overflow-hidden">
+              <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
                 {venue.pictures && venue.pictures.length > 0 ? (
                   <img
                     src={venue.pictures[0]}
                     alt={venue.venue_name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Music className="h-12 w-12 text-muted-foreground" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-heat">
+                    <Music className="h-12 w-12 text-primary/30" />
                   </div>
                 )}
                 {/* Capacity badge */}
                 {venue.capacity && (
-                  <div className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                  <div className="absolute top-2 right-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
                     <Users className="h-3 w-3" />
                     {venue.capacity}
                   </div>
@@ -244,25 +224,22 @@ export default function FindVenues() {
               </div>
 
               {/* Content */}
-              <div className="p-4">
-                <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors">
+              <div className="p-3">
+                <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors tracking-wide">
                   {venue.venue_name}
                 </h3>
-                {venue.room_name && (
-                  <p className="text-sm text-muted-foreground">{venue.room_name}</p>
-                )}
                 {venue.location && (
-                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                     <MapPin className="h-3 w-3" />
                     {venue.location}
                   </p>
                 )}
                 {venue.genres && venue.genres.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {venue.genres.slice(0, 3).map((genre) => (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {venue.genres.slice(0, 2).map((genre) => (
                       <span
                         key={genre}
-                        className="text-xs bg-secondary px-2 py-0.5 rounded-full text-muted-foreground"
+                        className="text-[10px] bg-secondary px-2 py-0.5 text-muted-foreground uppercase tracking-wider"
                       >
                         {genre}
                       </span>

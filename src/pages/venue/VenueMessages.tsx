@@ -89,12 +89,9 @@ export default function VenueMessages() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="font-display text-4xl md:text-5xl text-gradient">Messages</h1>
-        <p className="text-muted-foreground mt-1">Connect with artists</p>
-      </div>
+      <h1 className="font-display section-title text-foreground">MESSAGES</h1>
 
-      <div className="flex h-[calc(100vh-280px)] min-h-[400px] border border-border rounded-xl overflow-hidden bg-card">
+      <div className="flex h-[calc(100vh-220px)] min-h-[400px] border border-border overflow-hidden bg-card">
         {/* Message List */}
         <div className={`w-full md:w-1/3 border-r border-border flex flex-col ${
           selectedMessage ? 'hidden md:flex' : 'flex'
@@ -104,10 +101,10 @@ export default function VenueMessages() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search messages..."
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-background border-border"
               />
             </div>
           </div>
@@ -115,22 +112,22 @@ export default function VenueMessages() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto">
             {loading ? (
-              <div className="p-4 space-y-3">
+              <div className="p-3 space-y-2">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-20 bg-secondary rounded-lg animate-pulse" />
+                  <div key={i} className="h-16 bg-secondary animate-pulse" />
                 ))}
               </div>
             ) : filteredMessages.length === 0 ? (
               <div className="p-8 text-center">
-                <Mail className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No messages yet</p>
+                <Mail className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                <p className="text-muted-foreground text-sm">Empty</p>
               </div>
             ) : (
               filteredMessages.map((message) => (
                 <div
                   key={message.id}
                   onClick={() => handleSelectMessage(message)}
-                  className={`p-4 border-b border-border cursor-pointer transition-colors ${
+                  className={`p-3 border-b border-border cursor-pointer transition-colors ${
                     selectedMessage?.id === message.id
                       ? 'bg-primary/10'
                       : message.is_read
@@ -138,7 +135,7 @@ export default function VenueMessages() {
                       : 'bg-secondary/50 hover:bg-secondary'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2">
                     <div className="flex-shrink-0 mt-1">
                       {message.is_read ? (
                         <MailOpen className="h-4 w-4 text-muted-foreground" />
@@ -151,15 +148,12 @@ export default function VenueMessages() {
                         <span className={`text-sm truncate ${!message.is_read ? 'font-semibold' : ''}`}>
                           {message.sender?.first_name} {message.sender?.last_name}
                         </span>
-                        <span className="text-xs text-muted-foreground flex-shrink-0">
+                        <span className="text-[10px] text-muted-foreground flex-shrink-0 uppercase tracking-wider">
                           {format(new Date(message.created_at), 'MMM d')}
                         </span>
                       </div>
                       <p className={`text-sm truncate ${!message.is_read ? 'font-medium' : 'text-muted-foreground'}`}>
                         {message.subject || '(No subject)'}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate mt-1">
-                        {message.content}
                       </p>
                     </div>
                     <button
@@ -167,10 +161,10 @@ export default function VenueMessages() {
                         e.stopPropagation();
                         toggleStar(message.id, message.is_starred);
                       }}
-                      className="flex-shrink-0 p-1 hover:bg-secondary rounded"
+                      className="flex-shrink-0 p-1 hover:bg-secondary"
                     >
                       {message.is_starred ? (
-                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                        <Star className="h-4 w-4 text-primary fill-primary" />
                       ) : (
                         <StarOff className="h-4 w-4 text-muted-foreground" />
                       )}
@@ -199,27 +193,24 @@ export default function VenueMessages() {
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex-1">
-                  <h2 className="font-semibold">{selectedMessage.subject || '(No subject)'}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    From: {selectedMessage.sender?.first_name} {selectedMessage.sender?.last_name}
+                  <h2 className="font-display text-lg tracking-wide">{selectedMessage.subject || '(No subject)'}</h2>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedMessage.sender?.first_name} {selectedMessage.sender?.last_name}
                   </p>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {format(new Date(selectedMessage.created_at), 'MMM d, yyyy h:mm a')}
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                  {format(new Date(selectedMessage.created_at), 'MMM d, yyyy')}
                 </span>
               </div>
 
               {/* Detail Content */}
               <div className="flex-1 overflow-y-auto p-6">
-                <p className="whitespace-pre-wrap">{selectedMessage.content}</p>
+                <p className="whitespace-pre-wrap text-sm">{selectedMessage.content}</p>
               </div>
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <Mail className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p>Select a message to read</p>
-              </div>
+              <Mail className="h-12 w-12 text-muted-foreground/30" />
             </div>
           )}
         </div>
