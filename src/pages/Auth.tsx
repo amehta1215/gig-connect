@@ -1,23 +1,37 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import { z } from 'zod';
+import openingImage from "@/assets/opening.png";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { z } from "zod";
 
-type AuthMode = 'login' | 'signup';
-type UserRole = 'artist' | 'venue' | 'both';
+// If your project has shadcn Dialog, keep these imports.
+// If you DON'T have them, tell me and I'll give you a no-dependency modal version.
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-const emailSchema = z.string().email('Invalid email');
-const passwordSchema = z.string().min(6, 'Min 6 characters');
+type AuthMode = "login" | "signup";
+type UserRole = "artist" | "venue" | "both";
+
+const emailSchema = z.string().email("Invalid email");
+const passwordSchema = z.string().min(6, "Min 6 characters");
 
 export default function Auth() {
-  const [mode, setMode] = useState<AuthMode>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  // Modal control
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<AuthMode>("login");
+
+  // Form state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -25,12 +39,28 @@ export default function Auth() {
   const { signIn, signUp, user, profile, loading } = useAuth();
   const navigate = useNavigate();
 
+  const photoUrl = openingImage;
+
   useEffect(() => {
     if (!loading && user && profile) {
-      const targetDashboard = profile.role === 'venue' ? '/venue' : '/artist';
+      const targetDashboard = profile.role === "venue" ? "/venue" : "/artist";
       navigate(targetDashboard);
     }
   }, [user, profile, loading, navigate]);
+
+  const resetErrors = () => setErrors({});
+
+  const openLogin = () => {
+    resetErrors();
+    setMode("login");
+    setOpen(true);
+  };
+
+  const openSignup = () => {
+    resetErrors();
+    setMode("signup");
+    setOpen(true);
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -38,23 +68,19 @@ export default function Auth() {
     try {
       emailSchema.parse(email);
     } catch (e) {
-      if (e instanceof z.ZodError) {
-        newErrors.email = e.errors[0].message;
-      }
+      if (e instanceof z.ZodError) newErrors.email = e.errors[0].message;
     }
 
     try {
       passwordSchema.parse(password);
     } catch (e) {
-      if (e instanceof z.ZodError) {
-        newErrors.password = e.errors[0].message;
-      }
+      if (e instanceof z.ZodError) newErrors.password = e.errors[0].message;
     }
 
-    if (mode === 'signup') {
-      if (!firstName.trim()) newErrors.firstName = 'Required';
-      if (!lastName.trim()) newErrors.lastName = 'Required';
-      if (!role) newErrors.role = 'Pick one';
+    if (mode === "signup") {
+      if (!firstName.trim()) newErrors.firstName = "Required";
+      if (!lastName.trim()) newErrors.lastName = "Required";
+      if (!role) newErrors.role = "Pick one";
     }
 
     setErrors(newErrors);
@@ -63,35 +89,37 @@ export default function Auth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     setIsLoading(true);
 
     try {
-      if (mode === 'login') {
+      if (mode === "login") {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            toast.error('Wrong credentials');
-          } else {
-            toast.error(error.message);
-          }
-        }
-      } else {
-        const { error } = await signUp(email, password, firstName, lastName, role!);
-        if (error) {
-          if (error.message.includes('already registered')) {
-            toast.error('Email taken');
+          if (error.message.includes("Invalid login credentials")) {
+            toast.error("Wrong credentials");
           } else {
             toast.error(error.message);
           }
         } else {
-          toast.success('Welcome to RIFF');
+          setOpen(false);
+        }
+      } else {
+        const { error } = await signUp(email, password, firstName, lastName, role!);
+        if (error) {
+          if (error.message.includes("already registered")) {
+            toast.error("Email taken");
+          } else {
+            toast.error(error.message);
+          }
+        } else {
+          toast.success("Welcome to RIFF");
+          setOpen(false);
         }
       }
-    } catch (err) {
-      toast.error('Something went wrong');
+    } catch {
+      toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -106,81 +134,81 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background">
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-heat" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/5 blur-3xl" />
-      
-      {/* Noise overlay */}
-      <div className="absolute inset-0 bg-noise pointer-events-none" />
-      
-      {/* Giant diagonal RIFF */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <h1 className="font-display text-[35vw] text-primary/[0.08] diagonal-text whitespace-nowrap tracking-tighter">
-          RIFF
-        </h1>
-      </div>
-
-      {/* Main content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm">
-          {/* Logo */}
-          <div className="text-center mb-10">
-            <h1 className="font-display text-7xl md:text-8xl text-primary glow-primary inline-block tracking-tight">
-              RIFF
-            </h1>
+    <div className="min-h-screen w-full flex flex-col overflow-hidden bg-background">
+      {/* POSTER HEADER (replace “TASTE TASTE”) */}
+      <header className="w-full bg-primary text-primary-foreground">
+        <div className="px-6 py-10 md:py-14">
+          <div className="font-display leading-[0.9] tracking-tight uppercase">
+            <div className="text-[14vw] md:text-[8rem]">RIFF</div>
+            <div className="text-[14vw] md:text-[8rem] -mt-2 md:-mt-6">RIFF</div>
           </div>
+        </div>
+      </header>
 
-          {/* Auth form */}
-          <div className="bg-card/90 border border-border p-6">
-            {/* Toggle */}
-            <div className="flex border-b border-border mb-6">
-              <button
-                type="button"
-                onClick={() => setMode('login')}
-                className={`flex-1 py-3 text-sm font-display text-lg tracking-wide transition-all border-b-2 -mb-px ${
-                  mode === 'login'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                LOG IN
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode('signup')}
-                className={`flex-1 py-3 text-sm font-display text-lg tracking-wide transition-all border-b-2 -mb-px ${
-                  mode === 'signup'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                SIGN UP
-              </button>
-            </div>
+      {/* ACTION STRIP (replace artist-name blocks with LOG IN / SIGN UP) */}
+      <section className="w-full bg-background border-y border-border">
+        <div className="grid grid-cols-2">
+          <button
+            type="button"
+            onClick={openLogin}
+            className="py-6 md:py-7 text-center font-display uppercase tracking-widest text-2xl md:text-3xl text-foreground hover:bg-foreground/5 transition"
+          >
+            LOG IN
+          </button>
+          <button
+            type="button"
+            onClick={openSignup}
+            className="py-6 md:py-7 text-center font-display uppercase tracking-widest text-2xl md:text-3xl text-foreground hover:bg-foreground/5 transition border-l border-border"
+          >
+            SIGN UP
+          </button>
+        </div>
+      </section>
+
+      {/* PHOTO AREA (fills remaining space) */}
+      <main className="relative flex-1 min-h-0">
+        <div
+          className="absolute inset-0 bg-center bg-cover"
+          style={{ backgroundImage: `url(${photoUrl})` }}
+        />
+        {/* subtle darkening so the bands feel like they sit on a poster */}
+        <div className="absolute inset-0 bg-background/20" />
+      </main>
+
+      {/* MODAL */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md bg-background border-border p-0">
+          <div className="p-6">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="font-display uppercase tracking-widest text-2xl">
+                {mode === "login" ? "LOG IN" : "SIGN UP"}
+              </DialogTitle>
+            </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {mode === 'signup' && (
+              {mode === "signup" && (
                 <>
                   {/* Role selection */}
                   <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-2">
-                      {(['artist', 'venue', 'both'] as UserRole[]).map((r) => (
+                      {(["artist", "venue", "both"] as UserRole[]).map((r) => (
                         <button
                           key={r}
                           type="button"
                           onClick={() => setRole(r)}
-                          className={`p-3 border transition-all text-center font-display text-lg tracking-wide ${
+                          className={`p-3 border transition-all text-center font-display uppercase tracking-widest text-sm ${
                             role === r
-                              ? 'border-primary bg-primary/10 text-primary'
-                              : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                           }`}
                         >
-                          {r === 'both' ? 'BOTH' : r.toUpperCase()}
+                          {r === "both" ? "BOTH" : r.toUpperCase()}
                         </button>
                       ))}
                     </div>
-                    {errors.role && <p className="text-destructive text-xs">{errors.role}</p>}
+                    {errors.role && (
+                      <p className="text-destructive text-xs">{errors.role}</p>
+                    )}
                   </div>
 
                   {/* Name fields */}
@@ -192,7 +220,11 @@ export default function Auth() {
                         placeholder="First"
                         className="bg-background border-border"
                       />
-                      {errors.firstName && <p className="text-destructive text-xs mt-1">{errors.firstName}</p>}
+                      {errors.firstName && (
+                        <p className="text-destructive text-xs mt-1">
+                          {errors.firstName}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Input
@@ -201,7 +233,11 @@ export default function Auth() {
                         placeholder="Last"
                         className="bg-background border-border"
                       />
-                      {errors.lastName && <p className="text-destructive text-xs mt-1">{errors.lastName}</p>}
+                      {errors.lastName && (
+                        <p className="text-destructive text-xs mt-1">
+                          {errors.lastName}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </>
@@ -215,7 +251,9 @@ export default function Auth() {
                   placeholder="Email"
                   className="bg-background border-border"
                 />
-                {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
+                {errors.email && (
+                  <p className="text-destructive text-xs mt-1">{errors.email}</p>
+                )}
               </div>
 
               <div>
@@ -226,20 +264,24 @@ export default function Auth() {
                   placeholder="Password"
                   className="bg-background border-border"
                 />
-                {errors.password && <p className="text-destructive text-xs mt-1">{errors.password}</p>}
+                {errors.password && (
+                  <p className="text-destructive text-xs mt-1">
+                    {errors.password}
+                  </p>
+                )}
               </div>
 
               <Button
                 type="submit"
-                className="w-full font-display text-xl tracking-widest h-12"
+                className="w-full font-display uppercase tracking-widest h-12 text-lg"
                 disabled={isLoading}
               >
-                {isLoading ? '...' : mode === 'login' ? 'ENTER' : 'JOIN'}
+                {isLoading ? "..." : mode === "login" ? "ENTER" : "JOIN"}
               </Button>
             </form>
           </div>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
