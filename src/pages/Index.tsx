@@ -1,10 +1,31 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { z } from 'zod';
+import openingImg from '@/assets/opening.png';
+
+type AuthMode = 'login' | 'signup';
+type UserRole = 'artist' | 'venue' | 'both';
+
+const emailSchema = z.string().email('Invalid email');
+const passwordSchema = z.string().min(6, 'Min 6 characters');
 
 export default function Index() {
-  const { user, profile, loading } = useAuth();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [mode, setMode] = useState<AuthMode>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [role, setRole] = useState<UserRole | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { signIn, signUp, user, profile, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,6 +34,77 @@ export default function Index() {
       navigate(targetDashboard);
     }
   }, [user, profile, loading, navigate]);
+
+  const openModal = (authMode: AuthMode) => {
+    setMode(authMode);
+    setModalOpen(true);
+    setErrors({});
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    try {
+      emailSchema.parse(email);
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        newErrors.email = e.errors[0].message;
+      }
+    }
+
+    try {
+      passwordSchema.parse(password);
+    } catch (e) {
+      if (e instanceof z.ZodError) {
+        newErrors.password = e.errors[0].message;
+      }
+    }
+
+    if (mode === 'signup') {
+      if (!firstName.trim()) newErrors.firstName = 'Required';
+      if (!lastName.trim()) newErrors.lastName = 'Required';
+      if (!role) newErrors.role = 'Pick one';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+
+    try {
+      if (mode === 'login') {
+        const { error } = await signIn(email, password);
+        if (error) {
+          if (error.message.includes('Invalid login credentials')) {
+            toast.error('Wrong credentials');
+          } else {
+            toast.error(error.message);
+          }
+        }
+      } else {
+        const { error } = await signUp(email, password, firstName, lastName, role!);
+        if (error) {
+          if (error.message.includes('already registered')) {
+            toast.error('Email taken');
+          } else {
+            toast.error(error.message);
+          }
+        } else {
+          toast.success('Welcome to RIFF');
+        }
+      }
+    } catch (err) {
+      toast.error('Something went wrong');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -23,66 +115,152 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Heat gradient */}
-      <div className="absolute inset-0 bg-heat" />
-      
-      {/* Glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/10 rounded-full blur-[150px]" />
-      
-      {/* Noise */}
-      <div className="absolute inset-0 bg-noise pointer-events-none" />
-
-      {/* Giant diagonal RIFF */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <h1 className="font-display text-[40vw] text-primary/[0.06] diagonal-text whitespace-nowrap tracking-tighter">
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* POSTER HEADER - Title block */}
+      <header className="bg-primary px-4 py-6 md:py-8">
+        <h1 className="font-display text-[18vw] md:text-[14vw] leading-[0.85] text-primary-foreground tracking-tighter text-center">
           RIFF
         </h1>
-      </div>
+      </header>
 
-      {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Header */}
-        <header className="p-6 flex items-center justify-between">
-          <div className="font-display text-4xl text-primary tracking-tight">RIFF</div>
-          <Button 
-            onClick={() => navigate('/auth')} 
-            variant="outline"
-            className="font-display tracking-widest border-border hover:bg-primary hover:text-primary-foreground hover:border-primary"
+      {/* ACTION ROW - Like artist names on poster */}
+      <div className="bg-background border-y border-border">
+        <div className="flex">
+          <button
+            onClick={() => openModal('login')}
+            className="flex-1 py-4 md:py-5 font-display text-2xl md:text-3xl tracking-wide text-foreground hover:bg-primary hover:text-primary-foreground transition-colors border-r border-border"
           >
-            ENTER
-          </Button>
-        </header>
-
-        {/* Hero */}
-        <main className="flex-1 flex items-center justify-center px-6">
-          <div className="max-w-5xl">
-            <h1 className="font-display poster-title text-foreground leading-none">
-              ARTISTS<br />
-              <span className="text-primary">MEET</span><br />
-              STAGES
-            </h1>
-            
-            <div className="mt-12 flex gap-4">
-              <Button
-                size="lg"
-                className="font-display text-xl tracking-widest px-8 h-14"
-                onClick={() => navigate('/auth')}
-              >
-                ARTIST
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="font-display text-xl tracking-widest px-8 h-14 border-border hover:bg-primary hover:text-primary-foreground hover:border-primary"
-                onClick={() => navigate('/auth')}
-              >
-                VENUE
-              </Button>
-            </div>
-          </div>
-        </main>
+            LOG IN
+          </button>
+          <button
+            onClick={() => openModal('signup')}
+            className="flex-1 py-4 md:py-5 font-display text-2xl md:text-3xl tracking-wide text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+          >
+            SIGN UP
+          </button>
+        </div>
       </div>
+
+      {/* MAIN IMAGE - Atmospheric B&W photo */}
+      <div className="flex-1 relative overflow-hidden">
+        <img
+          src={openingImg}
+          alt=""
+          className="w-full h-full object-cover object-center absolute inset-0 grayscale"
+        />
+        {/* Subtle gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+      </div>
+
+      {/* AUTH MODAL */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="bg-card border-border p-0 max-w-sm">
+          {/* Modal toggle */}
+          <div className="flex border-b border-border">
+            <button
+              type="button"
+              onClick={() => setMode('login')}
+              className={`flex-1 py-4 font-display text-lg tracking-wide transition-all border-b-2 -mb-px ${
+                mode === 'login'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              LOG IN
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('signup')}
+              className={`flex-1 py-4 font-display text-lg tracking-wide transition-all border-b-2 -mb-px ${
+                mode === 'signup'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              SIGN UP
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {mode === 'signup' && (
+              <>
+                {/* Role selection */}
+                <div className="space-y-2">
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['artist', 'venue', 'both'] as UserRole[]).map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRole(r)}
+                        className={`p-3 border transition-all text-center font-display text-base tracking-wide ${
+                          role === r
+                            ? 'border-primary bg-primary/10 text-primary'
+                            : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
+                        }`}
+                      >
+                        {r === 'both' ? 'BOTH' : r.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                  {errors.role && <p className="text-destructive text-xs">{errors.role}</p>}
+                </div>
+
+                {/* Name fields */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Input
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="First"
+                      className="bg-background border-border"
+                    />
+                    {errors.firstName && <p className="text-destructive text-xs mt-1">{errors.firstName}</p>}
+                  </div>
+                  <div>
+                    <Input
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Last"
+                      className="bg-background border-border"
+                    />
+                    {errors.lastName && <p className="text-destructive text-xs mt-1">{errors.lastName}</p>}
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                className="bg-background border-border"
+              />
+              {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
+            </div>
+
+            <div>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="bg-background border-border"
+              />
+              {errors.password && <p className="text-destructive text-xs mt-1">{errors.password}</p>}
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full font-display text-xl tracking-widest h-12"
+              disabled={isLoading}
+            >
+              {isLoading ? '...' : mode === 'login' ? 'ENTER' : 'JOIN'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
