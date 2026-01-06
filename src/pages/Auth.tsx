@@ -3,16 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Music2, Building2, Sparkles } from 'lucide-react';
 import { z } from 'zod';
 
 type AuthMode = 'login' | 'signup';
 type UserRole = 'artist' | 'venue' | 'both';
 
-const emailSchema = z.string().email('Please enter a valid email address');
-const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
+const emailSchema = z.string().email('Invalid email');
+const passwordSchema = z.string().min(6, 'Min 6 characters');
 
 export default function Auth() {
   const [mode, setMode] = useState<AuthMode>('login');
@@ -54,9 +52,9 @@ export default function Auth() {
     }
 
     if (mode === 'signup') {
-      if (!firstName.trim()) newErrors.firstName = 'First name is required';
-      if (!lastName.trim()) newErrors.lastName = 'Last name is required';
-      if (!role) newErrors.role = 'Please select your role';
+      if (!firstName.trim()) newErrors.firstName = 'Required';
+      if (!lastName.trim()) newErrors.lastName = 'Required';
+      if (!role) newErrors.role = 'Pick one';
     }
 
     setErrors(newErrors);
@@ -75,7 +73,7 @@ export default function Auth() {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
-            toast.error('Invalid email or password');
+            toast.error('Wrong credentials');
           } else {
             toast.error(error.message);
           }
@@ -84,85 +82,80 @@ export default function Auth() {
         const { error } = await signUp(email, password, firstName, lastName, role!);
         if (error) {
           if (error.message.includes('already registered')) {
-            toast.error('This email is already registered. Try logging in instead.');
+            toast.error('Email taken');
           } else {
             toast.error(error.message);
           }
         } else {
-          toast.success('Account created! Redirecting to your dashboard...');
+          toast.success('Welcome to RIFF');
         }
       }
     } catch (err) {
-      toast.error('An unexpected error occurred');
+      toast.error('Something went wrong');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const roleOptions = [
-    { value: 'artist' as UserRole, label: 'Artist', icon: Music2, description: 'Find venues & gigs' },
-    { value: 'venue' as UserRole, label: 'Venue', icon: Building2, description: 'Book talented artists' },
-    { value: 'both' as UserRole, label: 'Both', icon: Sparkles, description: 'Do it all' },
-  ];
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-primary font-display text-4xl">RIFF</div>
+        <div className="animate-pulse text-primary font-display text-6xl">RIFF</div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-background">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-concert-gradient opacity-50" />
+      {/* Background glow */}
+      <div className="absolute inset-0 bg-heat" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/5 blur-3xl" />
       
-      {/* Diagonal RIFF text */}
+      {/* Noise overlay */}
+      <div className="absolute inset-0 bg-noise pointer-events-none" />
+      
+      {/* Giant diagonal RIFF */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <h1 className="font-display text-[20vw] md:text-[25vw] text-primary/10 diagonal-text whitespace-nowrap">
+        <h1 className="font-display text-[35vw] text-primary/[0.08] diagonal-text whitespace-nowrap tracking-tighter">
           RIFF
         </h1>
       </div>
 
       {/* Main content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-sm">
           {/* Logo */}
-          <div className="text-center mb-8">
-            <h1 className="font-display text-6xl md:text-7xl text-primary glow-primary inline-block">
+          <div className="text-center mb-10">
+            <h1 className="font-display text-7xl md:text-8xl text-primary glow-primary inline-block tracking-tight">
               RIFF
             </h1>
-            <p className="text-muted-foreground mt-2">
-              {mode === 'login' ? 'Welcome back' : 'Join the stage'}
-            </p>
           </div>
 
-          {/* Auth card */}
-          <div className="bg-card/80 backdrop-blur-lg border border-border rounded-xl p-6 md:p-8 shadow-2xl">
+          {/* Auth form */}
+          <div className="bg-card/90 border border-border p-6">
             {/* Toggle */}
-            <div className="flex rounded-lg bg-secondary p-1 mb-6">
+            <div className="flex border-b border-border mb-6">
               <button
                 type="button"
                 onClick={() => setMode('login')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                className={`flex-1 py-3 text-sm font-display text-lg tracking-wide transition-all border-b-2 -mb-px ${
                   mode === 'login'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Log In
+                LOG IN
               </button>
               <button
                 type="button"
                 onClick={() => setMode('signup')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                className={`flex-1 py-3 text-sm font-display text-lg tracking-wide transition-all border-b-2 -mb-px ${
                   mode === 'signup'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Sign Up
+                SIGN UP
               </button>
             </div>
 
@@ -171,94 +164,77 @@ export default function Auth() {
                 <>
                   {/* Role selection */}
                   <div className="space-y-2">
-                    <Label>I am a...</Label>
                     <div className="grid grid-cols-3 gap-2">
-                      {roleOptions.map((option) => (
+                      {(['artist', 'venue', 'both'] as UserRole[]).map((r) => (
                         <button
-                          key={option.value}
+                          key={r}
                           type="button"
-                          onClick={() => setRole(option.value)}
-                          className={`p-3 rounded-lg border-2 transition-all text-center ${
-                            role === option.value
-                              ? 'border-primary bg-primary/10'
-                              : 'border-border hover:border-primary/50'
+                          onClick={() => setRole(r)}
+                          className={`p-3 border transition-all text-center font-display text-lg tracking-wide ${
+                            role === r
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
                           }`}
                         >
-                          <option.icon className={`w-5 h-5 mx-auto mb-1 ${
-                            role === option.value ? 'text-primary' : 'text-muted-foreground'
-                          }`} />
-                          <span className={`text-sm font-medium ${
-                            role === option.value ? 'text-primary' : 'text-foreground'
-                          }`}>
-                            {option.label}
-                          </span>
+                          {r === 'both' ? 'BOTH' : r.toUpperCase()}
                         </button>
                       ))}
                     </div>
-                    {errors.role && <p className="text-destructive text-sm">{errors.role}</p>}
+                    {errors.role && <p className="text-destructive text-xs">{errors.role}</p>}
                   </div>
 
                   {/* Name fields */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label htmlFor="firstName">First Name</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
                       <Input
-                        id="firstName"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="John"
+                        placeholder="First"
+                        className="bg-background border-border"
                       />
-                      {errors.firstName && <p className="text-destructive text-xs">{errors.firstName}</p>}
+                      {errors.firstName && <p className="text-destructive text-xs mt-1">{errors.firstName}</p>}
                     </div>
-                    <div className="space-y-1">
-                      <Label htmlFor="lastName">Last Name</Label>
+                    <div>
                       <Input
-                        id="lastName"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Doe"
+                        placeholder="Last"
+                        className="bg-background border-border"
                       />
-                      {errors.lastName && <p className="text-destructive text-xs">{errors.lastName}</p>}
+                      {errors.lastName && <p className="text-destructive text-xs mt-1">{errors.lastName}</p>}
                     </div>
                   </div>
                 </>
               )}
 
-              <div className="space-y-1">
-                <Label htmlFor="email">Email</Label>
+              <div>
                 <Input
-                  id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="Email"
+                  className="bg-background border-border"
                 />
-                {errors.email && <p className="text-destructive text-xs">{errors.email}</p>}
+                {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="password">Password</Label>
+              <div>
                 <Input
-                  id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Password"
+                  className="bg-background border-border"
                 />
-                {errors.password && <p className="text-destructive text-xs">{errors.password}</p>}
+                {errors.password && <p className="text-destructive text-xs mt-1">{errors.password}</p>}
               </div>
 
               <Button
                 type="submit"
-                className="w-full font-display text-lg tracking-wide"
-                size="lg"
+                className="w-full font-display text-xl tracking-widest h-12"
                 disabled={isLoading}
               >
-                {isLoading
-                  ? 'Please wait...'
-                  : mode === 'login'
-                  ? 'Log In'
-                  : 'Create Account'}
+                {isLoading ? '...' : mode === 'login' ? 'ENTER' : 'JOIN'}
               </Button>
             </form>
           </div>
