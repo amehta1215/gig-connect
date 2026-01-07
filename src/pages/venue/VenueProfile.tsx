@@ -119,7 +119,7 @@ export default function VenueProfile() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="font-display text-4xl text-gradient">Edit Venue Profile</h1>
+          <h1 className="font-display text-4xl text-accent font-bold">EDIT VENUE PROFILE</h1>
           
         </div>
       </div>
