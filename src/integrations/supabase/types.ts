@@ -17,9 +17,12 @@ export type Database = {
       applications: {
         Row: {
           artist_id: string
+          availability_end_date: string | null
           availability_preference:
             | Database["public"]["Enums"]["availability_preference"]
             | null
+          availability_specific_dates: string[] | null
+          availability_start_date: string | null
           created_at: string | null
           id: string
           is_read: boolean | null
@@ -36,9 +39,12 @@ export type Database = {
         }
         Insert: {
           artist_id: string
+          availability_end_date?: string | null
           availability_preference?:
             | Database["public"]["Enums"]["availability_preference"]
             | null
+          availability_specific_dates?: string[] | null
+          availability_start_date?: string | null
           created_at?: string | null
           id?: string
           is_read?: boolean | null
@@ -55,9 +61,12 @@ export type Database = {
         }
         Update: {
           artist_id?: string
+          availability_end_date?: string | null
           availability_preference?:
             | Database["public"]["Enums"]["availability_preference"]
             | null
+          availability_specific_dates?: string[] | null
+          availability_start_date?: string | null
           created_at?: string | null
           id?: string
           is_read?: boolean | null

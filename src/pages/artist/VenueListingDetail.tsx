@@ -6,8 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowLeft, MapPin, Users, Music } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ArrowLeft, MapPin, Users, Music, CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { DateRange } from 'react-day-picker';
 
 interface VenueListing {
   id: string;
@@ -56,6 +61,8 @@ export default function VenueListingDetail() {
   const [hasApplied, setHasApplied] = useState(false);
 
   const [availability, setAvailability] = useState<AvailabilityPreference>('flexible');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [specificDates, setSpecificDates] = useState<Date[]>([]);
   const [paymentPreferences, setPaymentPreferences] = useState<PaymentPreference[]>([]);
   const [lineup, setLineup] = useState<LineupPreference>('solo_performer');
 
@@ -109,6 +116,16 @@ export default function VenueListingDetail() {
       return;
     }
 
+    if (availability === 'date_range' && (!dateRange?.from || !dateRange?.to)) {
+      toast.error('Select a date range');
+      return;
+    }
+
+    if (availability === 'specific_dates' && specificDates.length === 0) {
+      toast.error('Select at least one date');
+      return;
+    }
+
     setApplying(true);
 
     const { error } = await supabase
@@ -117,9 +134,18 @@ export default function VenueListingDetail() {
         artist_id: user.id,
         venue_listing_id: listing.id,
         availability_preference: availability,
-        payment_preference: paymentPreferences[0], // Primary preference
+        payment_preference: paymentPreferences[0],
         lineup_preference: lineup,
-        status: 'in_progress',
+        status: 'in_progress' as const,
+        availability_start_date: availability === 'date_range' && dateRange?.from 
+          ? format(dateRange.from, 'yyyy-MM-dd') 
+          : null,
+        availability_end_date: availability === 'date_range' && dateRange?.to 
+          ? format(dateRange.to, 'yyyy-MM-dd') 
+          : null,
+        availability_specific_dates: availability === 'specific_dates' && specificDates.length > 0
+          ? specificDates.map(d => format(d, 'yyyy-MM-dd'))
+          : null,
       });
 
     if (error) {
@@ -262,6 +288,94 @@ export default function VenueListingDetail() {
                   ))}
                 </div>
               </RadioGroup>
+
+              {/* Date Range Picker */}
+              {availability === 'date_range' && (
+                <div className="mt-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full md:w-auto justify-start text-left font-normal",
+                          !dateRange && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateRange?.from ? (
+                          dateRange.to ? (
+                            <>
+                              {format(dateRange.from, "MMM d, yyyy")} - {format(dateRange.to, "MMM d, yyyy")}
+                            </>
+                          ) : (
+                            format(dateRange.from, "MMM d, yyyy")
+                          )
+                        ) : (
+                          <span>Select date range</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange?.from}
+                        selected={dateRange}
+                        onSelect={setDateRange}
+                        numberOfMonths={2}
+                        disabled={(date) => date < new Date()}
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
+
+              {/* Specific Dates Picker */}
+              {availability === 'specific_dates' && (
+                <div className="mt-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full md:w-auto justify-start text-left font-normal",
+                          specificDates.length === 0 && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {specificDates.length > 0 ? (
+                          <span>{specificDates.length} date{specificDates.length > 1 ? 's' : ''} selected</span>
+                        ) : (
+                          <span>Select dates</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        initialFocus
+                        mode="multiple"
+                        selected={specificDates}
+                        onSelect={(dates) => setSpecificDates(dates || [])}
+                        disabled={(date) => date < new Date()}
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {specificDates.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {specificDates.map((date, index) => (
+                        <span
+                          key={index}
+                          className="text-xs bg-secondary px-2 py-1 rounded"
+                        >
+                          {format(date, "MMM d")}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Payment Preference */}
