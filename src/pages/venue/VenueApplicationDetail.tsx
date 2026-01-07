@@ -258,7 +258,15 @@ export default function VenueApplicationDetail() {
           </span>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" onClick={() => setMessageDialogOpen(true)} className="bg-primary hover:bg-primary/90">
+          <Button size="sm" onClick={() => {
+            const roomName = venueListing?.room_name || '';
+            const venueName = venueListing?.venue_name || '';
+            const subject = roomName 
+              ? `Application for ${roomName} at ${venueName}`
+              : `Application for ${venueName}`;
+            setMessageSubject(subject);
+            setMessageDialogOpen(true);
+          }} className="bg-primary hover:bg-primary/90">
             <MessageSquare className="h-4 w-4 mr-1" />
             Message
           </Button>
