@@ -17,6 +17,9 @@ export type Database = {
       applications: {
         Row: {
           artist_id: string
+          availability_preference:
+            | Database["public"]["Enums"]["availability_preference"]
+            | null
           created_at: string | null
           id: string
           is_read: boolean | null
@@ -33,6 +36,9 @@ export type Database = {
         }
         Insert: {
           artist_id: string
+          availability_preference?:
+            | Database["public"]["Enums"]["availability_preference"]
+            | null
           created_at?: string | null
           id?: string
           is_read?: boolean | null
@@ -49,6 +55,9 @@ export type Database = {
         }
         Update: {
           artist_id?: string
+          availability_preference?:
+            | Database["public"]["Enums"]["availability_preference"]
+            | null
           created_at?: string | null
           id?: string
           is_read?: boolean | null
@@ -338,6 +347,7 @@ export type Database = {
     }
     Enums: {
       application_status: "in_progress" | "accepted" | "archived"
+      availability_preference: "date_range" | "specific_dates" | "flexible"
       lineup_preference:
         | "co_acts_needed"
         | "co_acts_confirmed"
@@ -479,6 +489,7 @@ export const Constants = {
   public: {
     Enums: {
       application_status: ["in_progress", "accepted", "archived"],
+      availability_preference: ["date_range", "specific_dates", "flexible"],
       lineup_preference: [
         "co_acts_needed",
         "co_acts_confirmed",

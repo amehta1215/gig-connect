@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ const capacityRanges = [
 ];
 
 export default function FindVenues() {
+  const navigate = useNavigate();
   const [venues, setVenues] = useState<VenueListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -195,6 +197,7 @@ export default function FindVenues() {
           {filteredVenues.map((venue) => (
             <div
               key={venue.id}
+              onClick={() => navigate(`/artist/venues/${venue.id}`)}
               className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer"
             >
               {/* Image */}
