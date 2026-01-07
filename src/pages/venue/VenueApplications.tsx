@@ -17,6 +17,7 @@ interface Application {
   status: 'in_progress' | 'accepted' | 'archived';
   payment_preference: string | null;
   lineup_preference: string | null;
+  availability_preference: string | null;
   message: string | null;
   is_read: boolean;
   created_at: string;
@@ -203,6 +204,9 @@ export default function VenueApplications() {
           </p>}
 
         <div className="flex flex-wrap gap-1 mt-3">
+          {application.availability_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+              {application.availability_preference.replace('_', ' ')}
+            </span>}
           {application.payment_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
               {application.payment_preference.replace('_', ' ')}
             </span>}
