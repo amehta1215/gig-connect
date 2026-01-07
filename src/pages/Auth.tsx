@@ -114,9 +114,9 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
-      {/* Giant RIFF title - takes up ~50% of viewport */}
-      <header className="px-4 md:px-8 pt-4 md:pt-6 flex items-center min-h-[50vh]">
-        <h1 className="font-display text-primary leading-[0.75] text-[42vw] md:text-[35vw] tracking-tighter font-black">
+      {/* Giant RIFF title - fills top half of viewport */}
+      <header className="h-[50vh] flex items-start justify-center overflow-hidden pt-2">
+        <h1 className="font-display text-primary leading-none text-[58vw] tracking-[-0.05em] font-black">
           RIFF
         </h1>
       </header>
