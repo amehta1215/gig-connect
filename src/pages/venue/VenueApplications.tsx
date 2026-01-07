@@ -9,8 +9,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music } from 'lucide-react';
-import { format } from 'date-fns';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
+import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X } from 'lucide-react';
+import { format, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { DateRange } from 'react-day-picker';
 
 interface Application {
   id: string;
@@ -28,7 +37,7 @@ interface Application {
 
 const genres = ['Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
 const paymentPreferences = [
-  { value: 'all', label: 'All' },
+  { value: 'all', label: 'Payment Preference' },
   { value: 'door_split', label: 'Door' },
   { value: 'bar_split', label: 'Bar' },
   { value: 'tip_based', label: 'Tips' },
@@ -36,7 +45,7 @@ const paymentPreferences = [
   { value: 'rental', label: 'Rental' },
 ];
 const lineupPreferences = [
-  { value: 'all', label: 'All' },
+  { value: 'all', label: 'Lineup' },
   { value: 'co_acts_needed', label: 'Co-acts needed' },
   { value: 'co_acts_confirmed', label: 'Co-acts confirmed' },
   { value: 'solo_performer', label: 'Solo' },
@@ -52,6 +61,7 @@ export default function VenueApplications() {
   const [filterGenre, setFilterGenre] = useState('all');
   const [filterPayment, setFilterPayment] = useState('all');
   const [filterLineup, setFilterLineup] = useState('all');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   useEffect(() => {
     if (user) {
@@ -126,6 +136,15 @@ export default function VenueApplications() {
 
     if (filterLineup !== 'all') {
       filtered = filtered.filter(app => app.lineup_preference === filterLineup);
+    }
+
+    if (dateRange?.from) {
+      filtered = filtered.filter(app => {
+        const appDate = new Date(app.created_at);
+        const fromDate = startOfDay(dateRange.from!);
+        const toDate = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from!);
+        return !isBefore(appDate, fromDate) && !isAfter(appDate, toDate);
+      });
     }
 
     if (sortBy === 'oldest') {
@@ -222,7 +241,7 @@ export default function VenueApplications() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <h1 className="font-display section-title text-foreground">APPLICATIONS</h1>
+      <h1 className="font-display section-title text-[hsl(var(--neon-accent))] font-bold">APPLICATIONS</h1>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
@@ -253,7 +272,7 @@ export default function VenueApplications() {
             <SelectValue placeholder="Genre" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="all">Genre</SelectItem>
             {genres.map((genre) => (
               <SelectItem key={genre} value={genre}>{genre}</SelectItem>
             ))}
@@ -281,6 +300,53 @@ export default function VenueApplications() {
             ))}
           </SelectContent>
         </Select>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-auto bg-card border-border text-xs justify-start text-left font-normal",
+                !dateRange && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-3 w-3" />
+              {dateRange?.from ? (
+                dateRange.to ? (
+                  <>
+                    {format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d")}
+                  </>
+                ) : (
+                  format(dateRange.from, "MMM d, yyyy")
+                )
+              ) : (
+                <span>Date Range</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <CalendarComponent
+              initialFocus
+              mode="range"
+              defaultMonth={dateRange?.from}
+              selected={dateRange}
+              onSelect={setDateRange}
+              numberOfMonths={2}
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
+
+        {dateRange && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => setDateRange(undefined)}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
