@@ -10,8 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Star, StarOff, Mail, MailOpen, ChevronLeft } from 'lucide-react';
+import { Search, Star, StarOff, Mail, MailOpen, ChevronLeft, Reply } from 'lucide-react';
 import { format } from 'date-fns';
+import { MessageReplyForm } from '@/components/MessageReplyForm';
 
 interface Message {
   id: string;
@@ -46,6 +47,7 @@ export default function ArtistMessages() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [filter, setFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('newest');
+  const [showReplyForm, setShowReplyForm] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -275,6 +277,28 @@ export default function ArtistMessages() {
               <div className="flex-1 overflow-y-auto p-6">
                 <p className="whitespace-pre-wrap text-sm">{selectedMessage.content}</p>
               </div>
+
+              {/* Reply Section */}
+              {showReplyForm ? (
+                <MessageReplyForm
+                  threadId={selectedMessage.thread_id}
+                  originalSubject={selectedMessage.subject}
+                  senderId={user?.id || ''}
+                  receiverId={selectedMessage.sender_id === user?.id ? selectedMessage.receiver_id : selectedMessage.sender_id}
+                  onSuccess={() => {
+                    setShowReplyForm(false);
+                    fetchMessages();
+                  }}
+                  onCancel={() => setShowReplyForm(false)}
+                />
+              ) : (
+                <div className="border-t border-border p-4">
+                  <Button onClick={() => setShowReplyForm(true)} className="w-full">
+                    <Reply className="h-4 w-4 mr-2" />
+                    Reply
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center">
