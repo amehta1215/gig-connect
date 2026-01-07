@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -7,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Star, StarOff, Mail, MailOpen, ChevronLeft, Reply } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
-
 interface Message {
   id: string;
   sender_id: string;
@@ -48,6 +48,7 @@ type SortType = 'newest' | 'oldest';
 
 export default function VenueMessages() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,6 +56,17 @@ export default function VenueMessages() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('newest');
   const [showReplyForm, setShowReplyForm] = useState(false);
+
+  // Handle thread param from URL
+  useEffect(() => {
+    const threadParam = searchParams.get('thread');
+    if (threadParam && !loading && messages.length > 0) {
+      const thread = messages.find(m => m.thread_id === threadParam);
+      if (thread) {
+        setSelectedThreadId(threadParam);
+      }
+    }
+  }, [searchParams, loading, messages]);
 
   useEffect(() => {
     if (user) {

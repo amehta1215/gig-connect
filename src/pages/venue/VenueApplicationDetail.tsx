@@ -176,6 +176,32 @@ export default function VenueApplicationDetail() {
     setApplication({ ...application, status: newStatus });
   };
 
+  const handleMessageClick = async () => {
+    if (!user || !application) return;
+
+    // Check if a thread already exists between the venue and artist
+    const { data: existingMessages } = await supabase
+      .from('messages')
+      .select('thread_id')
+      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${application.artist_id}),and(sender_id.eq.${application.artist_id},receiver_id.eq.${user.id})`)
+      .limit(1);
+
+    if (existingMessages && existingMessages.length > 0) {
+      // Thread exists, navigate to messages with the thread selected
+      navigate(`/venue/messages?thread=${existingMessages[0].thread_id}`);
+      return;
+    }
+
+    // No existing thread, open the message dialog
+    const roomName = venueListing?.room_name || '';
+    const venueName = venueListing?.venue_name || '';
+    const subject = roomName 
+      ? `Application for ${roomName} at ${venueName}`
+      : `Application for ${venueName}`;
+    setMessageSubject(subject);
+    setMessageDialogOpen(true);
+  };
+
   const handleSendMessage = async () => {
     if (!user || !application || !messageContent.trim()) return;
     
@@ -258,15 +284,7 @@ export default function VenueApplicationDetail() {
           </span>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" onClick={() => {
-            const roomName = venueListing?.room_name || '';
-            const venueName = venueListing?.venue_name || '';
-            const subject = roomName 
-              ? `Application for ${roomName} at ${venueName}`
-              : `Application for ${venueName}`;
-            setMessageSubject(subject);
-            setMessageDialogOpen(true);
-          }} className="bg-primary hover:bg-primary/90">
+          <Button size="sm" onClick={handleMessageClick} className="bg-primary hover:bg-primary/90">
             <MessageSquare className="h-4 w-4 mr-1" />
             Message
           </Button>
