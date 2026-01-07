@@ -245,16 +245,13 @@ export default function VenueApplicationDetail() {
 
         <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
           {artistProfile?.location && (
-            <span className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              {artistProfile.location}
-            </span>
+            <span>{artistProfile.location}</span>
+          )}
+          {artistProfile?.location && artistProfile?.genre && (
+            <span>•</span>
           )}
           {artistProfile?.genre && (
-            <span className="flex items-center gap-2">
-              <Music className="h-4 w-4" />
-              {artistProfile.genre}
-            </span>
+            <span>{artistProfile.genre}</span>
           )}
         </div>
       </div>
