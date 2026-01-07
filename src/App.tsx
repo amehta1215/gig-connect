@@ -25,6 +25,7 @@ import VenueDashboard from "./pages/venue/VenueDashboard";
 import VenueMessages from "./pages/venue/VenueMessages";
 import VenueListings from "./pages/venue/VenueListings";
 import VenueApplications from "./pages/venue/VenueApplications";
+import VenueApplicationDetail from "./pages/venue/VenueApplicationDetail";
 import VenueProfile from "./pages/venue/VenueProfile";
 
 const queryClient = new QueryClient();
@@ -77,6 +78,7 @@ const App = () => (
               }
             >
               <Route index element={<VenueApplications />} />
+              <Route path="applications/:id" element={<VenueApplicationDetail />} />
               <Route path="messages" element={<VenueMessages />} />
               <Route path="listings" element={<VenueListings />} />
             </Route>
