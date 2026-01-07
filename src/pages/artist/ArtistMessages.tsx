@@ -23,8 +23,16 @@ interface Message {
   is_read: boolean;
   is_starred: boolean;
   created_at: string;
-  sender?: { first_name: string; last_name: string };
-  receiver?: { first_name: string; last_name: string };
+  sender?: {
+    first_name: string;
+    last_name: string;
+    venue_profiles: { venue_name: string | null } | null;
+  };
+  receiver?: {
+    first_name: string;
+    last_name: string;
+    venue_profiles: { venue_name: string | null } | null;
+  };
 }
 
 type FilterType = 'all' | 'unread' | 'starred';
@@ -53,14 +61,14 @@ export default function ArtistMessages() {
       .from('messages')
       .select(`
         *,
-        sender:profiles!messages_sender_id_fkey(first_name, last_name),
-        receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
+        sender:profiles!messages_sender_id_fkey(first_name, last_name, venue_profiles(venue_name)),
+        receiver:profiles!messages_receiver_id_fkey(first_name, last_name, venue_profiles(venue_name))
       `)
       .or(`receiver_id.eq.${user.id},sender_id.eq.${user.id}`)
       .order('created_at', { ascending: false });
 
     if (data && !error) {
-      setMessages(data as Message[]);
+      setMessages(data as unknown as Message[]);
     }
     setLoading(false);
   };
@@ -175,9 +183,11 @@ export default function ArtistMessages() {
             ) : (
               filteredMessages.map((message) => {
                 const isSent = message.sender_id === user?.id;
+                const recipientVenueName = message.receiver?.venue_profiles?.venue_name;
+                const senderVenueName = message.sender?.venue_profiles?.venue_name;
                 const displayName = isSent 
-                  ? `To: ${message.receiver?.first_name} ${message.receiver?.last_name}`
-                  : `${message.sender?.first_name} ${message.sender?.last_name}`;
+                  ? `To: ${message.receiver?.first_name} ${message.receiver?.last_name}${recipientVenueName ? ` (${recipientVenueName})` : ''}`
+                  : `${message.sender?.first_name} ${message.sender?.last_name}${senderVenueName ? ` (${senderVenueName})` : ''}`;
                 return (
                   <div
                     key={message.id}
@@ -252,8 +262,8 @@ export default function ArtistMessages() {
                   <h2 className="font-display text-lg tracking-wide">{selectedMessage.subject || '(No subject)'}</h2>
                   <p className="text-xs text-muted-foreground">
                     {selectedMessage.sender_id === user?.id 
-                      ? `To: ${selectedMessage.receiver?.first_name} ${selectedMessage.receiver?.last_name}`
-                      : `From: ${selectedMessage.sender?.first_name} ${selectedMessage.sender?.last_name}`}
+                      ? `To: ${selectedMessage.receiver?.first_name} ${selectedMessage.receiver?.last_name}${selectedMessage.receiver?.venue_profiles?.venue_name ? ` (${selectedMessage.receiver.venue_profiles.venue_name})` : ''}`
+                      : `From: ${selectedMessage.sender?.first_name} ${selectedMessage.sender?.last_name}${selectedMessage.sender?.venue_profiles?.venue_name ? ` (${selectedMessage.sender.venue_profiles.venue_name})` : ''}`}
                   </p>
                 </div>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
