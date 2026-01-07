@@ -15,37 +15,31 @@ serve(async (req) => {
     
     if (!query || query.length < 2) {
       return new Response(
-        JSON.stringify({ features: [] }),
+        JSON.stringify({ suggestions: [] }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const accessToken = Deno.env.get("MAPBOX_PUBLIC_TOKEN");
-    if (!accessToken) {
-      throw new Error("Mapbox token not configured");
-    }
-
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${accessToken}&types=place,locality,neighborhood,region&limit=5&country=us`;
+    // Use Nominatim (OpenStreetMap) - free, no API key needed
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&countrycodes=us`;
     
-    console.log("Mapbox request URL (without token):", url.split('?')[0]);
-    console.log("Query:", query);
+    console.log("Nominatim request for:", query);
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'LovableApp/1.0'
+      }
+    });
+    
     const data = await response.json();
     
-    console.log("Mapbox response status:", response.status);
-    console.log("Mapbox features count:", data.features?.length || 0);
-    
-    if (data.message) {
-      console.error("Mapbox API error:", data.message);
-      throw new Error(data.message);
-    }
+    console.log("Nominatim response count:", data.length);
 
-    const suggestions = data.features?.map((f: any) => ({
-      id: f.id,
-      name: f.place_name,
-      text: f.text,
-    })) || [];
+    const suggestions = data.map((place: any) => ({
+      id: place.place_id.toString(),
+      name: place.display_name,
+      text: place.display_name.split(',')[0],
+    }));
 
     return new Response(
       JSON.stringify({ suggestions }),
@@ -53,7 +47,7 @@ serve(async (req) => {
     );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error("Mapbox search error:", message);
+    console.error("Location search error:", message);
     return new Response(
       JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
