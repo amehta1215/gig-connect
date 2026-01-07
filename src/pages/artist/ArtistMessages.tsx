@@ -24,6 +24,7 @@ interface Message {
   is_starred: boolean;
   created_at: string;
   sender?: { first_name: string; last_name: string };
+  receiver?: { first_name: string; last_name: string };
 }
 
 type FilterType = 'all' | 'unread' | 'starred';
@@ -52,9 +53,10 @@ export default function ArtistMessages() {
       .from('messages')
       .select(`
         *,
-        sender:profiles!messages_sender_id_fkey(first_name, last_name)
+        sender:profiles!messages_sender_id_fkey(first_name, last_name),
+        receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
       `)
-      .eq('receiver_id', user.id)
+      .or(`receiver_id.eq.${user.id},sender_id.eq.${user.id}`)
       .order('created_at', { ascending: false });
 
     if (data && !error) {
@@ -171,55 +173,61 @@ export default function ArtistMessages() {
                 <p className="text-muted-foreground text-sm">Empty</p>
               </div>
             ) : (
-              filteredMessages.map((message) => (
-                <div
-                  key={message.id}
-                  onClick={() => handleSelectMessage(message)}
-                  className={`p-3 border-b border-border cursor-pointer transition-colors ${
-                    selectedMessage?.id === message.id
-                      ? 'bg-primary/10'
-                      : message.is_read
-                      ? 'hover:bg-secondary'
-                      : 'bg-secondary/50 hover:bg-secondary'
-                  }`}
-                >
-                  <div className="flex items-start gap-2">
-                    <div className="flex-shrink-0 mt-1">
-                      {message.is_read ? (
-                        <MailOpen className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Mail className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className={`text-sm truncate ${!message.is_read ? 'font-semibold' : ''}`}>
-                          {message.sender?.first_name} {message.sender?.last_name}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground flex-shrink-0 uppercase tracking-wider">
-                          {format(new Date(message.created_at), 'MMM d')}
-                        </span>
+              filteredMessages.map((message) => {
+                const isSent = message.sender_id === user?.id;
+                const displayName = isSent 
+                  ? `To: ${message.receiver?.first_name} ${message.receiver?.last_name}`
+                  : `${message.sender?.first_name} ${message.sender?.last_name}`;
+                return (
+                  <div
+                    key={message.id}
+                    onClick={() => handleSelectMessage(message)}
+                    className={`p-3 border-b border-border cursor-pointer transition-colors ${
+                      selectedMessage?.id === message.id
+                        ? 'bg-primary/10'
+                        : message.is_read
+                        ? 'hover:bg-secondary'
+                        : 'bg-secondary/50 hover:bg-secondary'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <div className="flex-shrink-0 mt-1">
+                        {message.is_read ? (
+                          <MailOpen className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Mail className="h-4 w-4 text-primary" />
+                        )}
                       </div>
-                      <p className={`text-sm truncate ${!message.is_read ? 'font-medium' : 'text-muted-foreground'}`}>
-                        {message.subject || '(No subject)'}
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`text-sm truncate ${!message.is_read && !isSent ? 'font-semibold' : ''}`}>
+                            {displayName}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground flex-shrink-0 uppercase tracking-wider">
+                            {format(new Date(message.created_at), 'MMM d')}
+                          </span>
+                        </div>
+                        <p className={`text-sm truncate ${!message.is_read && !isSent ? 'font-medium' : 'text-muted-foreground'}`}>
+                          {message.subject || '(No subject)'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleStar(message.id, message.is_starred);
+                        }}
+                        className="flex-shrink-0 p-1 hover:bg-secondary"
+                      >
+                        {message.is_starred ? (
+                          <Star className="h-4 w-4 text-primary fill-primary" />
+                        ) : (
+                          <StarOff className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </button>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleStar(message.id, message.is_starred);
-                      }}
-                      className="flex-shrink-0 p-1 hover:bg-secondary"
-                    >
-                      {message.is_starred ? (
-                        <Star className="h-4 w-4 text-primary fill-primary" />
-                      ) : (
-                        <StarOff className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </button>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -243,7 +251,9 @@ export default function ArtistMessages() {
                 <div className="flex-1">
                   <h2 className="font-display text-lg tracking-wide">{selectedMessage.subject || '(No subject)'}</h2>
                   <p className="text-xs text-muted-foreground">
-                    {selectedMessage.sender?.first_name} {selectedMessage.sender?.last_name}
+                    {selectedMessage.sender_id === user?.id 
+                      ? `To: ${selectedMessage.receiver?.first_name} ${selectedMessage.receiver?.last_name}`
+                      : `From: ${selectedMessage.sender?.first_name} ${selectedMessage.sender?.last_name}`}
                   </p>
                 </div>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
