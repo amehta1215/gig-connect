@@ -208,7 +208,7 @@ export default function VenueListings() {
   };
 
   const handleDelete = async (listingId: string) => {
-    if (!confirm('Delete this listing?')) return;
+    if (!confirm('Delete this room?')) return;
 
     const { error } = await supabase
       .from('venue_listings')
@@ -235,7 +235,7 @@ export default function VenueListings() {
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="font-display section-title text-accent font-bold">LISTINGS</h1>
+        <h1 className="font-display section-title text-accent font-bold">ROOMS</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => openDialog()} className="font-display tracking-widest">
@@ -246,7 +246,7 @@ export default function VenueListings() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
             <DialogHeader>
               <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
-                {editingListing ? 'EDIT LISTING' : 'NEW LISTING'}
+                {editingListing ? 'EDIT ROOM' : 'NEW ROOM'}
               </DialogTitle>
             </DialogHeader>
 
@@ -401,7 +401,7 @@ export default function VenueListings() {
         </div>
       ) : listings.length === 0 ? (
         <div className="text-center py-16 bg-card border border-border">
-          <h3 className="font-display text-xl text-muted-foreground mb-4">NO LISTINGS</h3>
+          <h3 className="font-display text-xl text-muted-foreground mb-4">NO ROOMS</h3>
           <Button onClick={() => openDialog()} className="font-display tracking-widest">
             <Plus className="h-4 w-4 mr-2" />
             ADD

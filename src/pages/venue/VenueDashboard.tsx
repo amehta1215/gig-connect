@@ -5,7 +5,7 @@ import VenueApplications from './VenueApplications';
 const venueTabs = [
   { label: 'Applications', href: '/venue' },
   { label: 'Messages', href: '/venue/messages' },
-  { label: 'Listings', href: '/venue/listings' },
+  { label: 'Rooms', href: '/venue/listings' },
 ];
 
 export default function VenueDashboard() {
