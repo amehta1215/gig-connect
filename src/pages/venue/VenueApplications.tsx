@@ -255,23 +255,23 @@ export default function VenueApplications() {
             {/* Room/Venue applied to */}
             {roomDisplay && (
               <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
-                Applied to: <span className="text-accent">{roomDisplay}</span>
+                Applied to: <span className="text-primary">{roomDisplay}</span>
               </p>
             )}
 
             <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
               {application.artist_profile?.genre && (
                 <span className="uppercase tracking-wider">
-                  Genre: <span className="text-accent">{application.artist_profile.genre}</span>
+                  Genre: <span className="text-primary">{application.artist_profile.genre}</span>
                 </span>
               )}
               {application.lineup_preference && (
                 <span className="uppercase tracking-wider">
-                  Act Type: <span className="text-accent">{lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}</span>
+                  Act Type: <span className="text-primary">{lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}</span>
                 </span>
               )}
               <span className="uppercase tracking-wider">
-                Application Date: <span className="text-accent">{format(new Date(application.created_at), 'MMM d')}</span>
+                Application Date: <span className="text-primary">{format(new Date(application.created_at), 'MMM d')}</span>
               </span>
             </div>
 
