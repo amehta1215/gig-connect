@@ -218,6 +218,10 @@ export default function VenueApplications() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
+        <button onClick={() => setFilterUnread(!filterUnread)} className={`px-3 py-2 text-xs font-display tracking-wider transition-colors ${filterUnread ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}>
+          UNREAD
+        </button>
+
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-28 bg-card border-border text-xs">
             <ListFilter className="h-3 w-3 mr-1" />
@@ -228,10 +232,6 @@ export default function VenueApplications() {
             <SelectItem value="oldest">Oldest</SelectItem>
           </SelectContent>
         </Select>
-
-        <button onClick={() => setFilterUnread(!filterUnread)} className={`px-3 py-2 text-xs font-display tracking-wider transition-colors ${filterUnread ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}>
-          UNREAD
-        </button>
 
         <Select value={filterGenre} onValueChange={setFilterGenre}>
           <SelectTrigger className="w-28 bg-card border-border text-xs">
@@ -244,7 +244,7 @@ export default function VenueApplications() {
         </Select>
 
         <Select value={filterPayment} onValueChange={setFilterPayment}>
-          <SelectTrigger className="w-24 bg-card border-border text-xs">
+          <SelectTrigger className="w-44 bg-card border-border text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
