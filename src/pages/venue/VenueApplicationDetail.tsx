@@ -263,12 +263,12 @@ export default function VenueApplicationDetail() {
             Message
           </Button>
           {application.status !== 'accepted' && (
-            <Button size="sm" onClick={() => updateStatus('accepted')} className="bg-green-600 hover:bg-green-700 text-white">
+            <Button size="sm" onClick={() => updateStatus('accepted')} className="bg-primary hover:bg-primary/90">
               Accept
             </Button>
           )}
           {application.status !== 'archived' && (
-            <Button size="sm" variant="outline" onClick={() => updateStatus('archived')}>
+            <Button size="sm" onClick={() => updateStatus('archived')} className="bg-primary hover:bg-primary/90">
               Archive
             </Button>
           )}
