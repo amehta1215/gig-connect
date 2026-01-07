@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select';
 import { Search, MapPin, Users, Music, Filter } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-
+import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 interface VenueListing {
   id: string;
   venue_name: string;
@@ -80,15 +80,12 @@ export default function FindVenues() {
 
   const FiltersContent = () => (
     <div className="space-y-4">
-      <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Location"
-          value={selectedLocation}
-          onChange={(e) => setSelectedLocation(e.target.value)}
-          className="pl-10 bg-background"
-        />
-      </div>
+      <LocationAutocomplete
+        value={selectedLocation}
+        onChange={setSelectedLocation}
+        placeholder="Location"
+        className="w-full"
+      />
 
       <Select value={selectedGenre} onValueChange={setSelectedGenre}>
         <SelectTrigger className="bg-background">
@@ -118,7 +115,9 @@ export default function FindVenues() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <h1 className="font-display section-title text-foreground">VENUES</h1>
+      <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-accent">
+        FIND VENUES
+      </h1>
 
       {/* Search and Filters */}
       <div className="flex gap-2">
@@ -134,15 +133,12 @@ export default function FindVenues() {
 
         {/* Desktop Filters */}
         <div className="hidden lg:flex gap-2">
-          <div className="relative w-40">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Location"
-              value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
-              className="pl-10 bg-card border-border"
-            />
-          </div>
+          <LocationAutocomplete
+            value={selectedLocation}
+            onChange={setSelectedLocation}
+            placeholder="Location"
+            className="w-48"
+          />
           <Select value={selectedGenre} onValueChange={setSelectedGenre}>
             <SelectTrigger className="w-32 bg-card border-border">
               <Music className="h-4 w-4 mr-2 text-muted-foreground" />
