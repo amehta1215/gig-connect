@@ -8,56 +8,57 @@
 
 @layer base {
   :root {
-    --background: 0 0% 2%;
+    /* Core palette: Dark green, Orange, Yellow */
+    --background: 160 40% 12%;
     --foreground: 0 0% 96%;
 
-    --card: 0 0% 5%;
+    --card: 160 40% 10%;
     --card-foreground: 0 0% 96%;
 
-    --popover: 0 0% 5%;
+    --popover: 160 40% 10%;
     --popover-foreground: 0 0% 96%;
 
-    --primary: 21 89% 53%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 11 80% 55%;
+    --primary-foreground: 160 40% 12%;
 
-    --secondary: 0 0% 10%;
+    --secondary: 160 35% 16%;
     --secondary-foreground: 0 0% 96%;
 
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 160 30% 18%;
+    --muted-foreground: 160 15% 55%;
 
-    --accent: 0 95% 36%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 68 80% 58%;
+    --accent-foreground: 160 40% 12%;
 
     --destructive: 0 84% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 14%;
-    --input: 0 0% 14%;
-    --ring: 6 100% 50%;
+    --border: 160 30% 20%;
+    --input: 160 30% 20%;
+    --ring: 11 80% 55%;
 
-    --radius: 0.25rem;
+    --radius: 0rem;
 
     /* RIFF brand colors */
-    --riff-red: 6 100% 50%;
-    --riff-pink: 330 85% 55%;
-    --riff-blue: 210 100% 55%;
-    --riff-dark: 0 0% 2%;
-    --riff-card: 0 0% 6%;
+    --riff-orange: 11 80% 55%;
+    --riff-green: 160 40% 12%;
+    --riff-yellow: 68 80% 58%;
+    --riff-dark: 160 40% 10%;
+    --riff-card: 160 35% 14%;
 
     /* Gradients */
-    --gradient-heat: linear-gradient(135deg, hsl(6 100% 50% / 0.4), hsl(330 85% 55% / 0.3));
-    --gradient-hero: linear-gradient(180deg, transparent 0%, hsl(0 0% 2%) 100%);
-    --gradient-glow: radial-gradient(ellipse at center, hsl(6 100% 50% / 0.15), transparent 70%);
+    --gradient-heat: linear-gradient(135deg, hsl(11 80% 55% / 0.4), hsl(68 80% 58% / 0.3));
+    --gradient-hero: linear-gradient(180deg, transparent 0%, hsl(160 40% 12%) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(11 80% 55% / 0.15), transparent 70%);
 
-    --sidebar-background: 0 0% 4%;
+    --sidebar-background: 160 40% 10%;
     --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 6 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 10%;
+    --sidebar-primary: 11 80% 55%;
+    --sidebar-primary-foreground: 160 40% 12%;
+    --sidebar-accent: 160 35% 16%;
     --sidebar-accent-foreground: 0 0% 96%;
-    --sidebar-border: 0 0% 14%;
-    --sidebar-ring: 6 100% 50%;
+    --sidebar-border: 160 30% 20%;
+    --sidebar-ring: 11 80% 55%;
   }
 }
 
