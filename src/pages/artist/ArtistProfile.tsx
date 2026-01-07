@@ -181,7 +181,7 @@ export default function ArtistProfile() {
         </div>
       </div>;
   }
-  return <div className="space-y-6 animate-fade-in max-w-3xl">
+  return <div className="space-y-6 animate-fade-in max-w-3xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
