@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { toast } from 'sonner';
 import { ArrowLeft, Save } from 'lucide-react';
 interface VenueProfileData {
@@ -141,10 +142,11 @@ export default function VenueProfile() {
 
         <div className="space-y-2">
           <Label htmlFor="location">Location</Label>
-          <Input id="location" value={formData.location} onChange={e => setFormData({
-          ...formData,
-          location: e.target.value
-        })} placeholder="New York, NY" />
+          <LocationAutocomplete
+            value={formData.location}
+            onChange={(value) => setFormData({ ...formData, location: value })}
+            placeholder="New York, NY"
+          />
         </div>
 
         <div className="space-y-2">

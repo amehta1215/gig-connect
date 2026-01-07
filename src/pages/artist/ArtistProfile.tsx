@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Music, X, Upload } from 'lucide-react';
 interface ArtistProfile {
@@ -217,10 +218,11 @@ export default function ArtistProfile() {
 
         <div className="space-y-2">
           <Label htmlFor="location">Location</Label>
-          <Input id="location" value={formData.location} onChange={e => setFormData({
-          ...formData,
-          location: e.target.value
-        })} placeholder="Los Angeles, CA" />
+          <LocationAutocomplete
+            value={formData.location}
+            onChange={(value) => setFormData({ ...formData, location: value })}
+            placeholder="Los Angeles, CA"
+          />
         </div>
 
         <div className="space-y-2">
