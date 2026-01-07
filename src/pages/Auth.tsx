@@ -121,45 +121,45 @@ export default function Auth() {
         </h1>
       </header>
 
-      {/* Auth buttons row */}
-      <section className="px-4 md:px-8 mt-4">
-        <div className="flex gap-8 md:gap-16">
-          {/* SIGN UP button */}
-          <button
-            type="button"
-            onClick={() => toggleMode("signup")}
-            className={`font-display uppercase tracking-wide text-2xl md:text-4xl transition-colors ${
-              mode === "signup" ? "text-accent" : "text-primary"
-            }`}
-          >
-            SIGN UP
-          </button>
+      {/* Two-column auth section with orange bar */}
+      <section className="flex-1 flex flex-col">
+        {/* Orange bar with SIGN UP / LOG IN */}
+        <div className="bg-primary">
+          <div className="grid grid-cols-2">
+            {/* SIGN UP column */}
+            <button
+              type="button"
+              onClick={() => toggleMode("signup")}
+              className={`py-6 md:py-8 font-display uppercase tracking-tight text-4xl md:text-6xl lg:text-7xl font-black transition-colors ${
+                mode === "signup" ? "text-accent" : "text-background"
+              }`}
+            >
+              SIGN UP
+            </button>
 
-          {/* LOG IN button */}
-          <button
-            type="button"
-            onClick={() => toggleMode("login")}
-            className={`font-display uppercase tracking-wide text-2xl md:text-4xl transition-colors ${
-              mode === "login" ? "text-accent" : "text-primary"
-            }`}
-          >
-            LOG IN
-          </button>
+            {/* LOG IN column */}
+            <button
+              type="button"
+              onClick={() => toggleMode("login")}
+              className={`py-6 md:py-8 font-display uppercase tracking-tight text-4xl md:text-6xl lg:text-7xl font-black transition-colors ${
+                mode === "login" ? "text-accent" : "text-background"
+              }`}
+            >
+              LOG IN
+            </button>
+          </div>
         </div>
-      </section>
 
-      {/* Unrolling form panels */}
-      <main className="flex-1 px-4 md:px-8 mt-4 pb-8">
-        <div className="flex gap-8 md:gap-16">
-          {/* SIGN UP Panel */}
+        {/* Form panels - appear in corresponding column */}
+        <div className="grid grid-cols-2 flex-1">
+          {/* SIGN UP Panel - left column */}
           <div
             className={`overflow-hidden transition-all duration-300 ease-out ${
               mode === "signup" ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
             }`}
-            style={{ width: mode === "signup" ? "100%" : "auto", maxWidth: "400px" }}
           >
             <div className="bg-primary p-6 md:p-8">
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
                 {/* Role selection */}
                 <div className="space-y-2">
                   <div className="grid grid-cols-3 gap-2">
@@ -236,15 +236,14 @@ export default function Auth() {
             </div>
           </div>
 
-          {/* LOG IN Panel */}
+          {/* LOG IN Panel - right column */}
           <div
             className={`overflow-hidden transition-all duration-300 ease-out ${
               mode === "login" ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
             }`}
-            style={{ width: mode === "login" ? "100%" : "auto", maxWidth: "400px" }}
           >
             <div className="bg-primary p-6 md:p-8">
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
                 <div>
                   <Input
                     type="email"
@@ -278,7 +277,7 @@ export default function Auth() {
             </div>
           </div>
         </div>
-      </main>
+      </section>
     </div>
   );
 }
