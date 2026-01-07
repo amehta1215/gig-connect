@@ -87,10 +87,11 @@ export default function VenueProfile() {
     }).eq('id', profile.id);
     if (error) {
       toast.error('Failed to save profile');
+      setSaving(false);
     } else {
       toast.success('Profile saved successfully');
+      navigate('/venue');
     }
-    setSaving(false);
   };
   const toggleEventType = (eventType: string) => {
     if (formData.event_types.includes(eventType)) {
