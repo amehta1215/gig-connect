@@ -314,7 +314,7 @@ export default function ArtistProfile() {
           
           <h2 className="font-display text-xl">FEATURED SAMPLES</h2>
         </div>
-        <p className="text-sm text-muted-foreground">Upload up to 3 music samples</p>
+        
 
         <div className="space-y-3">
           {featuredSamples.map((url, index) => <div key={index} className="flex items-center gap-3 p-3 bg-background rounded-lg border border-border">
