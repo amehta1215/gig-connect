@@ -108,7 +108,7 @@ export default function ArtistApplications() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <h1 className="font-display section-title text-foreground">APPLICATIONS</h1>
+      <h1 className="font-display section-title text-accent font-black">APPLICATIONS</h1>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-card border border-border p-0 h-auto">
