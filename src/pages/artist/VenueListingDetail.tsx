@@ -153,7 +153,7 @@ export default function VenueListingDetail() {
       setApplying(false);
     } else {
       toast.success('Application submitted!');
-      navigate('/artist/venues');
+      navigate('/artist');
     }
   };
 
