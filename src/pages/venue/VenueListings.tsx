@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Plus, MapPin, Users, Music, Edit, Trash2 } from 'lucide-react';
+import { Plus, MapPin, Users, Music, Trash2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 
@@ -42,6 +42,9 @@ export default function VenueListings() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingListing, setEditingListing] = useState<VenueListing | null>(null);
   const [saving, setSaving] = useState(false);
+  const [pictures, setPictures] = useState<string[]>([]);
+  const [uploadingPicture, setUploadingPicture] = useState(false);
+  const pictureInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     venue_name: '',
@@ -102,6 +105,7 @@ export default function VenueListings() {
       backline_info: '',
       house_rules: '',
     });
+    setPictures([]);
     setEditingListing(null);
   };
 
@@ -117,10 +121,45 @@ export default function VenueListings() {
         backline_info: listing.backline_info || '',
         house_rules: listing.house_rules || '',
       });
+      setPictures(listing.pictures || []);
     } else {
       resetForm();
     }
     setIsDialogOpen(true);
+  };
+
+  const uploadFile = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user?.id}/listings/${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from('venue-media')
+      .upload(fileName, file);
+    if (uploadError) throw uploadError;
+    const { data } = supabase.storage.from('venue-media').getPublicUrl(fileName);
+    return data.publicUrl;
+  };
+
+  const handlePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploadingPicture(true);
+    try {
+      const newUrls: string[] = [];
+      for (const file of Array.from(files)) {
+        const url = await uploadFile(file);
+        newUrls.push(url);
+      }
+      setPictures(prev => [...prev, ...newUrls]);
+      toast.success('Photo uploaded');
+    } catch (error) {
+      toast.error('Upload failed');
+    }
+    setUploadingPicture(false);
+    if (pictureInputRef.current) pictureInputRef.current.value = '';
+  };
+
+  const removePicture = (index: number) => {
+    setPictures(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSave = async () => {
@@ -138,6 +177,7 @@ export default function VenueListings() {
       location: formData.location || null,
       capacity: formData.capacity ? parseInt(formData.capacity) : null,
       genres: formData.genres,
+      pictures: pictures,
       backline_info: formData.backline_info || null,
       house_rules: formData.house_rules || null,
     };
@@ -211,6 +251,43 @@ export default function VenueListings() {
             </DialogHeader>
 
             <div className="space-y-6 mt-4">
+              {/* Photo Upload */}
+              <div className="space-y-4">
+                <h3 className="font-display text-sm text-primary tracking-widest">PHOTO</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {pictures.map((url, index) => (
+                    <div key={index} className="relative group aspect-square">
+                      <img src={url} alt={`Photo ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={() => removePicture(index)}
+                        className="absolute top-2 right-2 p-1 bg-destructive rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-4 w-4 text-destructive-foreground" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => pictureInputRef.current?.click()}
+                    disabled={uploadingPicture}
+                    className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer"
+                  >
+                    <Upload className="h-6 w-6 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">
+                      {uploadingPicture ? 'Uploading...' : 'Add Photo'}
+                    </span>
+                  </button>
+                </div>
+                <input
+                  ref={pictureInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePictureUpload}
+                />
+              </div>
+
               {/* General Info */}
               <div className="space-y-4">
                 <h3 className="font-display text-sm text-primary tracking-widest">GENERAL</h3>
@@ -337,9 +414,15 @@ export default function VenueListings() {
               key={listing.id}
               className="bg-card border border-border overflow-hidden hover:border-primary/50 transition-colors"
             >
-              {/* Image placeholder */}
-              <div className="aspect-[4/3] bg-secondary flex items-center justify-center bg-heat">
-                <Music className="h-12 w-12 text-primary/30" />
+              {/* Image */}
+              <div className="aspect-[4/3] bg-secondary flex items-center justify-center overflow-hidden">
+                {listing.pictures && listing.pictures.length > 0 ? (
+                  <img src={listing.pictures[0]} alt={listing.venue_name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="bg-heat w-full h-full flex items-center justify-center">
+                    <Music className="h-12 w-12 text-primary/30" />
+                  </div>
+                )}
               </div>
 
               {/* Content */}
