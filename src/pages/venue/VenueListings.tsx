@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, MapPin, Users, Music, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 
 interface VenueListing {
   id: string;
@@ -29,13 +30,15 @@ interface VenueListing {
   house_rules: string | null;
 }
 
-const availableGenres = ['Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
+const availableGenres = ['All', 'Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
 
 export default function VenueListings() {
   const { user } = useAuth();
   const [listings, setListings] = useState<VenueListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [venueProfileId, setVenueProfileId] = useState<string | null>(null);
+  const [venueProfileName, setVenueProfileName] = useState<string>('');
+  const [venueProfileLocation, setVenueProfileLocation] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingListing, setEditingListing] = useState<VenueListing | null>(null);
   const [saving, setSaving] = useState(false);
@@ -46,7 +49,6 @@ export default function VenueListings() {
     location: '',
     capacity: '',
     genres: [] as string[],
-    bio: '',
     backline_info: '',
     house_rules: '',
   });
@@ -62,12 +64,14 @@ export default function VenueListings() {
 
     const { data: profile } = await supabase
       .from('venue_profiles')
-      .select('id')
+      .select('id, venue_name, location')
       .eq('user_id', user.id)
       .single();
 
     if (profile) {
       setVenueProfileId(profile.id);
+      setVenueProfileName(profile.venue_name || '');
+      setVenueProfileLocation(profile.location || '');
       fetchListings(profile.id);
     } else {
       setLoading(false);
@@ -90,12 +94,11 @@ export default function VenueListings() {
 
   const resetForm = () => {
     setFormData({
-      venue_name: '',
+      venue_name: venueProfileName,
       room_name: '',
-      location: '',
+      location: venueProfileLocation,
       capacity: '',
       genres: [],
-      bio: '',
       backline_info: '',
       house_rules: '',
     });
@@ -111,7 +114,6 @@ export default function VenueListings() {
         location: listing.location || '',
         capacity: listing.capacity?.toString() || '',
         genres: listing.genres || [],
-        bio: listing.bio || '',
         backline_info: listing.backline_info || '',
         house_rules: listing.house_rules || '',
       });
@@ -136,7 +138,6 @@ export default function VenueListings() {
       location: formData.location || null,
       capacity: formData.capacity ? parseInt(formData.capacity) : null,
       genres: formData.genres,
-      bio: formData.bio || null,
       backline_info: formData.backline_info || null,
       house_rules: formData.house_rules || null,
     };
@@ -204,8 +205,8 @@ export default function VenueListings() {
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
             <DialogHeader>
-              <DialogTitle className="font-display text-2xl tracking-wide">
-                {editingListing ? 'EDIT' : 'NEW LISTING'}
+              <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
+                {editingListing ? 'EDIT LISTING' : 'NEW LISTING'}
               </DialogTitle>
             </DialogHeader>
 
@@ -236,11 +237,11 @@ export default function VenueListings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label htmlFor="location" className="text-xs uppercase tracking-wider text-muted-foreground">Location</Label>
-                    <Input
-                      id="location"
+                    <LocationAutocomplete
                       value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      className="bg-background border-border"
+                      onChange={(value) => setFormData({ ...formData, location: value })}
+                      placeholder="Search location..."
+                      className="bg-background"
                     />
                   </div>
                   <div className="space-y-1">
@@ -278,16 +279,6 @@ export default function VenueListings() {
               {/* Additional Info */}
               <div className="space-y-4">
                 <h3 className="font-display text-sm text-primary tracking-widest">DETAILS</h3>
-                <div className="space-y-1">
-                  <Label htmlFor="bio" className="text-xs uppercase tracking-wider text-muted-foreground">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    value={formData.bio}
-                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    className="bg-background border-border"
-                    rows={2}
-                  />
-                </div>
                 <div className="space-y-1">
                   <Label htmlFor="backline_info" className="text-xs uppercase tracking-wider text-muted-foreground">Backline</Label>
                   <Textarea
