@@ -3,8 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, Music, Calendar, Clock, CheckCircle2, Archive, ExternalLink, Globe } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, Globe, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface ArtistProfile {
   band_name: string | null;
@@ -97,6 +101,12 @@ export default function VenueApplicationDetail() {
   const [artistProfile, setArtistProfile] = useState<ArtistProfile | null>(null);
   const [venueListing, setVenueListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Message dialog state
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  const [messageSubject, setMessageSubject] = useState('');
+  const [messageContent, setMessageContent] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
     if (id && user) {
@@ -166,6 +176,37 @@ export default function VenueApplicationDetail() {
     setApplication({ ...application, status: newStatus });
   };
 
+  const handleSendMessage = async () => {
+    if (!user || !application || !messageContent.trim()) return;
+    
+    setSendingMessage(true);
+    
+    // Create a thread_id based on the application
+    const threadId = crypto.randomUUID();
+    
+    const { error } = await supabase.from('messages').insert({
+      sender_id: user.id,
+      receiver_id: application.artist_id,
+      thread_id: threadId,
+      subject: messageSubject.trim() || `Re: Application for ${venueListing?.venue_name || 'venue'}`,
+      content: messageContent.trim(),
+      is_read: false,
+      is_starred: false,
+    });
+
+    setSendingMessage(false);
+
+    if (error) {
+      toast.error('Failed to send message');
+      return;
+    }
+
+    toast.success('Message sent!');
+    setMessageDialogOpen(false);
+    setMessageSubject('');
+    setMessageContent('');
+  };
+
   if (loading) {
     return (
       <div className="space-y-6 animate-fade-in">
@@ -217,6 +258,10 @@ export default function VenueApplicationDetail() {
           </span>
         </div>
         <div className="flex gap-2">
+          <Button size="sm" onClick={() => setMessageDialogOpen(true)} className="bg-primary hover:bg-primary/90">
+            <MessageSquare className="h-4 w-4 mr-1" />
+            Message
+          </Button>
           {application.status !== 'accepted' && (
             <Button size="sm" onClick={() => updateStatus('accepted')} className="bg-green-600 hover:bg-green-700 text-white">
               Accept
@@ -403,6 +448,53 @@ export default function VenueApplicationDetail() {
           </div>
         )}
       </div>
+
+      {/* Message Dialog */}
+      <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl tracking-wide">
+              MESSAGE {bandName.toUpperCase()}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="font-display text-xs text-muted-foreground tracking-widest block mb-2">
+                SUBJECT
+              </label>
+              <Input
+                value={messageSubject}
+                onChange={(e) => setMessageSubject(e.target.value)}
+                placeholder={`Re: Application for ${venueListing?.venue_name || 'venue'}`}
+                className="bg-background border-border"
+              />
+            </div>
+            <div>
+              <label className="font-display text-xs text-muted-foreground tracking-widest block mb-2">
+                MESSAGE
+              </label>
+              <Textarea
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                placeholder="Write your message..."
+                className="bg-background border-border min-h-[150px]"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setMessageDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSendMessage} 
+                disabled={!messageContent.trim() || sendingMessage}
+                className="bg-primary hover:bg-primary/90"
+              >
+                {sendingMessage ? 'Sending...' : 'Send Message'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
