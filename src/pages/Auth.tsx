@@ -1,4 +1,3 @@
-import openingImage from "@/assets/opening.png";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,15 +6,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { z } from "zod";
 
-// If your project has shadcn Dialog, keep these imports.
-// If you DON'T have them, tell me and I'll give you a no-dependency modal version.
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
 type AuthMode = "login" | "signup";
 type UserRole = "artist" | "venue" | "both";
 
@@ -23,8 +13,6 @@ const emailSchema = z.string().email("Invalid email");
 const passwordSchema = z.string().min(6, "Min 6 characters");
 
 export default function Auth() {
-  // Modal control
-  const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<AuthMode>("login");
 
   // Form state
@@ -33,34 +21,20 @@ export default function Auth() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<UserRole | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { signIn, signUp, user, profile, loading } = useAuth();
   const navigate = useNavigate();
 
-  const photoUrl = openingImage;
-
+  // Redirect after auth/profile is available
   useEffect(() => {
     if (!loading && user && profile) {
       const targetDashboard = profile.role === "venue" ? "/venue" : "/artist";
       navigate(targetDashboard);
     }
   }, [user, profile, loading, navigate]);
-
-  const resetErrors = () => setErrors({});
-
-  const openLogin = () => {
-    resetErrors();
-    setMode("login");
-    setOpen(true);
-  };
-
-  const openSignup = () => {
-    resetErrors();
-    setMode("signup");
-    setOpen(true);
-  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -102,8 +76,6 @@ export default function Auth() {
           } else {
             toast.error(error.message);
           }
-        } else {
-          setOpen(false);
         }
       } else {
         const { error } = await signUp(email, password, firstName, lastName, role!);
@@ -115,7 +87,6 @@ export default function Auth() {
           }
         } else {
           toast.success("Welcome to RIFF");
-          setOpen(false);
         }
       }
     } catch {
@@ -127,67 +98,65 @@ export default function Auth() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="animate-pulse text-primary font-display text-6xl">RIFF</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col overflow-hidden bg-background">
-      {/* POSTER HEADER (replace “TASTE TASTE”) */}
-      <header className="w-full bg-primary text-primary-foreground">
-        <div className="px-6 py-10 md:py-14">
-          <div className="font-display leading-[0.9] tracking-tight uppercase">
-            <div className="text-[14vw] md:text-[8rem]">RIFF</div>
-            <div className="text-[14vw] md:text-[8rem] -mt-2 md:-mt-6">RIFF</div>
-          </div>
+    <div className="min-h-screen w-full flex flex-col bg-black text-foreground">
+      {/* Poster title (stacked) */}
+      <header className="px-6 pt-8 md:pt-10">
+        <div className="font-display uppercase tracking-tight leading-[0.82] text-primary">
+          <div className="text-[20vw] md:text-[11rem]">RIFF</div>
+          <div className="text-[20vw] md:text-[11rem] -mt-4 md:-mt-8">RIFF</div>
         </div>
       </header>
 
-      {/* ACTION STRIP (replace artist-name blocks with LOG IN / SIGN UP) */}
-      <section className="w-full bg-background border-y border-border">
-        <div className="grid grid-cols-2">
+      {/* Sign in / Log in strip */}
+      <section className="px-6">
+        <div className="grid grid-cols-2 border border-black">
           <button
             type="button"
-            onClick={openLogin}
-            className="py-6 md:py-7 text-center font-display uppercase tracking-widest text-2xl md:text-3xl text-foreground hover:bg-foreground/5 transition"
+            onClick={() => {
+              setErrors({});
+              setMode("signup");
+            }}
+            className={[
+              "font-display uppercase tracking-widest text-2xl md:text-3xl py-5 md:py-6",
+              "transition-none border-r border-black",
+              mode === "signup" ? "bg-black text-primary" : "bg-primary text-black",
+            ].join(" ")}
+          >
+            SIGN IN
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setErrors({});
+              setMode("login");
+            }}
+            className={[
+              "font-display uppercase tracking-widest text-2xl md:text-3xl py-5 md:py-6",
+              "transition-none",
+              mode === "login" ? "bg-black text-primary" : "bg-primary text-black",
+            ].join(" ")}
           >
             LOG IN
-          </button>
-          <button
-            type="button"
-            onClick={openSignup}
-            className="py-6 md:py-7 text-center font-display uppercase tracking-widest text-2xl md:text-3xl text-foreground hover:bg-foreground/5 transition border-l border-border"
-          >
-            SIGN UP
           </button>
         </div>
       </section>
 
-      {/* PHOTO AREA (fills remaining space) */}
-      <main className="relative flex-1 min-h-0">
-        <div
-          className="absolute inset-0 bg-center bg-cover"
-          style={{ backgroundImage: `url(${photoUrl})` }}
-        />
-        {/* subtle darkening so the bands feel like they sit on a poster */}
-        <div className="absolute inset-0 bg-background/20" />
-      </main>
-
-      {/* MODAL */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md bg-background border-border p-0">
-          <div className="p-6">
-            <DialogHeader className="mb-4">
-              <DialogTitle className="font-display uppercase tracking-widest text-2xl">
-                {mode === "login" ? "LOG IN" : "SIGN UP"}
-              </DialogTitle>
-            </DialogHeader>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {mode === "signup" && (
-                <>
+      {/* Panels (show under the selected half) */}
+      <main className="flex-1 px-6 pb-10 pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-0 h-full">
+          {/* LEFT: SIGNUP PANEL */}
+          <div className="md:pr-3">
+            {mode === "signup" && (
+              <div className="bg-primary text-black border border-black p-6 md:p-8 min-h-[420px]">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Role selection */}
                   <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-2">
@@ -196,92 +165,113 @@ export default function Auth() {
                           key={r}
                           type="button"
                           onClick={() => setRole(r)}
-                          className={`p-3 border transition-all text-center font-display uppercase tracking-widest text-sm ${
-                            role === r
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                          className={`p-3 border border-black text-center font-display uppercase tracking-widest text-sm md:text-base ${
+                            role === r ? "bg-black text-primary" : "bg-primary text-black"
                           }`}
                         >
                           {r === "both" ? "BOTH" : r.toUpperCase()}
                         </button>
                       ))}
                     </div>
-                    {errors.role && (
-                      <p className="text-destructive text-xs">{errors.role}</p>
-                    )}
+                    {errors.role && <p className="text-black/80 text-xs font-medium">{errors.role}</p>}
                   </div>
 
-                  {/* Name fields */}
+                  {/* Name */}
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <Input
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         placeholder="First"
-                        className="bg-background border-border"
+                        className="bg-black text-white placeholder:text-white/50 border-black focus-visible:ring-0 focus-visible:ring-offset-0"
                       />
-                      {errors.firstName && (
-                        <p className="text-destructive text-xs mt-1">
-                          {errors.firstName}
-                        </p>
-                      )}
+                      {errors.firstName && <p className="text-black/80 text-xs mt-1 font-medium">{errors.firstName}</p>}
                     </div>
                     <div>
                       <Input
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         placeholder="Last"
-                        className="bg-background border-border"
+                        className="bg-black text-white placeholder:text-white/50 border-black focus-visible:ring-0 focus-visible:ring-offset-0"
                       />
-                      {errors.lastName && (
-                        <p className="text-destructive text-xs mt-1">
-                          {errors.lastName}
-                        </p>
-                      )}
+                      {errors.lastName && <p className="text-black/80 text-xs mt-1 font-medium">{errors.lastName}</p>}
                     </div>
                   </div>
-                </>
-              )}
 
-              <div>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
-                  className="bg-background border-border"
-                />
-                {errors.email && (
-                  <p className="text-destructive text-xs mt-1">{errors.email}</p>
-                )}
+                  <div>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email"
+                      className="bg-black text-white placeholder:text-white/50 border-black focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    {errors.email && <p className="text-black/80 text-xs mt-1 font-medium">{errors.email}</p>}
+                  </div>
+
+                  <div>
+                    <Input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password"
+                      className="bg-black text-white placeholder:text-white/50 border-black focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    {errors.password && <p className="text-black/80 text-xs mt-1 font-medium">{errors.password}</p>}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-12 font-display uppercase tracking-widest text-lg bg-black text-primary hover:bg-black/90"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "..." : "JOIN"}
+                  </Button>
+                </form>
               </div>
-
-              <div>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="bg-background border-border"
-                />
-                {errors.password && (
-                  <p className="text-destructive text-xs mt-1">
-                    {errors.password}
-                  </p>
-                )}
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full font-display uppercase tracking-widest h-12 text-lg"
-                disabled={isLoading}
-              >
-                {isLoading ? "..." : mode === "login" ? "ENTER" : "JOIN"}
-              </Button>
-            </form>
+            )}
           </div>
-        </DialogContent>
-      </Dialog>
+
+          {/* RIGHT: LOGIN PANEL */}
+          <div className="md:pl-3">
+            {mode === "login" && (
+              <div className="bg-primary text-black border border-black p-6 md:p-8 min-h-[420px]">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email"
+                      className="bg-black text-white placeholder:text-white/50 border-black focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    {errors.email && <p className="text-black/80 text-xs mt-1 font-medium">{errors.email}</p>}
+                  </div>
+
+                  <div>
+                    <Input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password"
+                      className="bg-black text-white placeholder:text-white/50 border-black focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    {errors.password && <p className="text-black/80 text-xs mt-1 font-medium">{errors.password}</p>}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-12 font-display uppercase tracking-widest text-lg bg-black text-primary hover:bg-black/90"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "..." : "ENTER"}
+                  </Button>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
