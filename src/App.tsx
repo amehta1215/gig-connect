@@ -23,6 +23,7 @@ import ApplicationDetail from "./pages/artist/ApplicationDetail";
 import VenueDashboard from "./pages/venue/VenueDashboard";
 import VenueMessages from "./pages/venue/VenueMessages";
 import VenueListings from "./pages/venue/VenueListings";
+import VenueApplications from "./pages/venue/VenueApplications";
 import VenueProfile from "./pages/venue/VenueProfile";
 
 const queryClient = new QueryClient();
@@ -73,6 +74,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             >
+              <Route index element={<VenueApplications />} />
               <Route path="messages" element={<VenueMessages />} />
               <Route path="listings" element={<VenueListings />} />
             </Route>
