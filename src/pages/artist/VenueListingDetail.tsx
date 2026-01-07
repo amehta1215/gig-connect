@@ -170,7 +170,7 @@ export default function VenueListingDetail() {
   if (!listing) {
     return (
       <div className="text-center py-20">
-        <h3 className="font-display text-2xl text-muted-foreground">LISTING NOT FOUND</h3>
+        <h3 className="font-display text-2xl text-muted-foreground">ROOM NOT FOUND</h3>
         <Button onClick={() => navigate(-1)} variant="outline" className="mt-4">
           Go Back
         </Button>
@@ -262,7 +262,7 @@ export default function VenueListingDetail() {
 
         {hasApplied ? (
           <div className="text-center py-8">
-            <p className="text-lg text-muted-foreground">You've already applied to this listing</p>
+            <p className="text-lg text-muted-foreground">You've already applied to this room</p>
             <Button
               variant="outline"
               onClick={() => navigate('/artist/applications')}

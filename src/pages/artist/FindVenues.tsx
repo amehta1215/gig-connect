@@ -118,7 +118,7 @@ export default function FindVenues() {
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-accent">
-        FIND VENUES
+        FIND ROOMS
       </h1>
 
       {/* Search and Filters */}
@@ -190,7 +190,7 @@ export default function FindVenues() {
         </div>
       ) : filteredVenues.length === 0 ? (
         <div className="text-center py-20">
-          <h3 className="font-display text-2xl text-muted-foreground">NO VENUES</h3>
+          <h3 className="font-display text-2xl text-muted-foreground">NO ROOMS</h3>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
