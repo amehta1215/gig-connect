@@ -26,9 +26,20 @@ serve(async (req) => {
     }
 
     const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${accessToken}&types=place,locality,neighborhood,region&limit=5&country=us`;
+    
+    console.log("Mapbox request URL (without token):", url.split('?')[0]);
+    console.log("Query:", query);
 
     const response = await fetch(url);
     const data = await response.json();
+    
+    console.log("Mapbox response status:", response.status);
+    console.log("Mapbox features count:", data.features?.length || 0);
+    
+    if (data.message) {
+      console.error("Mapbox API error:", data.message);
+      throw new Error(data.message);
+    }
 
     const suggestions = data.features?.map((f: any) => ({
       id: f.id,
