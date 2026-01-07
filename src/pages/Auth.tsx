@@ -114,23 +114,23 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
-      {/* Giant RIFF title - fills top half of viewport */}
-      <header className="h-[50vh] flex items-start justify-center overflow-hidden pt-2">
-        <h1 className="font-display text-primary leading-none text-[58vw] tracking-[-0.05em] font-black">
+      {/* Giant RIFF title - locked to top half of viewport */}
+      <header className="relative h-[50vh] overflow-hidden">
+        <h1 className="pointer-events-none absolute inset-x-0 bottom-0 text-center font-display text-primary leading-none text-[min(64vw,50vh)] tracking-[-0.06em] font-black">
           RIFF
         </h1>
       </header>
 
-      {/* Two-column auth section with orange bar */}
+      {/* Two-column auth section with separate orange boxes */}
       <section className="flex-1 flex flex-col">
-        {/* Orange bar with SIGN UP / LOG IN */}
-        <div className="bg-primary">
-          <div className="grid grid-cols-2">
+        {/* Separate orange boxes with SIGN UP / LOG IN */}
+        <div className="px-4 md:px-8">
+          <div className="grid grid-cols-2 gap-6">
             {/* SIGN UP column */}
             <button
               type="button"
               onClick={() => toggleMode("signup")}
-              className={`py-6 md:py-8 font-display uppercase tracking-tight text-4xl md:text-6xl lg:text-7xl font-black transition-colors ${
+              className={`bg-primary py-6 md:py-8 text-center font-display uppercase tracking-tight text-4xl md:text-6xl lg:text-7xl font-black transition-colors ${
                 mode === "signup" ? "text-accent" : "text-background"
               }`}
             >
@@ -141,7 +141,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={() => toggleMode("login")}
-              className={`py-6 md:py-8 font-display uppercase tracking-tight text-4xl md:text-6xl lg:text-7xl font-black transition-colors ${
+              className={`bg-primary py-6 md:py-8 text-center font-display uppercase tracking-tight text-4xl md:text-6xl lg:text-7xl font-black transition-colors ${
                 mode === "login" ? "text-accent" : "text-background"
               }`}
             >
@@ -151,35 +151,38 @@ export default function Auth() {
         </div>
 
         {/* Form panels - appear in corresponding column */}
-        <div className="grid grid-cols-2 flex-1">
+        <div className="grid grid-cols-2 flex-1 px-4 md:px-8 pb-8 gap-6">
           {/* SIGN UP Panel - left column */}
           <div
             className={`overflow-hidden transition-all duration-300 ease-out ${
               mode === "signup" ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
             }`}
           >
-            <div className="bg-primary p-6 md:p-8">
-              <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
-                {/* Role selection */}
-                <div className="space-y-2">
-                  <div className="grid grid-cols-3 gap-2">
-                    {(["artist", "venue", "both"] as UserRole[]).map((r) => (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => setRole(r)}
-                        className={`p-3 text-center font-display uppercase tracking-widest text-sm md:text-base transition-colors ${
-                          role === r
-                            ? "bg-background text-primary"
-                            : "bg-primary text-background border border-background"
-                        }`}
-                      >
-                        {r === "both" ? "BOTH" : r.toUpperCase()}
-                      </button>
-                    ))}
+            <div className="mt-6 bg-primary p-1 md:p-2">
+              <div className="bg-background p-6 md:p-8">
+                <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
+                  {/* Role selection */}
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-3 gap-2">
+                      {(["artist", "venue", "both"] as UserRole[]).map((r) => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => setRole(r)}
+                          className={`p-3 text-center font-display uppercase tracking-widest text-sm md:text-base transition-colors ${
+                            role === r
+                              ? "bg-background text-primary"
+                              : "bg-primary text-background border border-background"
+                          }`}
+                        >
+                          {r === "both" ? "BOTH" : r.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                    {errors.role && (
+                      <p className="text-accent text-xs font-display">{errors.role}</p>
+                    )}
                   </div>
-                  {errors.role && <p className="text-accent text-xs font-display">{errors.role}</p>}
-                </div>
 
                 {/* Name */}
                 <div className="grid grid-cols-2 gap-2">
@@ -233,6 +236,7 @@ export default function Auth() {
                   {isLoading ? "..." : "JOIN"}
                 </button>
               </form>
+              </div>
             </div>
           </div>
 
@@ -242,38 +246,44 @@ export default function Auth() {
               mode === "login" ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
             }`}
           >
-            <div className="bg-primary p-6 md:p-8">
-              <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
-                <div>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="EMAIL"
-                    className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
-                  />
-                  {errors.email && <p className="text-accent text-xs mt-1 font-display">{errors.email}</p>}
-                </div>
+            <div className="mt-6 bg-primary p-1 md:p-2">
+              <div className="bg-background p-6 md:p-8">
+                <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
+                  <div>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="EMAIL"
+                      className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
+                    />
+                    {errors.email && (
+                      <p className="text-accent text-xs mt-1 font-display">{errors.email}</p>
+                    )}
+                  </div>
 
-                <div>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="PASSWORD"
-                    className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
-                  />
-                  {errors.password && <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>}
-                </div>
+                  <div>
+                    <Input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="PASSWORD"
+                      className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
+                    />
+                    {errors.password && (
+                      <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>
+                    )}
+                  </div>
 
-                <button
-                  type="submit"
-                  className="w-full h-12 font-display uppercase tracking-widest text-lg bg-background text-primary hover:bg-secondary transition-colors"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "..." : "ENTER"}
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    className="w-full h-12 font-display uppercase tracking-widest text-lg bg-background text-primary hover:bg-secondary transition-colors"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "..." : "ENTER"}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
