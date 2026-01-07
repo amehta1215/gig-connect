@@ -165,7 +165,7 @@ export default function VenueApplicationDetail() {
     setLoading(false);
   };
 
-  const updateStatus = async (newStatus: 'accepted' | 'archived') => {
+  const updateStatus = async (newStatus: 'accepted' | 'archived' | 'in_progress') => {
     if (!application) return;
     
     await supabase
@@ -173,7 +173,12 @@ export default function VenueApplicationDetail() {
       .update({ status: newStatus })
       .eq('id', application.id);
     
-    navigate('/venue');
+    // Stay on page for rescind/unarchive, navigate back for accept/archive
+    if (newStatus === 'in_progress') {
+      setApplication({ ...application, status: newStatus });
+    } else {
+      navigate('/venue');
+    }
   };
 
   const handleMessageClick = async () => {
@@ -288,14 +293,24 @@ export default function VenueApplicationDetail() {
             <MessageSquare className="h-4 w-4 mr-1" />
             Message
           </Button>
-          {application.status !== 'accepted' && (
-            <Button size="sm" onClick={() => updateStatus('accepted')} className="bg-primary hover:bg-primary/90">
-              Accept
+          {application.status === 'in_progress' && (
+            <>
+              <Button size="sm" onClick={() => updateStatus('accepted')} className="bg-primary hover:bg-primary/90">
+                Accept
+              </Button>
+              <Button size="sm" onClick={() => updateStatus('archived')} className="bg-primary hover:bg-primary/90">
+                Archive
+              </Button>
+            </>
+          )}
+          {application.status === 'accepted' && (
+            <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
+              Rescind Acceptance
             </Button>
           )}
-          {application.status !== 'archived' && (
-            <Button size="sm" onClick={() => updateStatus('archived')} className="bg-primary hover:bg-primary/90">
-              Archive
+          {application.status === 'archived' && (
+            <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
+              Unarchive
             </Button>
           )}
         </div>
