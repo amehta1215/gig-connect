@@ -92,7 +92,7 @@ export default function VenueMessages() {
   const unreadCount = messages.filter(m => !m.is_read).length;
   return <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <h1 className="font-display section-title text-[hsl(var(--neon-accent))] font-bold text-accent">MESSAGES</h1>
+      <h1 className="font-display section-title text-accent font-bold">MESSAGES</h1>
 
       <div className="flex h-[calc(100vh-220px)] min-h-[400px] border border-border overflow-hidden bg-card">
         {/* Message List */}

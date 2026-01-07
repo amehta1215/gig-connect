@@ -214,7 +214,7 @@ export default function VenueApplications() {
   };
   return <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <h1 className="font-display section-title text-[hsl(var(--neon-accent))] font-bold">APPLICATIONS</h1>
+      <h1 className="font-display section-title text-accent font-bold">APPLICATIONS</h1>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">

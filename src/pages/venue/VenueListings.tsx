@@ -194,7 +194,7 @@ export default function VenueListings() {
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="font-display section-title text-foreground">LISTINGS</h1>
+        <h1 className="font-display section-title text-accent font-bold">LISTINGS</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => openDialog()} className="font-display tracking-widest">
