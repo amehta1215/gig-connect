@@ -3,6 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Search, Star, StarOff, Mail, MailOpen, ChevronLeft } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -19,12 +26,17 @@ interface Message {
   sender?: { first_name: string; last_name: string };
 }
 
+type FilterType = 'all' | 'unread' | 'starred';
+type SortType = 'newest' | 'oldest';
+
 export default function ArtistMessages() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [sortBy, setSortBy] = useState<SortType>('newest');
 
   useEffect(() => {
     if (user) {
@@ -73,11 +85,24 @@ export default function ArtistMessages() {
     ));
   };
 
-  const filteredMessages = messages.filter((message) =>
-    message.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    message.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    `${message.sender?.first_name} ${message.sender?.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMessages = messages
+    .filter((message) => {
+      // Text search
+      const matchesSearch =
+        message.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        message.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        `${message.sender?.first_name} ${message.sender?.last_name}`.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Filter type
+      if (filter === 'unread') return matchesSearch && !message.is_read;
+      if (filter === 'starred') return matchesSearch && message.is_starred;
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sortBy === 'newest' ? dateB - dateA : dateA - dateB;
+    });
 
   const handleSelectMessage = (message: Message) => {
     setSelectedMessage(message);
@@ -86,18 +111,20 @@ export default function ArtistMessages() {
     }
   };
 
+  const unreadCount = messages.filter(m => !m.is_read).length;
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <h1 className="font-display section-title text-foreground">MESSAGES</h1>
+      <h1 className="font-display section-title text-accent font-black">MESSAGES</h1>
 
       <div className="flex h-[calc(100vh-220px)] min-h-[400px] border border-border overflow-hidden bg-card">
         {/* Message List */}
         <div className={`w-full md:w-1/3 border-r border-border flex flex-col ${
           selectedMessage ? 'hidden md:flex' : 'flex'
         }`}>
-          {/* Search */}
-          <div className="p-3 border-b border-border">
+          {/* Search & Filters */}
+          <div className="p-3 border-b border-border space-y-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -106,6 +133,27 @@ export default function ArtistMessages() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 bg-background border-border"
               />
+            </div>
+            <div className="flex gap-2">
+              <Select value={filter} onValueChange={(v) => setFilter(v as FilterType)}>
+                <SelectTrigger className="flex-1 h-8 text-xs bg-background border-border">
+                  <SelectValue placeholder="Filter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="unread">Unread {unreadCount > 0 && `(${unreadCount})`}</SelectItem>
+                  <SelectItem value="starred">Starred</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortType)}>
+                <SelectTrigger className="flex-1 h-8 text-xs bg-background border-border">
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="oldest">Oldest</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
