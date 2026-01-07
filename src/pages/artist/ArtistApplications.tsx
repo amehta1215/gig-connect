@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,6 +21,7 @@ interface Application {
 }
 
 export default function ArtistApplications() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +80,10 @@ export default function ArtistApplications() {
     const StatusIcon = config.icon;
 
     return (
-      <div className="bg-card border border-border p-4 hover:border-primary/50 transition-colors">
+      <div 
+        className="bg-card border border-border p-4 hover:border-primary/50 transition-colors cursor-pointer"
+        onClick={() => navigate(`/artist/applications/${application.id}`)}
+      >
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <h3 className="font-display text-xl text-foreground tracking-wide">
