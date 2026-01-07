@@ -150,11 +150,11 @@ export default function VenueListingDetail() {
 
     if (error) {
       toast.error('Failed to apply');
+      setApplying(false);
     } else {
       toast.success('Application submitted!');
-      setHasApplied(true);
+      navigate('/artist/venues');
     }
-    setApplying(false);
   };
 
   if (loading) {
