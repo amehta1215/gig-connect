@@ -261,20 +261,17 @@ export default function VenueApplications() {
 
             <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
               {application.artist_profile?.genre && (
-                <span className="flex items-center gap-1 uppercase tracking-wider">
-                  <Music className="h-3 w-3" />
-                  {application.artist_profile.genre}
+                <span className="uppercase tracking-wider">
+                  Genre: {application.artist_profile.genre}
                 </span>
               )}
               {application.lineup_preference && (
-                <span className="flex items-center gap-1 uppercase tracking-wider">
-                  <Users className="h-3 w-3" />
-                  {lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}
+                <span className="uppercase tracking-wider">
+                  Type of Act: {lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}
                 </span>
               )}
-              <span className="flex items-center gap-1 uppercase tracking-wider">
-                <Calendar className="h-3 w-3" />
-                {format(new Date(application.created_at), 'MMM d')}
+              <span className="uppercase tracking-wider">
+                Application Date: {format(new Date(application.created_at), 'MMM d')}
               </span>
             </div>
 
