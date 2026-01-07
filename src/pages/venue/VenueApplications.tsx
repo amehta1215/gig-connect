@@ -99,21 +99,51 @@ export default function VenueApplications() {
       return;
     }
     const listingIds = listings.map(l => l.id);
-    const {
-      data,
-      error
-    } = await supabase.from('applications').select(`
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
         *,
-        artist:profiles!applications_artist_id_fkey(first_name, last_name),
-        artist_profile:artist_profiles!inner(band_name, genre)
-      `).in('venue_listing_id', listingIds).order('created_at', {
-      ascending: false
-    });
-    if (data && !error) {
-      setApplications(data as unknown as Application[]);
+        artist:profiles!applications_artist_id_fkey(first_name, last_name)
+      `)
+      .in('venue_listing_id', listingIds)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to fetch applications:', error);
+      setApplications([]);
+      setLoading(false);
+      return;
     }
+
+    const apps = (data || []) as unknown as Application[];
+
+    // Fetch artist profiles (band name / genre) in a second query (no FK relation exists for embedding)
+    const artistIds = Array.from(new Set(apps.map(a => a.artist_id)));
+    const { data: artistProfiles, error: artistProfilesError } = await supabase
+      .from('artist_profiles')
+      .select('user_id, band_name, genre')
+      .in('user_id', artistIds);
+
+    if (artistProfilesError) {
+      console.error('Failed to fetch artist profiles:', artistProfilesError);
+      setApplications(apps);
+      setLoading(false);
+      return;
+    }
+
+    const profileByUserId = new Map(
+      (artistProfiles || []).map(p => [p.user_id, { band_name: p.band_name, genre: p.genre }])
+    );
+
+    const merged = apps.map(app => ({
+      ...app,
+      artist_profile: profileByUserId.get(app.artist_id),
+    }));
+
+    setApplications(merged as unknown as Application[]);
     setLoading(false);
   };
+
   const getFilteredApplications = () => {
     let filtered = [...applications];
     if (activeTab !== 'all') {
