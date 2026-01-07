@@ -19,12 +19,12 @@ interface Message {
   sender?: {
     first_name: string;
     last_name: string;
-    artist_profiles: { band_name: string | null }[];
+    artist_profiles: { band_name: string | null } | null;
   };
   receiver?: {
     first_name: string;
     last_name: string;
-    artist_profiles: { band_name: string | null }[];
+    artist_profiles: { band_name: string | null } | null;
   };
 }
 type FilterType = 'all' | 'unread' | 'starred';
@@ -142,8 +142,8 @@ export default function VenueMessages() {
                 <p className="text-muted-foreground text-sm">Empty</p>
               </div> : filteredMessages.map(message => {
                 const isSent = message.sender_id === user?.id;
-                const recipientBandName = message.receiver?.artist_profiles?.[0]?.band_name;
-                const senderBandName = message.sender?.artist_profiles?.[0]?.band_name;
+                const recipientBandName = message.receiver?.artist_profiles?.band_name;
+                const senderBandName = message.sender?.artist_profiles?.band_name;
                 const displayName = isSent 
                   ? `To: ${message.receiver?.first_name} ${message.receiver?.last_name}${recipientBandName ? ` (${recipientBandName})` : ''}`
                   : `${message.sender?.first_name} ${message.sender?.last_name}${senderBandName ? ` (${senderBandName})` : ''}`;
@@ -191,8 +191,8 @@ export default function VenueMessages() {
                   <h2 className="font-display text-lg tracking-wide">{selectedMessage.subject || '(No subject)'}</h2>
                   <p className="text-xs text-muted-foreground">
                     {selectedMessage.sender_id === user?.id 
-                      ? `To: ${selectedMessage.receiver?.first_name} ${selectedMessage.receiver?.last_name}${selectedMessage.receiver?.artist_profiles?.[0]?.band_name ? ` (${selectedMessage.receiver.artist_profiles[0].band_name})` : ''}`
-                      : `From: ${selectedMessage.sender?.first_name} ${selectedMessage.sender?.last_name}${selectedMessage.sender?.artist_profiles?.[0]?.band_name ? ` (${selectedMessage.sender.artist_profiles[0].band_name})` : ''}`}
+                      ? `To: ${selectedMessage.receiver?.first_name} ${selectedMessage.receiver?.last_name}${selectedMessage.receiver?.artist_profiles?.band_name ? ` (${selectedMessage.receiver.artist_profiles.band_name})` : ''}`
+                      : `From: ${selectedMessage.sender?.first_name} ${selectedMessage.sender?.last_name}${selectedMessage.sender?.artist_profiles?.band_name ? ` (${selectedMessage.sender.artist_profiles.band_name})` : ''}`}
                   </p>
                 </div>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
