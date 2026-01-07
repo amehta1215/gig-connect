@@ -173,7 +173,7 @@ export default function VenueApplicationDetail() {
       .update({ status: newStatus })
       .eq('id', application.id);
     
-    setApplication({ ...application, status: newStatus });
+    navigate('/venue');
   };
 
   const handleMessageClick = async () => {
