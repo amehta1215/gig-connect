@@ -16,6 +16,7 @@ import ArtistDashboard from "./pages/artist/ArtistDashboard";
 import ArtistMessages from "./pages/artist/ArtistMessages";
 import ArtistApplications from "./pages/artist/ArtistApplications";
 import ArtistProfile from "./pages/artist/ArtistProfile";
+import FindVenues from "./pages/artist/FindVenues";
 import VenueListingDetail from "./pages/artist/VenueListingDetail";
 import ApplicationDetail from "./pages/artist/ApplicationDetail";
 
@@ -49,6 +50,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             >
+              <Route index element={<FindVenues />} />
               <Route path="messages" element={<ArtistMessages />} />
               <Route path="applications" element={<ArtistApplications />} />
               <Route path="applications/:id" element={<ApplicationDetail />} />

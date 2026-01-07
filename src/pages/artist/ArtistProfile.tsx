@@ -172,7 +172,7 @@ export default function ArtistProfile() {
       setSaving(false);
     } else {
       toast.success('Profile saved successfully');
-      navigate('/artist/find-venues');
+      navigate('/artist');
     }
   };
   if (loading) {
