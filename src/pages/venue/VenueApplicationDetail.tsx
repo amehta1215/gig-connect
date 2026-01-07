@@ -221,7 +221,7 @@ export default function VenueApplicationDetail() {
     return (
       <div className="text-center py-20">
         <h3 className="font-display text-2xl text-muted-foreground">APPLICATION NOT FOUND</h3>
-        <Button onClick={() => navigate('/venue/applications')} variant="outline" className="mt-4">
+        <Button onClick={() => navigate('/venue')} variant="outline" className="mt-4">
           Go Back
         </Button>
       </div>
@@ -244,7 +244,7 @@ export default function VenueApplicationDetail() {
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       {/* Back Button */}
-      <Button variant="ghost" size="icon" onClick={() => navigate('/venue/applications')}>
+      <Button variant="ghost" size="icon" onClick={() => navigate('/venue')}>
         <ArrowLeft className="h-5 w-5" />
       </Button>
 
