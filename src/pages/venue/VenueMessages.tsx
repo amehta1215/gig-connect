@@ -19,10 +19,12 @@ interface Message {
   sender?: {
     first_name: string;
     last_name: string;
+    artist_profiles: { band_name: string | null }[];
   };
   receiver?: {
     first_name: string;
     last_name: string;
+    artist_profiles: { band_name: string | null }[];
   };
 }
 type FilterType = 'all' | 'unread' | 'starred';
@@ -50,13 +52,13 @@ export default function VenueMessages() {
       error
     } = await supabase.from('messages').select(`
         *,
-        sender:profiles!messages_sender_id_fkey(first_name, last_name),
-        receiver:profiles!messages_receiver_id_fkey(first_name, last_name)
+        sender:profiles!messages_sender_id_fkey(first_name, last_name, artist_profiles(band_name)),
+        receiver:profiles!messages_receiver_id_fkey(first_name, last_name, artist_profiles(band_name))
       `).or(`receiver_id.eq.${user.id},sender_id.eq.${user.id}`).order('created_at', {
       ascending: false
     });
     if (data && !error) {
-      setMessages(data as Message[]);
+      setMessages(data as unknown as Message[]);
     }
     setLoading(false);
   };
@@ -140,9 +142,11 @@ export default function VenueMessages() {
                 <p className="text-muted-foreground text-sm">Empty</p>
               </div> : filteredMessages.map(message => {
                 const isSent = message.sender_id === user?.id;
+                const recipientBandName = message.receiver?.artist_profiles?.[0]?.band_name;
+                const senderBandName = message.sender?.artist_profiles?.[0]?.band_name;
                 const displayName = isSent 
-                  ? `To: ${message.receiver?.first_name} ${message.receiver?.last_name}`
-                  : `${message.sender?.first_name} ${message.sender?.last_name}`;
+                  ? `To: ${message.receiver?.first_name} ${message.receiver?.last_name}${recipientBandName ? ` (${recipientBandName})` : ''}`
+                  : `${message.sender?.first_name} ${message.sender?.last_name}${senderBandName ? ` (${senderBandName})` : ''}`;
                 return (
                   <div key={message.id} onClick={() => handleSelectMessage(message)} className={`p-3 border-b border-border cursor-pointer transition-colors ${selectedMessage?.id === message.id ? 'bg-primary/10' : message.is_read ? 'hover:bg-secondary' : 'bg-secondary/50 hover:bg-secondary'}`}>
                     <div className="flex items-start gap-2">
@@ -187,8 +191,8 @@ export default function VenueMessages() {
                   <h2 className="font-display text-lg tracking-wide">{selectedMessage.subject || '(No subject)'}</h2>
                   <p className="text-xs text-muted-foreground">
                     {selectedMessage.sender_id === user?.id 
-                      ? `To: ${selectedMessage.receiver?.first_name} ${selectedMessage.receiver?.last_name}`
-                      : `From: ${selectedMessage.sender?.first_name} ${selectedMessage.sender?.last_name}`}
+                      ? `To: ${selectedMessage.receiver?.first_name} ${selectedMessage.receiver?.last_name}${selectedMessage.receiver?.artist_profiles?.[0]?.band_name ? ` (${selectedMessage.receiver.artist_profiles[0].band_name})` : ''}`
+                      : `From: ${selectedMessage.sender?.first_name} ${selectedMessage.sender?.last_name}${selectedMessage.sender?.artist_profiles?.[0]?.band_name ? ` (${selectedMessage.sender.artist_profiles[0].band_name})` : ''}`}
                   </p>
                 </div>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
