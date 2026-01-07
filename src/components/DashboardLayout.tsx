@@ -94,7 +94,7 @@ export default function DashboardLayout({ children, tabs }: DashboardLayoutProps
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                <DropdownMenuItem onClick={handleSignOut} className="text-accent">
                   <LogOut className="mr-2 h-4 w-4" />
                   Exit
                 </DropdownMenuItem>
