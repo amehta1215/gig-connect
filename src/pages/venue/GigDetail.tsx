@@ -257,12 +257,6 @@ export default function GigDetail() {
           <h1 className="font-display text-4xl md:text-5xl text-accent font-bold tracking-wide">
             {artistName.toUpperCase()}
           </h1>
-          {artistProfile?.genre && (
-            <p className="text-muted-foreground mt-2 flex items-center justify-center gap-2">
-              <Music className="h-4 w-4" />
-              {artistProfile.genre}
-            </p>
-          )}
         </div>
 
         {/* Openers Section */}
@@ -378,8 +372,7 @@ export default function GigDetail() {
               : venueListing?.venue_name}
           </p>
           {venueListing?.location && (
-            <p className="text-muted-foreground flex items-center justify-center gap-2 mt-2">
-              <MapPin className="h-4 w-4" />
+            <p className="text-muted-foreground mt-2">
               {venueListing.location}
             </p>
           )}
