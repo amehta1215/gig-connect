@@ -6,6 +6,7 @@ const venueTabs = [
   { label: 'Applications', href: '/venue' },
   { label: 'Messages', href: '/venue/messages' },
   { label: 'Rooms', href: '/venue/listings' },
+  { label: 'Calendar', href: '/venue/calendar' },
 ];
 
 export default function VenueDashboard() {

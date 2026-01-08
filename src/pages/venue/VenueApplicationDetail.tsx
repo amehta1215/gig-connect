@@ -6,9 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, Globe, MessageSquare } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, Globe, MessageSquare, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface ArtistProfile {
   band_name: string | null;
@@ -106,6 +109,10 @@ export default function VenueApplicationDetail() {
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [messageSubject, setMessageSubject] = useState('');
   const [messageContent, setMessageContent] = useState('');
+  
+  // Accept dialog state
+  const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
+  const [selectedGigDate, setSelectedGigDate] = useState<Date | undefined>(undefined);
   const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
@@ -179,6 +186,50 @@ export default function VenueApplicationDetail() {
     } else {
       navigate('/venue');
     }
+  };
+
+  const handleAcceptClick = () => {
+    // Pre-select a date from application if available
+    if (application?.availability_start_date) {
+      setSelectedGigDate(new Date(application.availability_start_date));
+    } else if (application?.availability_specific_dates && application.availability_specific_dates.length > 0) {
+      setSelectedGigDate(new Date(application.availability_specific_dates[0]));
+    }
+    setAcceptDialogOpen(true);
+  };
+
+  const handleConfirmAccept = async () => {
+    if (!application || !selectedGigDate) {
+      toast.error('Please select a gig date');
+      return;
+    }
+
+    // Create gig listing
+    const { error: gigError } = await supabase
+      .from('gig_listings')
+      .insert({
+        application_id: application.id,
+        venue_listing_id: application.venue_listing_id,
+        artist_id: application.artist_id,
+        gig_date: format(selectedGigDate, 'yyyy-MM-dd'),
+        openers: [],
+        notes: null,
+      });
+
+    if (gigError) {
+      toast.error('Failed to create gig listing');
+      return;
+    }
+
+    // Update application status
+    await supabase
+      .from('applications')
+      .update({ status: 'accepted' })
+      .eq('id', application.id);
+
+    toast.success('Application accepted! Gig created.');
+    setAcceptDialogOpen(false);
+    navigate('/venue');
   };
 
   const handleMessageClick = async () => {
@@ -295,7 +346,7 @@ export default function VenueApplicationDetail() {
           </Button>
           {application.status === 'in_progress' && (
             <>
-              <Button size="sm" onClick={() => updateStatus('accepted')} className="bg-primary hover:bg-primary/90">
+              <Button size="sm" onClick={handleAcceptClick} className="bg-primary hover:bg-primary/90">
                 Accept
               </Button>
               <Button size="sm" onClick={() => updateStatus('archived')} className="bg-primary hover:bg-primary/90">
@@ -531,6 +582,59 @@ export default function VenueApplicationDetail() {
                 className="bg-primary hover:bg-primary/90"
               >
                 {sendingMessage ? 'Sending...' : 'Send Message'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Accept Dialog with Date Picker */}
+      <Dialog open={acceptDialogOpen} onOpenChange={setAcceptDialogOpen}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl tracking-wide">
+              SELECT GIG DATE
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <p className="text-muted-foreground text-sm">
+              Choose the date for {bandName}'s performance
+            </p>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !selectedGigDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedGigDate ? format(selectedGigDate, "PPP") : "Pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedGigDate}
+                  onSelect={setSelectedGigDate}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setAcceptDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleConfirmAccept} 
+                disabled={!selectedGigDate}
+                className="bg-primary hover:bg-primary/90"
+              >
+                Accept & Create Gig
               </Button>
             </div>
           </div>

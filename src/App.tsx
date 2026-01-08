@@ -16,6 +16,8 @@ import ArtistDashboard from "./pages/artist/ArtistDashboard";
 import ArtistMessages from "./pages/artist/ArtistMessages";
 import ArtistApplications from "./pages/artist/ArtistApplications";
 import ArtistProfile from "./pages/artist/ArtistProfile";
+import ArtistCalendar from "./pages/artist/ArtistCalendar";
+import ArtistGigDetail from "./pages/artist/ArtistGigDetail";
 import FindVenues from "./pages/artist/FindVenues";
 import VenueListingDetail from "./pages/artist/VenueListingDetail";
 import ApplicationDetail from "./pages/artist/ApplicationDetail";
@@ -26,6 +28,8 @@ import VenueMessages from "./pages/venue/VenueMessages";
 import VenueListings from "./pages/venue/VenueListings";
 import VenueApplications from "./pages/venue/VenueApplications";
 import VenueApplicationDetail from "./pages/venue/VenueApplicationDetail";
+import VenueCalendar from "./pages/venue/VenueCalendar";
+import GigDetail from "./pages/venue/GigDetail";
 import VenueProfile from "./pages/venue/VenueProfile";
 
 const queryClient = new QueryClient();
@@ -55,6 +59,8 @@ const App = () => (
               <Route path="messages" element={<ArtistMessages />} />
               <Route path="applications" element={<ArtistApplications />} />
               <Route path="applications/:id" element={<ApplicationDetail />} />
+              <Route path="calendar" element={<ArtistCalendar />} />
+              <Route path="calendar/:id" element={<ArtistGigDetail />} />
               <Route path="venues/:id" element={<VenueListingDetail />} />
             </Route>
             <Route
@@ -81,6 +87,8 @@ const App = () => (
               <Route path="applications/:id" element={<VenueApplicationDetail />} />
               <Route path="messages" element={<VenueMessages />} />
               <Route path="listings" element={<VenueListings />} />
+              <Route path="calendar" element={<VenueCalendar />} />
+              <Route path="calendar/:id" element={<GigDetail />} />
             </Route>
             <Route
               path="/venue/profile"
