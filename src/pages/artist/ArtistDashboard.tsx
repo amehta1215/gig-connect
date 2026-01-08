@@ -6,6 +6,7 @@ const artistTabs = [
   { label: 'Find Rooms', href: '/artist' },
   { label: 'Messages', href: '/artist/messages' },
   { label: 'Applications', href: '/artist/applications' },
+  { label: 'Calendar', href: '/artist/calendar' },
 ];
 
 export default function ArtistDashboard() {

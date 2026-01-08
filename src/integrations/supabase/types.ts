@@ -169,6 +169,50 @@ export type Database = {
           },
         ]
       }
+      gig_listings: {
+        Row: {
+          application_id: string
+          artist_id: string
+          created_at: string
+          gig_date: string
+          id: string
+          notes: string | null
+          openers: Json | null
+          updated_at: string
+          venue_listing_id: string
+        }
+        Insert: {
+          application_id: string
+          artist_id: string
+          created_at?: string
+          gig_date: string
+          id?: string
+          notes?: string | null
+          openers?: Json | null
+          updated_at?: string
+          venue_listing_id: string
+        }
+        Update: {
+          application_id?: string
+          artist_id?: string
+          created_at?: string
+          gig_date?: string
+          id?: string
+          notes?: string | null
+          openers?: Json | null
+          updated_at?: string
+          venue_listing_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gig_listings_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
