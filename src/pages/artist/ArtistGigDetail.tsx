@@ -158,7 +158,7 @@ export default function ArtistGigDetail() {
         </div>
 
         {/* Headliner */}
-        <div className="text-center border-y-2 border-border py-6">
+        <div className="text-center border-t-2 border-border py-6">
           <p className="font-display text-xs text-primary tracking-widest mb-2">HEADLINER</p>
           <h1 className="font-display text-4xl md:text-5xl text-accent font-bold tracking-wide">
             {artistName.toUpperCase()}
