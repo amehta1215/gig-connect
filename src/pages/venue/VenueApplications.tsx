@@ -79,6 +79,7 @@ export default function VenueApplications() {
   const [filterGenre, setFilterGenre] = useState('all');
   const [filterPayment, setFilterPayment] = useState('all');
   const [filterLineup, setFilterLineup] = useState('all');
+  const [filterRoom, setFilterRoom] = useState('all');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   useEffect(() => {
@@ -180,6 +181,9 @@ export default function VenueApplications() {
     }
     if (filterLineup !== 'all') {
       filtered = filtered.filter(app => app.lineup_preference === filterLineup);
+    }
+    if (filterRoom !== 'all') {
+      filtered = filtered.filter(app => app.venue_listing_id === filterRoom);
     }
     if (dateRange?.from) {
       filtered = filtered.filter(app => {
@@ -363,6 +367,22 @@ export default function VenueApplications() {
             ))}
           </SelectContent>
         </Select>
+
+        {venueListings.size > 1 && (
+          <Select value={filterRoom} onValueChange={setFilterRoom}>
+            <SelectTrigger className="w-36 bg-card border-border text-xs">
+              <SelectValue placeholder="All Rooms" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Rooms</SelectItem>
+              {Array.from(venueListings.values()).map(listing => (
+                <SelectItem key={listing.id} value={listing.id}>
+                  {listing.room_name || listing.venue_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <Popover>
           <PopoverTrigger asChild>
