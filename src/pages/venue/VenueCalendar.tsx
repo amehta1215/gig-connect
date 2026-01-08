@@ -107,8 +107,8 @@ export default function VenueCalendar() {
 
   const modifiersStyles = {
     hasGig: {
-      backgroundColor: 'hsl(var(--primary))',
-      color: 'hsl(var(--primary-foreground))',
+      backgroundColor: '#b0177f',
+      color: 'white',
       borderRadius: '0',
     },
   };
@@ -130,7 +130,7 @@ export default function VenueCalendar() {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Calendar */}
-        <div className="bg-card border border-border p-4">
+        <div className="bg-card border border-border p-4 flex items-center justify-center">
           <Calendar
             mode="single"
             selected={selectedDate}
