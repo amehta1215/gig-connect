@@ -186,11 +186,33 @@ export default function VenueApplications() {
       filtered = filtered.filter(app => app.venue_listing_id === filterRoom);
     }
     if (dateRange?.from) {
+      const filterFrom = startOfDay(dateRange.from);
+      const filterTo = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
+      
       filtered = filtered.filter(app => {
-        const appDate = new Date(app.created_at);
-        const fromDate = startOfDay(dateRange.from!);
-        const toDate = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from!);
-        return !isBefore(appDate, fromDate) && !isAfter(appDate, toDate);
+        // Flexible means available for any date
+        if (app.availability_preference === 'flexible') {
+          return true;
+        }
+        
+        // Date range: check if ranges overlap
+        if (app.availability_preference === 'date_range' && app.availability_start_date && app.availability_end_date) {
+          const appStart = startOfDay(new Date(app.availability_start_date));
+          const appEnd = endOfDay(new Date(app.availability_end_date));
+          // Ranges overlap if one starts before the other ends
+          return appStart <= filterTo && appEnd >= filterFrom;
+        }
+        
+        // Specific dates: check if any date falls within filter range
+        if (app.availability_preference === 'specific_dates' && app.availability_specific_dates?.length) {
+          return app.availability_specific_dates.some(dateStr => {
+            const specificDate = new Date(dateStr);
+            return specificDate >= filterFrom && specificDate <= filterTo;
+          });
+        }
+        
+        // No availability info - include by default
+        return true;
       });
     }
     if (sortBy === 'oldest') {
