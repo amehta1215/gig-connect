@@ -176,6 +176,20 @@ export default function VenueApplicationDetail() {
   const updateStatus = async (newStatus: 'accepted' | 'archived' | 'in_progress') => {
     if (!application) return;
     
+    // If rescinding acceptance, delete the associated gig listing first
+    if (application.status === 'accepted' && newStatus === 'in_progress') {
+      const { error: deleteError } = await supabase
+        .from('gig_listings')
+        .delete()
+        .eq('application_id', application.id);
+      
+      if (deleteError) {
+        toast.error('Failed to remove gig listing');
+        return;
+      }
+      toast.success('Acceptance rescinded and gig removed from calendar');
+    }
+    
     await supabase
       .from('applications')
       .update({ status: newStatus })
