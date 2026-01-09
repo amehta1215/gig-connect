@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ArrowLeft, MapPin, Music } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface Opener {
   type: 'riff' | 'external';
@@ -44,6 +46,8 @@ export default function ArtistGigDetail() {
   const [artistProfile, setArtistProfile] = useState<ArtistProfile | null>(null);
   const [artistName, setArtistName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (id && user) {
@@ -101,6 +105,43 @@ export default function ArtistGigDetail() {
     }
 
     setLoading(false);
+  };
+
+  const handleCancelGig = async () => {
+    if (!gig) return;
+    
+    setCancelling(true);
+
+    // First get the application_id from the gig
+    const { data: gigData } = await supabase
+      .from('gig_listings')
+      .select('application_id')
+      .eq('id', gig.id)
+      .single();
+
+    if (gigData?.application_id) {
+      // Revert application status to in_progress
+      await supabase
+        .from('applications')
+        .update({ status: 'in_progress' })
+        .eq('id', gigData.application_id);
+    }
+
+    // Delete the gig listing
+    const { error } = await supabase
+      .from('gig_listings')
+      .delete()
+      .eq('id', gig.id);
+
+    setCancelling(false);
+
+    if (error) {
+      toast.error('Failed to cancel gig');
+      return;
+    }
+
+    toast.success('Gig cancelled');
+    navigate('/artist/calendar');
   };
 
   if (loading) {
@@ -209,7 +250,40 @@ export default function ArtistGigDetail() {
             <p className="text-muted-foreground whitespace-pre-wrap">{gig.notes}</p>
           </div>
         )}
+
+        {/* Cancel Gig Button */}
+        <Button 
+          onClick={() => setCancelDialogOpen(true)} 
+          variant="destructive"
+          className="w-full"
+        >
+          Cancel Gig
+        </Button>
       </div>
+
+      {/* Cancel Confirmation Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Gig?</DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground">
+            Are you sure you want to cancel this gig? This will remove the event from both your calendar and the venue's calendar. Your application will be reverted to pending status.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
+              Keep Gig
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleCancelGig}
+              disabled={cancelling}
+            >
+              {cancelling ? 'Cancelling...' : 'Cancel Gig'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
