@@ -15,6 +15,7 @@ interface Opener {
 interface GigData {
   id: string;
   gig_date: string;
+  show_time: string | null;
   notes: string | null;
   openers: Opener[];
   venue_listing_id: string;
@@ -144,7 +145,7 @@ export default function ArtistGigDetail() {
           </div>
         )}
 
-        {/* Date */}
+        {/* Date & Time */}
         <div className="text-center">
           <p className="font-display text-sm text-primary tracking-widest">
             {format(new Date(gig.gig_date), 'EEEE').toUpperCase()}
@@ -155,6 +156,11 @@ export default function ArtistGigDetail() {
           <p className="font-display text-2xl text-muted-foreground">
             {format(new Date(gig.gig_date), 'yyyy')}
           </p>
+          {gig.show_time && (
+            <p className="font-display text-xl text-primary mt-2">
+              {format(new Date(`2000-01-01T${gig.show_time}`), 'h:mm a')}
+            </p>
+          )}
         </div>
 
         {/* Headliner */}
