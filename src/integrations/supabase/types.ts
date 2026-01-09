@@ -178,6 +178,7 @@ export type Database = {
           id: string
           notes: string | null
           openers: Json | null
+          show_time: string | null
           updated_at: string
           venue_listing_id: string
         }
@@ -189,6 +190,7 @@ export type Database = {
           id?: string
           notes?: string | null
           openers?: Json | null
+          show_time?: string | null
           updated_at?: string
           venue_listing_id: string
         }
@@ -200,6 +202,7 @@ export type Database = {
           id?: string
           notes?: string | null
           openers?: Json | null
+          show_time?: string | null
           updated_at?: string
           venue_listing_id?: string
         }

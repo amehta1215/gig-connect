@@ -113,6 +113,7 @@ export default function VenueApplicationDetail() {
   // Accept dialog state
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [selectedGigDate, setSelectedGigDate] = useState<Date | undefined>(undefined);
+  const [selectedGigTime, setSelectedGigTime] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
@@ -212,6 +213,7 @@ export default function VenueApplicationDetail() {
         venue_listing_id: application.venue_listing_id,
         artist_id: application.artist_id,
         gig_date: format(selectedGigDate, 'yyyy-MM-dd'),
+        show_time: selectedGigTime || null,
         openers: [],
         notes: null,
       });
@@ -588,42 +590,59 @@ export default function VenueApplicationDetail() {
         </DialogContent>
       </Dialog>
 
-      {/* Accept Dialog with Date Picker */}
+      {/* Accept Dialog with Date and Time Picker */}
       <Dialog open={acceptDialogOpen} onOpenChange={setAcceptDialogOpen}>
         <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="font-display text-xl tracking-wide">
-              SELECT GIG DATE
+              SELECT GIG DATE & TIME
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <p className="text-muted-foreground text-sm">
-              Choose the date for {bandName}'s performance
+              Choose the date and time for {bandName}'s performance
             </p>
             
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !selectedGigDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedGigDate ? format(selectedGigDate, "PPP") : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={selectedGigDate}
-                  onSelect={setSelectedGigDate}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="space-y-2">
+              <label className="font-display text-xs text-muted-foreground tracking-widest block">
+                DATE
+              </label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !selectedGigDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedGigDate ? format(selectedGigDate, "PPP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedGigDate}
+                    onSelect={setSelectedGigDate}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-2">
+              <label className="font-display text-xs text-muted-foreground tracking-widest block">
+                TIME OF SHOW
+              </label>
+              <Input
+                type="time"
+                value={selectedGigTime}
+                onChange={(e) => setSelectedGigTime(e.target.value)}
+                className="bg-background border-border"
+              />
+            </div>
 
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setAcceptDialogOpen(false)}>
