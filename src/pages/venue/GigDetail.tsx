@@ -200,6 +200,7 @@ export default function GigDetail() {
     }
 
     toast.success('Gig updated!');
+    navigate('/venue/calendar');
   };
 
   const handleCancelGig = async () => {
