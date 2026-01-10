@@ -120,7 +120,7 @@ export default function ArtistApplications() {
           {loading ? <div className="space-y-3">
               {[1, 2, 3].map(i => <div key={i} className="h-24 bg-card animate-pulse" />)}
             </div> : filteredApplications.length === 0 ? <div className="text-center py-16 bg-card border border-border">
-              <h3 className="font-display text-xl text-muted-foreground">EMPTY</h3>
+              <h3 className="font-display text-xl text-muted-foreground">NO APPLICATIONS YET</h3>
             </div> : <div className="space-y-3">
               {filteredApplications.map(application => <ApplicationCard key={application.id} application={application} />)}
             </div>}
