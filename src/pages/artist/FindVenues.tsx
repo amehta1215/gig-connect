@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useFavorites } from '@/hooks/useFavorites';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, MapPin, Users, Music, Filter, X } from 'lucide-react';
+import { Search, MapPin, Users, Music, Filter, X, Heart } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -38,12 +39,18 @@ const capacityRanges = [{
 }];
 export default function FindVenues() {
   const navigate = useNavigate();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const [venues, setVenues] = useState<VenueListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedCapacity, setSelectedCapacity] = useState<string>('any');
   const [selectedLocation, setSelectedLocation] = useState<string>('');
+
+  const handleToggleFavorite = async (e: React.MouseEvent, venueId: string) => {
+    e.stopPropagation();
+    await toggleFavorite(venueId);
+  };
   useEffect(() => {
     fetchVenues();
   }, []);
@@ -176,7 +183,21 @@ export default function FindVenues() {
         </div> : filteredVenues.length === 0 ? <div className="text-center py-20">
           <h3 className="font-display text-2xl text-muted-foreground">NO VENUES</h3>
         </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filteredVenues.map(venue => <div key={venue.id} onClick={() => navigate(`/artist/venues/${venue.id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer">
+          {filteredVenues.map(venue => <div key={venue.id} onClick={() => navigate(`/artist/venues/${venue.id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative">
+              {/* Favorite Button */}
+              <button
+                onClick={(e) => handleToggleFavorite(e, venue.id)}
+                className="absolute top-2 left-2 z-10 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors"
+              >
+                <Heart
+                  className={`h-5 w-5 transition-colors ${
+                    isFavorite(venue.id)
+                      ? 'fill-primary text-primary'
+                      : 'text-muted-foreground hover:text-primary'
+                  }`}
+                />
+              </button>
+
               {/* Image */}
               <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
                 {venue.pictures && venue.pictures.length > 0 ? <img src={venue.pictures[0]} alt={venue.venue_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="absolute inset-0 flex items-center justify-center bg-heat">

@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { User, LogOut, ArrowLeftRight } from 'lucide-react';
+import { User, LogOut, ArrowLeftRight, Heart } from 'lucide-react';
 
 interface Tab {
   label: string;
@@ -87,6 +87,12 @@ export default function DashboardLayout({ children, tabs }: DashboardLayoutProps
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
+                {activeRole === 'artist' && (
+                  <DropdownMenuItem onClick={() => navigate('/artist/favorites')}>
+                    <Heart className="mr-2 h-4 w-4" />
+                    Favorites
+                  </DropdownMenuItem>
+                )}
                 {canSwitchRole && (
                   <DropdownMenuItem onClick={handleSwitchRole}>
                     <ArrowLeftRight className="mr-2 h-4 w-4" />

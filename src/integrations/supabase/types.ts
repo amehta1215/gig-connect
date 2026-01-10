@@ -98,6 +98,42 @@ export type Database = {
           },
         ]
       }
+      artist_favorites: {
+        Row: {
+          artist_id: string
+          created_at: string
+          id: string
+          venue_listing_id: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          id?: string
+          venue_listing_id: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          id?: string
+          venue_listing_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_favorites_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_favorites_venue_listing_id_fkey"
+            columns: ["venue_listing_id"]
+            isOneToOne: false
+            referencedRelation: "venue_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artist_profiles: {
         Row: {
           apple_music_link: string | null
