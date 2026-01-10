@@ -145,7 +145,13 @@ export default function ArtistMessages() {
     }
   };
   const filteredThreads = threads.filter(thread => {
-    const matchesSearch = thread.latestMessage.subject?.toLowerCase().includes(searchTerm.toLowerCase()) || thread.messages.some(m => m.content.toLowerCase().includes(searchTerm.toLowerCase())) || thread.otherParty.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSubject = thread.messages.some(m => m.subject?.toLowerCase().includes(searchLower));
+    const matchesContent = thread.messages.some(m => m.content.toLowerCase().includes(searchLower));
+    const matchesName = thread.otherParty.name.toLowerCase().includes(searchLower);
+    const matchesVenueName = thread.otherParty.venueName?.toLowerCase().includes(searchLower);
+    const matchesSearch = !searchTerm || matchesSubject || matchesContent || matchesName || matchesVenueName;
+    
     if (filter === 'unread') return matchesSearch && thread.hasUnread;
     if (filter === 'starred') return matchesSearch && thread.isStarred;
     return matchesSearch;
