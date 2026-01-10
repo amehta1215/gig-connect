@@ -168,6 +168,18 @@ export default function ArtistMessages() {
   };
   const unreadCount = threads.filter(t => t.hasUnread).length;
 
+  // Highlight search term in text
+  const highlightText = (text: string) => {
+    if (!searchTerm.trim()) return text;
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, i) => 
+      regex.test(part) ? (
+        <mark key={i} className="bg-primary/20 text-foreground rounded-sm px-0.5">{part}</mark>
+      ) : part
+    );
+  };
+
   // Get the base subject (without Re: prefix)
   const getBaseSubject = (thread: Thread) => {
     const firstMessage = thread.messages[0];
@@ -224,7 +236,7 @@ export default function ArtistMessages() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <span className={`text-sm truncate ${thread.hasUnread ? 'font-semibold' : ''}`}>
-                            {displayName}
+                            {highlightText(displayName)}
                           </span>
                           <span className="text-[10px] text-muted-foreground flex-shrink-0 uppercase tracking-wider">
                             {format(new Date(thread.latestMessage.created_at), 'MMM d')}
@@ -232,7 +244,7 @@ export default function ArtistMessages() {
                         </div>
                         <div className="flex items-center gap-2">
                           <p className={`text-sm truncate flex-1 ${thread.hasUnread ? 'font-medium' : 'text-muted-foreground'}`}>
-                            {getBaseSubject(thread)}
+                            {highlightText(getBaseSubject(thread))}
                           </p>
                           {messageCount > 1 && <span className="text-[10px] text-muted-foreground">({messageCount})</span>}
                         </div>
@@ -277,7 +289,7 @@ export default function ArtistMessages() {
                             {format(new Date(message.created_at), 'MMM d, h:mm a')}
                           </span>
                         </div>
-                        <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                        <p className="whitespace-pre-wrap text-sm">{highlightText(message.content)}</p>
                       </div>
                     </div>;
             })}
