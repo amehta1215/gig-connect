@@ -200,7 +200,7 @@ export default function FindVenues() {
                   </p>}
                 {venue.genres && venue.genres.length > 0 && <div className="flex flex-wrap gap-1 mt-2">
                     {venue.genres.slice(0, 2).map(genre => <span key={genre} className="text-[10px] bg-secondary px-2 py-0.5 text-muted-foreground uppercase tracking-wider">
-                        {genre}
+                        {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
                       </span>)}
                   </div>}
               </div>
