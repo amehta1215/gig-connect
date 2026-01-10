@@ -147,7 +147,7 @@ export default function FindVenues() {
       {loading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-card h-56 animate-pulse" />)}
         </div> : filteredVenues.length === 0 ? <div className="text-center py-20">
-          <h3 className="font-display text-2xl text-muted-foreground">NO ROOMS</h3>
+          <h3 className="font-display text-2xl text-muted-foreground">NO VENUES</h3>
         </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredVenues.map(venue => <div key={venue.id} onClick={() => navigate(`/artist/venues/${venue.id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer">
               {/* Image */}

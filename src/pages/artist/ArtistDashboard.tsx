@@ -3,7 +3,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import FindVenues from './FindVenues';
 
 const artistTabs = [
-  { label: 'Find Rooms', href: '/artist' },
+  { label: 'Find Venues', href: '/artist' },
   { label: 'Messages', href: '/artist/messages' },
   { label: 'Applications', href: '/artist/applications' },
   { label: 'Calendar', href: '/artist/calendar' },
