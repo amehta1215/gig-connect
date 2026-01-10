@@ -4,9 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, MapPin, Users, Music, Filter } from 'lucide-react';
+import { Search, MapPin, Users, Music, Filter, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 interface VenueListing {
   id: string;
   venue_name: string;
@@ -39,7 +41,7 @@ export default function FindVenues() {
   const [venues, setVenues] = useState<VenueListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState<string>('all');
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedCapacity, setSelectedCapacity] = useState<string>('any');
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   useEffect(() => {
@@ -58,7 +60,7 @@ export default function FindVenues() {
   };
   const filteredVenues = venues.filter(venue => {
     const matchesSearch = venue.venue_name.toLowerCase().includes(searchTerm.toLowerCase()) || venue.room_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGenre = selectedGenre === 'all' || venue.genres?.includes(selectedGenre);
+    const matchesGenre = selectedGenres.length === 0 || selectedGenres.some(g => venue.genres?.includes(g));
     const matchesLocation = !selectedLocation || venue.location?.toLowerCase().includes(selectedLocation.toLowerCase());
     let matchesCapacity = true;
     if (selectedCapacity !== 'any' && venue.capacity) {
@@ -71,18 +73,52 @@ export default function FindVenues() {
     }
     return matchesSearch && matchesGenre && matchesLocation && matchesCapacity;
   });
+  const toggleGenre = (genre: string) => {
+    setSelectedGenres(prev => 
+      prev.includes(genre) 
+        ? prev.filter(g => g !== genre)
+        : [...prev, genre]
+    );
+  };
+
+  const GenreMultiSelect = ({ className }: { className?: string }) => (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className={`bg-card border-border justify-start ${className}`}>
+          <Music className="h-4 w-4 mr-2 text-muted-foreground" />
+          {selectedGenres.length === 0 ? 'Genre' : `${selectedGenres.length} selected`}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-2" align="start">
+        <div className="space-y-2">
+          {selectedGenres.length > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full justify-start text-xs text-muted-foreground"
+              onClick={() => setSelectedGenres([])}
+            >
+              <X className="h-3 w-3 mr-1" /> Clear all
+            </Button>
+          )}
+          {genres.map(genre => (
+            <label key={genre} className="flex items-center gap-2 cursor-pointer hover:bg-secondary p-1.5 rounded">
+              <Checkbox 
+                checked={selectedGenres.includes(genre)}
+                onCheckedChange={() => toggleGenre(genre)}
+              />
+              <span className="text-sm">{genre}</span>
+            </label>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+
   const FiltersContent = () => <div className="space-y-4">
       <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Location" className="w-full" />
 
-      <Select value={selectedGenre} onValueChange={setSelectedGenre}>
-        <SelectTrigger className="bg-background">
-          <SelectValue placeholder="Genre" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All</SelectItem>
-          {genres.map(genre => <SelectItem key={genre} value={genre}>{genre}</SelectItem>)}
-        </SelectContent>
-      </Select>
+      <GenreMultiSelect className="w-full" />
 
       <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
         <SelectTrigger className="bg-background">
@@ -107,16 +143,7 @@ export default function FindVenues() {
         {/* Desktop Filters */}
         <div className="hidden lg:flex gap-2">
           <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Location" className="w-48" />
-          <Select value={selectedGenre} onValueChange={setSelectedGenre}>
-            <SelectTrigger className="w-32 bg-card border-border">
-              <Music className="h-4 w-4 mr-2 text-muted-foreground" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {genres.map(genre => <SelectItem key={genre} value={genre}>{genre}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <GenreMultiSelect className="w-36" />
           <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
             <SelectTrigger className="w-28 bg-card border-border">
               <Users className="h-4 w-4 mr-2 text-muted-foreground" />
