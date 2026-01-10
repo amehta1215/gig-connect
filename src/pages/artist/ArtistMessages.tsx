@@ -224,7 +224,7 @@ export default function ArtistMessages() {
                 {[1, 2, 3].map(i => <div key={i} className="h-16 bg-secondary animate-pulse" />)}
               </div> : filteredThreads.length === 0 ? <div className="p-8 text-center">
                 <Mail className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                <p className="text-muted-foreground text-sm">Empty</p>
+                <p className="text-muted-foreground text-sm">No messages yet!</p>
               </div> : filteredThreads.map(thread => {
             const displayName = `${thread.otherParty.name}${thread.otherParty.venueName ? ` (${thread.otherParty.venueName})` : ''}`;
             const messageCount = thread.messages.length;
