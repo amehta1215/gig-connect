@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFavorites } from '@/hooks/useFavorites';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ArrowLeft, MapPin, Users, Music, CalendarIcon } from 'lucide-react';
+import { ArrowLeft, MapPin, Users, Music, CalendarIcon, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -55,6 +56,7 @@ export default function VenueListingDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const [listing, setListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
@@ -180,10 +182,28 @@ export default function VenueListingDetail() {
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
-      {/* Back Button */}
-      <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
+      {/* Back Button & Favorite */}
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        {id && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => toggleFavorite(id)}
+            className="h-9 w-9"
+          >
+            <Heart
+              className={`h-6 w-6 transition-colors ${
+                isFavorite(id)
+                  ? 'fill-primary text-primary'
+                  : 'text-muted-foreground hover:text-primary'
+              }`}
+            />
+          </Button>
+        )}
+      </div>
 
       {/* Hero Image */}
       <div className="aspect-[16/9] bg-secondary rounded-lg overflow-hidden">

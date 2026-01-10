@@ -18,6 +18,7 @@ import ArtistApplications from "./pages/artist/ArtistApplications";
 import ArtistProfile from "./pages/artist/ArtistProfile";
 import ArtistCalendar from "./pages/artist/ArtistCalendar";
 import ArtistGigDetail from "./pages/artist/ArtistGigDetail";
+import ArtistFavorites from "./pages/artist/ArtistFavorites";
 import FindVenues from "./pages/artist/FindVenues";
 import VenueListingDetail from "./pages/artist/VenueListingDetail";
 import ApplicationDetail from "./pages/artist/ApplicationDetail";
@@ -72,6 +73,16 @@ const App = () => (
               }
             >
               <Route index element={<ArtistProfile />} />
+            </Route>
+            <Route
+              path="/artist/favorites"
+              element={
+                <ProtectedRoute requiredRole="artist">
+                  <ArtistDashboard />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<ArtistFavorites />} />
             </Route>
 
             {/* Venue routes */}
