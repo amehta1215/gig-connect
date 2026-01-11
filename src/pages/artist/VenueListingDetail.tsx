@@ -223,7 +223,7 @@ export default function VenueListingDetail() {
         )}
       </div>
 
-      {/* All Pictures Gallery */}
+      {/* All Pictures Gallery - side by side */}
       {(() => {
         const allPictures: string[] = [];
         if (venueProfile?.picture) allPictures.push(venueProfile.picture);
@@ -233,48 +233,25 @@ export default function VenueListingDetail() {
         
         if (allPictures.length === 0) {
           return (
-            <div className="aspect-[16/9] bg-secondary rounded-lg overflow-hidden">
+            <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
               <div className="w-full h-full flex items-center justify-center bg-heat">
-                <Music className="h-24 w-24 text-primary/30" />
+                <Music className="h-12 w-12 text-primary/30" />
               </div>
             </div>
           );
         }
         
-        if (allPictures.length === 1) {
-          return (
-            <div className="aspect-[16/9] bg-secondary rounded-lg overflow-hidden">
-              <img
-                src={allPictures[0]}
-                alt={listing.venue_name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          );
-        }
-        
         return (
-          <div className="space-y-2">
-            {/* Main image */}
-            <div className="aspect-[16/9] bg-secondary rounded-lg overflow-hidden">
-              <img
-                src={allPictures[0]}
-                alt={listing.venue_name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {/* Thumbnail gallery */}
-            <div className="grid grid-cols-4 gap-2">
-              {allPictures.slice(1).map((pic, index) => (
-                <div key={index} className="aspect-square bg-secondary rounded-lg overflow-hidden">
-                  <img
-                    src={pic}
-                    alt={`${listing.venue_name} ${index + 2}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {allPictures.map((pic, index) => (
+              <div key={index} className="aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+                <img
+                  src={pic}
+                  alt={`${listing.venue_name} ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
           </div>
         );
       })()}
