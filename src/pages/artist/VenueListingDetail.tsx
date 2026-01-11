@@ -199,9 +199,9 @@ export default function VenueListingDetail() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+    <div className="animate-fade-in max-w-6xl mx-auto">
       {/* Back Button & Favorite */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -224,267 +224,280 @@ export default function VenueListingDetail() {
       </div>
 
       {/* All Pictures Gallery - side by side */}
-      {(() => {
-        const allPictures: string[] = [];
-        if (venueProfile?.picture) allPictures.push(venueProfile.picture);
-        if (listing.pictures && listing.pictures.length > 0) {
-          allPictures.push(...listing.pictures);
-        }
-        
-        if (allPictures.length === 0) {
-          return (
-            <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
-              <div className="w-full h-full flex items-center justify-center bg-heat">
-                <Music className="h-12 w-12 text-primary/30" />
+      <div className="mb-6">
+        {(() => {
+          const allPictures: string[] = [];
+          if (venueProfile?.picture) allPictures.push(venueProfile.picture);
+          if (listing.pictures && listing.pictures.length > 0) {
+            allPictures.push(...listing.pictures);
+          }
+          
+          if (allPictures.length === 0) {
+            return (
+              <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
+                <div className="w-full h-full flex items-center justify-center bg-heat">
+                  <Music className="h-12 w-12 text-primary/30" />
+                </div>
               </div>
+            );
+          }
+          
+          return (
+            <div className="flex flex-wrap justify-center gap-2">
+              {allPictures.map((pic, index) => (
+                <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+                  <img
+                    src={pic}
+                    alt={`${listing.venue_name} ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
             </div>
           );
-        }
-        
-        return (
-          <div className="flex flex-wrap justify-center gap-2">
-            {allPictures.map((pic, index) => (
-              <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
-                <img
-                  src={pic}
-                  alt={`${listing.venue_name} ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
-        );
-      })()}
-
-      {/* Venue Info */}
-      <div className="space-y-4">
-        <div>
-          <h1 className="font-display text-4xl md:text-5xl text-accent font-bold tracking-wide">
-            {listing.venue_name}
-          </h1>
-          {listing.room_name && (
-            <p className="text-lg text-muted-foreground mt-1">{listing.room_name}</p>
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-          {listing.location && (
-            <span className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              {listing.location}
-            </span>
-          )}
-          {listing.capacity && (
-            <span className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              {listing.capacity} capacity
-            </span>
-          )}
-        </div>
-
-        {listing.genres && listing.genres.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {listing.genres.map((genre) => (
-              <span
-                key={genre}
-                className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display"
-              >
-                {genre}
-              </span>
-            ))}
-          </div>
-        )}
+        })()}
       </div>
 
-      {/* Details */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {listing.backline_info && (
-          <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
-            <p className="text-muted-foreground text-sm">{listing.backline_info}</p>
-          </div>
-        )}
-        {listing.house_rules && (
-          <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
-            <p className="text-muted-foreground text-sm">{listing.house_rules}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Apply Form */}
-      <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-        <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
-
-        {hasApplied ? (
-          <div className="text-center py-8">
-            <p className="text-lg text-muted-foreground">You've already applied to this room</p>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/artist/applications')}
-              className="mt-4 font-display tracking-widest"
-            >
-              VIEW APPLICATIONS
-            </Button>
-          </div>
-        ) : (
-          <>
-            {/* Availability */}
-            <div className="space-y-3">
-              <h3 className="font-display text-sm text-primary tracking-widest">AVAILABILITY</h3>
-              <RadioGroup value={availability} onValueChange={(v) => setAvailability(v as AvailabilityPreference)}>
-                <div className="flex flex-wrap gap-3">
-                  {availabilityOptions.map((option) => (
-                    <div key={option.id} className="flex items-center space-x-2">
-                      <RadioGroupItem value={option.id} id={`avail-${option.id}`} />
-                      <Label htmlFor={`avail-${option.id}`} className="cursor-pointer">
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </RadioGroup>
-
-              {/* Date Range Picker */}
-              {availability === 'date_range' && (
-                <div className="mt-3">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full md:w-auto justify-start text-left font-normal",
-                          !dateRange && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateRange?.from ? (
-                          dateRange.to ? (
-                            <>
-                              {format(dateRange.from, "MMM d, yyyy")} - {format(dateRange.to, "MMM d, yyyy")}
-                            </>
-                          ) : (
-                            format(dateRange.from, "MMM d, yyyy")
-                          )
-                        ) : (
-                          <span>Select date range</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        initialFocus
-                        mode="range"
-                        defaultMonth={dateRange?.from}
-                        selected={dateRange}
-                        onSelect={setDateRange}
-                        numberOfMonths={2}
-                        disabled={(date) => date < new Date()}
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              )}
-
-              {/* Specific Dates Picker */}
-              {availability === 'specific_dates' && (
-                <div className="mt-3">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full md:w-auto justify-start text-left font-normal",
-                          specificDates.length === 0 && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {specificDates.length > 0 ? (
-                          <span>{specificDates.length} date{specificDates.length > 1 ? 's' : ''} selected</span>
-                        ) : (
-                          <span>Select dates</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        initialFocus
-                        mode="multiple"
-                        selected={specificDates}
-                        onSelect={(dates) => setSpecificDates(dates || [])}
-                        disabled={(date) => date < new Date()}
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {specificDates.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {specificDates.map((date, index) => (
-                        <span
-                          key={index}
-                          className="text-xs bg-secondary px-2 py-1 rounded"
-                        >
-                          {format(date, "MMM d")}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+      {/* Two Column Layout */}
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Left Column - Venue Info */}
+        <div className="flex-1 space-y-6">
+          {/* Venue Info */}
+          <div className="space-y-4">
+            <div>
+              <h1 className="font-display text-4xl md:text-5xl text-accent font-bold tracking-wide">
+                {listing.venue_name}
+              </h1>
+              {listing.room_name && (
+                <p className="text-lg text-muted-foreground mt-1">{listing.room_name}</p>
               )}
             </div>
 
-            {/* Payment Preference */}
-            <div className="space-y-3">
-              <h3 className="font-display text-sm text-primary tracking-widest">PAYMENT PREFERENCE</h3>
-              <div className="flex flex-wrap gap-3">
-                {paymentOptions.map((option) => (
-                  <div
-                    key={option.id}
-                    className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      paymentPreferences.includes(option.id as PaymentPreference)
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                    onClick={() => togglePayment(option.id as PaymentPreference)}
+            <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
+              {listing.location && (
+                <span className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  {listing.location}
+                </span>
+              )}
+              {listing.capacity && (
+                <span className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  {listing.capacity} capacity
+                </span>
+              )}
+            </div>
+
+            {listing.genres && listing.genres.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {listing.genres.map((genre) => (
+                  <span
+                    key={genre}
+                    className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display"
                   >
-                    <Checkbox
-                      checked={paymentPreferences.includes(option.id as PaymentPreference)}
-                      onCheckedChange={() => togglePayment(option.id as PaymentPreference)}
-                    />
-                    <Label className="cursor-pointer">{option.label}</Label>
-                  </div>
+                    {genre}
+                  </span>
                 ))}
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* Lineup */}
-            <div className="space-y-3">
-              <h3 className="font-display text-sm text-primary tracking-widest">LINEUP</h3>
-              <RadioGroup value={lineup} onValueChange={(v) => setLineup(v as LineupPreference)}>
-                <div className="flex flex-wrap gap-3">
-                  {lineupOptions.map((option) => (
-                    <div key={option.id} className="flex items-center space-x-2">
-                      <RadioGroupItem value={option.id} id={`lineup-${option.id}`} />
-                      <Label htmlFor={`lineup-${option.id}`} className="cursor-pointer">
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
+          {/* Details */}
+          <div className="space-y-4">
+            {listing.backline_info && (
+              <div className="bg-card border border-border rounded-lg p-4">
+                <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
+                <p className="text-muted-foreground text-sm">{listing.backline_info}</p>
+              </div>
+            )}
+            {listing.house_rules && (
+              <div className="bg-card border border-border rounded-lg p-4">
+                <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
+                <p className="text-muted-foreground text-sm">{listing.house_rules}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column - Sticky Apply Form */}
+        <div className="lg:w-80 xl:w-96">
+          <div className="lg:sticky lg:top-4">
+            <div className="bg-card border border-border rounded-lg p-6 space-y-6">
+              <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
+
+              {hasApplied ? (
+                <div className="text-center py-8">
+                  <p className="text-lg text-muted-foreground">You've already applied to this room</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/artist/applications')}
+                    className="mt-4 font-display tracking-widest"
+                  >
+                    VIEW APPLICATIONS
+                  </Button>
                 </div>
-              </RadioGroup>
-            </div>
+              ) : (
+                <>
+                  {/* Availability */}
+                  <div className="space-y-3">
+                    <h3 className="font-display text-sm text-primary tracking-widest">AVAILABILITY</h3>
+                    <RadioGroup value={availability} onValueChange={(v) => setAvailability(v as AvailabilityPreference)}>
+                      <div className="flex flex-col gap-2">
+                        {availabilityOptions.map((option) => (
+                          <div key={option.id} className="flex items-center space-x-2">
+                            <RadioGroupItem value={option.id} id={`avail-${option.id}`} />
+                            <Label htmlFor={`avail-${option.id}`} className="cursor-pointer">
+                              {option.label}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </RadioGroup>
 
-            {/* Submit */}
-            <Button
-              onClick={handleApply}
-              disabled={applying}
-              className="w-full font-display tracking-widest text-lg py-6"
-            >
-              {applying ? 'APPLYING...' : 'APPLY'}
-            </Button>
-          </>
-        )}
+                    {/* Date Range Picker */}
+                    {availability === 'date_range' && (
+                      <div className="mt-3">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !dateRange && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {dateRange?.from ? (
+                                dateRange.to ? (
+                                  <>
+                                    {format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d")}
+                                  </>
+                                ) : (
+                                  format(dateRange.from, "MMM d, yyyy")
+                                )
+                              ) : (
+                                <span>Select dates</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              initialFocus
+                              mode="range"
+                              defaultMonth={dateRange?.from}
+                              selected={dateRange}
+                              onSelect={setDateRange}
+                              numberOfMonths={1}
+                              disabled={(date) => date < new Date()}
+                              className={cn("p-3 pointer-events-auto")}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    )}
+
+                    {/* Specific Dates Picker */}
+                    {availability === 'specific_dates' && (
+                      <div className="mt-3">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                specificDates.length === 0 && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {specificDates.length > 0 ? (
+                                <span>{specificDates.length} date{specificDates.length > 1 ? 's' : ''} selected</span>
+                              ) : (
+                                <span>Select dates</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              initialFocus
+                              mode="multiple"
+                              selected={specificDates}
+                              onSelect={(dates) => setSpecificDates(dates || [])}
+                              disabled={(date) => date < new Date()}
+                              className={cn("p-3 pointer-events-auto")}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        {specificDates.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {specificDates.map((date, index) => (
+                              <span
+                                key={index}
+                                className="text-xs bg-secondary px-2 py-1 rounded"
+                              >
+                                {format(date, "MMM d")}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Payment Preference */}
+                  <div className="space-y-3">
+                    <h3 className="font-display text-sm text-primary tracking-widest">PAYMENT</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {paymentOptions.map((option) => (
+                        <div
+                          key={option.id}
+                          className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors text-sm ${
+                            paymentPreferences.includes(option.id as PaymentPreference)
+                              ? 'border-primary bg-primary/10'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                          onClick={() => togglePayment(option.id as PaymentPreference)}
+                        >
+                          <Checkbox
+                            checked={paymentPreferences.includes(option.id as PaymentPreference)}
+                            onCheckedChange={() => togglePayment(option.id as PaymentPreference)}
+                            className="h-4 w-4"
+                          />
+                          <Label className="cursor-pointer text-sm">{option.label}</Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Lineup */}
+                  <div className="space-y-3">
+                    <h3 className="font-display text-sm text-primary tracking-widest">LINEUP</h3>
+                    <RadioGroup value={lineup} onValueChange={(v) => setLineup(v as LineupPreference)}>
+                      <div className="flex flex-col gap-2">
+                        {lineupOptions.map((option) => (
+                          <div key={option.id} className="flex items-center space-x-2">
+                            <RadioGroupItem value={option.id} id={`lineup-${option.id}`} />
+                            <Label htmlFor={`lineup-${option.id}`} className="cursor-pointer">
+                              {option.label}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Submit */}
+                  <Button
+                    onClick={handleApply}
+                    disabled={applying}
+                    className="w-full font-display tracking-widest text-lg py-6"
+                  >
+                    {applying ? 'APPLYING...' : 'APPLY'}
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
