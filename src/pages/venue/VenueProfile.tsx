@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { toast } from 'sonner';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, ImageIcon } from 'lucide-react';
 interface VenueProfileData {
   id: string;
   user_id: string;
@@ -17,6 +17,7 @@ interface VenueProfileData {
   location: string | null;
   bio: string | null;
   event_types: string[];
+  picture: string | null;
 }
 const eventTypeOptions = [{
   id: 'dj',
@@ -49,8 +50,10 @@ export default function VenueProfile() {
     venue_name: '',
     location: '',
     bio: '',
-    event_types: [] as string[]
+    event_types: [] as string[],
+    picture: '' as string | null
   });
+  const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (user) {
       fetchProfile();
@@ -69,7 +72,8 @@ export default function VenueProfile() {
         venue_name: data.venue_name || '',
         location: data.location || '',
         bio: data.bio || '',
-        event_types: data.event_types || []
+        event_types: data.event_types || [],
+        picture: data.picture || null
       });
     }
     setLoading(false);
@@ -83,7 +87,8 @@ export default function VenueProfile() {
       venue_name: formData.venue_name || null,
       location: formData.location || null,
       bio: formData.bio || null,
-      event_types: formData.event_types
+      event_types: formData.event_types,
+      picture: formData.picture || null
     }).eq('id', profile.id);
     if (error) {
       toast.error('Failed to save profile');
@@ -106,6 +111,44 @@ export default function VenueProfile() {
       });
     }
   };
+
+  const handlePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/venue-picture-${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('venue-media')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      toast.error('Failed to upload picture');
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('venue-media')
+      .getPublicUrl(fileName);
+
+    setFormData({ ...formData, picture: urlData.publicUrl });
+    toast.success('Picture uploaded');
+  };
+
+  const removePicture = async () => {
+    if (!formData.picture) return;
+
+    // Extract file path from URL
+    const url = formData.picture;
+    const bucketPath = url.split('/venue-media/')[1];
+    
+    if (bucketPath) {
+      await supabase.storage.from('venue-media').remove([bucketPath]);
+    }
+    
+    setFormData({ ...formData, picture: null });
+  };
   if (loading) {
     return <div className="space-y-6 animate-fade-in">
         <div className="h-8 w-48 bg-card rounded animate-pulse" />
@@ -124,6 +167,48 @@ export default function VenueProfile() {
           <h1 className="font-display text-4xl text-accent font-bold">EDIT VENUE PROFILE</h1>
           
         </div>
+      </div>
+
+      {/* Venue Picture Section */}
+      <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+        <div className="flex items-center gap-2 text-primary mb-4">
+          <h2 className="font-display text-xl">Venue Picture</h2>
+        </div>
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handlePictureUpload}
+          accept="image/*"
+          className="hidden"
+        />
+
+        {formData.picture ? (
+          <div className="relative w-full max-w-md">
+            <img
+              src={formData.picture}
+              alt="Venue"
+              className="w-full aspect-[4/3] object-cover rounded-lg"
+            />
+            <Button
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2"
+              onClick={removePicture}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full max-w-md h-32 border-dashed flex flex-col gap-2"
+          >
+            <Upload className="h-6 w-6" />
+            <span>Upload Venue Picture</span>
+          </Button>
+        )}
       </div>
 
       {/* Venue Info Section */}

@@ -19,6 +19,12 @@ interface VenueListing {
   genres: string[];
   pictures: string[];
   bio: string | null;
+  venue_profile_id: string;
+}
+
+interface VenueProfile {
+  id: string;
+  picture: string | null;
 }
 const genres = ['Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
 const capacityRanges = [{
@@ -41,6 +47,7 @@ export default function FindVenues() {
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useFavorites();
   const [venues, setVenues] = useState<VenueListing[]>([]);
+  const [venueProfiles, setVenueProfiles] = useState<Record<string, VenueProfile>>({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
@@ -56,12 +63,33 @@ export default function FindVenues() {
   }, []);
   const fetchVenues = async () => {
     setLoading(true);
-    const {
-      data,
-      error
-    } = await supabase.from('venue_listings').select('*');
-    if (data && !error) {
-      setVenues(data as VenueListing[]);
+    
+    // Fetch venues
+    const { data: venuesData, error: venuesError } = await supabase
+      .from('venue_listings')
+      .select('*');
+    
+    if (venuesData && !venuesError) {
+      setVenues(venuesData as VenueListing[]);
+      
+      // Get unique venue profile IDs
+      const profileIds = [...new Set(venuesData.map(v => v.venue_profile_id))];
+      
+      // Fetch venue profiles for pictures
+      if (profileIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('venue_profiles')
+          .select('id, picture')
+          .in('id', profileIds);
+        
+        if (profilesData) {
+          const profilesMap: Record<string, VenueProfile> = {};
+          profilesData.forEach(p => {
+            profilesMap[p.id] = p as VenueProfile;
+          });
+          setVenueProfiles(profilesMap);
+        }
+      }
     }
     setLoading(false);
   };
@@ -198,11 +226,20 @@ export default function FindVenues() {
                 />
               </button>
 
-              {/* Image */}
+              {/* Image - prioritize venue profile picture, fallback to room picture */}
               <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
-                {venue.pictures && venue.pictures.length > 0 ? <img src={venue.pictures[0]} alt={venue.venue_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="absolute inset-0 flex items-center justify-center bg-heat">
-                    <Music className="h-12 w-12 text-primary/30" />
-                  </div>}
+                {(() => {
+                  const venueProfile = venueProfiles[venue.venue_profile_id];
+                  const displayPicture = venueProfile?.picture || (venue.pictures && venue.pictures.length > 0 ? venue.pictures[0] : null);
+                  
+                  return displayPicture ? (
+                    <img src={displayPicture} alt={venue.venue_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-heat">
+                      <Music className="h-12 w-12 text-primary/30" />
+                    </div>
+                  );
+                })()}
                 {/* Capacity badge */}
                 {venue.capacity && <div className="absolute top-2 right-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
                     <Users className="h-3 w-3" />
