@@ -242,9 +242,9 @@ export default function VenueListingDetail() {
         }
         
         return (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <div className="flex flex-wrap justify-center gap-2">
             {allPictures.map((pic, index) => (
-              <div key={index} className="aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+              <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
                 <img
                   src={pic}
                   alt={`${listing.venue_name} ${index + 1}`}
