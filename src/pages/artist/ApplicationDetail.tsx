@@ -28,7 +28,13 @@ interface ApplicationData {
     bio: string | null;
     backline_info: string | null;
     house_rules: string | null;
+    venue_profile_id: string;
   };
+}
+
+interface VenueProfile {
+  id: string;
+  picture: string | null;
 }
 
 const statusConfig = {
@@ -77,6 +83,7 @@ export default function ApplicationDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [application, setApplication] = useState<ApplicationData | null>(null);
+  const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -98,7 +105,21 @@ export default function ApplicationDetail() {
       .maybeSingle();
 
     if (data && !error) {
-      setApplication(data as unknown as ApplicationData);
+      const appData = data as unknown as ApplicationData;
+      setApplication(appData);
+      
+      // Fetch venue profile for the general picture
+      if (appData.venue_listing?.venue_profile_id) {
+        const { data: profileData } = await supabase
+          .from('venue_profiles')
+          .select('id, picture')
+          .eq('id', appData.venue_listing.venue_profile_id)
+          .maybeSingle();
+        
+        if (profileData) {
+          setVenueProfile(profileData as VenueProfile);
+        }
+      }
     }
     setLoading(false);
   };
@@ -146,25 +167,37 @@ export default function ApplicationDetail() {
 
       {/* Pictures Gallery */}
       <div className="mb-6">
-        {listing.pictures && listing.pictures.length > 0 ? (
-          <div className="flex flex-wrap justify-center gap-2">
-            {listing.pictures.map((pic, index) => (
-              <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
-                <img
-                  src={pic}
-                  alt={`${listing.venue_name} ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
+        {(() => {
+          const allPictures: string[] = [];
+          if (venueProfile?.picture) allPictures.push(venueProfile.picture);
+          if (listing.pictures && listing.pictures.length > 0) {
+            allPictures.push(...listing.pictures);
+          }
+          
+          if (allPictures.length === 0) {
+            return (
+              <div className="aspect-[4/3] max-w-xs mx-auto bg-secondary rounded-lg overflow-hidden">
+                <div className="w-full h-full flex items-center justify-center bg-heat">
+                  <Music className="h-12 w-12 text-primary/30" />
+                </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="aspect-[4/3] max-w-xs mx-auto bg-secondary rounded-lg overflow-hidden">
-            <div className="w-full h-full flex items-center justify-center bg-heat">
-              <Music className="h-12 w-12 text-primary/30" />
+            );
+          }
+          
+          return (
+            <div className="flex flex-wrap justify-center gap-2">
+              {allPictures.map((pic, index) => (
+                <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+                  <img
+                    src={pic}
+                    alt={`${listing.venue_name} ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Venue Info */}
