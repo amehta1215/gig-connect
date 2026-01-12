@@ -112,43 +112,40 @@ export default function VenueProfile() {
       });
     }
   };
-
   const handlePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}/venue-picture-${Date.now()}.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('venue-media')
-      .upload(fileName, file);
-
+    const {
+      error: uploadError
+    } = await supabase.storage.from('venue-media').upload(fileName, file);
     if (uploadError) {
       toast.error('Failed to upload picture');
       return;
     }
-
-    const { data: urlData } = supabase.storage
-      .from('venue-media')
-      .getPublicUrl(fileName);
-
-    setFormData({ ...formData, picture: urlData.publicUrl });
+    const {
+      data: urlData
+    } = supabase.storage.from('venue-media').getPublicUrl(fileName);
+    setFormData({
+      ...formData,
+      picture: urlData.publicUrl
+    });
     toast.success('Picture uploaded');
   };
-
   const removePicture = async () => {
     if (!formData.picture) return;
 
     // Extract file path from URL
     const url = formData.picture;
     const bucketPath = url.split('/venue-media/')[1];
-    
     if (bucketPath) {
       await supabase.storage.from('venue-media').remove([bucketPath]);
     }
-    
-    setFormData({ ...formData, picture: null });
+    setFormData({
+      ...formData,
+      picture: null
+    });
   };
   if (loading) {
     return <div className="space-y-6 animate-fade-in">
@@ -173,43 +170,20 @@ export default function VenueProfile() {
       {/* Venue Picture Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2 text-primary mb-4">
-          <h2 className="font-display text-xl">Venue Picture</h2>
+          <h2 className="font-display text-xl">PICTURE OF VENUE</h2>
         </div>
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handlePictureUpload}
-          accept="image/*"
-          className="hidden"
-        />
+        <input type="file" ref={fileInputRef} onChange={handlePictureUpload} accept="image/*" className="hidden" />
 
-        {formData.picture ? (
-          <div className="relative w-full max-w-md">
-            <img
-              src={formData.picture}
-              alt="Venue"
-              className="w-full aspect-[4/3] object-cover rounded-lg"
-            />
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute top-2 right-2"
-              onClick={removePicture}
-            >
+        {formData.picture ? <div className="relative w-full max-w-md">
+            <img src={formData.picture} alt="Venue" className="w-full aspect-[4/3] object-cover rounded-lg" />
+            <Button variant="destructive" size="icon" className="absolute top-2 right-2" onClick={removePicture}>
               <X className="h-4 w-4" />
             </Button>
-          </div>
-        ) : (
-          <Button
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full max-w-md h-32 border-dashed flex flex-col gap-2"
-          >
+          </div> : <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full max-w-md h-32 border-dashed flex flex-col gap-2">
             <Upload className="h-6 w-6" />
             <span>Upload Venue Picture</span>
-          </Button>
-        )}
+          </Button>}
       </div>
 
       {/* Venue Info Section */}
@@ -229,11 +203,10 @@ export default function VenueProfile() {
 
         <div className="space-y-2">
           <Label htmlFor="location">Location</Label>
-          <LocationAutocomplete
-            value={formData.location}
-            onChange={(value) => setFormData({ ...formData, location: value })}
-            placeholder="New York, NY"
-          />
+          <LocationAutocomplete value={formData.location} onChange={value => setFormData({
+          ...formData,
+          location: value
+        })} placeholder="New York, NY" />
         </div>
 
         <div className="space-y-2">
