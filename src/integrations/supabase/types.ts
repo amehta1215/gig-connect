@@ -438,7 +438,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      send_welcome_message: {
+        Args: {
+          p_role: Database["public"]["Enums"]["user_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       application_status: "in_progress" | "accepted" | "archived"
