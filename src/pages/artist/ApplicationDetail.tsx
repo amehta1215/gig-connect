@@ -144,17 +144,25 @@ export default function ApplicationDetail() {
         </span>
       </div>
 
-      {/* Hero Image */}
-      <div className="aspect-[16/9] bg-secondary rounded-lg overflow-hidden">
+      {/* Pictures Gallery */}
+      <div className="mb-6">
         {listing.pictures && listing.pictures.length > 0 ? (
-          <img
-            src={listing.pictures[0]}
-            alt={listing.venue_name}
-            className="w-full h-full object-cover"
-          />
+          <div className="flex flex-wrap justify-center gap-2">
+            {listing.pictures.map((pic, index) => (
+              <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+                <img
+                  src={pic}
+                  alt={`${listing.venue_name} ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-heat">
-            <Music className="h-24 w-24 text-primary/30" />
+          <div className="aspect-[4/3] max-w-xs mx-auto bg-secondary rounded-lg overflow-hidden">
+            <div className="w-full h-full flex items-center justify-center bg-heat">
+              <Music className="h-12 w-12 text-primary/30" />
+            </div>
           </div>
         )}
       </div>
