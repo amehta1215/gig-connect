@@ -9,7 +9,14 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ArrowLeft, MapPin, Users, Music, CalendarIcon, Heart } from 'lucide-react';
+import { ArrowLeft, MapPin, Users, Music, CalendarIcon, Heart, CheckCircle } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -69,6 +76,7 @@ export default function VenueListingDetail() {
   const [applying, setApplying] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
 
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [availability, setAvailability] = useState<AvailabilityPreference>('flexible');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [specificDates, setSpecificDates] = useState<Date[]>([]);
@@ -172,8 +180,7 @@ export default function VenueListingDetail() {
       toast.error('Failed to apply');
       setApplying(false);
     } else {
-      toast.success('Application submitted!');
-      navigate('/artist');
+      setShowSuccessDialog(true);
     }
   };
 
@@ -499,6 +506,38 @@ export default function VenueListingDetail() {
           </div>
         </div>
       </div>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader className="text-center sm:text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
+              <CheckCircle className="h-10 w-10 text-primary" />
+            </div>
+            <DialogTitle className="font-display text-3xl text-accent tracking-wide">
+              APPLICATION SUBMITTED
+            </DialogTitle>
+            <DialogDescription className="text-base text-muted-foreground mt-2">
+              Your application to {listing?.venue_name} has been sent. The venue will review your submission and get back to you.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 mt-6">
+            <Button
+              onClick={() => navigate('/artist/applications')}
+              className="w-full font-display tracking-widest"
+            >
+              VIEW MY APPLICATIONS
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/artist')}
+              className="w-full font-display tracking-widest"
+            >
+              FIND MORE VENUES
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
