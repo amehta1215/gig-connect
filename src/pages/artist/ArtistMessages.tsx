@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Star, StarOff, Mail, MailOpen, ChevronLeft, Reply } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
+import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 interface Message {
   id: string;
   sender_id: string;
@@ -289,7 +290,7 @@ export default function ArtistMessages() {
                             {format(new Date(message.created_at), 'MMM d, h:mm a')}
                           </span>
                         </div>
-                        <p className="whitespace-pre-wrap text-sm">{highlightText(message.content)}</p>
+                        <FormattedMessageContent content={message.content} />
                       </div>
                     </div>;
             })}
