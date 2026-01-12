@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
+import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Upload, X, ImageIcon } from 'lucide-react';
 interface VenueProfileData {
@@ -259,6 +260,9 @@ export default function VenueProfile() {
             </div>)}
         </div>
       </div>
+
+      {/* Account Information Section */}
+      <AccountInformation />
 
       {/* Save Button */}
       <div className="flex justify-end gap-3">
