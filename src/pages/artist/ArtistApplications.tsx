@@ -25,7 +25,7 @@ export default function ArtistApplications() {
   } = useAuth();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('in_progress');
+  const [activeTab, setActiveTab] = useState('all');
   useEffect(() => {
     if (user) {
       fetchApplications();
@@ -48,7 +48,9 @@ export default function ArtistApplications() {
     }
     setLoading(false);
   };
-  const filteredApplications = applications.filter(app => app.status === activeTab);
+  const filteredApplications = activeTab === 'all' 
+    ? applications 
+    : applications.filter(app => app.status === activeTab);
   const statusConfig = {
     in_progress: {
       icon: Clock,
@@ -105,6 +107,9 @@ export default function ArtistApplications() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-card border border-border p-0 h-auto">
+          <TabsTrigger value="all" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+            ALL
+          </TabsTrigger>
           <TabsTrigger value="in_progress" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
             PENDING
           </TabsTrigger>
