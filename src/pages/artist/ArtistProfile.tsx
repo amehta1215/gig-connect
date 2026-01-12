@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
+import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Music, X, Upload } from 'lucide-react';
 interface ArtistProfile {
@@ -361,6 +362,9 @@ export default function ArtistProfile() {
         })} placeholder="https://example.com/review&#10;https://blog.com/interview" rows={3} />
         </div>
       </div>
+
+      {/* Account Information Section */}
+      <AccountInformation />
 
       {/* Save Button */}
       <div className="flex justify-end gap-3">
