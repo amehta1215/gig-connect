@@ -364,20 +364,7 @@ export default function VenueListingDetail() {
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
               <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
 
-              {isProfileComplete === false ? (
-                <div className="text-center py-8 space-y-4">
-                  <p className="text-lg text-muted-foreground font-display">FILL OUT PROFILE FIRST</p>
-                  <p className="text-sm text-muted-foreground">
-                    Complete your band name, location, genre, bio, and add at least one picture.
-                  </p>
-                  <Button
-                    onClick={() => navigate('/artist/profile')}
-                    className="font-display tracking-widest"
-                  >
-                    EDIT ARTIST PROFILE
-                  </Button>
-                </div>
-              ) : hasApplied ? (
+              {hasApplied ? (
                 <div className="text-center py-8">
                   <p className="text-lg text-muted-foreground">You've already applied to this room</p>
                   <Button
@@ -389,7 +376,20 @@ export default function VenueListingDetail() {
                   </Button>
                 </div>
               ) : (
-                <>
+                <div className="relative">
+                  {/* Incomplete Profile Overlay */}
+                  {isProfileComplete === false && (
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card/95 backdrop-blur-sm rounded-lg">
+                      <p className="text-lg text-accent font-display font-bold mb-4">FILL OUT PROFILE FIRST</p>
+                      <Button
+                        onClick={() => navigate('/artist/profile')}
+                        className="font-display tracking-widest"
+                      >
+                        EDIT ARTIST PROFILE
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Availability */}
                   <div className="space-y-3">
                     <h3 className="font-display text-sm text-primary tracking-widest">AVAILABILITY</h3>
@@ -496,7 +496,7 @@ export default function VenueListingDetail() {
                   </div>
 
                   {/* Payment Preference */}
-                  <div className="space-y-3">
+                  <div className="space-y-3 mt-6">
                     <h3 className="font-display text-sm text-primary tracking-widest">PAYMENT</h3>
                     <div className="grid grid-cols-2 gap-2">
                       {paymentOptions.map((option) => (
@@ -521,7 +521,7 @@ export default function VenueListingDetail() {
                   </div>
 
                   {/* Lineup */}
-                  <div className="space-y-3">
+                  <div className="space-y-3 mt-6">
                     <h3 className="font-display text-sm text-primary tracking-widest">LINEUP</h3>
                     <RadioGroup value={lineup} onValueChange={(v) => setLineup(v as LineupPreference)}>
                       <div className="flex flex-col gap-2">
@@ -540,12 +540,12 @@ export default function VenueListingDetail() {
                   {/* Submit */}
                   <Button
                     onClick={handleApply}
-                    disabled={applying}
-                    className="w-full font-display tracking-widest text-lg py-6"
+                    disabled={applying || isProfileComplete === false}
+                    className="w-full font-display tracking-widest text-lg py-6 mt-6"
                   >
                     {applying ? 'APPLYING...' : 'APPLY'}
                   </Button>
-                </>
+                </div>
               )}
             </div>
           </div>

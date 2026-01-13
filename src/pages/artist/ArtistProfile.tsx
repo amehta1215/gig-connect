@@ -203,14 +203,14 @@ export default function ArtistProfile() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="band_name">Band / Stage Name</Label>
+            <Label htmlFor="band_name">Band / Stage Name <span className="text-primary">*</span></Label>
             <Input id="band_name" value={formData.band_name} onChange={e => setFormData({
             ...formData,
             band_name: e.target.value
           })} placeholder="The Midnight Riders" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="genre">Genre</Label>
+            <Label htmlFor="genre">Genre <span className="text-primary">*</span></Label>
             <Input id="genre" value={formData.genre} onChange={e => setFormData({
             ...formData,
             genre: e.target.value
@@ -219,7 +219,7 @@ export default function ArtistProfile() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="location">Location</Label>
+          <Label htmlFor="location">Location <span className="text-primary">*</span></Label>
           <LocationAutocomplete
             value={formData.location}
             onChange={(value) => setFormData({ ...formData, location: value })}
@@ -228,7 +228,7 @@ export default function ArtistProfile() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="bio">Bio</Label>
+          <Label htmlFor="bio">Bio <span className="text-primary">*</span></Label>
           <Textarea id="bio" value={formData.bio} onChange={e => setFormData({
           ...formData,
           bio: e.target.value
@@ -292,7 +292,7 @@ export default function ArtistProfile() {
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2 text-primary mb-4">
           
-          <h2 className="font-display text-xl">PICTURES</h2>
+          <h2 className="font-display text-xl">PICTURES <span className="text-primary">*</span></h2>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
