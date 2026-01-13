@@ -97,7 +97,7 @@ export default function ArtistApplications() {
 
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-3 uppercase tracking-wider">
           <Calendar className="h-3 w-3" />
-          {format(new Date(application.created_at), 'MMM d, yyyy')}
+          Submitted: {format(new Date(application.created_at), 'MMM d, yyyy')}
         </div>
       </div>;
   };
