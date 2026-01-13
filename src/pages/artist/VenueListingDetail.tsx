@@ -75,6 +75,7 @@ export default function VenueListingDetail() {
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
+  const [isProfileComplete, setIsProfileComplete] = useState<boolean | null>(null);
 
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [availability, setAvailability] = useState<AvailabilityPreference>('flexible');
@@ -88,7 +89,38 @@ export default function VenueListingDetail() {
       fetchListing();
       checkExistingApplication();
     }
+    if (user) {
+      checkProfileComplete();
+    }
   }, [id, user]);
+
+  const checkProfileComplete = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('artist_profiles')
+      .select('band_name, location, genre, bio, pictures')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    if (data) {
+      const hasRequiredFields = 
+        data.band_name && 
+        data.band_name.trim() !== '' &&
+        data.location && 
+        data.location.trim() !== '' &&
+        data.genre && 
+        data.genre.trim() !== '' &&
+        data.bio && 
+        data.bio.trim() !== '' &&
+        data.pictures && 
+        data.pictures.length > 0;
+      
+      setIsProfileComplete(!!hasRequiredFields);
+    } else {
+      setIsProfileComplete(false);
+    }
+  };
 
   const fetchListing = async () => {
     setLoading(true);
@@ -332,7 +364,20 @@ export default function VenueListingDetail() {
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
               <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
 
-              {hasApplied ? (
+              {isProfileComplete === false ? (
+                <div className="text-center py-8 space-y-4">
+                  <p className="text-lg text-muted-foreground font-display">FILL OUT PROFILE FIRST</p>
+                  <p className="text-sm text-muted-foreground">
+                    Complete your band name, location, genre, bio, and add at least one picture.
+                  </p>
+                  <Button
+                    onClick={() => navigate('/artist/profile')}
+                    className="font-display tracking-widest"
+                  >
+                    EDIT ARTIST PROFILE
+                  </Button>
+                </div>
+              ) : hasApplied ? (
                 <div className="text-center py-8">
                   <p className="text-lg text-muted-foreground">You've already applied to this room</p>
                   <Button
