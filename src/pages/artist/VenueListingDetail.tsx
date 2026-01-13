@@ -292,9 +292,9 @@ export default function VenueListingDetail() {
                   </Button>
                 </div> : <div className="relative">
                   {/* Incomplete Profile Overlay */}
-                  {isProfileComplete === false && <div className="absolute inset-x-0 top-1/3 z-10 flex flex-col items-center justify-center bg-card/90 backdrop-blur-sm rounded-lg py-6 mx-2 border border-primary/30">
-                      <p className="text-lg text-accent font-display font-bold mb-4">COMPLETE PROFILE BEFORE APPLYING</p>
-                      <Button onClick={() => navigate('/artist/profile')} className="font-display tracking-widest">
+                  {isProfileComplete === false && <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card/95 backdrop-blur-sm rounded-lg py-8 border border-primary/30">
+                      <p className="text-xl text-accent font-display font-bold mb-6 text-center px-4">COMPLETE PROFILE BEFORE APPLYING</p>
+                      <Button onClick={() => navigate('/artist/profile')} className="font-display tracking-widest" size="lg">
                         EDIT ARTIST PROFILE
                       </Button>
                     </div>}
