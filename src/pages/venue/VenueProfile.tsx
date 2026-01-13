@@ -157,14 +157,17 @@ export default function VenueProfile() {
   }
   return <div className="space-y-6 animate-fade-in max-w-3xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <h1 className="font-display text-4xl text-accent font-bold">EDIT VENUE PROFILE</h1>
-          
         </div>
+        <Button onClick={handleSave} disabled={saving}>
+          <Save className="h-4 w-4 mr-2" />
+          {saving ? 'Saving...' : 'Save Profile'}
+        </Button>
       </div>
 
       {/* Venue Picture Section */}
@@ -237,15 +240,5 @@ export default function VenueProfile() {
       {/* Account Information Section */}
       <AccountInformation />
 
-      {/* Save Button */}
-      <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={() => navigate(-1)}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave} disabled={saving}>
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? 'Saving...' : 'Save Profile'}
-        </Button>
-      </div>
     </div>;
 }
