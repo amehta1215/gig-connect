@@ -173,7 +173,7 @@ export default function VenueProfile() {
       {/* Venue Picture Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2 text-primary mb-4">
-          <h2 className="font-display text-xl">PICTURE OF VENUE</h2>
+          <h2 className="font-display text-xl">PICTURE OF VENUE <span className="text-destructive">*</span></h2>
         </div>
 
         <input type="file" ref={fileInputRef} onChange={handlePictureUpload} accept="image/*" className="hidden" />
@@ -197,7 +197,7 @@ export default function VenueProfile() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="venue_name">Venue Name</Label>
+          <Label htmlFor="venue_name">Venue Name <span className="text-destructive">*</span></Label>
           <Input id="venue_name" value={formData.venue_name} onChange={e => setFormData({
           ...formData,
           venue_name: e.target.value
@@ -205,7 +205,7 @@ export default function VenueProfile() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="location">Location</Label>
+          <Label htmlFor="location">Location <span className="text-destructive">*</span></Label>
           <LocationAutocomplete value={formData.location} onChange={value => setFormData({
           ...formData,
           location: value
@@ -213,7 +213,7 @@ export default function VenueProfile() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="bio">Bio</Label>
+          <Label htmlFor="bio">Bio <span className="text-destructive">*</span></Label>
           <Textarea id="bio" value={formData.bio} onChange={e => setFormData({
           ...formData,
           bio: e.target.value
@@ -225,7 +225,7 @@ export default function VenueProfile() {
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2 text-primary mb-4">
           
-          <h2 className="font-display text-xl">Event Types</h2>
+          <h2 className="font-display text-xl">Event Types <span className="text-destructive">*</span></h2>
         </div>
         
 
