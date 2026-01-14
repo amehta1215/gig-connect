@@ -46,6 +46,7 @@ interface Application {
   artist_profile?: {
     band_name: string | null;
     genre: string | null;
+    pictures: string[] | null;
   };
   venue_listing?: VenueListing;
 }
@@ -209,7 +210,7 @@ export default function VenueApplications() {
     const {
       data: artistProfiles,
       error: artistProfilesError
-    } = await supabase.from('artist_profiles').select('user_id, band_name, genre').in('user_id', artistIds);
+    } = await supabase.from('artist_profiles').select('user_id, band_name, genre, pictures').in('user_id', artistIds);
     if (artistProfilesError) {
       console.error('Failed to fetch artist profiles:', artistProfilesError);
       setApplications(apps);
@@ -218,7 +219,8 @@ export default function VenueApplications() {
     }
     const profileByUserId = new Map((artistProfiles || []).map(p => [p.user_id, {
       band_name: p.band_name,
-      genre: p.genre
+      genre: p.genre,
+      pictures: p.pictures
     }]));
     const merged = apps.map(app => ({
       ...app,
@@ -326,60 +328,77 @@ export default function VenueApplications() {
     const roomDisplay = application.venue_listing?.room_name || application.venue_listing?.venue_name || '';
     const availability = formatAvailability(application);
     const isFavorited = favorites.has(application.id);
+    const mainPicture = application.artist_profile?.pictures?.[0];
+    
     return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className={`bg-card border p-4 transition-colors cursor-pointer ${!application.is_read ? 'border-primary/50' : 'border-border hover:border-primary/30'}`}>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              {!application.is_read && <div className="w-2 h-2 bg-primary" />}
-              <h3 className="font-display text-xl text-foreground tracking-wide">
-                {bandName}
-              </h3>
+        <div className="flex items-start gap-4">
+          {/* Artist Picture */}
+          {mainPicture ? (
+            <div className="w-20 h-20 flex-shrink-0">
+              <img src={mainPicture} alt={bandName} className="w-full h-full object-cover" />
             </div>
-            
-            {/* Room/Venue applied to */}
-            {roomDisplay && <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
-                Applied to: <span className="text-primary">{roomDisplay}</span>
+          ) : (
+            <div className="w-20 h-20 flex-shrink-0 bg-secondary flex items-center justify-center">
+              <Music className="h-8 w-8 text-muted-foreground" />
+            </div>
+          )}
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  {!application.is_read && <div className="w-2 h-2 bg-primary" />}
+                  <h3 className="font-display text-xl text-foreground tracking-wide">
+                    {bandName}
+                  </h3>
+                </div>
+                
+                {/* Room/Venue applied to */}
+                {roomDisplay && <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
+                    Applied to: <span className="text-primary">{roomDisplay}</span>
+                  </p>}
+
+                {/* Application Submitted */}
+                <p className="text-xs text-muted-foreground mt-0.5 uppercase tracking-wider">
+                  Application Submitted: <span className="text-primary">{format(new Date(application.created_at), 'MMM d, yyyy')}</span>
+                </p>
+
+                {/* Availability */}
+                {availability && <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wider">
+                    Availability: <span className="text-primary">{availability}</span>
+                  </p>}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={(e) => toggleFavorite(e, application.id)}
+                  className="p-1 hover:bg-secondary/50 transition-colors"
+                >
+                  <Heart className={`h-4 w-4 ${isFavorited ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                </button>
+                <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
+                  <StatusIcon className="h-3 w-3" />
+                  {config.label}
+                </div>
+              </div>
+            </div>
+
+            {application.message && <p className="text-xs text-muted-foreground mt-3 line-clamp-2 bg-secondary/50 p-2">
+                {application.message}
               </p>}
 
-            <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
-              {application.artist_profile?.genre && <span className="uppercase tracking-wider">
-                  Genre: <span className="text-primary">{application.artist_profile.genre}</span>
+            {/* Tags row - Genre, Act Type, Payment */}
+            <div className="flex flex-wrap gap-1 mt-3">
+              {application.artist_profile?.genre && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+                  {application.artist_profile.genre}
                 </span>}
-              {application.lineup_preference && <span className="uppercase tracking-wider">
-                  Act Type: <span className="text-primary">{lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}</span>
+              {application.lineup_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+                  {lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}
                 </span>}
-              <span className="uppercase tracking-wider">
-                Application Date: <span className="text-primary">{format(new Date(application.created_at), 'MMM d')}</span>
-              </span>
-            </div>
-
-            {/* Availability dates */}
-            {availability && <p className="text-xs text-primary mt-2">
-                Dates: {availability}
-              </p>}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={(e) => toggleFavorite(e, application.id)}
-              className="p-1 hover:bg-secondary/50 transition-colors"
-            >
-              <Heart className={`h-4 w-4 ${isFavorited ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
-            </button>
-            <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
-              <StatusIcon className="h-3 w-3" />
-              {config.label}
+              {application.payment_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+                  {application.payment_preference.replace('_', ' ')}
+                </span>}
             </div>
           </div>
-        </div>
-
-        {application.message && <p className="text-xs text-muted-foreground mt-3 line-clamp-2 bg-secondary/50 p-2">
-            {application.message}
-          </p>}
-
-        <div className="flex flex-wrap gap-1 mt-3">
-          {application.payment_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
-              {application.payment_preference.replace('_', ' ')}
-            </span>}
         </div>
       </div>;
   };
