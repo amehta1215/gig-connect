@@ -102,7 +102,7 @@ export default function DashboardLayout({ children, tabs }: DashboardLayoutProps
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-accent">
                   <LogOut className="mr-2 h-4 w-4" />
-                  Exit
+                  Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
