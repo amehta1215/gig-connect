@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,6 +13,7 @@ import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon
 import { format, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
+import { toast } from 'sonner';
 interface VenueProfile {
   id: string;
   venue_name: string | null;
@@ -305,6 +307,24 @@ export default function VenueApplications() {
       bgColor: 'bg-muted'
     }
   };
+  
+  const updateApplicationStatus = async (e: React.MouseEvent, applicationId: string, newStatus: 'in_progress' | 'accepted' | 'archived') => {
+    e.stopPropagation();
+    const { error } = await supabase
+      .from('applications')
+      .update({ status: newStatus })
+      .eq('id', applicationId);
+    
+    if (error) {
+      toast.error('Failed to update status');
+    } else {
+      setApplications(prev => prev.map(app => 
+        app.id === applicationId ? { ...app, status: newStatus } : app
+      ));
+      toast.success(`Status updated to ${statusConfig[newStatus].label}`);
+    }
+  };
+
   const formatAvailability = (app: Application) => {
     if (app.availability_preference === 'date_range' && app.availability_start_date && app.availability_end_date) {
       return `${format(new Date(app.availability_start_date), 'MMM d')} - ${format(new Date(app.availability_end_date), 'MMM d, yyyy')}`;
@@ -371,10 +391,37 @@ export default function VenueApplications() {
                 >
                   <Heart className={`h-4 w-4 ${isFavorited ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
                 </button>
-                <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
-                  <StatusIcon className="h-3 w-3" />
-                  {config.label}
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                    <button className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider cursor-pointer hover:opacity-80 transition-opacity ${config.bgColor} ${config.color}`}>
+                      <StatusIcon className="h-3 w-3" />
+                      {config.label}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-card border-border z-50">
+                    <DropdownMenuItem
+                      onClick={(e) => updateApplicationStatus(e as unknown as React.MouseEvent, application.id, 'in_progress')}
+                      className={`text-xs uppercase tracking-wider cursor-pointer ${application.status === 'in_progress' ? 'bg-secondary' : ''}`}
+                    >
+                      <Clock className="h-3 w-3 mr-2 text-yellow-500" />
+                      <span className="text-yellow-500">PENDING</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) => updateApplicationStatus(e as unknown as React.MouseEvent, application.id, 'accepted')}
+                      className={`text-xs uppercase tracking-wider cursor-pointer ${application.status === 'accepted' ? 'bg-secondary' : ''}`}
+                    >
+                      <CheckCircle2 className="h-3 w-3 mr-2 text-green-500" />
+                      <span className="text-green-500">ACCEPTED</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) => updateApplicationStatus(e as unknown as React.MouseEvent, application.id, 'archived')}
+                      className={`text-xs uppercase tracking-wider cursor-pointer ${application.status === 'archived' ? 'bg-secondary' : ''}`}
+                    >
+                      <Archive className="h-3 w-3 mr-2 text-muted-foreground" />
+                      <span className="text-muted-foreground">ARCHIVED</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 
