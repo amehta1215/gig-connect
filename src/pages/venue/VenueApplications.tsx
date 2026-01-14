@@ -107,6 +107,7 @@ export default function VenueApplications() {
   const [showIncompleteDialog, setShowIncompleteDialog] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterFavorites, setFilterFavorites] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const isProfileComplete = venueProfile && venueProfile.picture && venueProfile.venue_name && venueProfile.location && venueProfile.bio && venueProfile.event_types && venueProfile.event_types.length > 0;
   const isVenueDiscoverable = isProfileComplete && hasRooms;
   useEffect(() => {
@@ -422,99 +423,111 @@ export default function VenueApplications() {
 
     <div className="space-y-6 animate-fade-in">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-card border border-border p-0 h-auto">
-          <TabsTrigger value="all" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
-            ALL
-          </TabsTrigger>
-          <TabsTrigger value="accepted" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
-            ACCEPTED
-          </TabsTrigger>
-          <TabsTrigger value="in_progress" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
-            PENDING
-          </TabsTrigger>
-          <TabsTrigger value="archived" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
-            ARCHIVED
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2 items-center mt-4">
+        <div className="flex items-center gap-2">
+          <TabsList className="bg-card border border-border p-0 h-auto">
+            <TabsTrigger value="all" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+              ALL
+            </TabsTrigger>
+            <TabsTrigger value="accepted" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+              ACCEPTED
+            </TabsTrigger>
+            <TabsTrigger value="in_progress" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+              PENDING
+            </TabsTrigger>
+            <TabsTrigger value="archived" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+              ARCHIVED
+            </TabsTrigger>
+          </TabsList>
           <button
-            onClick={() => setFilterFavorites(!filterFavorites)}
-            className={`h-9 w-9 flex items-center justify-center transition-colors ${filterFavorites ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
+            onClick={() => setShowFilters(!showFilters)}
+            className={`h-8 px-3 flex items-center justify-center transition-colors text-xs font-display tracking-wider ${showFilters ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
           >
-            <Heart className={`h-4 w-4 ${filterFavorites ? 'fill-current' : ''}`} />
+            <ListFilter className="h-3 w-3 mr-1" />
+            FILTER
           </button>
+        </div>
 
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-28 bg-card border-border text-xs">
-              <ListFilter className="h-3 w-3 mr-1" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Filters - hidden by default */}
+        {showFilters && (
+          <div className="flex flex-wrap gap-2 items-center mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setFilterFavorites(!filterFavorites)}
+              className={`h-8 px-2 ${filterFavorites ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:text-foreground'}`}
+            >
+              <Heart className={`h-3 w-3 ${filterFavorites ? 'fill-current' : ''}`} />
+            </Button>
 
-          <Select value={filterGenre} onValueChange={setFilterGenre}>
-            <SelectTrigger className="w-32 bg-card border-border text-xs">
-              <SelectValue placeholder="Genre" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Genres</SelectItem>
-              {genres.map(genre => <SelectItem key={genre} value={genre}>{genre}</SelectItem>)}
-            </SelectContent>
-          </Select>
-
-          <Select value={filterPayment} onValueChange={setFilterPayment}>
-            <SelectTrigger className="w-36 bg-card border-border text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {paymentPreferences.map(pref => <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-
-          <Select value={filterLineup} onValueChange={setFilterLineup}>
-            <SelectTrigger className="w-36 bg-card border-border text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {lineupPreferences.map(pref => <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-
-          {venueListings.size > 1 && <Select value={filterRoom} onValueChange={setFilterRoom}>
-              <SelectTrigger className="w-36 bg-card border-border text-xs">
-                <SelectValue placeholder="All Rooms" />
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-8 w-28 bg-card border-border text-xs">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Rooms</SelectItem>
-                {Array.from(venueListings.values()).map(listing => <SelectItem key={listing.id} value={listing.id}>
-                    {listing.room_name || listing.venue_name}
-                  </SelectItem>)}
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
               </SelectContent>
-            </Select>}
+            </Select>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-auto bg-card border-border text-xs justify-start text-left font-normal", !dateRange && "text-muted-foreground")}>
-                <CalendarIcon className="mr-2 h-3 w-3" />
-                {dateRange?.from ? dateRange.to ? <>
-                      {format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d")}
-                    </> : format(dateRange.from, "MMM d, yyyy") : <span>Date Range</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent initialFocus mode="range" defaultMonth={dateRange?.from} selected={dateRange} onSelect={setDateRange} numberOfMonths={2} className={cn("p-3 pointer-events-auto")} />
-            </PopoverContent>
-          </Popover>
+            <Select value={filterGenre} onValueChange={setFilterGenre}>
+              <SelectTrigger className="h-8 w-32 bg-card border-border text-xs">
+                <SelectValue placeholder="Genre" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Genres</SelectItem>
+                {genres.map(genre => <SelectItem key={genre} value={genre}>{genre}</SelectItem>)}
+              </SelectContent>
+            </Select>
 
-          {dateRange && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDateRange(undefined)}>
-              <X className="h-3 w-3" />
-            </Button>}
-        </div>
+            <Select value={filterPayment} onValueChange={setFilterPayment}>
+              <SelectTrigger className="h-8 w-36 bg-card border-border text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {paymentPreferences.map(pref => <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+
+            <Select value={filterLineup} onValueChange={setFilterLineup}>
+              <SelectTrigger className="h-8 w-36 bg-card border-border text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {lineupPreferences.map(pref => <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+
+            {venueListings.size > 1 && <Select value={filterRoom} onValueChange={setFilterRoom}>
+                <SelectTrigger className="h-8 w-36 bg-card border-border text-xs">
+                  <SelectValue placeholder="All Rooms" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Rooms</SelectItem>
+                  {Array.from(venueListings.values()).map(listing => <SelectItem key={listing.id} value={listing.id}>
+                      {listing.room_name || listing.venue_name}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>}
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("h-8 w-auto bg-card border-border text-xs justify-start text-left font-normal", !dateRange && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-3 w-3" />
+                  {dateRange?.from ? dateRange.to ? <>
+                        {format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d")}
+                      </> : format(dateRange.from, "MMM d, yyyy") : <span>Date Range</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent initialFocus mode="range" defaultMonth={dateRange?.from} selected={dateRange} onSelect={setDateRange} numberOfMonths={2} className={cn("p-3 pointer-events-auto")} />
+              </PopoverContent>
+            </Popover>
+
+            {dateRange && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDateRange(undefined)}>
+                <X className="h-3 w-3" />
+              </Button>}
+          </div>
+        )}
 
         <TabsContent value={activeTab} className="mt-4">
           {loading ? <div className="space-y-3">
