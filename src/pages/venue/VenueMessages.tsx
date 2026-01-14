@@ -198,10 +198,6 @@ export default function VenueMessages() {
               </Button>
             </div>
             <div className="flex gap-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-background border-border" />
-            </div>
-            <div className="flex gap-2">
               <Select value={filter} onValueChange={v => setFilter(v as FilterType)}>
                 <SelectTrigger className="flex-1 h-8 text-xs bg-background border-border">
                   <SelectValue placeholder="Filter" />
