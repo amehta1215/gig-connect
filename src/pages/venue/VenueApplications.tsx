@@ -346,14 +346,12 @@ export default function VenueApplications() {
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <p className="text-muted-foreground">
-            Complete your profile and add a room to make your venue discoverable to artists.
-          </p>
+          <p className="text-muted-foreground">Complete your profile and add a room to make your venue discoverable to artists!</p>
           
           {!isProfileComplete && <div className="text-sm text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">Missing profile fields:</p>
+              
               <ul className="list-disc list-inside space-y-1">
-                {!venueProfile?.picture && <li>Venue Picture</li>}
+                {!venueProfile?.picture}
                 {!venueProfile?.venue_name && <li>Venue Name</li>}
                 {!venueProfile?.location && <li>Location</li>}
                 {!venueProfile?.bio && <li>Bio</li>}
