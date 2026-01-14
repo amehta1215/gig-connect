@@ -8,11 +8,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, AlertTriangle } from 'lucide-react';
+import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users } from 'lucide-react';
 import { format, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
-
 interface VenueProfile {
   id: string;
   venue_name: string | null;
@@ -107,23 +106,13 @@ export default function VenueApplications() {
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [hasRooms, setHasRooms] = useState<boolean | null>(null);
   const [showIncompleteDialog, setShowIncompleteDialog] = useState(false);
-
-  const isProfileComplete = venueProfile && 
-    venueProfile.picture && 
-    venueProfile.venue_name && 
-    venueProfile.location && 
-    venueProfile.bio && 
-    venueProfile.event_types && 
-    venueProfile.event_types.length > 0;
-
+  const isProfileComplete = venueProfile && venueProfile.picture && venueProfile.venue_name && venueProfile.location && venueProfile.bio && venueProfile.event_types && venueProfile.event_types.length > 0;
   const isVenueDiscoverable = isProfileComplete && hasRooms;
-
   useEffect(() => {
     if (user) {
       fetchApplications();
     }
   }, [user]);
-
   useEffect(() => {
     // Show dialog after data is loaded and if venue is not discoverable
     if (venueProfile !== null && hasRooms !== null && !isVenueDiscoverable) {
@@ -133,27 +122,22 @@ export default function VenueApplications() {
   const fetchApplications = async () => {
     if (!user) return;
     setLoading(true);
-    
+
     // Fetch full venue profile for completeness check
     const {
       data: venueProfileData
     } = await supabase.from('venue_profiles').select('id, venue_name, location, bio, event_types, picture').eq('user_id', user.id).single();
-    
     if (!venueProfileData) {
       setLoading(false);
       setVenueProfile(null);
       setHasRooms(false);
       return;
     }
-    
     setVenueProfile(venueProfileData as VenueProfile);
-    
     const {
       data: listings
     } = await supabase.from('venue_listings').select('id, venue_name, room_name').eq('venue_profile_id', venueProfileData.id);
-    
     setHasRooms(listings && listings.length > 0);
-    
     if (!listings || listings.length === 0) {
       setLoading(false);
       return;
@@ -357,7 +341,7 @@ export default function VenueApplications() {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 font-display text-xl text-accent">
-            <AlertTriangle className="h-5 w-5 text-primary" />
+            
             COMPLETE YOUR VENUE SETUP
           </DialogTitle>
         </DialogHeader>
@@ -366,8 +350,7 @@ export default function VenueApplications() {
             Complete your profile and add a room to make your venue discoverable to artists.
           </p>
           
-          {!isProfileComplete && (
-            <div className="text-sm text-muted-foreground">
+          {!isProfileComplete && <div className="text-sm text-muted-foreground">
               <p className="font-medium text-foreground mb-1">Missing profile fields:</p>
               <ul className="list-disc list-inside space-y-1">
                 {!venueProfile?.picture && <li>Venue Picture</li>}
@@ -376,33 +359,19 @@ export default function VenueApplications() {
                 {!venueProfile?.bio && <li>Bio</li>}
                 {(!venueProfile?.event_types || venueProfile.event_types.length === 0) && <li>Event Types</li>}
               </ul>
-            </div>
-          )}
+            </div>}
           
-          {!hasRooms && (
-            <div className="text-sm text-muted-foreground">
+          {!hasRooms && <div className="text-sm text-muted-foreground">
               <p className="font-medium text-foreground">You need to add at least one room.</p>
-            </div>
-          )}
+            </div>}
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
-          {!isProfileComplete && (
-            <Button 
-              onClick={() => navigate('/venue/profile')} 
-              className="flex-1 font-display tracking-widest"
-            >
+          {!isProfileComplete && <Button onClick={() => navigate('/venue/profile')} className="flex-1 font-display tracking-widest">
               GO TO EDIT PROFILE
-            </Button>
-          )}
-          {!hasRooms && (
-            <Button 
-              onClick={() => navigate('/venue/rooms')} 
-              variant={!isProfileComplete ? "outline" : "default"}
-              className="flex-1 font-display tracking-widest"
-            >
+            </Button>}
+          {!hasRooms && <Button onClick={() => navigate('/venue/rooms')} variant={!isProfileComplete ? "outline" : "default"} className="flex-1 font-display tracking-widest">
               GO TO ROOMS
-            </Button>
-          )}
+            </Button>}
         </div>
       </DialogContent>
     </Dialog>
