@@ -441,10 +441,9 @@ export default function VenueApplications() {
         <div className="flex flex-wrap gap-2 items-center mt-4">
           <button
             onClick={() => setFilterFavorites(!filterFavorites)}
-            className={`px-3 py-2 text-xs font-display tracking-wider transition-colors flex items-center gap-1 ${filterFavorites ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
+            className={`h-9 w-9 flex items-center justify-center transition-colors ${filterFavorites ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
           >
-            <Heart className={`h-3 w-3 ${filterFavorites ? 'fill-current' : ''}`} />
-            FAVORITES
+            <Heart className={`h-4 w-4 ${filterFavorites ? 'fill-current' : ''}`} />
           </button>
 
           <Select value={sortBy} onValueChange={setSortBy}>
