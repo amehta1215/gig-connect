@@ -331,19 +331,19 @@ export default function VenueApplications() {
     const mainPicture = application.artist_profile?.pictures?.[0];
     
     return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className={`bg-card border p-4 transition-colors cursor-pointer ${!application.is_read ? 'border-primary/50' : 'border-border hover:border-primary/30'}`}>
-        <div className="flex items-stretch gap-4">
+        <div className="flex items-center gap-4">
           {/* Artist Picture */}
           {mainPicture ? (
-            <div className="w-24 h-24 flex-shrink-0 -m-4 mr-0">
+            <div className="w-20 h-20 flex-shrink-0">
               <img src={mainPicture} alt={bandName} className="w-full h-full object-cover" />
             </div>
           ) : (
-            <div className="w-24 h-24 flex-shrink-0 -m-4 mr-0 bg-secondary flex items-center justify-center">
+            <div className="w-20 h-20 flex-shrink-0 bg-secondary flex items-center justify-center">
               <Music className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
           
-          <div className="flex-1 min-w-0 py-0">
+          <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
