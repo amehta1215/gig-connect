@@ -9,7 +9,7 @@ import { Search, Star, StarOff, Mail, MailOpen, ChevronLeft, Reply, PenSquare } 
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
-import { ComposeMessageDialog } from '@/components/ComposeMessageDialog';
+import { ComposeMessagePanel } from '@/components/ComposeMessagePanel';
 interface Message {
   id: string;
   sender_id: string;
@@ -61,7 +61,7 @@ export default function VenueMessages() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('newest');
   const [showReplyForm, setShowReplyForm] = useState(false);
-  const [showComposeDialog, setShowComposeDialog] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
   // Handle thread param from URL
   useEffect(() => {
     const threadParam = searchParams.get('thread');
@@ -179,25 +179,25 @@ export default function VenueMessages() {
     return firstMessage.subject?.replace(/^Re:\s*/i, '') || '(No subject)';
   };
   return <div className="space-y-6 animate-fade-in">
-      <ComposeMessageDialog 
-        open={showComposeDialog} 
-        onOpenChange={setShowComposeDialog}
-        onSuccess={fetchMessages}
-      />
-
       <div className="flex h-[calc(100vh-220px)] min-h-[400px] border border-border overflow-hidden bg-card">
         {/* Thread List */}
-        <div className={`w-full md:w-1/3 border-r border-border flex flex-col ${selectedThreadId ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`w-full md:w-1/3 border-r border-border flex flex-col ${selectedThreadId || isComposing ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-3 border-b border-border space-y-2">
-            <Button 
-              onClick={() => setShowComposeDialog(true)} 
-              className="w-full"
-              variant="outline"
-            >
-              <PenSquare className="h-4 w-4 mr-2" />
-              Compose
-            </Button>
-            <div className="relative">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-background border-border" />
+              </div>
+              <Button 
+                onClick={() => { setIsComposing(true); setSelectedThreadId(null); }} 
+                size="icon"
+                variant="outline"
+                className="flex-shrink-0"
+              >
+                <PenSquare className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex gap-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-background border-border" />
             </div>
@@ -266,9 +266,14 @@ export default function VenueMessages() {
           </div>
         </div>
 
-        {/* Thread Detail */}
-        <div className={`flex-1 flex flex-col ${selectedThreadId ? 'flex' : 'hidden md:flex'}`}>
-          {selectedThread ? <>
+        {/* Thread Detail / Compose Panel */}
+        <div className={`flex-1 flex flex-col ${selectedThreadId || isComposing ? 'flex' : 'hidden md:flex'}`}>
+          {isComposing ? (
+            <ComposeMessagePanel 
+              onSuccess={fetchMessages}
+              onClose={() => setIsComposing(false)}
+            />
+          ) : selectedThread ? <>
               <div className="p-4 border-b border-border flex items-center gap-3">
                 <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedThreadId(null)}>
                   <ChevronLeft className="h-5 w-5" />
