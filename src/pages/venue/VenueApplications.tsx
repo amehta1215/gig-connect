@@ -330,7 +330,7 @@ export default function VenueApplications() {
     const isFavorited = favorites.has(application.id);
     const mainPicture = application.artist_profile?.pictures?.[0];
     
-    return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className={`bg-card border p-4 transition-colors cursor-pointer ${!application.is_read ? 'border-primary/50' : 'border-border hover:border-primary/30'}`}>
+    return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className={`bg-card border px-4 py-3 transition-colors cursor-pointer ${!application.is_read ? 'border-primary/50' : 'border-border hover:border-primary/30'}`}>
         <div className="flex items-center gap-4">
           {/* Artist Picture */}
           {mainPicture ? (
