@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart, RotateCcw } from 'lucide-react';
 import { format, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
@@ -111,6 +112,12 @@ export default function VenueApplications() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Accept dialog state
+  const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
+  const [pendingAcceptApplication, setPendingAcceptApplication] = useState<Application | null>(null);
+  const [selectedGigDate, setSelectedGigDate] = useState<Date | undefined>(undefined);
+  const [selectedGigTime, setSelectedGigTime] = useState('');
   const isProfileComplete = venueProfile && venueProfile.picture && venueProfile.venue_name && venueProfile.location && venueProfile.bio && venueProfile.event_types && venueProfile.event_types.length > 0;
   const isVenueDiscoverable = isProfileComplete && hasRooms;
   useEffect(() => {
@@ -310,6 +317,27 @@ export default function VenueApplications() {
   
   const updateApplicationStatus = async (e: React.MouseEvent, applicationId: string, newStatus: 'in_progress' | 'accepted' | 'archived') => {
     e.stopPropagation();
+    
+    // If accepting, open the dialog to select date/time first
+    if (newStatus === 'accepted') {
+      const app = applications.find(a => a.id === applicationId);
+      if (app) {
+        setPendingAcceptApplication(app);
+        // Pre-select a date from application if available
+        if (app.availability_start_date) {
+          setSelectedGigDate(new Date(app.availability_start_date));
+        } else if (app.availability_specific_dates && app.availability_specific_dates.length > 0) {
+          setSelectedGigDate(new Date(app.availability_specific_dates[0]));
+        } else {
+          setSelectedGigDate(undefined);
+        }
+        setSelectedGigTime('');
+        setAcceptDialogOpen(true);
+      }
+      return;
+    }
+    
+    // For non-accept status changes, just update directly
     const { error } = await supabase
       .from('applications')
       .update({ status: newStatus })
@@ -323,6 +351,51 @@ export default function VenueApplications() {
       ));
       toast.success(`Status updated to ${statusConfig[newStatus].label}`);
     }
+  };
+
+  const handleConfirmAccept = async () => {
+    if (!pendingAcceptApplication || !selectedGigDate) {
+      toast.error('Please select a gig date');
+      return;
+    }
+
+    // Create gig listing
+    const { error: gigError } = await supabase
+      .from('gig_listings')
+      .insert({
+        application_id: pendingAcceptApplication.id,
+        venue_listing_id: pendingAcceptApplication.venue_listing_id,
+        artist_id: pendingAcceptApplication.artist_id,
+        gig_date: format(selectedGigDate, 'yyyy-MM-dd'),
+        show_time: selectedGigTime || null,
+        openers: [],
+        notes: null,
+      });
+
+    if (gigError) {
+      toast.error('Failed to create gig listing');
+      return;
+    }
+
+    // Update application status
+    const { error } = await supabase
+      .from('applications')
+      .update({ status: 'accepted' })
+      .eq('id', pendingAcceptApplication.id);
+
+    if (error) {
+      toast.error('Failed to update status');
+    } else {
+      setApplications(prev => prev.map(app => 
+        app.id === pendingAcceptApplication.id ? { ...app, status: 'accepted' } : app
+      ));
+      toast.success('Application accepted! Gig created.');
+    }
+    
+    setAcceptDialogOpen(false);
+    setPendingAcceptApplication(null);
+    setSelectedGigDate(undefined);
+    setSelectedGigTime('');
   };
 
   const formatAvailability = (app: Application) => {
@@ -446,6 +519,68 @@ export default function VenueApplications() {
       </div>;
   };
   return <>
+    {/* Accept Application Dialog */}
+    <Dialog open={acceptDialogOpen} onOpenChange={setAcceptDialogOpen}>
+      <DialogContent className="sm:max-w-md bg-card border-border">
+        <DialogHeader>
+          <DialogTitle className="font-display text-xl tracking-wide">ACCEPT APPLICATION</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <p className="text-sm text-muted-foreground">
+            Select a date and time for the gig to add it to the calendar.
+          </p>
+          
+          {/* Date Picker */}
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-wider text-muted-foreground">Gig Date *</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !selectedGigDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedGigDate ? format(selectedGigDate, "PPP") : <span>Select date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 z-50" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedGigDate}
+                  onSelect={setSelectedGigDate}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Time Input */}
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-wider text-muted-foreground">Show Time</label>
+            <Input
+              type="time"
+              value={selectedGigTime}
+              onChange={(e) => setSelectedGigTime(e.target.value)}
+              className="bg-background border-border"
+            />
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setAcceptDialogOpen(false)} className="flex-1">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmAccept} disabled={!selectedGigDate} className="flex-1">
+            <CheckCircle2 className="h-4 w-4 mr-2" />
+            Accept & Create Gig
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
     {/* Profile Incomplete Dialog */}
     <Dialog open={showIncompleteDialog} onOpenChange={setShowIncompleteDialog}>
       <DialogContent className="sm:max-w-md">
