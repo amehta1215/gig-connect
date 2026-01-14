@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users } from 'lucide-react';
+import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart } from 'lucide-react';
 import { format, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
@@ -105,13 +105,52 @@ export default function VenueApplications() {
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [hasRooms, setHasRooms] = useState<boolean | null>(null);
   const [showIncompleteDialog, setShowIncompleteDialog] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [filterFavorites, setFilterFavorites] = useState(false);
   const isProfileComplete = venueProfile && venueProfile.picture && venueProfile.venue_name && venueProfile.location && venueProfile.bio && venueProfile.event_types && venueProfile.event_types.length > 0;
   const isVenueDiscoverable = isProfileComplete && hasRooms;
   useEffect(() => {
     if (user) {
       fetchApplications();
+      fetchFavorites();
     }
   }, [user]);
+
+  const fetchFavorites = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('venue_application_favorites')
+      .select('application_id')
+      .eq('venue_user_id', user.id);
+    if (data) {
+      setFavorites(new Set(data.map(f => f.application_id)));
+    }
+  };
+
+  const toggleFavorite = async (e: React.MouseEvent, applicationId: string) => {
+    e.stopPropagation();
+    if (!user) return;
+    
+    const isFavorited = favorites.has(applicationId);
+    
+    if (isFavorited) {
+      await supabase
+        .from('venue_application_favorites')
+        .delete()
+        .eq('venue_user_id', user.id)
+        .eq('application_id', applicationId);
+      setFavorites(prev => {
+        const next = new Set(prev);
+        next.delete(applicationId);
+        return next;
+      });
+    } else {
+      await supabase
+        .from('venue_application_favorites')
+        .insert({ venue_user_id: user.id, application_id: applicationId });
+      setFavorites(prev => new Set(prev).add(applicationId));
+    }
+  };
   useEffect(() => {
     // Show dialog after data is loaded and if venue is not discoverable
     if (venueProfile !== null && hasRooms !== null && !isVenueDiscoverable) {
@@ -192,6 +231,9 @@ export default function VenueApplications() {
     let filtered = [...applications];
     if (activeTab !== 'all') {
       filtered = filtered.filter(app => app.status === activeTab);
+    }
+    if (filterFavorites) {
+      filtered = filtered.filter(app => favorites.has(app.id));
     }
     if (filterGenre !== 'all') {
       filtered = filtered.filter(app => app.artist_profile?.genre?.toLowerCase().includes(filterGenre.toLowerCase()));
@@ -282,6 +324,7 @@ export default function VenueApplications() {
     const bandName = application.artist_profile?.band_name || `${application.artist?.first_name} ${application.artist?.last_name}`;
     const roomDisplay = application.venue_listing?.room_name || application.venue_listing?.venue_name || '';
     const availability = formatAvailability(application);
+    const isFavorited = favorites.has(application.id);
     return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className={`bg-card border p-4 transition-colors cursor-pointer ${!application.is_read ? 'border-primary/50' : 'border-border hover:border-primary/30'}`}>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
@@ -314,9 +357,17 @@ export default function VenueApplications() {
                 Dates: {availability}
               </p>}
           </div>
-          <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
-            <StatusIcon className="h-3 w-3" />
-            {config.label}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={(e) => toggleFavorite(e, application.id)}
+              className="p-1 hover:bg-secondary/50 transition-colors"
+            >
+              <Heart className={`h-4 w-4 ${isFavorited ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+            </button>
+            <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
+              <StatusIcon className="h-3 w-3" />
+              {config.label}
+            </div>
           </div>
         </div>
 
@@ -388,6 +439,14 @@ export default function VenueApplications() {
 
         {/* Filters */}
         <div className="flex flex-wrap gap-2 items-center mt-4">
+          <button
+            onClick={() => setFilterFavorites(!filterFavorites)}
+            className={`px-3 py-2 text-xs font-display tracking-wider transition-colors flex items-center gap-1 ${filterFavorites ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
+          >
+            <Heart className={`h-3 w-3 ${filterFavorites ? 'fill-current' : ''}`} />
+            FAVORITES
+          </button>
+
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-28 bg-card border-border text-xs">
               <ListFilter className="h-3 w-3 mr-1" />

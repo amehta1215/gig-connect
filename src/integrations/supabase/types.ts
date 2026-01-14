@@ -333,6 +333,42 @@ export type Database = {
         }
         Relationships: []
       }
+      venue_application_favorites: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          venue_user_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          venue_user_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          venue_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_application_favorites_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_application_favorites_venue_user_id_fkey"
+            columns: ["venue_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venue_listings: {
         Row: {
           backline_info: string | null
