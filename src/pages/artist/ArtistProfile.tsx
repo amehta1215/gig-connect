@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Music, X, Upload } from 'lucide-react';
+import { ArrowLeft, Save, Music, X, Upload, Star } from 'lucide-react';
 interface ArtistProfile {
   id: string;
   user_id: string;
@@ -143,6 +143,16 @@ export default function ArtistProfile() {
   };
   const removePicture = (index: number) => {
     setPictures(prev => prev.filter((_, i) => i !== index));
+  };
+  const setMainPicture = (index: number) => {
+    if (index === 0) return; // Already main
+    setPictures(prev => {
+      const newPictures = [...prev];
+      const [selected] = newPictures.splice(index, 1);
+      newPictures.unshift(selected);
+      return newPictures;
+    });
+    toast.success('Main picture updated');
   };
   const removeSample = (index: number) => {
     setFeaturedSamples(prev => prev.filter((_, i) => i !== index));
@@ -300,11 +310,23 @@ export default function ArtistProfile() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {pictures.map((url, index) => <div key={index} className="relative group aspect-square">
+          {pictures.map((url, index) => <div key={index} className={`relative group aspect-square ${index === 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}>
               <img src={url} alt={`Picture ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
-              <button onClick={() => removePicture(index)} className="absolute top-2 right-2 p-1 bg-destructive rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <X className="h-4 w-4 text-destructive-foreground" />
-              </button>
+              {index === 0 && (
+                <div className="absolute top-2 left-2 px-2 py-1 bg-primary text-primary-foreground text-xs font-display rounded">
+                  MAIN
+                </div>
+              )}
+              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {index !== 0 && (
+                  <button onClick={() => setMainPicture(index)} className="p-1 bg-accent rounded-full" title="Set as main picture">
+                    <Star className="h-4 w-4 text-accent-foreground" />
+                  </button>
+                )}
+                <button onClick={() => removePicture(index)} className="p-1 bg-destructive rounded-full">
+                  <X className="h-4 w-4 text-destructive-foreground" />
+                </button>
+              </div>
             </div>)}
           <button onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
             <Upload className="h-6 w-6 text-muted-foreground" />
