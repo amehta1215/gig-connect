@@ -331,19 +331,19 @@ export default function VenueApplications() {
     const mainPicture = application.artist_profile?.pictures?.[0];
     
     return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className={`bg-card border p-4 transition-colors cursor-pointer ${!application.is_read ? 'border-primary/50' : 'border-border hover:border-primary/30'}`}>
-        <div className="flex items-start gap-4">
+        <div className="flex items-stretch gap-4">
           {/* Artist Picture */}
           {mainPicture ? (
-            <div className="w-20 h-20 flex-shrink-0">
+            <div className="w-24 h-24 flex-shrink-0 -m-4 mr-0">
               <img src={mainPicture} alt={bandName} className="w-full h-full object-cover" />
             </div>
           ) : (
-            <div className="w-20 h-20 flex-shrink-0 bg-secondary flex items-center justify-center">
+            <div className="w-24 h-24 flex-shrink-0 -m-4 mr-0 bg-secondary flex items-center justify-center">
               <Music className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
           
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 py-0">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
@@ -358,17 +358,13 @@ export default function VenueApplications() {
                     Applied to: <span className="text-primary">{roomDisplay}</span>
                   </p>}
 
-                {/* Application Submitted */}
-                <p className="text-xs text-muted-foreground mt-0.5 uppercase tracking-wider">
-                  Application Submitted: <span className="text-primary">{format(new Date(application.created_at), 'MMM d, yyyy')}</span>
-                </p>
-
                 {/* Availability */}
-                {availability && <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wider">
+                {availability && <p className="text-xs text-muted-foreground mt-0.5 uppercase tracking-wider">
                     Availability: <span className="text-primary">{availability}</span>
                   </p>}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-wider flex-shrink-0">
+                <span>Submitted {format(new Date(application.created_at), 'M/d/yy')}</span>
                 <button
                   onClick={(e) => toggleFavorite(e, application.id)}
                   className="p-1 hover:bg-secondary/50 transition-colors"
