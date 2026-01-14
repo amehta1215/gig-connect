@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart } from 'lucide-react';
+import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart, RotateCcw } from 'lucide-react';
 import { format, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
@@ -526,6 +526,24 @@ export default function VenueApplications() {
             {dateRange && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDateRange(undefined)}>
                 <X className="h-3 w-3" />
               </Button>}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                setFilterFavorites(false);
+                setSortBy('newest');
+                setFilterGenre('all');
+                setFilterPayment('all');
+                setFilterLineup('all');
+                setFilterRoom('all');
+                setDateRange(undefined);
+              }}
+            >
+              <RotateCcw className="h-3 w-3 mr-1" />
+              RESET
+            </Button>
           </div>
         )}
 
