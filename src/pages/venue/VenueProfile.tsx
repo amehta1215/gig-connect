@@ -173,7 +173,7 @@ export default function VenueProfile() {
       {/* Venue Picture Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2 text-primary mb-4">
-          <h2 className="font-display text-xl">PICTURE OF VENUE <span className="text-destructive">*</span></h2>
+          <h2 className="font-display text-xl">VENUE PICTURE *<span className="text-destructive">*</span></h2>
         </div>
 
         <input type="file" ref={fileInputRef} onChange={handlePictureUpload} accept="image/*" className="hidden" />
