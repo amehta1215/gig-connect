@@ -352,7 +352,7 @@ export default function VenueApplicationDetail() {
           <StatusIcon className="h-4 w-4" />
           {config.label}
           <span className="text-muted-foreground ml-2">
-            Submitted on {format(new Date(application.created_at), 'MMM d, yyyy')}
+            Submitted {format(new Date(application.created_at), 'MMM d, yyyy')}
           </span>
         </div>
         <div className="flex gap-2">
