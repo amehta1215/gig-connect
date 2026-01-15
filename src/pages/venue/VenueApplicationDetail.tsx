@@ -411,8 +411,8 @@ export default function VenueApplicationDetail() {
 
       {/* Main Artist Picture */}
       {artistProfile?.pictures && artistProfile.pictures.length > 0 && (
-        <div className="aspect-video md:aspect-[2/1] bg-secondary overflow-hidden max-w-2xl mx-auto">
-          <img src={artistProfile.pictures[0]} alt={`${bandName} main photo`} className="w-full h-full object-cover" />
+        <div className="flex justify-center">
+          <img src={artistProfile.pictures[0]} alt={`${bandName} main photo`} className="max-h-64 w-auto object-contain" />
         </div>
       )}
 
