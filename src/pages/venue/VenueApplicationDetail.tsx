@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -105,16 +104,10 @@ export default function VenueApplicationDetail() {
   const [venueListing, setVenueListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Message dialog state
-  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
-  const [messageSubject, setMessageSubject] = useState('');
-  const [messageContent, setMessageContent] = useState('');
-  
   // Accept dialog state
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [selectedGigDate, setSelectedGigDate] = useState<Date | undefined>(undefined);
   const [selectedGigTime, setSelectedGigTime] = useState('');
-  const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
     if (id && user) {
@@ -264,45 +257,25 @@ export default function VenueApplicationDetail() {
       return;
     }
 
-    // No existing thread, open the message dialog
+    // No existing thread, navigate to messages with compose panel open
     const roomName = venueListing?.room_name || '';
     const venueName = venueListing?.venue_name || '';
     const subject = roomName 
       ? `Application for ${roomName} at ${venueName}`
       : `Application for ${venueName}`;
-    setMessageSubject(subject);
-    setMessageDialogOpen(true);
-  };
-
-  const handleSendMessage = async () => {
-    if (!user || !application || !messageContent.trim()) return;
     
-    setSendingMessage(true);
+    const artistName = `${application.artist?.first_name || ''} ${application.artist?.last_name || ''}`.trim();
+    const bandName = artistProfile?.band_name || '';
     
-    // Create a thread_id based on the application
-    const threadId = crypto.randomUUID();
-    
-    const { error } = await supabase.from('messages').insert({
-      sender_id: user.id,
-      receiver_id: application.artist_id,
-      thread_id: threadId,
-      subject: messageSubject.trim() || `Re: Application for ${venueListing?.venue_name || 'venue'}`,
-      content: messageContent.trim(),
-      is_read: false,
-      is_starred: false,
+    const params = new URLSearchParams({
+      compose: 'true',
+      artistId: application.artist_id,
+      artistName: artistName,
+      ...(bandName && { bandName }),
+      subject: subject,
     });
-
-    setSendingMessage(false);
-
-    if (error) {
-      toast.error('Failed to send message');
-      return;
-    }
-
-    toast.success('Message sent!');
-    setMessageDialogOpen(false);
-    setMessageSubject('');
-    setMessageContent('');
+    
+    navigate(`/venue/messages?${params.toString()}`);
   };
 
   if (loading) {
@@ -569,53 +542,6 @@ export default function VenueApplicationDetail() {
           </div>
         </div>
       )}
-
-      {/* Message Dialog */}
-      <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
-        <DialogContent className="bg-card border-border">
-          <DialogHeader>
-            <DialogTitle className="font-display text-xl tracking-wide">
-              MESSAGE {bandName.toUpperCase()}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div>
-              <label className="font-display text-xs text-muted-foreground tracking-widest block mb-2">
-                SUBJECT
-              </label>
-              <Input
-                value={messageSubject}
-                onChange={(e) => setMessageSubject(e.target.value)}
-                placeholder={`Re: Application for ${venueListing?.venue_name || 'venue'}`}
-                className="bg-background border-border"
-              />
-            </div>
-            <div>
-              <label className="font-display text-xs text-muted-foreground tracking-widest block mb-2">
-                MESSAGE
-              </label>
-              <Textarea
-                value={messageContent}
-                onChange={(e) => setMessageContent(e.target.value)}
-                placeholder="Write your message..."
-                className="bg-background border-border min-h-[150px]"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setMessageDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSendMessage} 
-                disabled={!messageContent.trim() || sendingMessage}
-                className="bg-primary hover:bg-primary/90"
-              >
-                {sendingMessage ? 'Sending...' : 'Send Message'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Accept Dialog with Date and Time Picker */}
       <Dialog open={acceptDialogOpen} onOpenChange={setAcceptDialogOpen}>

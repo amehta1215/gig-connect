@@ -62,10 +62,28 @@ export default function VenueMessages() {
   const [sortBy, setSortBy] = useState<SortType>('newest');
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
-  // Handle thread param from URL
+  const [composeArtist, setComposeArtist] = useState<{ id: string; name: string; bandName: string | null } | null>(null);
+  const [composeSubject, setComposeSubject] = useState<string>('');
+
+  // Handle URL params for thread or compose
   useEffect(() => {
     const threadParam = searchParams.get('thread');
-    if (threadParam && !loading && messages.length > 0) {
+    const composeParam = searchParams.get('compose');
+    const artistIdParam = searchParams.get('artistId');
+    const artistNameParam = searchParams.get('artistName');
+    const bandNameParam = searchParams.get('bandName');
+    const subjectParam = searchParams.get('subject');
+
+    if (composeParam === 'true' && artistIdParam && artistNameParam) {
+      setComposeArtist({
+        id: artistIdParam,
+        name: artistNameParam,
+        bandName: bandNameParam || null,
+      });
+      setComposeSubject(subjectParam || '');
+      setIsComposing(true);
+      setSelectedThreadId(null);
+    } else if (threadParam && !loading && messages.length > 0) {
       const thread = messages.find(m => m.thread_id === threadParam);
       if (thread) {
         setSelectedThreadId(threadParam);
@@ -267,7 +285,9 @@ export default function VenueMessages() {
           {isComposing ? (
             <ComposeMessagePanel 
               onSuccess={fetchMessages}
-              onClose={() => setIsComposing(false)}
+              onClose={() => { setIsComposing(false); setComposeArtist(null); setComposeSubject(''); }}
+              initialArtist={composeArtist}
+              initialSubject={composeSubject}
             />
           ) : selectedThread ? <>
               <div className="p-4 border-b border-border flex items-center gap-3">

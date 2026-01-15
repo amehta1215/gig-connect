@@ -17,14 +17,16 @@ interface Artist {
 interface ComposeMessagePanelProps {
   onSuccess: () => void;
   onClose: () => void;
+  initialArtist?: Artist | null;
+  initialSubject?: string;
 }
 
-export function ComposeMessagePanel({ onSuccess, onClose }: ComposeMessagePanelProps) {
+export function ComposeMessagePanel({ onSuccess, onClose, initialArtist, initialSubject }: ComposeMessagePanelProps) {
   const { user } = useAuth();
   const [artists, setArtists] = useState<Artist[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
-  const [subject, setSubject] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialArtist?.bandName || initialArtist?.name || '');
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(initialArtist || null);
+  const [subject, setSubject] = useState(initialSubject || '');
   const [content, setContent] = useState('');
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(false);
