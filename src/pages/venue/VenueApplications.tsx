@@ -404,7 +404,7 @@ export default function VenueApplications() {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 font-display text-xl text-accent">
-            COMPLETE YOUR VENUE PROFILE
+            COMPLETE YOUR PROFILE
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
