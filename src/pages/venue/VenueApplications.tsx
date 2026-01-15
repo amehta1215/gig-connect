@@ -427,7 +427,7 @@ export default function VenueApplications() {
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
           {!isProfileComplete && <Button onClick={() => navigate('/venue/profile')} className="flex-1 font-display tracking-widest">
-              GO TO EDIT PROFILE
+              EDIT PROFILE
             </Button>}
           {!hasRooms && <Button onClick={() => navigate('/venue/rooms')} variant={!isProfileComplete ? "outline" : "default"} className="flex-1 font-display tracking-widest">
               GO TO ROOMS
