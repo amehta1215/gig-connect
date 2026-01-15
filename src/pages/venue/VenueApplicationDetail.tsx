@@ -409,14 +409,10 @@ export default function VenueApplicationDetail() {
         </div>
       </div>
 
-      {/* Artist Pictures */}
+      {/* Main Artist Picture */}
       {artistProfile?.pictures && artistProfile.pictures.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {artistProfile.pictures.slice(0, 6).map((pic, i) => (
-            <div key={i} className="aspect-square bg-secondary overflow-hidden">
-              <img src={pic} alt={`${bandName} photo ${i + 1}`} className="w-full h-full object-cover" />
-            </div>
-          ))}
+        <div className="aspect-video md:aspect-[2/1] bg-secondary overflow-hidden max-w-2xl mx-auto">
+          <img src={artistProfile.pictures[0]} alt={`${bandName} main photo`} className="w-full h-full object-cover" />
         </div>
       )}
 
@@ -555,6 +551,20 @@ export default function VenueApplicationDetail() {
           </div>
         )}
       </div>
+
+      {/* Additional Photos */}
+      {artistProfile?.pictures && artistProfile.pictures.length > 1 && (
+        <div className="bg-card border border-border p-6">
+          <h2 className="font-display text-sm text-primary tracking-widest mb-3">ADDITIONAL PHOTOS</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {artistProfile.pictures.slice(1).map((pic, i) => (
+              <div key={i} className="aspect-square bg-secondary overflow-hidden">
+                <img src={pic} alt={`${bandName} photo ${i + 2}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Message Dialog */}
       <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
