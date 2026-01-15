@@ -405,6 +405,80 @@ export default function VenueApplicationDetail() {
         </div>
       )}
 
+      {/* Application Details */}
+      <div className="bg-card border border-border p-6 space-y-4">
+        <h2 className="font-display text-2xl text-accent font-bold">APPLICATION DETAILS</h2>
+
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+          {/* Genre */}
+          {artistProfile?.genre && (
+            <div className="space-y-1">
+              <h3 className="font-display text-xs text-primary tracking-widest">GENRE</h3>
+              <p className="text-foreground">{artistProfile.genre}</p>
+            </div>
+          )}
+
+          {/* Based In */}
+          {artistProfile?.location && (
+            <div className="space-y-1">
+              <h3 className="font-display text-xs text-primary tracking-widest">BASED IN</h3>
+              <p className="text-foreground">{artistProfile.location}</p>
+            </div>
+          )}
+          {/* Availability */}
+          <div className="space-y-1">
+            <h3 className="font-display text-xs text-primary tracking-widest">AVAILABILITY</h3>
+            <p className="text-foreground">
+              {application.availability_preference 
+                ? availabilityLabels[application.availability_preference] 
+                : 'Not specified'}
+            </p>
+            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                {format(new Date(application.availability_start_date), 'MMM d, yyyy')} - {format(new Date(application.availability_end_date), 'MMM d, yyyy')}
+              </p>
+            )}
+            {application.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {application.availability_specific_dates.map((date, i) => (
+                  <span key={i} className="text-xs bg-secondary px-2 py-0.5">
+                    {format(new Date(date), 'MMM d, yyyy')}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Payment */}
+          <div className="space-y-1">
+            <h3 className="font-display text-xs text-primary tracking-widest">PAYMENT PREFERENCE</h3>
+            <p className="text-foreground">
+              {application.payment_preference 
+                ? paymentLabels[application.payment_preference] 
+                : 'Not specified'}
+            </p>
+          </div>
+
+          {/* Lineup */}
+          <div className="space-y-1">
+            <h3 className="font-display text-xs text-primary tracking-widest">LINEUP</h3>
+            <p className="text-foreground">
+              {application.lineup_preference 
+                ? lineupLabels[application.lineup_preference] 
+                : 'Not specified'}
+            </p>
+          </div>
+        </div>
+
+        {application.message && (
+          <div className="space-y-1 pt-2 border-t border-border">
+            <h3 className="font-display text-xs text-primary tracking-widest">MESSAGE</h3>
+            <p className="text-muted-foreground text-sm whitespace-pre-wrap">{application.message}</p>
+          </div>
+        )}
+      </div>
+
       {/* Artist Bio */}
       {artistProfile?.bio && (
         <div className="bg-card border border-border p-6">
@@ -481,80 +555,6 @@ export default function VenueApplicationDetail() {
           </ul>
         </div>
       )}
-
-      {/* Application Details */}
-      <div className="bg-card border border-border p-6 space-y-4">
-        <h2 className="font-display text-2xl text-accent font-bold">APPLICATION DETAILS</h2>
-
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-          {/* Genre */}
-          {artistProfile?.genre && (
-            <div className="space-y-1">
-              <h3 className="font-display text-xs text-primary tracking-widest">GENRE</h3>
-              <p className="text-foreground">{artistProfile.genre}</p>
-            </div>
-          )}
-
-          {/* Based In */}
-          {artistProfile?.location && (
-            <div className="space-y-1">
-              <h3 className="font-display text-xs text-primary tracking-widest">BASED IN</h3>
-              <p className="text-foreground">{artistProfile.location}</p>
-            </div>
-          )}
-          {/* Availability */}
-          <div className="space-y-1">
-            <h3 className="font-display text-xs text-primary tracking-widest">AVAILABILITY</h3>
-            <p className="text-foreground">
-              {application.availability_preference 
-                ? availabilityLabels[application.availability_preference] 
-                : 'Not specified'}
-            </p>
-            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && (
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {format(new Date(application.availability_start_date), 'MMM d, yyyy')} - {format(new Date(application.availability_end_date), 'MMM d, yyyy')}
-              </p>
-            )}
-            {application.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {application.availability_specific_dates.map((date, i) => (
-                  <span key={i} className="text-xs bg-secondary px-2 py-0.5">
-                    {format(new Date(date), 'MMM d, yyyy')}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Payment */}
-          <div className="space-y-1">
-            <h3 className="font-display text-xs text-primary tracking-widest">PAYMENT PREFERENCE</h3>
-            <p className="text-foreground">
-              {application.payment_preference 
-                ? paymentLabels[application.payment_preference] 
-                : 'Not specified'}
-            </p>
-          </div>
-
-          {/* Lineup */}
-          <div className="space-y-1">
-            <h3 className="font-display text-xs text-primary tracking-widest">LINEUP</h3>
-            <p className="text-foreground">
-              {application.lineup_preference 
-                ? lineupLabels[application.lineup_preference] 
-                : 'Not specified'}
-            </p>
-          </div>
-        </div>
-
-        {application.message && (
-          <div className="space-y-1 pt-2 border-t border-border">
-            <h3 className="font-display text-xs text-primary tracking-widest">MESSAGE</h3>
-            <p className="text-muted-foreground text-sm whitespace-pre-wrap">{application.message}</p>
-          </div>
-        )}
-      </div>
 
       {/* Additional Photos */}
       {artistProfile?.pictures && artistProfile.pictures.length > 1 && (
