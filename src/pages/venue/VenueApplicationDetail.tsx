@@ -396,17 +396,6 @@ export default function VenueApplicationDetail() {
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-          {artistProfile?.location && (
-            <span>{artistProfile.location}</span>
-          )}
-          {artistProfile?.location && artistProfile?.genre && (
-            <span>•</span>
-          )}
-          {artistProfile?.genre && (
-            <span>{artistProfile.genre}</span>
-          )}
-        </div>
       </div>
 
       {/* Main Artist Picture */}
@@ -497,7 +486,22 @@ export default function VenueApplicationDetail() {
       <div className="bg-card border border-border p-6 space-y-4">
         <h2 className="font-display text-2xl text-accent font-bold">APPLICATION DETAILS</h2>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+          {/* Genre */}
+          {artistProfile?.genre && (
+            <div className="space-y-1">
+              <h3 className="font-display text-xs text-primary tracking-widest">GENRE</h3>
+              <p className="text-foreground">{artistProfile.genre}</p>
+            </div>
+          )}
+
+          {/* Based In */}
+          {artistProfile?.location && (
+            <div className="space-y-1">
+              <h3 className="font-display text-xs text-primary tracking-widest">BASED IN</h3>
+              <p className="text-foreground">{artistProfile.location}</p>
+            </div>
+          )}
           {/* Availability */}
           <div className="space-y-1">
             <h3 className="font-display text-xs text-primary tracking-widest">AVAILABILITY</h3>
