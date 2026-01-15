@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon, Music, Youtube, Facebook } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -331,12 +331,12 @@ export default function VenueApplicationDetail() {
   const bandName = artistProfile?.band_name || `${application.artist?.first_name} ${application.artist?.last_name}`;
 
   const socialLinks = [
-    { key: 'spotify_link', label: 'Spotify', value: artistProfile?.spotify_link, icon: Music },
-    { key: 'soundcloud_link', label: 'SoundCloud', value: artistProfile?.soundcloud_link, icon: Music },
-    { key: 'apple_music_link', label: 'Apple Music', value: artistProfile?.apple_music_link, icon: Music },
-    { key: 'youtube_link', label: 'YouTube', value: artistProfile?.youtube_link, icon: Youtube },
-    { key: 'facebook_link', label: 'Facebook', value: artistProfile?.facebook_link, icon: Facebook },
-    { key: 'tiktok_link', label: 'TikTok', value: artistProfile?.tiktok_link, icon: Music },
+    { key: 'spotify_link', label: 'Spotify', value: artistProfile?.spotify_link },
+    { key: 'soundcloud_link', label: 'SoundCloud', value: artistProfile?.soundcloud_link },
+    { key: 'apple_music_link', label: 'Apple Music', value: artistProfile?.apple_music_link },
+    { key: 'youtube_link', label: 'YouTube', value: artistProfile?.youtube_link },
+    { key: 'facebook_link', label: 'Facebook', value: artistProfile?.facebook_link },
+    { key: 'tiktok_link', label: 'TikTok', value: artistProfile?.tiktok_link },
   ].filter(link => link.value);
 
   return (
@@ -433,22 +433,18 @@ export default function VenueApplicationDetail() {
         <div className="bg-card border border-border p-6">
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">LINKS</h2>
           <div className="flex flex-wrap gap-2">
-            {socialLinks.map((link) => {
-              const IconComponent = link.icon;
-              return (
-                <a
-                  key={link.key}
-                  href={link.value!}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm bg-secondary px-3 py-1.5 hover:bg-secondary/80 transition-colors"
-                >
-                  <IconComponent className="h-3 w-3" />
-                  {link.label}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              );
-            })}
+            {socialLinks.map((link) => (
+              <a
+                key={link.key}
+                href={link.value!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-sm bg-secondary px-3 py-1.5 hover:bg-secondary/80 transition-colors"
+              >
+                {link.label}
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            ))}
           </div>
         </div>
       )}
