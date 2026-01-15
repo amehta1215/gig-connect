@@ -402,8 +402,8 @@ export default function VenueApplications() {
     {/* Profile Incomplete Dialog */}
     <Dialog open={showIncompleteDialog} onOpenChange={setShowIncompleteDialog}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 font-display text-xl text-accent">
+        <DialogHeader className="sm:text-left text-center">
+          <DialogTitle className="flex items-center justify-center gap-2 font-display text-xl text-accent">
             COMPLETE YOUR PROFILE
           </DialogTitle>
         </DialogHeader>
