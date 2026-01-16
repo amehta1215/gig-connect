@@ -261,7 +261,7 @@ export default function VenueMessages() {
                 <Mail className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
                 <p className="text-muted-foreground text-sm">Empty</p>
               </div> : filteredThreads.map(thread => {
-            const displayName = `${thread.otherParty.name}${thread.otherParty.bandName ? ` (${thread.otherParty.bandName})` : ''}`;
+            const displayName = `To: ${thread.otherParty.bandName || thread.otherParty.name}`;
             const messageCount = thread.messages.length;
             return <div key={thread.thread_id} onClick={() => handleSelectThread(thread)} className={`p-3 border-b border-border cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}>
                     <div className="flex items-start gap-2">

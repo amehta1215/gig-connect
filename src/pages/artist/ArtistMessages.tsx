@@ -243,7 +243,7 @@ export default function ArtistMessages() {
                 <Mail className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
                 <p className="text-muted-foreground text-sm">No messages yet</p>
               </div> : filteredThreads.map(thread => {
-            const displayName = `${thread.otherParty.name}${thread.otherParty.venueName ? ` (${thread.otherParty.venueName})` : ''}`;
+            const displayName = `To: ${thread.otherParty.venueName || thread.otherParty.name}`;
             const messageCount = thread.messages.length;
             return <div key={thread.thread_id} onClick={() => handleSelectThread(thread)} className={`p-3 border-b border-border cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}>
                     <div className="flex items-start gap-2">
