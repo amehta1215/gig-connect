@@ -53,10 +53,12 @@ export function MessageReplyForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-border p-4 space-y-2 relative">
-      <Button type="button" variant="ghost" size="icon" onClick={onCancel} className="absolute top-2 right-2 h-6 w-6">
-        <X className="h-3 w-3" />
-      </Button>
+    <form onSubmit={handleSubmit} className="border-t border-border p-4 pt-2 space-y-2 relative">
+      <div className="flex justify-end">
+        <Button type="button" variant="ghost" size="icon" onClick={onCancel} className="h-6 w-6">
+          <X className="h-3 w-3" />
+        </Button>
+      </div>
       <Textarea
         placeholder="Write your reply..."
         value={content}
