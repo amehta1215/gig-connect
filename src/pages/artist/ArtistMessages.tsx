@@ -289,7 +289,7 @@ export default function ArtistMessages() {
         {/* Thread Detail */}
         <div className={`flex-1 flex flex-col ${selectedThreadId ? 'flex' : 'hidden md:flex'}`}>
           {selectedThread ? <>
-              <div className="p-4 border-b border-border flex items-center gap-3">
+              <div className="p-3 border-b border-border flex items-center gap-3">
                 <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedThreadId(null)}>
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
