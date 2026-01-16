@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft, Reply, PenSquare } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, Reply, PenSquare, MailX } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
@@ -175,6 +175,22 @@ export default function VenueMessages() {
       } : m));
     }
   };
+
+  const markThreadAsUnread = async (threadId: string) => {
+    const thread = threads.find(t => t.thread_id === threadId);
+    if (!thread) return;
+    // Mark the latest received message as unread
+    const latestReceivedMessage = [...thread.messages].reverse().find(m => m.receiver_id === user?.id);
+    if (latestReceivedMessage) {
+      await supabase.from('messages').update({
+        is_read: false
+      }).eq('id', latestReceivedMessage.id);
+      setMessages(messages.map(m => m.id === latestReceivedMessage.id ? {
+        ...m,
+        is_read: false
+      } : m));
+    }
+  };
   const filteredThreads = threads.filter(thread => {
     const matchesSearch = thread.latestMessage.subject?.toLowerCase().includes(searchTerm.toLowerCase()) || thread.messages.some(m => m.content.toLowerCase().includes(searchTerm.toLowerCase())) || thread.otherParty.name.toLowerCase().includes(searchTerm.toLowerCase());
     if (filter === 'unread') return matchesSearch && thread.hasUnread;
@@ -274,6 +290,14 @@ export default function VenueMessages() {
                 }} className="flex-shrink-0 p-1 hover:bg-secondary">
                         {thread.isStarred ? <Star className="h-4 w-4 text-primary fill-primary" /> : <Star className="h-4 w-4 text-muted-foreground" />}
                       </button>
+                      {!thread.hasUnread && (
+                        <button onClick={e => {
+                          e.stopPropagation();
+                          markThreadAsUnread(thread.thread_id);
+                        }} className="flex-shrink-0 p-1 hover:bg-secondary" title="Mark as unread">
+                          <MailX className="h-4 w-4 text-muted-foreground" />
+                        </button>
+                      )}
                     </div>
                   </div>;
           })}
