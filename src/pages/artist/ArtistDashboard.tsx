@@ -4,8 +4,8 @@ import FindVenues from './FindVenues';
 
 const artistTabs = [
   { label: 'Find Venues', href: '/artist' },
-  { label: 'Messages', href: '/artist/messages' },
   { label: 'Applications', href: '/artist/applications' },
+  { label: 'Inbox', href: '/artist/messages' },
   { label: 'Calendar', href: '/artist/calendar' },
 ];
 
