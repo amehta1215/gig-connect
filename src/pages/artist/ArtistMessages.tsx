@@ -208,19 +208,11 @@ export default function ArtistMessages() {
       <div className="flex h-[calc(100vh-220px)] min-h-[400px] border border-border overflow-hidden bg-card">
         {/* Thread List */}
         <div className={`w-full md:w-1/3 border-r border-border flex flex-col ${selectedThreadId ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-3 border-b border-border min-h-[72px] flex items-center">
-            <div className="relative w-full">
+          <div className="p-3 border-b border-border space-y-2">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search mail..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="pl-10 bg-background border-border"
-              />
+              <Input placeholder="Search mail..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-background border-border" />
             </div>
-          </div>
-
-          <div className="p-3 pt-2">
             <div className="flex gap-2">
               <Select value={filter} onValueChange={v => setFilter(v as FilterType)}>
                 <SelectTrigger className="flex-1 h-8 text-xs bg-background border-border">
@@ -243,6 +235,7 @@ export default function ArtistMessages() {
               </Select>
             </div>
           </div>
+
           <div className="flex-1 overflow-y-auto">
             {loading ? <div className="p-3 space-y-2">
                 {[1, 2, 3].map(i => <div key={i} className="h-16 bg-secondary animate-pulse" />)}
@@ -296,14 +289,14 @@ export default function ArtistMessages() {
         {/* Thread Detail */}
         <div className={`flex-1 flex flex-col ${selectedThreadId ? 'flex' : 'hidden md:flex'}`}>
           {selectedThread ? <>
-              <div className="p-3 border-b border-border flex items-center gap-3 min-h-[72px]">
+              <div className="p-4 border-b border-border flex items-center gap-3">
                 <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedThreadId(null)}>
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex-1">
                   <h2 className="font-display text-lg tracking-wide">{getBaseSubject(selectedThread)}</h2>
                   <p className="text-xs text-muted-foreground">
-                    To: {selectedThread.otherParty.name}
+                    {selectedThread.otherParty.name}
                     {selectedThread.otherParty.venueName && ` (${selectedThread.otherParty.venueName})`}
                   </p>
                 </div>
