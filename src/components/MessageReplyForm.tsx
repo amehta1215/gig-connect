@@ -54,8 +54,7 @@ export function MessageReplyForm({
 
   return (
     <form onSubmit={handleSubmit} className="border-t border-border p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{subject}</span>
+      <div className="flex items-center justify-end">
         <Button type="button" variant="ghost" size="icon" onClick={onCancel}>
           <X className="h-4 w-4" />
         </Button>
