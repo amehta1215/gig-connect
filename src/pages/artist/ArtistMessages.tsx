@@ -296,7 +296,7 @@ export default function ArtistMessages() {
                 <div className="flex-1">
                   <h2 className="font-display text-lg tracking-wide">{getBaseSubject(selectedThread)}</h2>
                   <p className="text-xs text-muted-foreground">
-                    {selectedThread.otherParty.name}
+                    To: {selectedThread.otherParty.name}
                     {selectedThread.otherParty.venueName && ` (${selectedThread.otherParty.venueName})`}
                   </p>
                 </div>
