@@ -53,17 +53,15 @@ export function MessageReplyForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-border p-4 space-y-3">
-      <div className="flex items-center justify-end">
-        <Button type="button" variant="ghost" size="icon" onClick={onCancel}>
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
+    <form onSubmit={handleSubmit} className="border-t border-border p-4 space-y-2 relative">
+      <Button type="button" variant="ghost" size="icon" onClick={onCancel} className="absolute top-2 right-2 h-6 w-6">
+        <X className="h-3 w-3" />
+      </Button>
       <Textarea
         placeholder="Write your reply..."
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        className="min-h-[100px] bg-background border-border resize-none"
+        className="min-h-[120px] bg-background border-border resize-none"
       />
       <div className="flex justify-end">
         <Button type="submit" disabled={sending || !content.trim()}>
