@@ -115,6 +115,15 @@ export default function VenueProfile() {
   const handlePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload JPG, PNG, WebP, or GIF images only. HEIC files are not supported by web browsers.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+    
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}/venue-picture-${Date.now()}.${fileExt}`;
     const {
@@ -176,7 +185,7 @@ export default function VenueProfile() {
           <h2 className="font-display text-xl">VENUE PICTURE *<span className="text-destructive">*</span></h2>
         </div>
 
-        <input type="file" ref={fileInputRef} onChange={handlePictureUpload} accept="image/*" className="hidden" />
+        <input type="file" ref={fileInputRef} onChange={handlePictureUpload} accept=".jpg,.jpeg,.png,.webp,.gif" className="hidden" />
 
         {formData.picture ? <div className="relative w-full max-w-md">
             <img src={formData.picture} alt="Venue" className="w-full aspect-[4/3] object-cover rounded-lg" />

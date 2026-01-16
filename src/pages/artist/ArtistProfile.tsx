@@ -104,6 +104,17 @@ export default function ArtistProfile() {
   const handlePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    
+    // Validate file types
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    for (const file of Array.from(files)) {
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload JPG, PNG, WebP, or GIF images only. HEIC files are not supported by web browsers.');
+        if (pictureInputRef.current) pictureInputRef.current.value = '';
+        return;
+      }
+    }
+    
     if (pictures.length + files.length > 4) {
       toast.error('Maximum 4 pictures allowed');
       return;
@@ -341,7 +352,7 @@ export default function ArtistProfile() {
             </button>
           )}
         </div>
-        <input ref={pictureInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePictureUpload} />
+        <input ref={pictureInputRef} type="file" accept=".jpg,.jpeg,.png,.webp,.gif" multiple className="hidden" onChange={handlePictureUpload} />
       </div>
 
       {/* Featured Samples Section */}

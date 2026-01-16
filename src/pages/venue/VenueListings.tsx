@@ -125,6 +125,17 @@ export default function VenueListings() {
   const handlePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    
+    // Validate file types
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    for (const file of Array.from(files)) {
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload JPG, PNG, WebP, or GIF images only. HEIC files are not supported by web browsers.');
+        if (pictureInputRef.current) pictureInputRef.current.value = '';
+        return;
+      }
+    }
+    
     setUploadingPicture(true);
     try {
       const newUrls: string[] = [];
@@ -239,7 +250,7 @@ export default function VenueListings() {
                     </span>
                   </button>
                 </div>
-                <input ref={pictureInputRef} type="file" accept="image/*" className="hidden" onChange={handlePictureUpload} />
+                <input ref={pictureInputRef} type="file" accept=".jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={handlePictureUpload} />
               </div>
 
               {/* General Info */}
