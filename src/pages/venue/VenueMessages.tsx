@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, StarOff, Mail, MailOpen, ChevronLeft, Reply, PenSquare } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, Reply, PenSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
@@ -272,7 +272,7 @@ export default function VenueMessages() {
                   e.stopPropagation();
                   toggleStar(thread.thread_id, thread.isStarred);
                 }} className="flex-shrink-0 p-1 hover:bg-secondary">
-                        {thread.isStarred ? <Star className="h-4 w-4 text-primary fill-primary" /> : <StarOff className="h-4 w-4 text-muted-foreground" />}
+                        {thread.isStarred ? <Star className="h-4 w-4 text-primary fill-primary" /> : <Star className="h-4 w-4 text-muted-foreground" />}
                       </button>
                     </div>
                   </div>;
