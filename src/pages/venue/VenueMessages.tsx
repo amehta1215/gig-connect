@@ -371,26 +371,24 @@ export default function VenueMessages() {
                 </Button>
                 <div className="flex-1">
                   <h2 className="font-display text-lg tracking-wide">{getBaseSubject(selectedThread)}</h2>
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs text-muted-foreground">
-                      To: {selectedThread.otherParty.bandName || selectedThread.otherParty.name}
-                    </p>
-                    {(() => {
-                      const application = getApplicationForArtist(selectedThread.otherParty.id);
-                      if (application) {
-                        return (
-                          <button
-                            onClick={() => handleViewApplication(application.id)}
-                            className="text-xs text-primary hover:underline transition-colors cursor-pointer"
-                          >
-                            View Artist Application
-                          </button>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    To: {selectedThread.otherParty.bandName || selectedThread.otherParty.name}
+                  </p>
                 </div>
+                {(() => {
+                  const application = getApplicationForArtist(selectedThread.otherParty.id);
+                  if (application) {
+                    return (
+                      <button
+                        onClick={() => handleViewApplication(application.id)}
+                        className="text-xs text-primary hover:underline transition-colors cursor-pointer"
+                      >
+                        View Artist Application
+                      </button>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
