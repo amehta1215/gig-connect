@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -45,12 +46,20 @@ interface Thread {
     venueName?: string;
   };
 }
+
+interface ArtistApplication {
+  id: string;
+  venue_listing_id: string;
+  venue_user_id: string;
+}
+
 type FilterType = 'all' | 'unread' | 'starred';
 type SortType = 'newest' | 'oldest';
 export default function ArtistMessages() {
   const {
     user
   } = useAuth();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,9 +67,12 @@ export default function ArtistMessages() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('newest');
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const [artistApplications, setArtistApplications] = useState<ArtistApplication[]>([]);
+
   useEffect(() => {
     if (user) {
       fetchMessages();
+      fetchArtistApplications();
     }
   }, [user]);
   const fetchMessages = async () => {
@@ -81,6 +93,43 @@ export default function ArtistMessages() {
     }
     setLoading(false);
   };
+
+  const fetchArtistApplications = async () => {
+    if (!user) return;
+    
+    // Get applications for this artist with venue profile info
+    const { data: applications } = await supabase
+      .from('applications')
+      .select(`
+        id,
+        venue_listing_id,
+        venue_listing:venue_listings!applications_venue_listing_id_fkey(
+          venue_profile:venue_profiles!venue_listings_venue_profile_id_fkey(
+            user_id
+          )
+        )
+      `)
+      .eq('artist_id', user.id);
+    
+    if (applications) {
+      const formattedApplications = applications.map(app => ({
+        id: app.id,
+        venue_listing_id: app.venue_listing_id,
+        venue_user_id: (app.venue_listing as any)?.venue_profile?.user_id || ''
+      }));
+      setArtistApplications(formattedApplications);
+    }
+  };
+
+  // Get application ID for a venue user
+  const getApplicationForVenue = (venueUserId: string) => {
+    return artistApplications.find(app => app.venue_user_id === venueUserId);
+  };
+
+  const handleViewApplication = (applicationId: string) => {
+    navigate(`/artist/applications/${applicationId}`);
+  };
+
 
   // Group messages by thread
   const threads = useMemo(() => {
@@ -299,6 +348,20 @@ export default function ArtistMessages() {
                     To: {selectedThread.otherParty.venueName || selectedThread.otherParty.name}
                   </p>
                 </div>
+                {(() => {
+                  const application = getApplicationForVenue(selectedThread.otherParty.id);
+                  if (application) {
+                    return (
+                      <button
+                        onClick={() => handleViewApplication(application.id)}
+                        className="text-xs text-primary hover:underline transition-colors cursor-pointer"
+                      >
+                        View Your Application
+                      </button>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
