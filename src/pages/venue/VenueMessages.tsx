@@ -5,17 +5,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft, Reply, PenSquare, MailX, ExternalLink } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, Reply, PenSquare, MailX } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 import { ComposeMessagePanel } from '@/components/ComposeMessagePanel';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 interface Message {
   id: string;
   sender_id: string;
@@ -377,37 +371,25 @@ export default function VenueMessages() {
                 </Button>
                 <div className="flex-1">
                   <h2 className="font-display text-lg tracking-wide">{getBaseSubject(selectedThread)}</h2>
-                  {(() => {
-                    const application = getApplicationForArtist(selectedThread.otherParty.id);
-                    const displayName = selectedThread.otherParty.bandName || selectedThread.otherParty.name;
-                    
-                    if (application) {
-                      return (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() => handleViewApplication(application.id)}
-                                className="text-xs text-muted-foreground hover:text-primary hover:underline transition-colors cursor-pointer flex items-center gap-1"
-                              >
-                                To: {displayName}
-                                <ExternalLink className="h-3 w-3" />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>View Artist Application</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      );
-                    }
-                    
-                    return (
-                      <p className="text-xs text-muted-foreground">
-                        To: {displayName}
-                      </p>
-                    );
-                  })()}
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      To: {selectedThread.otherParty.bandName || selectedThread.otherParty.name}
+                    </p>
+                    {(() => {
+                      const application = getApplicationForArtist(selectedThread.otherParty.id);
+                      if (application) {
+                        return (
+                          <button
+                            onClick={() => handleViewApplication(application.id)}
+                            className="text-xs text-primary hover:underline transition-colors cursor-pointer"
+                          >
+                            View Artist Application
+                          </button>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
                 </div>
               </div>
 
