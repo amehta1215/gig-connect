@@ -10,6 +10,8 @@ import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 import { ComposeMessagePanel } from '@/components/ComposeMessagePanel';
+import { MessageAttachments } from '@/components/MessageAttachments';
+
 interface Message {
   id: string;
   sender_id: string;
@@ -20,6 +22,7 @@ interface Message {
   is_read: boolean;
   is_starred: boolean;
   created_at: string;
+  attachments?: any;
   sender?: {
     first_name: string;
     last_name: string;
@@ -404,6 +407,7 @@ export default function VenueMessages() {
                           </span>
                         </div>
                         <FormattedMessageContent content={message.content} />
+                        <MessageAttachments attachments={message.attachments} />
                       </div>
                     </div>;
             })}

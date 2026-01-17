@@ -1,12 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Send, Search, X, ChevronLeft } from 'lucide-react';
+import { Send, Search, X, ChevronLeft, Paperclip, File, Image } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+
+interface Attachment {
+  name: string;
+  url: string;
+  type: string;
+  size: number;
+}
 
 interface Artist {
   id: string;
@@ -31,6 +38,9 @@ export function ComposeMessagePanel({ onSuccess, onClose, initialArtist, initial
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch artists who have applied to this venue
   useEffect(() => {
@@ -123,9 +133,66 @@ export function ComposeMessagePanel({ onSuccess, onClose, initialArtist, initial
     setSearchTerm('');
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !user) return;
+
+    setUploading(true);
+    const newAttachments: Attachment[] = [];
+
+    for (const file of Array.from(files)) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} is too large (max 10MB)`);
+        continue;
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { error } = await supabase.storage
+        .from('message-attachments')
+        .upload(fileName, file);
+
+      if (error) {
+        toast.error(`Failed to upload ${file.name}`);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('message-attachments')
+        .getPublicUrl(fileName);
+
+      newAttachments.push({
+        name: file.name,
+        url: publicUrl,
+        type: file.type,
+        size: file.size,
+      });
+    }
+
+    setAttachments([...attachments, ...newAttachments]);
+    setUploading(false);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(attachments.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const isImageType = (type: string) => type.startsWith('image/');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedArtist || !content.trim() || !user) return;
+    if (!selectedArtist || (!content.trim() && attachments.length === 0) || !user) return;
 
     setSending(true);
     const threadId = crypto.randomUUID();
@@ -136,17 +203,18 @@ export function ComposeMessagePanel({ onSuccess, onClose, initialArtist, initial
       content: content.trim(),
       sender_id: user.id,
       receiver_id: selectedArtist.id,
-    });
+      attachments: attachments.length > 0 ? JSON.stringify(attachments) : '[]',
+    } as any);
 
     if (error) {
       toast.error('Failed to send message');
     } else {
       toast.success('Message sent');
-      // Reset form
       setSelectedArtist(null);
       setSearchTerm('');
       setSubject('');
       setContent('');
+      setAttachments([]);
       onSuccess();
       onClose();
     }
@@ -257,9 +325,57 @@ export function ComposeMessagePanel({ onSuccess, onClose, initialArtist, initial
           />
         </div>
 
+        {/* Attachments Preview */}
+        {attachments.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {attachments.map((attachment, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-2 bg-secondary px-2 py-1 text-xs border border-border"
+              >
+                {isImageType(attachment.type) ? (
+                  <Image className="h-3 w-3 text-muted-foreground" />
+                ) : (
+                  <File className="h-3 w-3 text-muted-foreground" />
+                )}
+                <span className="max-w-[120px] truncate">{attachment.name}</span>
+                <span className="text-muted-foreground">({formatFileSize(attachment.size)})</span>
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(index)}
+                  className="p-0.5 hover:bg-background/50 transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Actions */}
-        <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={sending || !selectedArtist || !content.trim()}>
+        <div className="flex justify-between items-center pt-2">
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+              accept="image/*,.pdf,.doc,.docx,.txt,.zip"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Paperclip className="h-4 w-4 mr-1" />
+              {uploading ? 'Uploading...' : 'Attach'}
+            </Button>
+          </div>
+          <Button type="submit" disabled={sending || !selectedArtist || (!content.trim() && attachments.length === 0)}>
             <Send className="h-4 w-4 mr-2" />
             {sending ? 'Sending...' : 'Send'}
           </Button>

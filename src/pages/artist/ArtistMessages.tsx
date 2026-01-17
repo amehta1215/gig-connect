@@ -9,6 +9,8 @@ import { Search, Star, Mail, MailOpen, ChevronLeft, Reply, MailX } from 'lucide-
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
+import { MessageAttachments } from '@/components/MessageAttachments';
+
 interface Message {
   id: string;
   sender_id: string;
@@ -19,6 +21,7 @@ interface Message {
   is_read: boolean;
   is_starred: boolean;
   created_at: string;
+  attachments?: any;
   sender?: {
     first_name: string;
     last_name: string;
@@ -377,6 +380,7 @@ export default function ArtistMessages() {
                           </span>
                         </div>
                         <FormattedMessageContent content={message.content} />
+                        <MessageAttachments attachments={message.attachments} />
                       </div>
                     </div>;
             })}
