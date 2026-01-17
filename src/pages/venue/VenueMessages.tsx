@@ -1,15 +1,21 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft, Reply, PenSquare, MailX } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, Reply, PenSquare, MailX, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 import { ComposeMessagePanel } from '@/components/ComposeMessagePanel';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 interface Message {
   id: string;
   sender_id: string;
@@ -47,12 +53,18 @@ interface Thread {
     bandName?: string;
   };
 }
+
+interface ArtistApplication {
+  id: string;
+  artist_id: string;
+}
 type FilterType = 'all' | 'unread' | 'starred';
 type SortType = 'newest' | 'oldest';
 export default function VenueMessages() {
   const {
     user
   } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +76,7 @@ export default function VenueMessages() {
   const [isComposing, setIsComposing] = useState(false);
   const [composeArtist, setComposeArtist] = useState<{ id: string; name: string; bandName: string | null } | null>(null);
   const [composeSubject, setComposeSubject] = useState<string>('');
+  const [artistApplications, setArtistApplications] = useState<ArtistApplication[]>([]);
 
   // Handle URL params for thread or compose
   useEffect(() => {
@@ -93,8 +106,43 @@ export default function VenueMessages() {
   useEffect(() => {
     if (user) {
       fetchMessages();
+      fetchArtistApplications();
     }
   }, [user]);
+
+  const fetchArtistApplications = async () => {
+    if (!user) return;
+    
+    // First get venue profile
+    const { data: venueProfile } = await supabase
+      .from('venue_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (!venueProfile) return;
+    
+    // Get venue listings for this venue
+    const { data: listings } = await supabase
+      .from('venue_listings')
+      .select('id')
+      .eq('venue_profile_id', venueProfile.id);
+    
+    if (!listings || listings.length === 0) return;
+    
+    const listingIds = listings.map(l => l.id);
+    
+    // Get applications for these listings
+    const { data: applications } = await supabase
+      .from('applications')
+      .select('id, artist_id')
+      .in('venue_listing_id', listingIds);
+    
+    if (applications) {
+      setArtistApplications(applications);
+    }
+  };
+
   const fetchMessages = async () => {
     if (!user) return;
     setLoading(true);
@@ -112,6 +160,15 @@ export default function VenueMessages() {
       setMessages(data as unknown as Message[]);
     }
     setLoading(false);
+  };
+
+  // Get application ID for an artist
+  const getApplicationForArtist = (artistId: string) => {
+    return artistApplications.find(app => app.artist_id === artistId);
+  };
+
+  const handleViewApplication = (applicationId: string) => {
+    navigate(`/venue/applications/${applicationId}`);
   };
 
   // Group messages by thread
@@ -320,9 +377,37 @@ export default function VenueMessages() {
                 </Button>
                 <div className="flex-1">
                   <h2 className="font-display text-lg tracking-wide">{getBaseSubject(selectedThread)}</h2>
-                  <p className="text-xs text-muted-foreground">
-                    To: {selectedThread.otherParty.bandName || selectedThread.otherParty.name}
-                  </p>
+                  {(() => {
+                    const application = getApplicationForArtist(selectedThread.otherParty.id);
+                    const displayName = selectedThread.otherParty.bandName || selectedThread.otherParty.name;
+                    
+                    if (application) {
+                      return (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => handleViewApplication(application.id)}
+                                className="text-xs text-muted-foreground hover:text-primary hover:underline transition-colors cursor-pointer flex items-center gap-1"
+                              >
+                                To: {displayName}
+                                <ExternalLink className="h-3 w-3" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>View Artist Application</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      );
+                    }
+                    
+                    return (
+                      <p className="text-xs text-muted-foreground">
+                        To: {displayName}
+                      </p>
+                    );
+                  })()}
                 </div>
               </div>
 
