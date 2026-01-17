@@ -10,6 +10,11 @@ import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 import { ComposeMessagePanel } from '@/components/ComposeMessagePanel';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card';
 interface Message {
   id: string;
   sender_id: string;
@@ -371,25 +376,36 @@ export default function VenueMessages() {
                 </Button>
                 <div className="flex-1">
                   <h2 className="font-display text-lg tracking-wide">{getBaseSubject(selectedThread)}</h2>
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs text-muted-foreground">
-                      To: {selectedThread.otherParty.bandName || selectedThread.otherParty.name}
-                    </p>
-                    {(() => {
-                      const application = getApplicationForArtist(selectedThread.otherParty.id);
-                      if (application) {
-                        return (
-                          <button
-                            onClick={() => handleViewApplication(application.id)}
-                            className="text-xs text-primary hover:underline transition-colors cursor-pointer"
-                          >
-                            View Artist Application
-                          </button>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </div>
+                  {(() => {
+                    const application = getApplicationForArtist(selectedThread.otherParty.id);
+                    const displayName = selectedThread.otherParty.bandName || selectedThread.otherParty.name;
+                    
+                    if (application) {
+                      return (
+                        <HoverCard openDelay={200}>
+                          <HoverCardTrigger asChild>
+                            <p className="text-xs text-muted-foreground cursor-default">
+                              To: {displayName}
+                            </p>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-auto p-2" side="bottom" align="start">
+                            <button
+                              onClick={() => handleViewApplication(application.id)}
+                              className="text-sm text-primary hover:underline cursor-pointer"
+                            >
+                              View Artist Application
+                            </button>
+                          </HoverCardContent>
+                        </HoverCard>
+                      );
+                    }
+                    
+                    return (
+                      <p className="text-xs text-muted-foreground">
+                        To: {displayName}
+                      </p>
+                    );
+                  })()}
                 </div>
               </div>
 
