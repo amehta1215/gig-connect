@@ -36,6 +36,7 @@ export default function ArtistCalendar() {
   const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
   const [eventTime, setEventTime] = useState('');
   const [eventVenueName, setEventVenueName] = useState('');
+  const [eventLocation, setEventLocation] = useState('');
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
@@ -76,12 +77,23 @@ export default function ArtistCalendar() {
     setEventDate(selectedDate);
     setEventTime('');
     setEventVenueName('');
+    setEventLocation('');
     setCreateDialogOpen(true);
   };
 
   const handleCreateEvent = async () => {
     if (!eventDate) {
       toast.error('Please select a date');
+      return;
+    }
+
+    if (!eventVenueName.trim()) {
+      toast.error('Please enter a venue name');
+      return;
+    }
+
+    if (!eventLocation.trim()) {
+      toast.error('Please enter a location');
       return;
     }
 
@@ -112,7 +124,7 @@ export default function ArtistCalendar() {
         artist_id: user!.id,
         gig_date: format(eventDate, 'yyyy-MM-dd'),
         show_time: eventTime || null,
-        notes: eventVenueName ? `Venue: ${eventVenueName}` : null,
+        notes: `Venue: ${eventVenueName}\nLocation: ${eventLocation}`,
         openers: [],
       })
       .select()
@@ -300,13 +312,27 @@ export default function ArtistCalendar() {
               </div>
             </div>
 
-            {/* Venue Name (optional) */}
+            {/* Venue Name */}
             <div className="space-y-2">
-              <label className="font-display text-xs text-primary tracking-widest">VENUE NAME (OPTIONAL)</label>
+              <label className="font-display text-xs text-primary tracking-widest">
+                VENUE NAME <span className="text-destructive">*</span>
+              </label>
               <Input
                 value={eventVenueName}
                 onChange={(e) => setEventVenueName(e.target.value)}
-                placeholder="Enter venue or event name"
+                placeholder="Enter venue name"
+              />
+            </div>
+
+            {/* Location */}
+            <div className="space-y-2">
+              <label className="font-display text-xs text-primary tracking-widest">
+                LOCATION <span className="text-destructive">*</span>
+              </label>
+              <Input
+                value={eventLocation}
+                onChange={(e) => setEventLocation(e.target.value)}
+                placeholder="Enter location"
               />
             </div>
           </div>
@@ -317,7 +343,7 @@ export default function ArtistCalendar() {
             </Button>
             <Button
               onClick={handleCreateEvent}
-              disabled={creating || !eventDate}
+              disabled={creating || !eventDate || !eventVenueName.trim() || !eventLocation.trim()}
               className="bg-primary hover:bg-primary/90"
             >
               {creating ? 'Creating...' : 'Create Event'}
