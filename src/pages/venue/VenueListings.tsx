@@ -322,14 +322,14 @@ export default function VenueListings() {
                 {editingListing ? (
                   <Button
                     variant="outline"
+                    size="icon"
                     onClick={() => {
                       handleDelete(editingListing.id);
                       setIsDialogOpen(false);
                     }}
-                    className="font-display tracking-widest text-destructive hover:bg-destructive hover:text-destructive-foreground border-border"
+                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    DELETE
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 ) : (
                   <div />
