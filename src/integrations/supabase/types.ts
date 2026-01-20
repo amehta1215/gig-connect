@@ -212,6 +212,7 @@ export type Database = {
           created_at: string
           gig_date: string
           id: string
+          manual_artist_name: string | null
           manual_location: string | null
           manual_venue_name: string | null
           notes: string | null
@@ -226,6 +227,7 @@ export type Database = {
           created_at?: string
           gig_date: string
           id?: string
+          manual_artist_name?: string | null
           manual_location?: string | null
           manual_venue_name?: string | null
           notes?: string | null
@@ -240,6 +242,7 @@ export type Database = {
           created_at?: string
           gig_date?: string
           id?: string
+          manual_artist_name?: string | null
           manual_location?: string | null
           manual_venue_name?: string | null
           notes?: string | null
