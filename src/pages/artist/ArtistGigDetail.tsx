@@ -4,9 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ArrowLeft, MapPin, Music } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { LocationAutocomplete } from '@/components/LocationAutocomplete';
+import { ArrowLeft, CalendarIcon, Clock, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface Opener {
   type: 'riff' | 'external';
@@ -22,6 +28,9 @@ interface GigData {
   openers: Opener[];
   venue_listing_id: string;
   artist_id: string;
+  application_id: string | null;
+  manual_venue_name: string | null;
+  manual_location: string | null;
 }
 
 interface VenueListing {
@@ -48,6 +57,18 @@ export default function ArtistGigDetail() {
   const [loading, setLoading] = useState(true);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  
+  // Edit state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDate, setEditDate] = useState<Date | undefined>(undefined);
+  const [editTime, setEditTime] = useState('');
+  const [editVenueName, setEditVenueName] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [editNotes, setEditNotes] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Check if this is a manual event (artist-created without application)
+  const isManualEvent = gig && !gig.application_id;
 
   useEffect(() => {
     if (id && user) {
@@ -105,6 +126,55 @@ export default function ArtistGigDetail() {
     }
 
     setLoading(false);
+  };
+
+  const handleEditClick = () => {
+    if (!gig) return;
+    setEditDate(new Date(gig.gig_date));
+    setEditTime(gig.show_time || '');
+    setEditVenueName(gig.manual_venue_name || '');
+    setEditLocation(gig.manual_location || '');
+    setEditNotes(gig.notes || '');
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!gig || !editDate) return;
+
+    if (isManualEvent && (!editVenueName.trim() || !editLocation.trim())) {
+      toast.error('Venue name and location are required');
+      return;
+    }
+
+    setSaving(true);
+
+    const updateData: Record<string, unknown> = {
+      gig_date: format(editDate, 'yyyy-MM-dd'),
+      show_time: editTime || null,
+      notes: editNotes.trim() || null,
+    };
+
+    // Only update manual fields for manual events
+    if (isManualEvent) {
+      updateData.manual_venue_name = editVenueName.trim();
+      updateData.manual_location = editLocation.trim();
+    }
+
+    const { error } = await supabase
+      .from('gig_listings')
+      .update(updateData)
+      .eq('id', gig.id);
+
+    setSaving(false);
+
+    if (error) {
+      toast.error('Failed to save changes');
+      return;
+    }
+
+    toast.success('Changes saved!');
+    setEditDialogOpen(false);
+    navigate('/artist/calendar');
   };
 
   const handleCancelGig = async () => {
@@ -165,13 +235,30 @@ export default function ArtistGigDetail() {
   }
 
   const openers = (gig.openers || []) as Opener[];
+  
+  // Determine venue name and location to display
+  const displayVenueName = isManualEvent && gig.manual_venue_name
+    ? gig.manual_venue_name
+    : venueListing?.room_name 
+      ? `${venueListing.room_name} at ${venueListing.venue_name}`
+      : venueListing?.venue_name || 'Venue';
+  
+  const displayLocation = isManualEvent && gig.manual_location
+    ? gig.manual_location
+    : venueListing?.location;
 
   return (
     <div className="space-y-6 animate-fade-in max-w-3xl mx-auto">
       {/* Back Button */}
-      <Button variant="ghost" size="icon" onClick={() => navigate('/artist/calendar')}>
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/artist/calendar')}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleEditClick}>
+          <Pencil className="h-4 w-4 mr-2" />
+          Edit
+        </Button>
+      </div>
 
       {/* Gig Flyer Style Card */}
       <div className="bg-card border-4 border-accent p-8 space-y-6">
@@ -232,13 +319,11 @@ export default function ArtistGigDetail() {
         {/* Venue Info */}
         <div className="text-center border-t-2 border-border pt-6">
           <p className="font-display text-2xl text-foreground">
-            {venueListing?.room_name 
-              ? `${venueListing.room_name} at ${venueListing.venue_name}`
-              : venueListing?.venue_name}
+            {displayVenueName}
           </p>
-          {venueListing?.location && (
+          {displayLocation && (
             <p className="text-muted-foreground mt-2">
-              {venueListing.location}
+              {displayLocation}
             </p>
           )}
         </div>
@@ -260,6 +345,111 @@ export default function ArtistGigDetail() {
           Cancel Gig
         </Button>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl">EDIT GIG</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Date */}
+            <div className="space-y-2">
+              <label className="font-display text-xs text-primary tracking-widest">DATE</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !editDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {editDate ? format(editDate, 'MMMM do, yyyy') : 'Pick a date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={editDate}
+                    onSelect={setEditDate}
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Time */}
+            <div className="space-y-2">
+              <label className="font-display text-xs text-primary tracking-widest">TIME OF SHOW</label>
+              <div className="relative">
+                <Input
+                  type="time"
+                  value={editTime}
+                  onChange={(e) => setEditTime(e.target.value)}
+                  className="pl-10"
+                />
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+
+            {/* Manual event fields */}
+            {isManualEvent && (
+              <>
+                {/* Venue Name */}
+                <div className="space-y-2">
+                  <label className="font-display text-xs text-primary tracking-widest">
+                    VENUE NAME <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    value={editVenueName}
+                    onChange={(e) => setEditVenueName(e.target.value)}
+                    placeholder="Enter venue name"
+                  />
+                </div>
+
+                {/* Location */}
+                <div className="space-y-2">
+                  <label className="font-display text-xs text-primary tracking-widest">
+                    LOCATION <span className="text-destructive">*</span>
+                  </label>
+                  <LocationAutocomplete
+                    value={editLocation}
+                    onChange={setEditLocation}
+                    placeholder="Search for location"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Notes */}
+            <div className="space-y-2">
+              <label className="font-display text-xs text-primary tracking-widest">NOTES</label>
+              <Textarea
+                value={editNotes}
+                onChange={(e) => setEditNotes(e.target.value)}
+                placeholder="Add any notes..."
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveChanges}
+              disabled={saving || !editDate || (isManualEvent && (!editVenueName.trim() || !editLocation.trim()))}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Cancel Confirmation Dialog */}
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
