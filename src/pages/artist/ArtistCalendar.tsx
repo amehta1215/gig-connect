@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { CalendarIcon, Clock, Plus } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
@@ -17,6 +18,9 @@ interface GigListing {
   gig_date: string;
   venue_listing_id: string;
   artist_id: string;
+  application_id: string | null;
+  manual_venue_name: string | null;
+  manual_location: string | null;
   venue_listing?: {
     venue_name: string;
     room_name: string | null;
@@ -116,7 +120,7 @@ export default function ArtistCalendar() {
       return;
     }
 
-    // Create gig listing without application_id
+    // Create gig listing without application_id, using new columns for manual venue/location
     const { data: newGig, error } = await supabase
       .from('gig_listings')
       .insert({
@@ -124,7 +128,8 @@ export default function ArtistCalendar() {
         artist_id: user!.id,
         gig_date: format(eventDate, 'yyyy-MM-dd'),
         show_time: eventTime || null,
-        notes: `Venue: ${eventVenueName}\nLocation: ${eventLocation}`,
+        manual_venue_name: eventVenueName.trim(),
+        manual_location: eventLocation.trim(),
         openers: [],
       })
       .select()
@@ -207,9 +212,13 @@ export default function ArtistCalendar() {
           ) : (
             <div className="space-y-3">
               {gigsOnSelectedDate.map(gig => {
-                const venueName = gig.venue_listing?.room_name 
-                  ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` 
-                  : gig.venue_listing?.venue_name || 'Venue';
+                const isManual = !gig.application_id && gig.manual_venue_name;
+                const venueName = isManual
+                  ? gig.manual_venue_name
+                  : gig.venue_listing?.room_name 
+                    ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` 
+                    : gig.venue_listing?.venue_name || 'Venue';
+                const location = isManual ? gig.manual_location : gig.venue_listing?.location;
                 return (
                   <button
                     key={gig.id}
@@ -217,8 +226,8 @@ export default function ArtistCalendar() {
                     className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors"
                   >
                     <p className="font-display text-lg text-accent">{venueName}</p>
-                    {gig.venue_listing?.location && (
-                      <p className="text-sm text-muted-foreground">{gig.venue_listing.location}</p>
+                    {location && (
+                      <p className="text-sm text-muted-foreground">{location}</p>
                     )}
                   </button>
                 );
@@ -236,9 +245,13 @@ export default function ArtistCalendar() {
         ) : (
           <div className="space-y-2">
             {gigs.filter(g => new Date(g.gig_date) >= new Date()).map(gig => {
-              const venueName = gig.venue_listing?.room_name 
-                ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` 
-                : gig.venue_listing?.venue_name || 'Venue';
+              const isManual = !gig.application_id && gig.manual_venue_name;
+              const venueName = isManual
+                ? gig.manual_venue_name
+                : gig.venue_listing?.room_name 
+                  ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` 
+                  : gig.venue_listing?.venue_name || 'Venue';
+              const location = isManual ? gig.manual_location : gig.venue_listing?.location;
               return (
                 <button
                   key={gig.id}
@@ -247,8 +260,8 @@ export default function ArtistCalendar() {
                 >
                   <div>
                     <p className="font-display text-accent">{venueName}</p>
-                    {gig.venue_listing?.location && (
-                      <p className="text-xs text-muted-foreground">{gig.venue_listing.location}</p>
+                    {location && (
+                      <p className="text-xs text-muted-foreground">{location}</p>
                     )}
                   </div>
                   <span className="text-sm text-muted-foreground">
@@ -329,10 +342,10 @@ export default function ArtistCalendar() {
               <label className="font-display text-xs text-primary tracking-widest">
                 LOCATION <span className="text-destructive">*</span>
               </label>
-              <Input
+              <LocationAutocomplete
                 value={eventLocation}
-                onChange={(e) => setEventLocation(e.target.value)}
-                placeholder="Enter location"
+                onChange={setEventLocation}
+                placeholder="Search for location"
               />
             </div>
           </div>
