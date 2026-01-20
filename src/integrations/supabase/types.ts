@@ -207,7 +207,7 @@ export type Database = {
       }
       gig_listings: {
         Row: {
-          application_id: string
+          application_id: string | null
           artist_id: string
           created_at: string
           gig_date: string
@@ -219,7 +219,7 @@ export type Database = {
           venue_listing_id: string
         }
         Insert: {
-          application_id: string
+          application_id?: string | null
           artist_id: string
           created_at?: string
           gig_date: string
@@ -231,7 +231,7 @@ export type Database = {
           venue_listing_id: string
         }
         Update: {
-          application_id?: string
+          application_id?: string | null
           artist_id?: string
           created_at?: string
           gig_date?: string
