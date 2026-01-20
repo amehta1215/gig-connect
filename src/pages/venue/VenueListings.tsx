@@ -318,13 +318,30 @@ export default function VenueListings() {
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end gap-2 pt-4 border-t border-border">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="font-display tracking-widest">
-                  CANCEL
-                </Button>
-                <Button onClick={handleSave} disabled={saving} className="font-display tracking-widest">
-                  {saving ? '...' : editingListing ? 'UPDATE' : 'CREATE'}
-                </Button>
+              <div className="flex justify-between pt-4 border-t border-border">
+                {editingListing ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      handleDelete(editingListing.id);
+                      setIsDialogOpen(false);
+                    }}
+                    className="font-display tracking-widest text-destructive hover:bg-destructive hover:text-destructive-foreground border-border"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    DELETE
+                  </Button>
+                ) : (
+                  <div />
+                )}
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="font-display tracking-widest">
+                    CANCEL
+                  </Button>
+                  <Button onClick={handleSave} disabled={saving} className="font-display tracking-widest">
+                    {saving ? '...' : editingListing ? 'UPDATE' : 'CREATE'}
+                  </Button>
+                </div>
               </div>
             </div>
           </DialogContent>
@@ -372,12 +389,9 @@ export default function VenueListings() {
                   </div>}
 
                 {/* Actions */}
-                <div className="flex gap-2 mt-3">
-                  <Button variant="outline" size="sm" className="flex-1 font-display tracking-widest text-xs border-border" onClick={() => openDialog(listing)}>
+                <div className="mt-3">
+                  <Button variant="outline" size="sm" className="w-full font-display tracking-widest text-xs border-border" onClick={() => openDialog(listing)}>
                     EDIT
-                  </Button>
-                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border" onClick={() => handleDelete(listing.id)}>
-                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
