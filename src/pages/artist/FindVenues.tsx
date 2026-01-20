@@ -27,22 +27,12 @@ interface VenueProfile {
   picture: string | null;
 }
 const genres = ['Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
-const capacityRanges = [{
-  label: 'Any',
-  value: 'any'
-}, {
-  label: '<100',
-  value: '0-100'
-}, {
-  label: '100-300',
-  value: '100-300'
-}, {
-  label: '300-500',
-  value: '300-500'
-}, {
-  label: '500+',
-  value: '500+'
-}];
+const capacityRanges = [
+  { label: '<100', value: '0-100', min: 0, max: 100 },
+  { label: '100-300', value: '100-300', min: 100, max: 300 },
+  { label: '300-500', value: '300-500', min: 300, max: 500 },
+  { label: '500+', value: '500+', min: 500, max: Infinity },
+];
 export default function FindVenues() {
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -51,7 +41,7 @@ export default function FindVenues() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [selectedCapacity, setSelectedCapacity] = useState<string>('any');
+  const [selectedCapacities, setSelectedCapacities] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -99,13 +89,12 @@ export default function FindVenues() {
     const matchesGenre = selectedGenres.length === 0 || selectedGenres.some(g => venue.genres?.includes(g));
     const matchesLocation = !selectedLocation || venue.location?.toLowerCase().includes(selectedLocation.toLowerCase());
     let matchesCapacity = true;
-    if (selectedCapacity !== 'any' && venue.capacity) {
-      const [min, max] = selectedCapacity.split('-').map(Number);
-      if (selectedCapacity === '500+') {
-        matchesCapacity = venue.capacity >= 500;
-      } else {
-        matchesCapacity = venue.capacity >= min && venue.capacity <= max;
-      }
+    if (selectedCapacities.length > 0 && venue.capacity) {
+      matchesCapacity = selectedCapacities.some(cap => {
+        const range = capacityRanges.find(r => r.value === cap);
+        if (!range) return false;
+        return venue.capacity! >= range.min && venue.capacity! <= range.max;
+      });
     }
     return matchesSearch && matchesGenre && matchesLocation && matchesCapacity;
   });
@@ -117,11 +106,19 @@ export default function FindVenues() {
     );
   };
 
-  const hasActiveFilters = selectedGenres.length > 0 || selectedCapacity !== 'any' || selectedLocation !== '';
+  const toggleCapacity = (capacity: string) => {
+    setSelectedCapacities(prev => 
+      prev.includes(capacity) 
+        ? prev.filter(c => c !== capacity)
+        : [...prev, capacity]
+    );
+  };
+
+  const hasActiveFilters = selectedGenres.length > 0 || selectedCapacities.length > 0 || selectedLocation !== '';
   
   const clearAllFilters = () => {
     setSelectedGenres([]);
-    setSelectedCapacity('any');
+    setSelectedCapacities([]);
     setSelectedLocation('');
     setSearchTerm('');
   };
@@ -160,18 +157,45 @@ export default function FindVenues() {
     </Popover>
   );
 
+  const capacityMultiSelect = (className?: string) => (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className={`bg-card border-border justify-start ${className || ''}`}>
+          <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+          {selectedCapacities.length === 0 ? 'Capacity' : `${selectedCapacities.length} selected`}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-2" align="start">
+        <div className="space-y-2">
+          {selectedCapacities.length > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full justify-start text-xs text-muted-foreground"
+              onClick={() => setSelectedCapacities([])}
+            >
+              <X className="h-3 w-3 mr-1" /> Clear all
+            </Button>
+          )}
+          {capacityRanges.map(range => (
+            <label key={range.value} className="flex items-center gap-2 cursor-pointer hover:bg-secondary p-1.5 rounded">
+              <Checkbox 
+                checked={selectedCapacities.includes(range.value)}
+                onCheckedChange={() => toggleCapacity(range.value)}
+              />
+              <span className="text-sm">{range.label}</span>
+            </label>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+
   const filtersContent = (
     <div className="space-y-4">
       <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Location" className="w-full" />
       {genreMultiSelect("w-full")}
-      <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
-        <SelectTrigger className="bg-background">
-          <SelectValue placeholder="Capacity" />
-        </SelectTrigger>
-        <SelectContent>
-          {capacityRanges.map(range => <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>)}
-        </SelectContent>
-      </Select>
+      {capacityMultiSelect("w-full")}
     </div>
   );
   return <div className="space-y-6 animate-fade-in">
@@ -190,15 +214,7 @@ export default function FindVenues() {
           <div className="hidden lg:flex gap-2">
             <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Location" className="w-48" />
             {genreMultiSelect("w-36")}
-            <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
-              <SelectTrigger className="w-28 bg-card border-border">
-                <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {capacityRanges.map(range => <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            {capacityMultiSelect("w-36")}
             {hasActiveFilters && (
               <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground">
                 <X className="h-3 w-3 mr-1" /> Reset
