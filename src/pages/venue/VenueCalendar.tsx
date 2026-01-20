@@ -128,6 +128,11 @@ export default function VenueCalendar() {
     setCreating(true);
 
     // Create gig listing without application_id
+    // Store artist name as the headliner in openers array
+    const openersData = eventArtistName.trim() 
+      ? [{ type: 'external', name: eventArtistName.trim() }]
+      : [];
+    
     const {
       data: newGig,
       error
@@ -137,8 +142,8 @@ export default function VenueCalendar() {
       // Use venue user as placeholder for manual events
       gig_date: format(eventDate, 'yyyy-MM-dd'),
       show_time: eventTime || null,
-      notes: eventArtistName ? `Artist: ${eventArtistName}` : null,
-      openers: []
+      notes: null,
+      openers: openersData
     }).select().single();
     setCreating(false);
     if (error) {

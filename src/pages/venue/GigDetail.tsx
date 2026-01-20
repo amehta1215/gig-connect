@@ -31,6 +31,7 @@ interface VenueListing {
   venue_name: string;
   room_name: string | null;
   location: string | null;
+  venue_profile_id: string;
 }
 
 interface ArtistProfile {
@@ -97,7 +98,7 @@ export default function GigDetail() {
     // Fetch venue listing
     const { data: venueData } = await supabase
       .from('venue_listings')
-      .select('venue_name, room_name, location')
+      .select('venue_name, room_name, location, venue_profile_id')
       .eq('id', gigData.venue_listing_id)
       .single();
 
@@ -105,26 +106,41 @@ export default function GigDetail() {
       setVenueListing(venueData);
     }
 
-    // Fetch artist profile
-    const { data: artistData } = await supabase
-      .from('artist_profiles')
-      .select('band_name, genre, pictures')
-      .eq('user_id', gigData.artist_id)
+    // Check if this is a manual event (venue created - artist_id matches venue user who owns the listing)
+    const { data: venueProfile } = await supabase
+      .from('venue_profiles')
+      .select('user_id')
+      .eq('id', venueData?.venue_profile_id || '')
       .single();
+    
+    const isManualEvent = venueProfile?.user_id === gigData.artist_id;
 
-    if (artistData) {
-      setArtistProfile(artistData);
-    }
+    // For manual events, use first opener as headliner
+    if (isManualEvent && parsedOpeners.length > 0) {
+      setArtistName(parsedOpeners[0].name);
+      setArtistProfile(null);
+    } else {
+      // Fetch artist profile for application-based gigs
+      const { data: artistData } = await supabase
+        .from('artist_profiles')
+        .select('band_name, genre, pictures')
+        .eq('user_id', gigData.artist_id)
+        .single();
 
-    // Fetch artist name from profiles
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('first_name, last_name')
-      .eq('id', gigData.artist_id)
-      .single();
+      if (artistData) {
+        setArtistProfile(artistData);
+      }
 
-    if (profileData) {
-      setArtistName(artistData?.band_name || `${profileData.first_name} ${profileData.last_name}`);
+      // Fetch artist name from profiles
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', gigData.artist_id)
+        .single();
+
+      if (profileData) {
+        setArtistName(artistData?.band_name || `${profileData.first_name} ${profileData.last_name}`);
+      }
     }
 
     setLoading(false);
