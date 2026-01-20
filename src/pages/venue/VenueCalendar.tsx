@@ -296,7 +296,7 @@ export default function VenueCalendar() {
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display text-2xl">SELECT GIG DATE & TIME</DialogTitle>
+            <DialogTitle className="font-display text-2xl">ADD GIG DETAILS</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6 py-4">

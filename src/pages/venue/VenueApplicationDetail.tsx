@@ -548,7 +548,7 @@ export default function VenueApplicationDetail() {
         <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="font-display text-xl tracking-wide">
-              SELECT GIG DATE & TIME
+              ADD GIG DETAILS
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
