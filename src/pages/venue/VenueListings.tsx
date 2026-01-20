@@ -366,8 +366,7 @@ export default function VenueListings() {
 
               {/* Content */}
               <div className="p-3">
-                <h3 className="font-display text-xl text-foreground tracking-wide">{listing.venue_name}</h3>
-                {listing.room_name && <p className="text-lg text-foreground mt-1 font-medium">Room Name: {listing.room_name}</p>}
+                <h3 className="font-display text-xl text-foreground tracking-wide">ROOM NAME: {listing.room_name || listing.venue_name}</h3>
                 
                 <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                   {listing.location && <span className="flex items-center gap-1">
