@@ -6,12 +6,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { CalendarIcon, Clock, Plus } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 
 interface GigListing {
   id: string;
@@ -284,31 +282,15 @@ export default function ArtistCalendar() {
           <div className="space-y-6 py-4">
             <p className="text-muted-foreground">Create a new event for your calendar</p>
 
-            {/* Date */}
+            {/* Date (read-only) */}
             <div className="space-y-2">
               <label className="font-display text-xs text-primary tracking-widest">DATE</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !eventDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {eventDate ? format(eventDate, 'MMMM do, yyyy') : 'Pick a date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={eventDate}
-                    onSelect={setEventDate}
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="flex items-center gap-2 px-3 py-2 bg-secondary border border-border rounded-md">
+                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-foreground">
+                  {eventDate ? format(eventDate, 'MMMM do, yyyy') : 'No date selected'}
+                </span>
+              </div>
             </div>
 
             {/* Time */}
