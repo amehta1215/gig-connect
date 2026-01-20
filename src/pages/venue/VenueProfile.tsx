@@ -115,7 +115,7 @@ export default function VenueProfile() {
   const handlePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-    
+
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
@@ -123,7 +123,6 @@ export default function VenueProfile() {
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
-    
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}/venue-picture-${Date.now()}.${fileExt}`;
     const {
@@ -182,7 +181,7 @@ export default function VenueProfile() {
       {/* Venue Picture Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2 text-primary mb-4">
-          <h2 className="font-display text-xl">VENUE PICTURE *<span className="text-destructive">*</span></h2>
+          <h2 className="font-display text-xl">VENUE PICTURE <span className="text-destructive">*</span></h2>
         </div>
 
         <input type="file" ref={fileInputRef} onChange={handlePictureUpload} accept=".jpg,.jpeg,.png,.webp,.gif" className="hidden" />
