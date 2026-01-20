@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ArrowLeft, MapPin, Calendar as CalendarIcon, Music, Plus, X, Search } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar as CalendarIcon, Music, Plus, X, Search, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface Opener {
   type: 'riff' | 'external';
@@ -59,6 +61,7 @@ export default function GigDetail() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isManualEvent, setIsManualEvent] = useState(false);
+  const posterRef = useRef<HTMLDivElement>(null);
   
   // Opener form state
   const [openers, setOpeners] = useState<Opener[]>([]);
@@ -69,6 +72,34 @@ export default function GigDetail() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [externalOpenerName, setExternalOpenerName] = useState('');
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPoster = async () => {
+    if (!posterRef.current || !gig) return;
+    
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(posterRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height],
+      });
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`gig-poster-${format(new Date(gig.gig_date), 'yyyy-MM-dd')}.pdf`);
+      toast.success('Poster downloaded!');
+    } catch (error) {
+      toast.error('Failed to download poster');
+    }
+    setDownloading(false);
+  };
 
   useEffect(() => {
     if (id && user) {
@@ -281,13 +312,24 @@ export default function GigDetail() {
 
   return (
     <div className="space-y-6 animate-fade-in max-w-3xl mx-auto">
-      {/* Back Button */}
-      <Button variant="ghost" size="icon" onClick={() => navigate('/venue/calendar')}>
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
+      {/* Header with Back Button and Download */}
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/venue/calendar')}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={handleDownloadPoster}
+          disabled={downloading}
+          title="Download poster as PDF"
+        >
+          <Download className="h-5 w-5" />
+        </Button>
+      </div>
 
       {/* Gig Flyer Style Card */}
-      <div className="bg-card border-4 border-accent p-8 space-y-6">
+      <div ref={posterRef} className="bg-card border-4 border-accent p-8 space-y-6">
         {/* Header Image */}
         {artistProfile?.pictures && artistProfile.pictures.length > 0 && (
           <div className="aspect-video bg-secondary overflow-hidden -mx-8 -mt-8 mb-6">
