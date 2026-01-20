@@ -4,9 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Plus, X, Search, Download } from 'lucide-react';
+import { ArrowLeft, Plus, X, Search, Download, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
@@ -64,6 +66,7 @@ export default function ArtistGigDetail() {
   // Opener form state
   const [openers, setOpeners] = useState<Opener[]>([]);
   const [notes, setNotes] = useState('');
+  const [gigDate, setGigDate] = useState<Date | undefined>(undefined);
   const [showOpenerSearch, setShowOpenerSearch] = useState(false);
   const [openerSearchQuery, setOpenerSearchQuery] = useState('');
   const [artistSearchResults, setArtistSearchResults] = useState<ArtistSearchResult[]>([]);
@@ -71,6 +74,7 @@ export default function ArtistGigDetail() {
   const [cancelling, setCancelling] = useState(false);
   const [externalOpenerName, setExternalOpenerName] = useState('');
   const [downloading, setDownloading] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const posterRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadPoster = async () => {
@@ -171,6 +175,7 @@ export default function ArtistGigDetail() {
     } as unknown as GigData);
     setOpeners(parsedOpeners);
     setNotes(gigData.notes || '');
+    setGigDate(new Date(gigData.gig_date));
 
     // Fetch venue listing
     const {
@@ -237,13 +242,14 @@ export default function ArtistGigDetail() {
     setOpeners(openers.filter((_, i) => i !== index));
   };
   const handleSave = async () => {
-    if (!gig) return;
+    if (!gig || !gigDate) return;
     setSaving(true);
     const {
       error
     } = await supabase.from('gig_listings').update({
       openers: JSON.parse(JSON.stringify(openers)),
-      notes: notes.trim() || null
+      notes: notes.trim() || null,
+      gig_date: format(gigDate, 'yyyy-MM-dd')
     }).eq('id', gig.id);
     setSaving(false);
     if (error) {
@@ -324,15 +330,51 @@ export default function ArtistGigDetail() {
 
         {/* Date & Time */}
         <div className="text-center">
-          <p className="font-display text-sm text-primary tracking-widest">
-            {format(new Date(gig.gig_date), 'EEEE').toUpperCase()}
-          </p>
-          <p className="font-display text-5xl md:text-6xl text-accent font-bold">
-            {format(new Date(gig.gig_date), 'MMMM d').toUpperCase()}
-          </p>
-          <p className="font-display text-2xl text-muted-foreground">
-            {format(new Date(gig.gig_date), 'yyyy')}
-          </p>
+          {isManualEvent ? (
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <button className="group inline-flex flex-col items-center hover:opacity-80 transition-opacity">
+                  <p className="font-display text-sm text-primary tracking-widest">
+                    {gigDate ? format(gigDate, 'EEEE').toUpperCase() : ''}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-display text-5xl md:text-6xl text-accent font-bold">
+                      {gigDate ? format(gigDate, 'MMMM d').toUpperCase() : ''}
+                    </p>
+                    <Pencil className="h-5 w-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <p className="font-display text-2xl text-muted-foreground">
+                    {gigDate ? format(gigDate, 'yyyy') : ''}
+                  </p>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="center">
+                <Calendar
+                  mode="single"
+                  selected={gigDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setGigDate(date);
+                      setDatePickerOpen(false);
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <>
+              <p className="font-display text-sm text-primary tracking-widest">
+                {gigDate ? format(gigDate, 'EEEE').toUpperCase() : ''}
+              </p>
+              <p className="font-display text-5xl md:text-6xl text-accent font-bold">
+                {gigDate ? format(gigDate, 'MMMM d').toUpperCase() : ''}
+              </p>
+              <p className="font-display text-2xl text-muted-foreground">
+                {gigDate ? format(gigDate, 'yyyy') : ''}
+              </p>
+            </>
+          )}
           {gig.show_time && <p className="font-display text-xl text-primary mt-2">
               {format(new Date(`2000-01-01T${gig.show_time}`), 'h:mm a')}
             </p>}
