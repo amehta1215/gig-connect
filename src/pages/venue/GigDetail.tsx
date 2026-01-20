@@ -25,6 +25,7 @@ interface GigData {
   openers: Opener[];
   venue_listing_id: string;
   artist_id: string;
+  manual_artist_name: string | null;
 }
 
 interface VenueListing {
@@ -115,9 +116,9 @@ export default function GigDetail() {
     
     const isManualEvent = venueProfile?.user_id === gigData.artist_id;
 
-    // For manual events, use first opener as headliner
-    if (isManualEvent && parsedOpeners.length > 0) {
-      setArtistName(parsedOpeners[0].name);
+    // For manual events, use manual_artist_name as headliner
+    if (isManualEvent) {
+      setArtistName(gigData.manual_artist_name || 'TBA');
       setArtistProfile(null);
     } else {
       // Fetch artist profile for application-based gigs
