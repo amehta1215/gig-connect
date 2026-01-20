@@ -125,7 +125,7 @@ export default function VenueListings() {
   const handlePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
+
     // Validate file types
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     for (const file of Array.from(files)) {
@@ -135,7 +135,6 @@ export default function VenueListings() {
         return;
       }
     }
-    
     setUploadingPicture(true);
     try {
       const newUrls: string[] = [];
@@ -235,7 +234,7 @@ export default function VenueListings() {
             <div className="space-y-6 mt-4">
               {/* Photo Upload */}
               <div className="space-y-4">
-                <h3 className="font-display text-sm text-primary tracking-widest">PHOTO</h3>
+                <h3 className="font-display text-sm text-primary tracking-widest">PHOTOS</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {pictures.map((url, index) => <div key={index} className="relative group aspect-square">
                       <img src={url} alt={`Photo ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
@@ -319,21 +318,12 @@ export default function VenueListings() {
 
               {/* Actions */}
               <div className="flex justify-between pt-4 border-t border-border">
-                {editingListing ? (
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => {
-                      handleDelete(editingListing.id);
-                      setIsDialogOpen(false);
-                    }}
-                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border"
-                  >
+                {editingListing ? <Button variant="outline" size="icon" onClick={() => {
+                handleDelete(editingListing.id);
+                setIsDialogOpen(false);
+              }} className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border">
                     <Trash2 className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <div />
-                )}
+                  </Button> : <div />}
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="font-display tracking-widest">
                     CANCEL
