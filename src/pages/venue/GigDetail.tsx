@@ -58,6 +58,7 @@ export default function GigDetail() {
   const [artistName, setArtistName] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isManualEvent, setIsManualEvent] = useState(false);
   
   // Opener form state
   const [openers, setOpeners] = useState<Opener[]>([]);
@@ -114,10 +115,11 @@ export default function GigDetail() {
       .eq('id', venueData?.venue_profile_id || '')
       .single();
     
-    const isManualEvent = venueProfile?.user_id === gigData.artist_id;
+    const manualEvent = venueProfile?.user_id === gigData.artist_id;
+    setIsManualEvent(manualEvent);
 
     // For manual events, use manual_artist_name as headliner
-    if (isManualEvent) {
+    if (manualEvent) {
       setArtistName(gigData.manual_artist_name || 'TBA');
       setArtistProfile(null);
     } else {
@@ -479,7 +481,9 @@ export default function GigDetail() {
             <DialogTitle>Cancel Gig?</DialogTitle>
           </DialogHeader>
           <p className="text-muted-foreground">
-            Are you sure you want to cancel this gig? This will remove the event from both your calendar and the artist's calendar. The application will be reverted to pending status.
+            {isManualEvent 
+              ? "Cancelling this gig will remove the event from your calendar."
+              : "Are you sure you want to cancel this gig? This will remove the event from both your calendar and the artist's calendar. The application will be reverted to pending status."}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
