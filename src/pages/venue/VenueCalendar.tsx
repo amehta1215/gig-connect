@@ -15,6 +15,7 @@ interface GigListing {
   gig_date: string;
   venue_listing_id: string;
   artist_id: string;
+  manual_artist_name: string | null;
   venue_listing?: {
     venue_name: string;
     room_name: string | null;
@@ -125,6 +126,10 @@ export default function VenueCalendar() {
       toast.error('Please select a date and room');
       return;
     }
+    if (!eventArtistName.trim()) {
+      toast.error('Please enter an artist name');
+      return;
+    }
     setCreating(true);
 
     // Create gig listing without application_id
@@ -197,7 +202,7 @@ export default function VenueCalendar() {
           
           {gigsOnSelectedDate.length === 0 ? <p className="text-muted-foreground text-sm">No events on this date</p> : <div className="space-y-3">
               {gigsOnSelectedDate.map(gig => {
-            const artistName = gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+            const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
             const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
             return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
                     <p className="font-display text-lg text-accent">{artistName}</p>
@@ -213,7 +218,7 @@ export default function VenueCalendar() {
         <h2 className="font-display text-sm text-primary tracking-widest mb-4">UPCOMING SHOWS</h2>
         {gigs.length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
             {gigs.filter(g => new Date(g.gig_date) >= new Date()).map(gig => {
-          const artistName = gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+          const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
           const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
           return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                   <div>
@@ -275,8 +280,8 @@ export default function VenueCalendar() {
 
             {/* Artist Name (optional) */}
             <div className="space-y-2">
-              <label className="font-display text-xs text-primary tracking-widest">ARTIST NAME (OPTIONAL)</label>
-              <Input value={eventArtistName} onChange={e => setEventArtistName(e.target.value)} placeholder="Enter artist or event name" />
+              <label className="font-display text-xs text-primary tracking-widest">ARTIST NAME <span className="text-destructive">*</span></label>
+              <Input value={eventArtistName} onChange={e => setEventArtistName(e.target.value)} placeholder="Enter artist or event name" required />
             </div>
           </div>
 
@@ -284,7 +289,7 @@ export default function VenueCalendar() {
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateEvent} disabled={creating || !eventDate || !selectedListingId} className="bg-primary hover:bg-primary/90">
+            <Button onClick={handleCreateEvent} disabled={creating || !eventDate || !selectedListingId || !eventArtistName.trim()} className="bg-primary hover:bg-primary/90">
               {creating ? 'Creating...' : 'Create Event'}
             </Button>
           </div>
