@@ -33,7 +33,7 @@ interface VenueProfile {
   picture: string | null;
 }
 type AvailabilityPreference = 'date_range' | 'specific_dates' | 'flexible';
-type PaymentPreference = 'door_split' | 'bar_split' | 'tip_based' | 'flat_fee' | 'rental';
+type PaymentPreference = 'door_split' | 'bar_split' | 'tip_based' | 'flat_fee' | 'rental' | 'no_preference';
 type LineupPreference = 'co_acts_needed' | 'co_acts_confirmed' | 'solo_performer';
 const availabilityOptions = [{
   id: 'date_range',
@@ -60,6 +60,9 @@ const paymentOptions = [{
 }, {
   id: 'rental',
   label: 'Rental'
+}, {
+  id: 'no_preference',
+  label: 'Flexible'
 }];
 const lineupOptions = [{
   id: 'co_acts_needed',
