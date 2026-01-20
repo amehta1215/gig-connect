@@ -79,20 +79,67 @@ export default function GigDetail() {
     
     setDownloading(true);
     try {
+      // Hide interactive elements before capture
+      const interactiveElements = posterRef.current.querySelectorAll('button, input, textarea, [data-hide-for-print]');
+      interactiveElements.forEach(el => (el as HTMLElement).style.display = 'none');
+      
+      // Hide empty sections
+      const emptyOpeners = posterRef.current.querySelector('[data-openers-section]');
+      if (emptyOpeners && openers.length === 0) {
+        (emptyOpeners as HTMLElement).style.display = 'none';
+      }
+      const notesSection = posterRef.current.querySelector('[data-notes-section]');
+      if (notesSection && !notes.trim()) {
+        (notesSection as HTMLElement).style.display = 'none';
+      }
+      
       const canvas = await html2canvas(posterRef.current, {
         scale: 2,
         useCORS: true,
         backgroundColor: null,
       });
       
-      const imgData = canvas.toDataURL('image/png');
+      // Restore interactive elements
+      interactiveElements.forEach(el => (el as HTMLElement).style.display = '');
+      if (emptyOpeners) (emptyOpeners as HTMLElement).style.display = '';
+      if (notesSection) (notesSection as HTMLElement).style.display = '';
+      
+      // 18x24 inches at 72 DPI = 1296x1728 pixels
+      const posterWidth = 1296;
+      const posterHeight = 1728;
+      
       const pdf = new jsPDF({
-        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        orientation: 'portrait',
         unit: 'px',
-        format: [canvas.width, canvas.height],
+        format: [posterWidth, posterHeight],
       });
       
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      // Calculate positioning to center the content without stretching
+      const imgRatio = canvas.width / canvas.height;
+      const posterRatio = posterWidth / posterHeight;
+      
+      let drawWidth, drawHeight, offsetX, offsetY;
+      
+      if (imgRatio > posterRatio) {
+        // Image is wider - fit to width
+        drawWidth = posterWidth;
+        drawHeight = posterWidth / imgRatio;
+        offsetX = 0;
+        offsetY = (posterHeight - drawHeight) / 2;
+      } else {
+        // Image is taller - fit to height
+        drawHeight = posterHeight;
+        drawWidth = posterHeight * imgRatio;
+        offsetX = (posterWidth - drawWidth) / 2;
+        offsetY = 0;
+      }
+      
+      // Fill background
+      pdf.setFillColor(28, 28, 28); // Dark background matching card
+      pdf.rect(0, 0, posterWidth, posterHeight, 'F');
+      
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', offsetX, offsetY, drawWidth, drawHeight);
       pdf.save(`gig-poster-${format(new Date(gig.gig_date), 'yyyy-MM-dd')}.pdf`);
       toast.success('Poster downloaded!');
     } catch (error) {
@@ -368,7 +415,7 @@ export default function GigDetail() {
         </div>
 
         {/* Openers Section */}
-        <div className="space-y-4">
+        <div data-openers-section className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="font-display text-xs text-primary tracking-widest">OPENERS</p>
             <Button 
@@ -487,7 +534,7 @@ export default function GigDetail() {
         </div>
 
         {/* Notes */}
-        <div className="space-y-2">
+        <div data-notes-section className="space-y-2">
           <p className="font-display text-xs text-primary tracking-widest">NOTES</p>
           <Textarea
             value={notes}
