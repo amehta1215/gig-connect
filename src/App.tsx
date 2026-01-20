@@ -26,7 +26,7 @@ import ApplicationDetail from "./pages/artist/ApplicationDetail";
 // Venue pages
 import VenueDashboard from "./pages/venue/VenueDashboard";
 import VenueMessages from "./pages/venue/VenueMessages";
-import VenueListings from "./pages/venue/VenueListings";
+
 import VenueApplications from "./pages/venue/VenueApplications";
 import VenueApplicationDetail from "./pages/venue/VenueApplicationDetail";
 import VenueCalendar from "./pages/venue/VenueCalendar";
@@ -97,7 +97,7 @@ const App = () => (
               <Route index element={<VenueApplications />} />
               <Route path="applications/:id" element={<VenueApplicationDetail />} />
               <Route path="messages" element={<VenueMessages />} />
-              <Route path="listings" element={<VenueListings />} />
+              
               <Route path="calendar" element={<VenueCalendar />} />
               <Route path="calendar/:id" element={<GigDetail />} />
             </Route>
