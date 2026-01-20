@@ -117,10 +117,10 @@ export default function FindVenues() {
     );
   };
 
-  const GenreMultiSelect = ({ className }: { className?: string }) => (
+  const genreMultiSelect = (className?: string) => (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className={`bg-card border-border justify-start ${className}`}>
+        <Button variant="outline" className={`bg-card border-border justify-start ${className || ''}`}>
           <Music className="h-4 w-4 mr-2 text-muted-foreground" />
           {selectedGenres.length === 0 ? 'Genre' : `${selectedGenres.length} selected`}
         </Button>
@@ -151,11 +151,10 @@ export default function FindVenues() {
     </Popover>
   );
 
-  const FiltersContent = () => <div className="space-y-4">
+  const filtersContent = (
+    <div className="space-y-4">
       <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Location" className="w-full" />
-
-      <GenreMultiSelect className="w-full" />
-
+      {genreMultiSelect("w-full")}
       <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
         <SelectTrigger className="bg-background">
           <SelectValue placeholder="Capacity" />
@@ -164,7 +163,8 @@ export default function FindVenues() {
           {capacityRanges.map(range => <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>)}
         </SelectContent>
       </Select>
-    </div>;
+    </div>
+  );
   return <div className="space-y-6 animate-fade-in">
       {/* Header */}
       
@@ -180,7 +180,7 @@ export default function FindVenues() {
           {/* Desktop Filters */}
           <div className="hidden lg:flex gap-2">
             <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Location" className="w-48" />
-            <GenreMultiSelect className="w-36" />
+            {genreMultiSelect("w-36")}
             <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
               <SelectTrigger className="w-28 bg-card border-border">
                 <Users className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -203,7 +203,7 @@ export default function FindVenues() {
         {/* Mobile Filters - opens below search bar */}
         <CollapsibleContent className="lg:hidden">
           <div className="mt-3 p-4 bg-card border border-border space-y-4">
-            <FiltersContent />
+            {filtersContent}
           </div>
         </CollapsibleContent>
       </Collapsible>
