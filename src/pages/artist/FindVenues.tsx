@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, MapPin, Users, Music, Filter, X, Heart } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -53,6 +53,7 @@ export default function FindVenues() {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedCapacity, setSelectedCapacity] = useState<string>('any');
   const [selectedLocation, setSelectedLocation] = useState<string>('');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const handleToggleFavorite = async (e: React.MouseEvent, venueId: string) => {
     e.stopPropagation();
@@ -169,41 +170,43 @@ export default function FindVenues() {
       
 
       {/* Search and Filters */}
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search venue names..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border" />
-        </div>
+      <Collapsible open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search venue names..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border" />
+          </div>
 
-        {/* Desktop Filters */}
-        <div className="hidden lg:flex gap-2">
-          <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Location" className="w-48" />
-          <GenreMultiSelect className="w-36" />
-          <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
-            <SelectTrigger className="w-28 bg-card border-border">
-              <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {capacityRanges.map(range => <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
+          {/* Desktop Filters */}
+          <div className="hidden lg:flex gap-2">
+            <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Location" className="w-48" />
+            <GenreMultiSelect className="w-36" />
+            <Select value={selectedCapacity} onValueChange={setSelectedCapacity}>
+              <SelectTrigger className="w-28 bg-card border-border">
+                <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {capacityRanges.map(range => <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* Mobile Filters */}
-        <Sheet>
-          <SheetTrigger asChild className="lg:hidden">
-            <Button variant="outline" size="icon" className="border-border">
-              <Filter className="h-4 w-4" />
+          {/* Mobile Filter Toggle */}
+          <CollapsibleTrigger asChild className="lg:hidden">
+            <Button variant="outline" size="icon" className={`border-border ${mobileFiltersOpen ? 'bg-primary text-primary-foreground' : ''}`}>
+              {mobileFiltersOpen ? <X className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
             </Button>
-          </SheetTrigger>
-          <SheetContent className="bg-card border-border">
-            <div className="mt-8">
-              <FiltersContent />
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
+          </CollapsibleTrigger>
+        </div>
+
+        {/* Mobile Filters - opens below search bar */}
+        <CollapsibleContent className="lg:hidden">
+          <div className="mt-3 p-4 bg-card border border-border space-y-4">
+            <FiltersContent />
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Results */}
       {loading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
