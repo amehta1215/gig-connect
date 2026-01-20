@@ -483,18 +483,18 @@ export default function ArtistGigDetail() {
         {isManualEvent ? (
           <div className="flex gap-4">
             <Button 
-              onClick={handleSave} 
-              disabled={saving}
-              className="flex-1 bg-primary hover:bg-primary/90"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-            <Button 
               onClick={() => setCancelDialogOpen(true)} 
               variant="destructive"
               className="flex-1"
             >
               Cancel Gig
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              disabled={saving}
+              className="flex-1 bg-primary hover:bg-primary/90"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         ) : (
