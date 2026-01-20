@@ -9,14 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Plus, X, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-
 interface Opener {
   type: 'riff' | 'external';
   artist_id?: string;
   name: string;
   band_name?: string;
 }
-
 interface GigData {
   id: string;
   gig_date: string;
@@ -29,37 +27,38 @@ interface GigData {
   manual_venue_name: string | null;
   manual_location: string | null;
 }
-
 interface VenueListing {
   venue_name: string;
   room_name: string | null;
   location: string | null;
 }
-
 interface ArtistProfile {
   band_name: string | null;
   genre: string | null;
   pictures: string[] | null;
 }
-
 interface ArtistSearchResult {
   user_id: string;
   band_name: string | null;
   genre: string | null;
 }
-
 export default function ArtistGigDetail() {
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  
+  const {
+    user
+  } = useAuth();
   const [gig, setGig] = useState<GigData | null>(null);
   const [venueListing, setVenueListing] = useState<VenueListing | null>(null);
   const [artistProfile, setArtistProfile] = useState<ArtistProfile | null>(null);
   const [artistName, setArtistName] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   // Opener form state
   const [openers, setOpeners] = useState<Opener[]>([]);
   const [notes, setNotes] = useState('');
@@ -72,213 +71,156 @@ export default function ArtistGigDetail() {
 
   // Check if this is a manual event (artist-created without application)
   const isManualEvent = gig && !gig.application_id;
-
   useEffect(() => {
     if (id && user) {
       fetchGig();
     }
   }, [id, user]);
-
   const fetchGig = async () => {
     setLoading(true);
-
-    const { data: gigData, error } = await supabase
-      .from('gig_listings')
-      .select('*')
-      .eq('id', id)
-      .single();
-
+    const {
+      data: gigData,
+      error
+    } = await supabase.from('gig_listings').select('*').eq('id', id).single();
     if (!gigData || error) {
       setLoading(false);
       return;
     }
-
-    const parsedOpeners = Array.isArray(gigData.openers) 
-      ? (gigData.openers as unknown as Opener[]) 
-      : [];
-    setGig({ ...gigData, openers: parsedOpeners } as unknown as GigData);
+    const parsedOpeners = Array.isArray(gigData.openers) ? gigData.openers as unknown as Opener[] : [];
+    setGig({
+      ...gigData,
+      openers: parsedOpeners
+    } as unknown as GigData);
     setOpeners(parsedOpeners);
     setNotes(gigData.notes || '');
 
     // Fetch venue listing
-    const { data: venueData } = await supabase
-      .from('venue_listings')
-      .select('venue_name, room_name, location')
-      .eq('id', gigData.venue_listing_id)
-      .single();
-
+    const {
+      data: venueData
+    } = await supabase.from('venue_listings').select('venue_name, room_name, location').eq('id', gigData.venue_listing_id).single();
     if (venueData) {
       setVenueListing(venueData);
     }
 
     // Fetch artist profile (own profile)
-    const { data: artistData } = await supabase
-      .from('artist_profiles')
-      .select('band_name, genre, pictures')
-      .eq('user_id', gigData.artist_id)
-      .single();
-
+    const {
+      data: artistData
+    } = await supabase.from('artist_profiles').select('band_name, genre, pictures').eq('user_id', gigData.artist_id).single();
     if (artistData) {
       setArtistProfile(artistData);
     }
 
     // Fetch artist name from profiles
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('first_name, last_name')
-      .eq('id', gigData.artist_id)
-      .single();
-
+    const {
+      data: profileData
+    } = await supabase.from('profiles').select('first_name, last_name').eq('id', gigData.artist_id).single();
     if (profileData) {
       setArtistName(artistData?.band_name || `${profileData.first_name} ${profileData.last_name}`);
     }
-
     setLoading(false);
   };
-
   const searchArtists = async (query: string) => {
     if (!query.trim()) {
       setArtistSearchResults([]);
       return;
     }
-
-    const { data } = await supabase
-      .from('artist_profiles')
-      .select('user_id, band_name, genre')
-      .ilike('band_name', `%${query}%`)
-      .limit(5);
-
+    const {
+      data
+    } = await supabase.from('artist_profiles').select('user_id, band_name, genre').ilike('band_name', `%${query}%`).limit(5);
     if (data) {
       setArtistSearchResults(data);
     }
   };
-
   const addRiffOpener = (artist: ArtistSearchResult) => {
     if (openers.some(o => o.artist_id === artist.user_id)) {
       toast.error('Artist already added');
       return;
     }
-
     setOpeners([...openers, {
       type: 'riff',
       artist_id: artist.user_id,
       name: artist.band_name || 'Unknown Artist',
-      band_name: artist.band_name || undefined,
+      band_name: artist.band_name || undefined
     }]);
     setShowOpenerSearch(false);
     setOpenerSearchQuery('');
     setArtistSearchResults([]);
   };
-
   const addExternalOpener = () => {
     if (!externalOpenerName.trim()) return;
-
     setOpeners([...openers, {
       type: 'external',
-      name: externalOpenerName.trim(),
+      name: externalOpenerName.trim()
     }]);
     setExternalOpenerName('');
     setShowOpenerSearch(false);
   };
-
   const removeOpener = (index: number) => {
     setOpeners(openers.filter((_, i) => i !== index));
   };
-
   const handleSave = async () => {
     if (!gig) return;
-    
     setSaving(true);
-
-    const { error } = await supabase
-      .from('gig_listings')
-      .update({
-        openers: JSON.parse(JSON.stringify(openers)),
-        notes: notes.trim() || null,
-      })
-      .eq('id', gig.id);
-
+    const {
+      error
+    } = await supabase.from('gig_listings').update({
+      openers: JSON.parse(JSON.stringify(openers)),
+      notes: notes.trim() || null
+    }).eq('id', gig.id);
     setSaving(false);
-
     if (error) {
       toast.error('Failed to save changes');
       return;
     }
-
     toast.success('Gig updated!');
     navigate('/artist/calendar');
   };
-
   const handleCancelGig = async () => {
     if (!gig) return;
-    
     setCancelling(true);
 
     // First get the application_id from the gig
-    const { data: gigData } = await supabase
-      .from('gig_listings')
-      .select('application_id')
-      .eq('id', gig.id)
-      .single();
-
+    const {
+      data: gigData
+    } = await supabase.from('gig_listings').select('application_id').eq('id', gig.id).single();
     if (gigData?.application_id) {
       // Revert application status to in_progress
-      await supabase
-        .from('applications')
-        .update({ status: 'in_progress' })
-        .eq('id', gigData.application_id);
+      await supabase.from('applications').update({
+        status: 'in_progress'
+      }).eq('id', gigData.application_id);
     }
 
     // Delete the gig listing
-    const { error } = await supabase
-      .from('gig_listings')
-      .delete()
-      .eq('id', gig.id);
-
+    const {
+      error
+    } = await supabase.from('gig_listings').delete().eq('id', gig.id);
     setCancelling(false);
-
     if (error) {
       toast.error('Failed to cancel gig');
       return;
     }
-
     toast.success('Gig cancelled');
     navigate('/artist/calendar');
   };
-
   if (loading) {
-    return (
-      <div className="space-y-6 animate-fade-in">
+    return <div className="space-y-6 animate-fade-in">
         <div className="h-8 w-48 bg-card animate-pulse" />
         <div className="h-96 bg-card animate-pulse" />
-      </div>
-    );
+      </div>;
   }
-
   if (!gig) {
-    return (
-      <div className="text-center py-20">
+    return <div className="text-center py-20">
         <h3 className="font-display text-2xl text-muted-foreground">GIG NOT FOUND</h3>
         <Button onClick={() => navigate('/artist/calendar')} variant="outline" className="mt-4">
           Go Back
         </Button>
-      </div>
-    );
+      </div>;
   }
 
   // Determine venue name and location to display
-  const displayVenueName = isManualEvent && gig.manual_venue_name
-    ? gig.manual_venue_name
-    : venueListing?.room_name 
-      ? `${venueListing.room_name} at ${venueListing.venue_name}`
-      : venueListing?.venue_name || 'Venue';
-  
-  const displayLocation = isManualEvent && gig.manual_location
-    ? gig.manual_location
-    : venueListing?.location;
-
-  return (
-    <div className="space-y-6 animate-fade-in max-w-3xl mx-auto">
+  const displayVenueName = isManualEvent && gig.manual_venue_name ? gig.manual_venue_name : venueListing?.room_name ? `${venueListing.room_name} at ${venueListing.venue_name}` : venueListing?.venue_name || 'Venue';
+  const displayLocation = isManualEvent && gig.manual_location ? gig.manual_location : venueListing?.location;
+  return <div className="space-y-6 animate-fade-in max-w-3xl mx-auto">
       {/* Back Button */}
       <Button variant="ghost" size="icon" onClick={() => navigate('/artist/calendar')}>
         <ArrowLeft className="h-5 w-5" />
@@ -287,15 +229,9 @@ export default function ArtistGigDetail() {
       {/* Gig Flyer Style Card */}
       <div className="bg-card border-4 border-accent p-8 space-y-6">
         {/* Header Image */}
-        {artistProfile?.pictures && artistProfile.pictures.length > 0 && (
-          <div className="aspect-video bg-secondary overflow-hidden -mx-8 -mt-8 mb-6">
-            <img 
-              src={artistProfile.pictures[0]} 
-              alt={artistName}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
+        {artistProfile?.pictures && artistProfile.pictures.length > 0 && <div className="aspect-video bg-secondary overflow-hidden -mx-8 -mt-8 mb-6">
+            <img src={artistProfile.pictures[0]} alt={artistName} className="w-full h-full object-cover" />
+          </div>}
 
         {/* Date & Time */}
         <div className="text-center">
@@ -308,11 +244,9 @@ export default function ArtistGigDetail() {
           <p className="font-display text-2xl text-muted-foreground">
             {format(new Date(gig.gig_date), 'yyyy')}
           </p>
-          {gig.show_time && (
-            <p className="font-display text-xl text-primary mt-2">
+          {gig.show_time && <p className="font-display text-xl text-primary mt-2">
               {format(new Date(`2000-01-01T${gig.show_time}`), 'h:mm a')}
-            </p>
-          )}
+            </p>}
         </div>
 
         {/* Headliner */}
@@ -324,188 +258,102 @@ export default function ArtistGigDetail() {
         </div>
 
         {/* Openers Section - Only for manual events */}
-        {isManualEvent && (
-          <div className="space-y-4">
+        {isManualEvent && <div className="space-y-4">
             <div className="flex items-center justify-between">
               <p className="font-display text-xs text-primary tracking-widest">OPENERS</p>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={() => setShowOpenerSearch(true)}
-                className="text-xs"
-              >
+              <Button size="sm" variant="outline" onClick={() => setShowOpenerSearch(true)} className="text-xs">
                 <Plus className="h-3 w-3 mr-1" />
                 Add Opener
               </Button>
             </div>
 
-            {openers.length === 0 ? (
-              <p className="text-muted-foreground text-sm text-center py-4 border border-dashed border-border">
+            {openers.length === 0 ? <p className="text-muted-foreground text-sm text-center py-4 border border-dashed border-border">
                 No openers added yet
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {openers.map((opener, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-center justify-between bg-secondary px-4 py-2"
-                  >
+              </p> : <div className="space-y-2">
+                {openers.map((opener, index) => <div key={index} className="flex items-center justify-between bg-secondary px-4 py-2">
                     <div>
                       <p className="font-display text-lg text-accent">{opener.name}</p>
-                      {opener.type === 'riff' && (
-                        <p className="text-xs text-primary">RIFF Artist</p>
-                      )}
+                      {opener.type === 'riff' && <p className="text-xs text-primary">RIFF Artist</p>}
                     </div>
-                    <Button 
-                      size="icon" 
-                      variant="ghost" 
-                      onClick={() => removeOpener(index)}
-                      className="h-8 w-8"
-                    >
+                    <Button size="icon" variant="ghost" onClick={() => removeOpener(index)} className="h-8 w-8">
                       <X className="h-4 w-4" />
                     </Button>
-                  </div>
-                ))}
-              </div>
-            )}
+                  </div>)}
+              </div>}
 
             {/* Opener Search/Add UI */}
-            {showOpenerSearch && (
-              <div className="bg-secondary p-4 space-y-4">
+            {showOpenerSearch && <div className="bg-secondary p-4 space-y-4">
                 <p className="font-display text-xs text-primary tracking-widest">SEARCH RIFF ARTISTS</p>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    value={openerSearchQuery}
-                    onChange={(e) => {
-                      setOpenerSearchQuery(e.target.value);
-                      searchArtists(e.target.value);
-                    }}
-                    placeholder="Search by band name..."
-                    className="pl-10 bg-background"
-                  />
+                  <Input value={openerSearchQuery} onChange={e => {
+              setOpenerSearchQuery(e.target.value);
+              searchArtists(e.target.value);
+            }} placeholder="Search by band name..." className="pl-10 bg-background" />
                 </div>
-                {artistSearchResults.length > 0 && (
-                  <div className="space-y-1">
-                    {artistSearchResults.map(artist => (
-                      <button
-                        key={artist.user_id}
-                        onClick={() => addRiffOpener(artist)}
-                        className="w-full text-left px-3 py-2 hover:bg-background transition-colors"
-                      >
+                {artistSearchResults.length > 0 && <div className="space-y-1">
+                    {artistSearchResults.map(artist => <button key={artist.user_id} onClick={() => addRiffOpener(artist)} className="w-full text-left px-3 py-2 hover:bg-background transition-colors">
                         <p className="font-display text-accent">{artist.band_name || 'Unknown'}</p>
-                        {artist.genre && (
-                          <p className="text-xs text-muted-foreground">{artist.genre}</p>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                        {artist.genre && <p className="text-xs text-muted-foreground">{artist.genre}</p>}
+                      </button>)}
+                  </div>}
 
                 <div className="border-t border-border pt-4">
                   <p className="font-display text-xs text-primary tracking-widest mb-2">OR ADD EXTERNAL ARTIST</p>
                   <div className="flex gap-2">
-                    <Input
-                      value={externalOpenerName}
-                      onChange={(e) => setExternalOpenerName(e.target.value)}
-                      placeholder="Artist name"
-                      className="bg-background"
-                    />
+                    <Input value={externalOpenerName} onChange={e => setExternalOpenerName(e.target.value)} placeholder="Artist name" className="bg-background" />
                     <Button onClick={addExternalOpener} disabled={!externalOpenerName.trim()}>
                       Add
                     </Button>
                   </div>
                 </div>
 
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setShowOpenerSearch(false)}
-                  className="w-full"
-                >
+                <Button variant="ghost" size="sm" onClick={() => setShowOpenerSearch(false)} className="w-full">
                   Cancel
                 </Button>
-              </div>
-            )}
-          </div>
-        )}
+              </div>}
+          </div>}
 
         {/* Display openers for venue-created gigs (read-only) */}
-        {!isManualEvent && openers.length > 0 && (
-          <div className="space-y-4">
+        {!isManualEvent && openers.length > 0 && <div className="space-y-4">
             <p className="font-display text-xs text-primary tracking-widest text-center">WITH</p>
             <div className="space-y-2">
-              {openers.map((opener, index) => (
-                <div 
-                  key={index} 
-                  className="text-center bg-secondary px-4 py-3"
-                >
+              {openers.map((opener, index) => <div key={index} className="text-center bg-secondary px-4 py-3">
                   <p className="font-display text-xl text-accent">{opener.name}</p>
-                </div>
-              ))}
+                </div>)}
             </div>
-          </div>
-        )}
+          </div>}
 
         {/* Venue Info */}
         <div className="text-center border-t-2 border-border pt-6">
           <p className="font-display text-2xl text-foreground">
             {displayVenueName}
           </p>
-          {displayLocation && (
-            <p className="text-muted-foreground mt-2">
+          {displayLocation && <p className="text-muted-foreground mt-2">
               {displayLocation}
-            </p>
-          )}
+            </p>}
         </div>
 
         {/* Notes - Editable for manual events, read-only for venue-created */}
-        {isManualEvent ? (
-          <div className="space-y-2">
+        {isManualEvent ? <div className="space-y-2">
             <p className="font-display text-xs text-primary tracking-widest">NOTES</p>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any additional notes about this show..."
-              className="bg-background border-border min-h-[100px]"
-            />
-          </div>
-        ) : (
-          gig.notes && (
-            <div className="bg-secondary p-4">
+            <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add any additional notes about this show..." className="bg-background border-border min-h-[100px]" />
+          </div> : gig.notes && <div className="bg-secondary p-4">
               <p className="font-display text-xs text-primary tracking-widest mb-2">NOTES</p>
               <p className="text-muted-foreground whitespace-pre-wrap">{gig.notes}</p>
-            </div>
-          )
-        )}
+            </div>}
 
         {/* Action Buttons */}
-        {isManualEvent ? (
-          <div className="flex gap-4">
-            <Button 
-              onClick={() => setCancelDialogOpen(true)} 
-              variant="destructive"
-              className="flex-1"
-            >
+        {isManualEvent ? <div className="flex gap-4">
+            <Button onClick={() => setCancelDialogOpen(true)} variant="destructive" className="flex-1">
               Cancel Gig
             </Button>
-            <Button 
-              onClick={handleSave} 
-              disabled={saving}
-              className="flex-1 bg-primary hover:bg-primary/90"
-            >
+            <Button onClick={handleSave} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
-          </div>
-        ) : (
-          <Button 
-            onClick={() => setCancelDialogOpen(true)} 
-            variant="destructive"
-            className="w-full"
-          >
+          </div> : <Button onClick={() => setCancelDialogOpen(true)} variant="destructive" className="w-full">
             Cancel Gig
-          </Button>
-        )}
+          </Button>}
       </div>
 
       {/* Cancel Confirmation Dialog */}
@@ -515,22 +363,17 @@ export default function ArtistGigDetail() {
             <DialogTitle>Cancel Gig?</DialogTitle>
           </DialogHeader>
           <p className="text-muted-foreground">
-            Are you sure you want to cancel this gig? This will remove the event from both your calendar and the venue's calendar. Your application will be reverted to pending status.
+            Cancelling this gig will remove the event from your calendar.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
               Keep Gig
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleCancelGig}
-              disabled={cancelling}
-            >
+            <Button variant="destructive" onClick={handleCancelGig} disabled={cancelling}>
               {cancelling ? 'Cancelling...' : 'Cancel Gig'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 }
