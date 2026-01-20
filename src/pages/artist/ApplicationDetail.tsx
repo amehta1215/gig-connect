@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, Users, Music, Calendar, Clock, CheckCircle2, Archive } from 'lucide-react';
+import { ArrowLeft, MapPin, Users, Music, Calendar, Clock, CheckCircle2, Archive, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 interface ApplicationData {
   id: string;
@@ -85,6 +87,8 @@ export default function ApplicationDetail() {
   const [application, setApplication] = useState<ApplicationData | null>(null);
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   useEffect(() => {
     if (id && user) {
@@ -122,6 +126,26 @@ export default function ApplicationDetail() {
       }
     }
     setLoading(false);
+  };
+
+  const handleWithdraw = async () => {
+    if (!application) return;
+    
+    setWithdrawing(true);
+    const { error } = await supabase
+      .from('applications')
+      .delete()
+      .eq('id', application.id);
+    
+    setWithdrawing(false);
+    
+    if (error) {
+      toast.error('Failed to withdraw application');
+      return;
+    }
+    
+    toast.success('Application withdrawn');
+    navigate('/artist/applications');
   };
 
   if (loading) {
@@ -313,7 +337,46 @@ export default function ApplicationDetail() {
             <p className="text-muted-foreground text-sm">{application.message}</p>
           </div>
         )}
+
+        {/* Withdraw Button - only show for pending applications */}
+        {application.status === 'in_progress' && (
+          <div className="pt-4 border-t border-border">
+            <Button 
+              variant="destructive" 
+              onClick={() => setWithdrawDialogOpen(true)}
+              className="w-full"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Withdraw Application
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* Withdraw Confirmation Dialog */}
+      <Dialog open={withdrawDialogOpen} onOpenChange={setWithdrawDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Withdraw Application?</DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground">
+            Are you sure you want to withdraw your application to {listing.venue_name}
+            {listing.room_name ? ` - ${listing.room_name}` : ''}? This action cannot be undone.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setWithdrawDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleWithdraw}
+              disabled={withdrawing}
+            >
+              {withdrawing ? 'Withdrawing...' : 'Withdraw'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
