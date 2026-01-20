@@ -254,10 +254,12 @@ export default function ArtistGigDetail() {
         <Button variant="ghost" size="icon" onClick={() => navigate('/artist/calendar')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <Button variant="outline" size="sm" onClick={handleEditClick}>
-          <Pencil className="h-4 w-4 mr-2" />
-          Edit
-        </Button>
+        {isManualEvent && (
+          <Button variant="outline" size="sm" onClick={handleEditClick}>
+            <Pencil className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+        )}
       </div>
 
       {/* Gig Flyer Style Card */}
