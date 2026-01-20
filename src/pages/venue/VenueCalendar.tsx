@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CalendarIcon, Clock, Plus } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
-
 interface GigListing {
   id: string;
   gig_date: string;
@@ -28,20 +27,20 @@ interface GigListing {
     last_name: string;
   };
 }
-
 interface VenueListing {
   id: string;
   venue_name: string;
   room_name: string | null;
 }
-
 export default function VenueCalendar() {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
   const [gigs, setGigs] = useState<GigListing[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(true);
-  
+
   // Create event dialog state
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [venueListings, setVenueListings] = useState<VenueListing[]>([]);
@@ -50,57 +49,44 @@ export default function VenueCalendar() {
   const [eventTime, setEventTime] = useState('');
   const [eventArtistName, setEventArtistName] = useState('');
   const [creating, setCreating] = useState(false);
-
   useEffect(() => {
     if (user) {
       fetchGigs();
       fetchVenueListings();
     }
   }, [user]);
-
   const fetchGigs = async () => {
     setLoading(true);
 
     // First get venue profile
-    const { data: venueProfile } = await supabase
-      .from('venue_profiles')
-      .select('id')
-      .eq('user_id', user!.id)
-      .single();
-
+    const {
+      data: venueProfile
+    } = await supabase.from('venue_profiles').select('id').eq('user_id', user!.id).single();
     if (!venueProfile) {
       setLoading(false);
       return;
     }
 
     // Get venue listings
-    const { data: listings } = await supabase
-      .from('venue_listings')
-      .select('id')
-      .eq('venue_profile_id', venueProfile.id);
-
+    const {
+      data: listings
+    } = await supabase.from('venue_listings').select('id').eq('venue_profile_id', venueProfile.id);
     if (!listings || listings.length === 0) {
       setLoading(false);
       return;
     }
-
     const listingIds = listings.map(l => l.id);
 
     // Get gigs for these listings
-    const { data: gigsData } = await supabase
-      .from('gig_listings')
-      .select('*')
-      .in('venue_listing_id', listingIds)
-      .order('gig_date', { ascending: true });
-
+    const {
+      data: gigsData
+    } = await supabase.from('gig_listings').select('*').in('venue_listing_id', listingIds).order('gig_date', {
+      ascending: true
+    });
     if (gigsData) {
       // Fetch additional data for each gig
       const enrichedGigs = await Promise.all(gigsData.map(async gig => {
-        const [venueListingRes, artistProfileRes, artistRes] = await Promise.all([
-          supabase.from('venue_listings').select('venue_name, room_name').eq('id', gig.venue_listing_id).single(),
-          supabase.from('artist_profiles').select('band_name').eq('user_id', gig.artist_id).maybeSingle(),
-          supabase.from('profiles').select('first_name, last_name').eq('id', gig.artist_id).maybeSingle()
-        ]);
+        const [venueListingRes, artistProfileRes, artistRes] = await Promise.all([supabase.from('venue_listings').select('venue_name, room_name').eq('id', gig.venue_listing_id).single(), supabase.from('artist_profiles').select('band_name').eq('user_id', gig.artist_id).maybeSingle(), supabase.from('profiles').select('first_name, last_name').eq('id', gig.artist_id).maybeSingle()]);
         return {
           ...gig,
           venue_listing: venueListingRes.data,
@@ -112,21 +98,14 @@ export default function VenueCalendar() {
     }
     setLoading(false);
   };
-
   const fetchVenueListings = async () => {
-    const { data: venueProfile } = await supabase
-      .from('venue_profiles')
-      .select('id')
-      .eq('user_id', user!.id)
-      .single();
-
+    const {
+      data: venueProfile
+    } = await supabase.from('venue_profiles').select('id').eq('user_id', user!.id).single();
     if (!venueProfile) return;
-
-    const { data: listings } = await supabase
-      .from('venue_listings')
-      .select('id, venue_name, room_name')
-      .eq('venue_profile_id', venueProfile.id);
-
+    const {
+      data: listings
+    } = await supabase.from('venue_listings').select('id, venue_name, room_name').eq('venue_profile_id', venueProfile.id);
     if (listings) {
       setVenueListings(listings);
       if (listings.length === 1) {
@@ -134,7 +113,6 @@ export default function VenueCalendar() {
       }
     }
   };
-
   const handleCreateEventClick = () => {
     setEventDate(selectedDate);
     setEventTime('');
@@ -142,52 +120,45 @@ export default function VenueCalendar() {
     setSelectedListingId(venueListings.length === 1 ? venueListings[0].id : '');
     setCreateDialogOpen(true);
   };
-
   const handleCreateEvent = async () => {
     if (!eventDate || !selectedListingId) {
       toast.error('Please select a date and room');
       return;
     }
-
     setCreating(true);
 
     // Create gig listing without application_id
-    const { data: newGig, error } = await supabase
-      .from('gig_listings')
-      .insert({
-        venue_listing_id: selectedListingId,
-        artist_id: user!.id, // Use venue user as placeholder for manual events
-        gig_date: format(eventDate, 'yyyy-MM-dd'),
-        show_time: eventTime || null,
-        notes: eventArtistName ? `Artist: ${eventArtistName}` : null,
-        openers: [],
-      })
-      .select()
-      .single();
-
+    const {
+      data: newGig,
+      error
+    } = await supabase.from('gig_listings').insert({
+      venue_listing_id: selectedListingId,
+      artist_id: user!.id,
+      // Use venue user as placeholder for manual events
+      gig_date: format(eventDate, 'yyyy-MM-dd'),
+      show_time: eventTime || null,
+      notes: eventArtistName ? `Artist: ${eventArtistName}` : null,
+      openers: []
+    }).select().single();
     setCreating(false);
-
     if (error) {
       toast.error('Failed to create event');
       return;
     }
-
     toast.success('Event created!');
     setCreateDialogOpen(false);
     fetchGigs();
-    
+
     // Navigate to gig detail page
     if (newGig) {
       navigate(`/venue/calendar/${newGig.id}`);
     }
   };
-
   const gigDates = gigs.map(g => new Date(g.gig_date));
-  const gigsOnSelectedDate = selectedDate 
-    ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) 
-    : [];
-  
-  const modifiers = { hasGig: gigDates };
+  const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
+  const modifiers = {
+    hasGig: gigDates
+  };
   const modifiersStyles = {
     hasGig: {
       backgroundColor: '#b0177f',
@@ -195,32 +166,19 @@ export default function VenueCalendar() {
       borderRadius: '0'
     }
   };
-
   const today = startOfDay(new Date());
   const canCreateEvent = selectedDate && selectedDate >= today;
-
   if (loading) {
-    return (
-      <div className="space-y-6 animate-fade-in">
+    return <div className="space-y-6 animate-fade-in">
         <div className="h-8 w-48 bg-card animate-pulse" />
         <div className="h-64 bg-card animate-pulse" />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6 animate-fade-in">
+  return <div className="space-y-6 animate-fade-in">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Calendar */}
         <div className="bg-card border border-border p-4 flex items-center justify-center">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            modifiers={modifiers}
-            modifiersStyles={modifiersStyles}
-            className="pointer-events-auto"
-          />
+          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} className="pointer-events-auto" />
         </div>
 
         {/* Events on selected date */}
@@ -229,55 +187,33 @@ export default function VenueCalendar() {
             <h2 className="font-display text-sm text-primary tracking-widest">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
             </h2>
-            {canCreateEvent && (
-              <Button size="sm" onClick={handleCreateEventClick} className="bg-primary hover:bg-primary/90">
+            {canCreateEvent && <Button size="sm" onClick={handleCreateEventClick} className="bg-primary hover:bg-primary/90">
                 <Plus className="h-4 w-4 mr-1" />
                 CREATE EVENT
-              </Button>
-            )}
+              </Button>}
           </div>
           
-          {gigsOnSelectedDate.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No events on this date</p>
-          ) : (
-            <div className="space-y-3">
+          {gigsOnSelectedDate.length === 0 ? <p className="text-muted-foreground text-sm">No events on this date</p> : <div className="space-y-3">
               {gigsOnSelectedDate.map(gig => {
-                const artistName = gig.artist_profile?.band_name || 
-                  (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
-                const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-                return (
-                  <button
-                    key={gig.id}
-                    onClick={() => navigate(`/venue/calendar/${gig.id}`)}
-                    className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors"
-                  >
+            const artistName = gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+            const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+            return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
                     <p className="font-display text-lg text-accent">{artistName}</p>
                     <p className="text-sm text-muted-foreground">{roomDisplay}</p>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                  </button>;
+          })}
+            </div>}
         </div>
       </div>
 
       {/* Upcoming gigs list */}
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4">UPCOMING SHOWS</h2>
-        {gigs.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No upcoming shows booked</p>
-        ) : (
-          <div className="space-y-2">
+        {gigs.length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
             {gigs.filter(g => new Date(g.gig_date) >= new Date()).map(gig => {
-              const artistName = gig.artist_profile?.band_name || 
-                (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
-              const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-              return (
-                <button
-                  key={gig.id}
-                  onClick={() => navigate(`/venue/calendar/${gig.id}`)}
-                  className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors"
-                >
+          const artistName = gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+          const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+          return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                   <div>
                     <p className="font-display text-accent">{artistName}</p>
                     <p className="text-xs text-muted-foreground">{roomDisplay}</p>
@@ -285,11 +221,9 @@ export default function VenueCalendar() {
                   <span className="text-sm text-muted-foreground">
                     {format(new Date(gig.gig_date), 'MMM d, yyyy')}
                   </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+                </button>;
+        })}
+          </div>}
       </div>
 
       {/* Create Event Dialog */}
@@ -300,26 +234,22 @@ export default function VenueCalendar() {
           </DialogHeader>
           
           <div className="space-y-6 py-4">
-            <p className="text-muted-foreground">Create a new event for your venue</p>
+            
 
             {/* Room Selection */}
-            {venueListings.length > 1 && (
-              <div className="space-y-2">
+            {venueListings.length > 1 && <div className="space-y-2">
                 <label className="font-display text-xs text-primary tracking-widest">ROOM</label>
                 <Select value={selectedListingId} onValueChange={setSelectedListingId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a room" />
                   </SelectTrigger>
                   <SelectContent>
-                    {venueListings.map(listing => (
-                      <SelectItem key={listing.id} value={listing.id}>
+                    {venueListings.map(listing => <SelectItem key={listing.id} value={listing.id}>
                         {listing.room_name || listing.venue_name}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
-              </div>
-            )}
+              </div>}
 
             {/* Date (read-only) */}
             <div className="space-y-2">
@@ -336,12 +266,7 @@ export default function VenueCalendar() {
             <div className="space-y-2">
               <label className="font-display text-xs text-primary tracking-widest">TIME OF SHOW</label>
               <div className="relative">
-                <Input
-                  type="time"
-                  value={eventTime}
-                  onChange={(e) => setEventTime(e.target.value)}
-                  className="pl-10"
-                />
+                <Input type="time" value={eventTime} onChange={e => setEventTime(e.target.value)} className="pl-10" />
                 <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
             </div>
@@ -349,11 +274,7 @@ export default function VenueCalendar() {
             {/* Artist Name (optional) */}
             <div className="space-y-2">
               <label className="font-display text-xs text-primary tracking-widest">ARTIST NAME (OPTIONAL)</label>
-              <Input
-                value={eventArtistName}
-                onChange={(e) => setEventArtistName(e.target.value)}
-                placeholder="Enter artist or event name"
-              />
+              <Input value={eventArtistName} onChange={e => setEventArtistName(e.target.value)} placeholder="Enter artist or event name" />
             </div>
           </div>
 
@@ -361,16 +282,11 @@ export default function VenueCalendar() {
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button
-              onClick={handleCreateEvent}
-              disabled={creating || !eventDate || !selectedListingId}
-              className="bg-primary hover:bg-primary/90"
-            >
+            <Button onClick={handleCreateEvent} disabled={creating || !eventDate || !selectedListingId} className="bg-primary hover:bg-primary/90">
               {creating ? 'Creating...' : 'Create Event'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 }
