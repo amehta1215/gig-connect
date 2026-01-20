@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, MapPin, Users, Music, Trash2, Upload, X } from 'lucide-react';
+import { Plus, MapPin, Users, Music, Trash2, Upload, X, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 interface VenueListing {
@@ -350,10 +350,18 @@ export default function VenueListings() {
         </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {listings.map(listing => <div key={listing.id} className="bg-card border border-border overflow-hidden hover:border-primary/50 transition-colors">
               {/* Image */}
-              <div className="aspect-[4/3] bg-secondary flex items-center justify-center overflow-hidden">
+              <div className="aspect-[4/3] bg-secondary flex items-center justify-center overflow-hidden relative">
                 {listing.pictures && listing.pictures.length > 0 ? <img src={listing.pictures[0]} alt={listing.venue_name} className="w-full h-full object-cover" /> : <div className="bg-heat w-full h-full flex items-center justify-center">
                     <Music className="h-12 w-12 text-primary/30" />
                   </div>}
+                <Button 
+                  variant="secondary" 
+                  size="icon" 
+                  className="absolute top-2 right-2 h-8 w-8 bg-background/80 hover:bg-background border border-border"
+                  onClick={() => openDialog(listing)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
               </div>
 
               {/* Content */}
@@ -378,12 +386,6 @@ export default function VenueListings() {
                       </span>)}
                   </div>}
 
-                {/* Actions */}
-                <div className="mt-3">
-                  <Button variant="outline" size="sm" className="w-full font-display tracking-widest text-xs border-border" onClick={() => openDialog(listing)}>
-                    EDIT
-                  </Button>
-                </div>
               </div>
             </div>)}
         </div>}
