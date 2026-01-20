@@ -3,7 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon, Clock, Plus } from 'lucide-react';
+import { format, startOfDay } from 'date-fns';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+
 interface GigListing {
   id: string;
   gig_date: string;
@@ -15,34 +23,45 @@ interface GigListing {
     location: string | null;
   };
 }
+
 export default function ArtistCalendar() {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [gigs, setGigs] = useState<GigListing[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(true);
+  
+  // Create event dialog state
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
+  const [eventTime, setEventTime] = useState('');
+  const [eventVenueName, setEventVenueName] = useState('');
+  const [creating, setCreating] = useState(false);
+
   useEffect(() => {
     if (user) {
       fetchGigs();
     }
   }, [user]);
+
   const fetchGigs = async () => {
     setLoading(true);
 
     // Get gigs where artist is headliner
-    const {
-      data: gigsData
-    } = await supabase.from('gig_listings').select('*').eq('artist_id', user!.id).order('gig_date', {
-      ascending: true
-    });
+    const { data: gigsData } = await supabase
+      .from('gig_listings')
+      .select('*')
+      .eq('artist_id', user!.id)
+      .order('gig_date', { ascending: true });
+
     if (gigsData) {
       // Fetch venue listing info for each gig
       const enrichedGigs = await Promise.all(gigsData.map(async gig => {
-        const {
-          data: venueListing
-        } = await supabase.from('venue_listings').select('venue_name, room_name, location').eq('id', gig.venue_listing_id).single();
+        const { data: venueListing } = await supabase
+          .from('venue_listings')
+          .select('venue_name, room_name, location')
+          .eq('id', gig.venue_listing_id)
+          .maybeSingle();
         return {
           ...gig,
           venue_listing: venueListing
@@ -52,11 +71,76 @@ export default function ArtistCalendar() {
     }
     setLoading(false);
   };
-  const gigDates = gigs.map(g => new Date(g.gig_date));
-  const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
-  const modifiers = {
-    hasGig: gigDates
+
+  const handleCreateEventClick = () => {
+    setEventDate(selectedDate);
+    setEventTime('');
+    setEventVenueName('');
+    setCreateDialogOpen(true);
   };
+
+  const handleCreateEvent = async () => {
+    if (!eventDate) {
+      toast.error('Please select a date');
+      return;
+    }
+
+    setCreating(true);
+
+    // For artists, we need to find or create a placeholder venue listing
+    // Since they may not have venue listings, we'll create a manual event 
+    // that uses a placeholder venue_listing_id (this requires schema flexibility)
+    
+    // Get the first venue listing available (for the venue_listing_id requirement)
+    const { data: anyListing } = await supabase
+      .from('venue_listings')
+      .select('id')
+      .limit(1)
+      .single();
+
+    if (!anyListing) {
+      toast.error('Unable to create event - no venues available');
+      setCreating(false);
+      return;
+    }
+
+    // Create gig listing without application_id
+    const { data: newGig, error } = await supabase
+      .from('gig_listings')
+      .insert({
+        venue_listing_id: anyListing.id,
+        artist_id: user!.id,
+        gig_date: format(eventDate, 'yyyy-MM-dd'),
+        show_time: eventTime || null,
+        notes: eventVenueName ? `Venue: ${eventVenueName}` : null,
+        openers: [],
+      })
+      .select()
+      .single();
+
+    setCreating(false);
+
+    if (error) {
+      toast.error('Failed to create event');
+      return;
+    }
+
+    toast.success('Event created!');
+    setCreateDialogOpen(false);
+    fetchGigs();
+    
+    // Navigate to gig detail page
+    if (newGig) {
+      navigate(`/artist/calendar/${newGig.id}`);
+    }
+  };
+
+  const gigDates = gigs.map(g => new Date(g.gig_date));
+  const gigsOnSelectedDate = selectedDate 
+    ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) 
+    : [];
+  
+  const modifiers = { hasGig: gigDates };
   const modifiersStyles = {
     hasGig: {
       backgroundColor: '#b0177f',
@@ -64,56 +148,183 @@ export default function ArtistCalendar() {
       borderRadius: '0'
     }
   };
+
+  const today = startOfDay(new Date());
+  const canCreateEvent = selectedDate && selectedDate >= today;
+
   if (loading) {
-    return <div className="space-y-6 animate-fade-in">
+    return (
+      <div className="space-y-6 animate-fade-in">
         <div className="h-8 w-48 bg-card animate-pulse" />
         <div className="h-64 bg-card animate-pulse" />
-      </div>;
+      </div>
+    );
   }
-  return <div className="space-y-6 animate-fade-in">
-      
 
+  return (
+    <div className="space-y-6 animate-fade-in">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Calendar */}
         <div className="bg-card border border-border p-4 flex items-center justify-center">
-          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} className="pointer-events-auto" />
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            modifiers={modifiers}
+            modifiersStyles={modifiersStyles}
+            className="pointer-events-auto"
+          />
         </div>
 
         {/* Events on selected date */}
         <div className="bg-card border border-border p-6">
-          <h2 className="font-display text-sm text-primary tracking-widest mb-4">
-            {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-sm text-primary tracking-widest">
+              {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
+            </h2>
+            {canCreateEvent && (
+              <Button size="sm" onClick={handleCreateEventClick} className="bg-primary hover:bg-primary/90">
+                <Plus className="h-4 w-4 mr-1" />
+                CREATE EVENT
+              </Button>
+            )}
+          </div>
           
-          {gigsOnSelectedDate.length === 0 ? <p className="text-muted-foreground text-sm">No shows on this date</p> : <div className="space-y-3">
+          {gigsOnSelectedDate.length === 0 ? (
+            <p className="text-muted-foreground text-sm">No shows on this date</p>
+          ) : (
+            <div className="space-y-3">
               {gigsOnSelectedDate.map(gig => {
-            const venueName = gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
-            return <button key={gig.id} onClick={() => navigate(`/artist/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
+                const venueName = gig.venue_listing?.room_name 
+                  ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` 
+                  : gig.venue_listing?.venue_name || 'Venue';
+                return (
+                  <button
+                    key={gig.id}
+                    onClick={() => navigate(`/artist/calendar/${gig.id}`)}
+                    className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors"
+                  >
                     <p className="font-display text-lg text-accent">{venueName}</p>
-                    {gig.venue_listing?.location && <p className="text-sm text-muted-foreground">{gig.venue_listing.location}</p>}
-                  </button>;
-          })}
-            </div>}
+                    {gig.venue_listing?.location && (
+                      <p className="text-sm text-muted-foreground">{gig.venue_listing.location}</p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Upcoming gigs list */}
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4">UPCOMING SHOWS</h2>
-        {gigs.length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
+        {gigs.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No upcoming shows booked</p>
+        ) : (
+          <div className="space-y-2">
             {gigs.filter(g => new Date(g.gig_date) >= new Date()).map(gig => {
-          const venueName = gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
-          return <button key={gig.id} onClick={() => navigate(`/artist/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
+              const venueName = gig.venue_listing?.room_name 
+                ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` 
+                : gig.venue_listing?.venue_name || 'Venue';
+              return (
+                <button
+                  key={gig.id}
+                  onClick={() => navigate(`/artist/calendar/${gig.id}`)}
+                  className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors"
+                >
                   <div>
                     <p className="font-display text-accent">{venueName}</p>
-                    {gig.venue_listing?.location && <p className="text-xs text-muted-foreground">{gig.venue_listing.location}</p>}
+                    {gig.venue_listing?.location && (
+                      <p className="text-xs text-muted-foreground">{gig.venue_listing.location}</p>
+                    )}
                   </div>
                   <span className="text-sm text-muted-foreground">
                     {format(new Date(gig.gig_date), 'MMM d, yyyy')}
                   </span>
-                </button>;
-        })}
-          </div>}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
-    </div>;
+
+      {/* Create Event Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl">SELECT GIG DATE & TIME</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <p className="text-muted-foreground">Create a new event for your calendar</p>
+
+            {/* Date */}
+            <div className="space-y-2">
+              <label className="font-display text-xs text-primary tracking-widest">DATE</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !eventDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {eventDate ? format(eventDate, 'MMMM do, yyyy') : 'Pick a date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={eventDate}
+                    onSelect={setEventDate}
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Time */}
+            <div className="space-y-2">
+              <label className="font-display text-xs text-primary tracking-widest">TIME OF SHOW</label>
+              <div className="relative">
+                <Input
+                  type="time"
+                  value={eventTime}
+                  onChange={(e) => setEventTime(e.target.value)}
+                  className="pl-10"
+                />
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+
+            {/* Venue Name (optional) */}
+            <div className="space-y-2">
+              <label className="font-display text-xs text-primary tracking-widest">VENUE NAME (OPTIONAL)</label>
+              <Input
+                value={eventVenueName}
+                onChange={(e) => setEventVenueName(e.target.value)}
+                placeholder="Enter venue or event name"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateEvent}
+              disabled={creating || !eventDate}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {creating ? 'Creating...' : 'Create Event'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }
