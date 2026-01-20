@@ -117,6 +117,15 @@ export default function FindVenues() {
     );
   };
 
+  const hasActiveFilters = selectedGenres.length > 0 || selectedCapacity !== 'any' || selectedLocation !== '';
+  
+  const clearAllFilters = () => {
+    setSelectedGenres([]);
+    setSelectedCapacity('any');
+    setSelectedLocation('');
+    setSearchTerm('');
+  };
+
   const genreMultiSelect = (className?: string) => (
     <Popover>
       <PopoverTrigger asChild>
@@ -190,6 +199,11 @@ export default function FindVenues() {
                 {capacityRanges.map(range => <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>)}
               </SelectContent>
             </Select>
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground">
+                <X className="h-3 w-3 mr-1" /> Reset
+              </Button>
+            )}
           </div>
 
           {/* Mobile Filter Toggle */}
@@ -204,6 +218,11 @@ export default function FindVenues() {
         <CollapsibleContent className="lg:hidden">
           <div className="mt-3 p-4 bg-card border border-border space-y-4">
             {filtersContent}
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearAllFilters} className="w-full text-xs text-muted-foreground hover:text-foreground">
+                <X className="h-3 w-3 mr-1" /> Reset All Filters
+              </Button>
+            )}
           </div>
         </CollapsibleContent>
       </Collapsible>
