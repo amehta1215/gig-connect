@@ -63,7 +63,7 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {/* Pictures Gallery */}
-          <div>
+          <div className="mb-10">
             {allPictures.length === 0 ? (
               <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
                 <div className="w-full h-full flex items-center justify-center bg-heat">
