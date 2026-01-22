@@ -83,7 +83,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
                 size="sm"
                 className="font-display tracking-widest"
               >
-                LOGIN
+                LOGIN / SIGN UP
               </Button>
             </div>
           </div>
