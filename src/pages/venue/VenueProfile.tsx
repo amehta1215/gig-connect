@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye } from 'lucide-react';
+import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
 
 interface VenueProfileData {
   id: string;
@@ -82,6 +83,7 @@ export default function VenueProfile() {
   const [pictures, setPictures] = useState<string[]>([]);
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const pictureInputRef = useRef<HTMLInputElement>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [roomFormData, setRoomFormData] = useState({
     venue_name: '',
     room_name: '',
@@ -681,21 +683,29 @@ export default function VenueProfile() {
 
                 {/* Actions */}
                 <div className="flex justify-between pt-4 border-t border-border">
-                  {editingListing ? (
+                  <div className="flex gap-2">
+                    {editingListing && (
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        onClick={() => {
+                          handleDeleteRoom(editingListing.id);
+                          setIsDialogOpen(false);
+                        }} 
+                        className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button 
                       variant="outline" 
-                      size="icon" 
-                      onClick={() => {
-                        handleDeleteRoom(editingListing.id);
-                        setIsDialogOpen(false);
-                      }} 
-                      className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border"
+                      onClick={() => setPreviewOpen(true)} 
+                      className="font-display tracking-widest"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Eye className="h-4 w-4 mr-2" />
+                      PREVIEW
                     </Button>
-                  ) : (
-                    <div />
-                  )}
+                  </div>
                   <div className="flex gap-2">
                     <Button 
                       variant="outline" 
@@ -713,6 +723,23 @@ export default function VenueProfile() {
                     </Button>
                   </div>
                 </div>
+
+                {/* Preview Sheet */}
+                <RoomPreviewSheet
+                  open={previewOpen}
+                  onOpenChange={setPreviewOpen}
+                  data={{
+                    venue_name: roomFormData.venue_name,
+                    room_name: roomFormData.room_name,
+                    location: roomFormData.location,
+                    capacity: roomFormData.capacity,
+                    genres: roomFormData.genres,
+                    backline_info: roomFormData.backline_info,
+                    house_rules: roomFormData.house_rules,
+                    pictures: pictures,
+                    venueProfilePicture: formData.picture
+                  }}
+                />
               </div>
             </DialogContent>
           </Dialog>
