@@ -54,14 +54,14 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
           <DialogTitle className="font-display text-sm text-primary tracking-widest">
             ARTIST VIEW PREVIEW
           </DialogTitle>
         </DialogHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="flex-1 overflow-y-auto px-6 py-6">
           {/* Pictures Gallery */}
           <div>
             {allPictures.length === 0 ? (
@@ -148,9 +148,9 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
               </div>
             </div>
 
-            {/* Right Column - Apply Form Preview */}
+            {/* Right Column - Apply Form Preview (Sticky) */}
             <div className="lg:w-72">
-              <div className="bg-background border border-border rounded-lg p-6 space-y-6">
+              <div className="lg:sticky lg:top-0 bg-background border border-border rounded-lg p-6 space-y-6">
                 <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
 
                 {/* Availability */}
