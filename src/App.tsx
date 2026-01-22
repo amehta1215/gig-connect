@@ -7,9 +7,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Pages
-import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+
+// Public pages
+import PublicDashboard from "./pages/public/PublicDashboard";
+import PublicVenueDetail from "./pages/public/PublicVenueDetail";
 
 // Artist pages
 import ArtistDashboard from "./pages/artist/ArtistDashboard";
@@ -43,8 +46,10 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
+            {/* Public routes - accessible to everyone */}
+            <Route path="/" element={<PublicDashboard />}>
+              <Route path="venues/:id" element={<PublicVenueDetail />} />
+            </Route>
             <Route path="/auth" element={<Auth />} />
 
             {/* Artist routes */}
