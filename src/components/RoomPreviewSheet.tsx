@@ -1,4 +1,4 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MapPin, Users, Music } from 'lucide-react';
 
 interface RoomPreviewData {
@@ -28,13 +28,13 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="font-display text-sm text-primary tracking-widest">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-display text-sm text-primary tracking-widest">
             ARTIST VIEW PREVIEW
-          </SheetTitle>
-        </SheetHeader>
+          </DialogTitle>
+        </DialogHeader>
 
         <div className="mt-6 space-y-6">
           {/* Pictures Gallery */}
@@ -127,7 +127,7 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
             </p>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
