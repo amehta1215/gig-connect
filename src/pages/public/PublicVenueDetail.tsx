@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, Users, Music } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { ArrowLeft, MapPin, Users, Music, CalendarIcon } from 'lucide-react';
 
 interface VenueListing {
   id: string;
@@ -23,12 +27,34 @@ interface VenueProfile {
   picture: string | null;
 }
 
+const availabilityOptions = [
+  { id: 'date_range', label: 'Date Range' },
+  { id: 'specific_dates', label: 'Specific Dates' },
+  { id: 'flexible', label: 'Flexible' }
+];
+
+const paymentOptions = [
+  { id: 'door_split', label: 'Door' },
+  { id: 'bar_split', label: 'Bar' },
+  { id: 'tip_based', label: 'Tips' },
+  { id: 'flat_fee', label: 'Flat' },
+  { id: 'rental', label: 'Rental' },
+  { id: 'no_preference', label: 'Flexible' }
+];
+
+const lineupOptions = [
+  { id: 'co_acts_needed', label: 'Co-acts Needed' },
+  { id: 'co_acts_confirmed', label: 'Co-acts Confirmed' },
+  { id: 'solo_performer', label: 'Solo' }
+];
+
 export default function PublicVenueDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [listing, setListing] = useState<VenueListing | null>(null);
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -58,6 +84,12 @@ export default function PublicVenueDetail() {
       }
     }
     setLoading(false);
+  };
+
+  const handleInteraction = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setAuthDialogOpen(true);
   };
 
   if (loading) {
@@ -175,29 +207,102 @@ export default function PublicVenueDetail() {
           </div>
         </div>
 
-        {/* Right Column - Login to Apply */}
+        {/* Right Column - Apply Form (with auth intercept) */}
         <div className="lg:w-80 xl:w-96">
           <div className="lg:sticky lg:top-20">
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
               <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
 
-              {/* Auth Required Overlay */}
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="text-xl text-accent font-display font-bold mb-6">
-                  LOGIN OR SIGN UP TO APPLY
-                </p>
+              {/* Availability */}
+              <div className="space-y-3" onClick={handleInteraction}>
+                <h3 className="font-display text-sm text-primary tracking-widest">AVAILABILITY</h3>
+                <RadioGroup defaultValue="flexible" className="pointer-events-none">
+                  <div className="flex flex-col gap-2">
+                    {availabilityOptions.map(option => (
+                      <div key={option.id} className="flex items-center space-x-2">
+                        <RadioGroupItem value={option.id} id={`public-avail-${option.id}`} />
+                        <Label htmlFor={`public-avail-${option.id}`} className="cursor-pointer">
+                          {option.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </RadioGroup>
+
+                {/* Date picker placeholder */}
                 <Button 
-                  onClick={() => navigate('/auth')} 
-                  className="font-display tracking-widest" 
-                  size="lg"
+                  variant="outline" 
+                  className="w-full justify-start text-left font-normal text-muted-foreground pointer-events-none"
                 >
-                  LOGIN / SIGN UP
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <span>Select dates</span>
                 </Button>
               </div>
+
+              {/* Payment Preference */}
+              <div className="space-y-3" onClick={handleInteraction}>
+                <h3 className="font-display text-sm text-primary tracking-widest">PAYMENT</h3>
+                <div className="grid grid-cols-2 gap-2 pointer-events-none">
+                  {paymentOptions.map(option => (
+                    <div 
+                      key={option.id} 
+                      className="flex items-center gap-2 p-2 rounded-lg border border-border text-sm"
+                    >
+                      <Checkbox className="h-4 w-4" />
+                      <Label className="cursor-pointer text-sm">{option.label}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Lineup */}
+              <div className="space-y-3" onClick={handleInteraction}>
+                <h3 className="font-display text-sm text-primary tracking-widest">LINEUP</h3>
+                <RadioGroup defaultValue="solo_performer" className="pointer-events-none">
+                  <div className="flex flex-col gap-2">
+                    {lineupOptions.map(option => (
+                      <div key={option.id} className="flex items-center space-x-2">
+                        <RadioGroupItem value={option.id} id={`public-lineup-${option.id}`} />
+                        <Label htmlFor={`public-lineup-${option.id}`} className="cursor-pointer">
+                          {option.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Submit Button */}
+              <Button 
+                onClick={handleInteraction} 
+                className="w-full font-display tracking-widest text-lg py-6"
+              >
+                APPLY
+              </Button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Auth Required Dialog */}
+      <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
+        <DialogContent className="bg-card border-border max-w-sm text-center">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl text-accent tracking-wide">
+              Login or sign up to apply
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Create an account or sign in to submit your application
+            </DialogDescription>
+          </DialogHeader>
+          <Button 
+            onClick={() => navigate('/auth')} 
+            className="w-full font-display tracking-widest text-lg h-12 mt-4"
+          >
+            LOGIN / SIGN UP
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
