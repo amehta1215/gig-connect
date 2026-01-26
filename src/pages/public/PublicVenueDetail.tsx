@@ -216,7 +216,7 @@ export default function PublicVenueDetail() {
               {/* Availability */}
               <div className="space-y-3" onClick={handleInteraction}>
                 <h3 className="font-display text-sm text-primary tracking-widest">AVAILABILITY</h3>
-                <RadioGroup defaultValue="flexible" className="pointer-events-none">
+                <RadioGroup className="pointer-events-none">
                   <div className="flex flex-col gap-2">
                     {availabilityOptions.map(option => (
                       <div key={option.id} className="flex items-center space-x-2">
@@ -258,7 +258,7 @@ export default function PublicVenueDetail() {
               {/* Lineup */}
               <div className="space-y-3" onClick={handleInteraction}>
                 <h3 className="font-display text-sm text-primary tracking-widest">LINEUP</h3>
-                <RadioGroup defaultValue="solo_performer" className="pointer-events-none">
+                <RadioGroup className="pointer-events-none">
                   <div className="flex flex-col gap-2">
                     {lineupOptions.map(option => (
                       <div key={option.id} className="flex items-center space-x-2">
