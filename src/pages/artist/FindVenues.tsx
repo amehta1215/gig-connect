@@ -253,7 +253,7 @@ export default function FindVenues() {
               {/* Favorite Button */}
               <button
                 onClick={(e) => handleToggleFavorite(e, venue.id)}
-                className="absolute top-2 left-2 z-10 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors"
+                className="absolute top-2 right-2 z-10 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors"
               >
                 <Heart
                   className={`h-5 w-5 transition-colors ${
@@ -279,7 +279,7 @@ export default function FindVenues() {
                   );
                 })()}
                 {/* Capacity badge */}
-                {venue.capacity && <div className="absolute top-2 right-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
+                {venue.capacity && <div className="absolute top-2 left-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
                     <Users className="h-3 w-3" />
                     {venue.capacity}
                   </div>}
