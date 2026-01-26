@@ -2,7 +2,14 @@ import { ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { ArrowLeftRight } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ArrowLeftRight, User, LogIn, UserPlus } from 'lucide-react';
 
 interface Tab {
   label: string;
@@ -67,25 +74,29 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
               })}
             </nav>
 
-            {/* Switch to Venue & Login Button */}
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleSwitchToVenue}
-                className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeftRight className="h-4 w-4" />
-                <span className="text-xs font-display tracking-widest">SWITCH TO VENUE</span>
-              </Button>
-              <Button 
-                onClick={() => navigate('/auth')} 
-                size="sm"
-                className="font-display tracking-widest"
-              >
-                LOGIN / SIGN UP
-              </Button>
-            </div>
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/auth')}>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/auth')}>
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/auth')}>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Sign Up
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Mobile Navigation */}
