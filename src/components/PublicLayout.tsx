@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ArrowLeftRight, User, LogIn, UserPlus } from 'lucide-react';
+import { ArrowLeftRight, User, LogIn } from 'lucide-react';
 
 interface Tab {
   label: string;
@@ -83,17 +83,8 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={() => navigate('/auth')}>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/auth')}>
                   <LogIn className="mr-2 h-4 w-4" />
-                  Login
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/auth')}>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Sign Up
+                  Login / Sign Up
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
