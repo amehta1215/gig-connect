@@ -76,7 +76,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
                 className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeftRight className="h-4 w-4" />
-                <span className="text-xs font-display tracking-widest">VENUE</span>
+                <span className="text-xs font-display tracking-widest">SWITCH TO VENUE</span>
               </Button>
               <Button 
                 onClick={() => navigate('/auth')} 
@@ -114,7 +114,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
               className="px-3 py-1.5 text-xs font-display tracking-widest whitespace-nowrap text-muted-foreground hover:text-foreground flex items-center gap-1"
             >
               <ArrowLeftRight className="h-3 w-3" />
-              VENUE
+              SWITCH TO VENUE
             </button>
           </nav>
         </div>
