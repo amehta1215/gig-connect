@@ -104,7 +104,7 @@ export default function ArtistProfile() {
   const handlePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
+
     // Validate file types
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     for (const file of Array.from(files)) {
@@ -114,7 +114,6 @@ export default function ArtistProfile() {
         return;
       }
     }
-    
     if (pictures.length + files.length > 4) {
       toast.error('Maximum 4 pictures allowed');
       return;
@@ -249,11 +248,10 @@ export default function ArtistProfile() {
 
         <div className="space-y-2">
           <Label htmlFor="location">Location <span className="text-primary">*</span></Label>
-          <LocationAutocomplete
-            value={formData.location}
-            onChange={(value) => setFormData({ ...formData, location: value })}
-            placeholder="Los Angeles, CA"
-          />
+          <LocationAutocomplete value={formData.location} onChange={value => setFormData({
+          ...formData,
+          location: value
+        })} placeholder="Los Angeles, CA" />
         </div>
 
         <div className="space-y-2">
@@ -268,7 +266,7 @@ export default function ArtistProfile() {
       {/* Links Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2 text-primary mb-4">
-          <h2 className="font-display text-xl">SOCIAL LINKS</h2>
+          <h2 className="font-display text-xl">HANDLES</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -327,30 +325,24 @@ export default function ArtistProfile() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {pictures.map((url, index) => <div key={index} className={`relative group aspect-square ${index === 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}>
               <img src={url} alt={`Picture ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
-              {index === 0 && (
-                <div className="absolute top-2 left-2 px-2 py-1 bg-primary text-primary-foreground text-xs font-display rounded">
+              {index === 0 && <div className="absolute top-2 left-2 px-2 py-1 bg-primary text-primary-foreground text-xs font-display rounded">
                   MAIN
-                </div>
-              )}
+                </div>}
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                {index !== 0 && (
-                  <button onClick={() => setMainPicture(index)} className="p-1 bg-accent rounded-full" title="Set as main picture">
+                {index !== 0 && <button onClick={() => setMainPicture(index)} className="p-1 bg-accent rounded-full" title="Set as main picture">
                     <Star className="h-4 w-4 text-accent-foreground" />
-                  </button>
-                )}
+                  </button>}
                 <button onClick={() => removePicture(index)} className="p-1 bg-destructive rounded-full">
                   <X className="h-4 w-4 text-destructive-foreground" />
                 </button>
               </div>
             </div>)}
-          {pictures.length < 4 && (
-            <button onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
+          {pictures.length < 4 && <button onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
               <Upload className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
                 {uploadingPicture ? 'Uploading...' : 'Add Picture'}
               </span>
-            </button>
-          )}
+            </button>}
         </div>
         <input ref={pictureInputRef} type="file" accept=".jpg,.jpeg,.png,.webp,.gif" multiple className="hidden" onChange={handlePictureUpload} />
       </div>
