@@ -215,7 +215,7 @@ export default function ArtistProfile() {
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="font-display text-4xl text-accent font-black">EDIT ARTIST PROFILE</h1>
+          <h1 className="font-display text-4xl text-accent font-black">ARTIST PROFILE</h1>
         </div>
         <Button onClick={handleSave} disabled={saving}>
           <Save className="h-4 w-4 mr-2" />
