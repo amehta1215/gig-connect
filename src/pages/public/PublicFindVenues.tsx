@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, MapPin, Users, Music, Filter, X } from 'lucide-react';
+import { Search, MapPin, Users, Music, Filter, X, Heart } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface VenueListing {
   id: string;
@@ -44,6 +45,7 @@ export default function PublicFindVenues() {
   const [selectedCapacities, setSelectedCapacities] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchVenues();
@@ -255,6 +257,19 @@ export default function PublicFindVenues() {
               onClick={() => navigate(`/venues/${venue.id}`)} 
               className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative"
             >
+              {/* Favorite Heart Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 left-2 z-10 h-8 w-8 bg-background/80 hover:bg-background"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAuthDialogOpen(true);
+                }}
+              >
+                <Heart className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+              </Button>
+
               {/* Image */}
               <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
                 {(() => {
@@ -308,6 +323,26 @@ export default function PublicFindVenues() {
           ))}
         </div>
       )}
+
+      {/* Auth Required Dialog */}
+      <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
+        <DialogContent className="bg-card border-border max-w-sm text-center">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl text-accent tracking-wide">
+              Login or sign up to save favorites
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Create an account or sign in to save venues to your favorites
+            </DialogDescription>
+          </DialogHeader>
+          <Button 
+            onClick={() => navigate('/auth')} 
+            className="w-full font-display tracking-widest text-lg h-12 mt-4"
+          >
+            LOGIN / SIGN UP
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
