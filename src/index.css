@@ -45,7 +45,7 @@
 @layer base {
   :root {
     /* Core palette: Dark green, Orange, Yellow */
-    --background: 240 4% 95%;
+    --background: 229 84% 4.902%;
     --foreground: 240 5% 10%;
 
     --card: 0 0% 98%;
@@ -54,7 +54,7 @@
     --popover: 240 5% 90%;
     --popover-foreground: 240 5% 10%;
 
-    --primary: 245 57.9365% 50.5882%;
+    --primary: 50 97.8495% 63.5294%;
     --primary-foreground: 327 73% 97%;
 
     --secondary: 214 31.8182% 91.3725%;
@@ -64,7 +64,7 @@
     --muted-foreground: 240 5% 10%;
 
     --accent: 48 95.8159% 53.1373%;
-    --accent-foreground: 201 96.3415% 32.1569%;
+    --accent-foreground: 46 96.6851% 64.5098%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 85% 97%;
