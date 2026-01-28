@@ -133,12 +133,9 @@ export default function Login() {
 
               {/* Create account link */}
               <div className="mt-6 text-center">
-                <p className="text-muted-foreground font-display text-sm">
-                  Don't have an account?
-                </p>
                 <Link
                   to="/signup"
-                  className="font-display uppercase tracking-widest text-primary hover:text-primary/80 transition-colors text-lg mt-2 inline-block"
+                  className="font-display uppercase tracking-widest text-primary hover:text-primary/80 transition-colors text-lg"
                 >
                   Create an account
                 </Link>

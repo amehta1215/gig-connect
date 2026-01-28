@@ -194,12 +194,9 @@ export default function Signup() {
 
               {/* Login link */}
               <div className="mt-6 text-center">
-                <p className="text-muted-foreground font-display text-sm">
-                  Already have an account?
-                </p>
                 <Link
                   to="/auth"
-                  className="font-display uppercase tracking-widest text-primary hover:text-primary/80 transition-colors text-lg mt-2 inline-block"
+                  className="font-display uppercase tracking-widest text-primary hover:text-primary/80 transition-colors text-lg"
                 >
                   Login
                 </Link>
