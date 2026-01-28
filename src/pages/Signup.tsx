@@ -196,7 +196,7 @@ export default function Signup() {
               <div className="mt-6 text-center">
                 <Link
                   to="/auth"
-                  className="font-display uppercase tracking-widest text-primary hover:text-primary/80 transition-colors text-lg"
+                  className="font-display uppercase tracking-widest text-primary hover:text-primary/80 transition-colors text-xs"
                 >
                   Login
                 </Link>
