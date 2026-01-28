@@ -7,8 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Pages
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 // Public pages
@@ -51,8 +50,7 @@ const App = () => (
             <Route path="/" element={<PublicDashboard />}>
               <Route path="venues/:id" element={<PublicVenueDetail />} />
             </Route>
-            <Route path="/auth" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/auth" element={<Auth />} />
 
             {/* Artist routes */}
             <Route
