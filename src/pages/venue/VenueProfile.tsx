@@ -439,28 +439,41 @@ export default function VenueProfile() {
                   <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
                     {editingListing ? (roomFormData.room_name || roomFormData.venue_name || 'ROOM') : 'NEW ROOM'}
                   </DialogTitle>
-                  {editingListing && (
-                    <div className="flex gap-2">
-                      <Button
-                        variant={dialogMode === 'preview' ? 'default' : 'outline'}
+                  <div className="flex gap-2">
+                    {editingListing && (
+                      <>
+                        <Button
+                          variant={dialogMode === 'preview' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setDialogMode('preview')}
+                          className="font-display tracking-widest"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          PREVIEW
+                        </Button>
+                        <Button
+                          variant={dialogMode === 'edit' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setDialogMode('edit')}
+                          className="font-display tracking-widest"
+                        >
+                          <Pencil className="h-4 w-4 mr-2" />
+                          EDIT
+                        </Button>
+                      </>
+                    )}
+                    {dialogMode === 'edit' && (
+                      <Button 
+                        onClick={handleSaveRoom} 
+                        disabled={savingRoom} 
                         size="sm"
-                        onClick={() => setDialogMode('preview')}
                         className="font-display tracking-widest"
                       >
-                        <Eye className="h-4 w-4 mr-2" />
-                        PREVIEW
+                        <Save className="h-4 w-4 mr-2" />
+                        {savingRoom ? '...' : 'SAVE CHANGES'}
                       </Button>
-                      <Button
-                        variant={dialogMode === 'edit' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setDialogMode('edit')}
-                        className="font-display tracking-widest"
-                      >
-                        <Pencil className="h-4 w-4 mr-2" />
-                        EDIT
-                      </Button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </DialogHeader>
 
@@ -667,14 +680,6 @@ export default function VenueProfile() {
                     }} className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border">
                           <Trash2 className="h-4 w-4" />
                         </Button>}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="font-display tracking-widest">
-                        CANCEL
-                      </Button>
-                      <Button onClick={handleSaveRoom} disabled={savingRoom} className="font-display tracking-widest">
-                        {savingRoom ? '...' : editingListing ? 'UPDATE' : 'CREATE'}
-                      </Button>
                     </div>
                   </div>
                 </div>
