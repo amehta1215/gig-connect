@@ -85,8 +85,8 @@ export default function Login() {
       {/* Login section */}
       <section className="flex-1 flex flex-col px-4 md:px-8 pb-8">
         {/* Welcome Back header */}
-        <div className="bg-primary py-4 md:py-5 text-center">
-          <h2 className="font-display uppercase tracking-tight text-2xl md:text-3xl lg:text-4xl font-black text-background">
+        <div className="py-4 md:py-5 text-center">
+          <h2 className="font-display uppercase tracking-tight text-2xl md:text-3xl lg:text-4xl font-black text-primary">
             WELCOME BACK
           </h2>
         </div>
