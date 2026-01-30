@@ -334,11 +334,11 @@ export default function VenueApplications() {
         <div className="flex items-start gap-4">
           {/* Artist Picture */}
           {mainPicture ? (
-            <div className="w-16 h-16 flex-shrink-0">
+            <div className="w-20 h-20 flex-shrink-0">
               <img src={mainPicture} alt={bandName} className="w-full h-full object-cover" />
             </div>
           ) : (
-            <div className="w-16 h-16 flex-shrink-0 bg-secondary flex items-center justify-center">
+            <div className="w-20 h-20 flex-shrink-0 bg-secondary flex items-center justify-center">
               <Music className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
