@@ -75,14 +75,12 @@ export default function VenueProfile() {
   // Room management state
   const [listings, setListings] = useState<VenueListing[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'preview' | 'edit'>('preview');
   const [editingListing, setEditingListing] = useState<VenueListing | null>(null);
   const [savingRoom, setSavingRoom] = useState(false);
   const [pictures, setPictures] = useState<string[]>([]);
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const pictureInputRef = useRef<HTMLInputElement>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [cardPreviewOpen, setCardPreviewOpen] = useState(false);
-  const [cardPreviewListing, setCardPreviewListing] = useState<VenueListing | null>(null);
   const [roomFormData, setRoomFormData] = useState({
     venue_name: '',
     room_name: '',
@@ -217,7 +215,7 @@ export default function VenueProfile() {
     setPictures([]);
     setEditingListing(null);
   };
-  const openDialog = (listing?: VenueListing) => {
+  const openDialog = (listing?: VenueListing, mode: 'preview' | 'edit' = 'edit') => {
     if (listing) {
       setEditingListing(listing);
       setRoomFormData({
@@ -233,6 +231,7 @@ export default function VenueProfile() {
     } else {
       resetRoomForm();
     }
+    setDialogMode(mode);
     setIsDialogOpen(true);
   };
   const uploadFile = async (file: File) => {
@@ -429,140 +428,257 @@ export default function VenueProfile() {
           <h2 className="font-display text-xl text-primary">ROOMS <span className="text-destructive">*</span></h2>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => openDialog()} className="font-display tracking-widest" size="sm">
+              <Button onClick={() => openDialog(undefined, 'edit')} className="font-display tracking-widest" size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 ADD
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
-              <DialogHeader>
-                <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
-                  {editingListing ? 'EDIT ROOM' : 'NEW ROOM'}
-                </DialogTitle>
+            <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 bg-card border-border">
+              <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
+                <div className="flex items-center justify-between">
+                  <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
+                    {editingListing ? (roomFormData.room_name || roomFormData.venue_name || 'ROOM') : 'NEW ROOM'}
+                  </DialogTitle>
+                  {editingListing && (
+                    <div className="flex gap-2">
+                      <Button
+                        variant={dialogMode === 'preview' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setDialogMode('preview')}
+                        className="font-display tracking-widest"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        PREVIEW
+                      </Button>
+                      <Button
+                        variant={dialogMode === 'edit' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setDialogMode('edit')}
+                        className="font-display tracking-widest"
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        EDIT
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </DialogHeader>
 
-              <div className="space-y-6 mt-4">
-                {/* Photo Upload */}
-                <div className="space-y-4">
-                  <h3 className="font-display text-sm text-primary tracking-widest">PHOTOS</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {pictures.map((url, index) => <div key={index} className="relative group aspect-square">
-                        <img src={url} alt={`Photo ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
-                        <button type="button" onClick={() => removeRoomPicture(index)} className="absolute top-2 right-2 p-1 bg-destructive rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                          <X className="h-4 w-4 text-destructive-foreground" />
-                        </button>
-                      </div>)}
-                    <button type="button" onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
-                      <Upload className="h-6 w-6 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
-                        {uploadingPicture ? 'Uploading...' : 'Add Photo'}
-                      </span>
-                    </button>
+              {dialogMode === 'preview' && editingListing ? (
+                /* Preview Content - Inline version of RoomPreviewSheet */
+                <div className="flex-1 overflow-y-auto px-6 py-6">
+                  {/* Pictures Gallery */}
+                  <div className="mb-10">
+                    {(() => {
+                      const allPictures: string[] = [];
+                      if (formData.picture) allPictures.push(formData.picture);
+                      if (pictures.length > 0) allPictures.push(...pictures);
+                      
+                      return allPictures.length === 0 ? (
+                        <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
+                          <div className="w-full h-full flex items-center justify-center bg-heat">
+                            <Music className="h-12 w-12 text-primary/30" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap justify-center gap-2">
+                          {allPictures.map((pic, index) => (
+                            <div 
+                              key={index} 
+                              className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden"
+                            >
+                              <img 
+                                src={pic} 
+                                alt={`${roomFormData.venue_name} ${index + 1}`} 
+                                className="w-full h-full object-cover" 
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
-                  <input ref={pictureInputRef} type="file" accept=".jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={handleRoomPictureUpload} />
-                </div>
 
-                {/* General Info */}
-                <div className="space-y-4">
-                  <h3 className="font-display text-sm text-primary tracking-widest">GENERAL</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label htmlFor="room_venue_name" className="text-xs uppercase tracking-wider text-muted-foreground">Venue *</Label>
-                      <Input id="room_venue_name" value={roomFormData.venue_name} onChange={e => setRoomFormData({
-                      ...roomFormData,
-                      venue_name: e.target.value
-                    })} className="bg-background border-border" />
+                  {/* Two Column Layout */}
+                  <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Left Column - Venue Info */}
+                    <div className="flex-1 space-y-6">
+                      <div className="space-y-4">
+                        <div>
+                          <h1 className="font-display text-3xl text-accent font-bold tracking-wide">
+                            {roomFormData.venue_name || 'Venue Name'}
+                          </h1>
+                          {roomFormData.room_name && (
+                            <p className="text-lg text-muted-foreground mt-1">{roomFormData.room_name}</p>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
+                          {roomFormData.location && (
+                            <span className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              {roomFormData.location}
+                            </span>
+                          )}
+                          {roomFormData.capacity && (
+                            <span className="flex items-center gap-2">
+                              <Users className="h-4 w-4" />
+                              {roomFormData.capacity} capacity
+                            </span>
+                          )}
+                        </div>
+
+                        {roomFormData.genres && roomFormData.genres.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {roomFormData.genres.map(genre => (
+                              <span 
+                                key={genre} 
+                                className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display"
+                              >
+                                {genre}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Details */}
+                      <div className="space-y-4">
+                        {roomFormData.backline_info && (
+                          <div className="bg-background border border-border rounded-lg p-4">
+                            <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
+                            <p className="text-muted-foreground text-sm">{roomFormData.backline_info}</p>
+                          </div>
+                        )}
+                        {roomFormData.house_rules && (
+                          <div className="bg-background border border-border rounded-lg p-4">
+                            <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
+                            <p className="text-muted-foreground text-sm">{roomFormData.house_rules}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <Label htmlFor="room_name" className="text-xs uppercase tracking-wider text-muted-foreground">Room</Label>
-                      <Input id="room_name" value={roomFormData.room_name} onChange={e => setRoomFormData({
-                      ...roomFormData,
-                      room_name: e.target.value
-                    })} className="bg-background border-border" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label htmlFor="room_location" className="text-xs uppercase tracking-wider text-muted-foreground">Location</Label>
-                      <LocationAutocomplete value={roomFormData.location} onChange={value => setRoomFormData({
-                      ...roomFormData,
-                      location: value
-                    })} placeholder="Search location..." className="bg-background" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label htmlFor="room_capacity" className="text-xs uppercase tracking-wider text-muted-foreground">Capacity</Label>
-                      <Input id="room_capacity" type="number" value={roomFormData.capacity} onChange={e => setRoomFormData({
-                      ...roomFormData,
-                      capacity: e.target.value
-                    })} className="bg-background border-border" />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs uppercase tracking-wider text-muted-foreground">Genres</Label>
-                    <div className="flex flex-wrap gap-1">
-                      {availableGenres.map(genre => <button key={genre} type="button" onClick={() => toggleGenre(genre)} className={`px-3 py-1 text-xs font-display tracking-wider transition-colors ${roomFormData.genres.includes(genre) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
-                          {genre.toUpperCase()}
-                        </button>)}
+
+                    {/* Right Column - Apply Form Preview (Disabled) */}
+                    <div className="lg:w-72">
+                      <div className="lg:sticky lg:top-0 bg-background border border-border rounded-lg p-6 space-y-6 opacity-70">
+                        <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
+                        <p className="text-sm text-muted-foreground">This is a preview of how artists will see your listing.</p>
+                        <Button disabled className="w-full font-display tracking-widest text-lg py-6">
+                          APPLY
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Additional Info */}
-                <div className="space-y-4">
-                  <h3 className="font-display text-sm text-primary tracking-widest">DETAILS</h3>
-                  <div className="space-y-1">
-                    <Label htmlFor="backline_info" className="text-xs uppercase tracking-wider text-muted-foreground">Backline</Label>
-                    <Textarea id="backline_info" value={roomFormData.backline_info} onChange={e => setRoomFormData({
-                    ...roomFormData,
-                    backline_info: e.target.value
-                  })} className="bg-background border-border" rows={2} />
+              ) : (
+                /* Edit Content */
+                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                  {/* Photo Upload */}
+                  <div className="space-y-4">
+                    <h3 className="font-display text-sm text-primary tracking-widest">PHOTOS</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {pictures.map((url, index) => <div key={index} className="relative group aspect-square">
+                          <img src={url} alt={`Photo ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
+                          <button type="button" onClick={() => removeRoomPicture(index)} className="absolute top-2 right-2 p-1 bg-destructive rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                            <X className="h-4 w-4 text-destructive-foreground" />
+                          </button>
+                        </div>)}
+                      <button type="button" onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
+                        <Upload className="h-6 w-6 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">
+                          {uploadingPicture ? 'Uploading...' : 'Add Photo'}
+                        </span>
+                      </button>
+                    </div>
+                    <input ref={pictureInputRef} type="file" accept=".jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={handleRoomPictureUpload} />
                   </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="house_rules" className="text-xs uppercase tracking-wider text-muted-foreground">Rules</Label>
-                    <Textarea id="house_rules" value={roomFormData.house_rules} onChange={e => setRoomFormData({
-                    ...roomFormData,
-                    house_rules: e.target.value
-                  })} className="bg-background border-border" rows={2} />
+
+                  {/* General Info */}
+                  <div className="space-y-4">
+                    <h3 className="font-display text-sm text-primary tracking-widest">GENERAL</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="room_venue_name" className="text-xs uppercase tracking-wider text-muted-foreground">Venue *</Label>
+                        <Input id="room_venue_name" value={roomFormData.venue_name} onChange={e => setRoomFormData({
+                        ...roomFormData,
+                        venue_name: e.target.value
+                      })} className="bg-background border-border" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="room_name" className="text-xs uppercase tracking-wider text-muted-foreground">Room</Label>
+                        <Input id="room_name" value={roomFormData.room_name} onChange={e => setRoomFormData({
+                        ...roomFormData,
+                        room_name: e.target.value
+                      })} className="bg-background border-border" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="room_location" className="text-xs uppercase tracking-wider text-muted-foreground">Location</Label>
+                        <LocationAutocomplete value={roomFormData.location} onChange={value => setRoomFormData({
+                        ...roomFormData,
+                        location: value
+                      })} placeholder="Search location..." className="bg-background" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="room_capacity" className="text-xs uppercase tracking-wider text-muted-foreground">Capacity</Label>
+                        <Input id="room_capacity" type="number" value={roomFormData.capacity} onChange={e => setRoomFormData({
+                        ...roomFormData,
+                        capacity: e.target.value
+                      })} className="bg-background border-border" />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">Genres</Label>
+                      <div className="flex flex-wrap gap-1">
+                        {availableGenres.map(genre => <button key={genre} type="button" onClick={() => toggleGenre(genre)} className={`px-3 py-1 text-xs font-display tracking-wider transition-colors ${roomFormData.genres.includes(genre) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
+                            {genre.toUpperCase()}
+                          </button>)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Info */}
+                  <div className="space-y-4">
+                    <h3 className="font-display text-sm text-primary tracking-widest">DETAILS</h3>
+                    <div className="space-y-1">
+                      <Label htmlFor="backline_info" className="text-xs uppercase tracking-wider text-muted-foreground">Backline</Label>
+                      <Textarea id="backline_info" value={roomFormData.backline_info} onChange={e => setRoomFormData({
+                      ...roomFormData,
+                      backline_info: e.target.value
+                    })} className="bg-background border-border" rows={2} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="house_rules" className="text-xs uppercase tracking-wider text-muted-foreground">Rules</Label>
+                      <Textarea id="house_rules" value={roomFormData.house_rules} onChange={e => setRoomFormData({
+                      ...roomFormData,
+                      house_rules: e.target.value
+                    })} className="bg-background border-border" rows={2} />
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex justify-between pt-4 border-t border-border">
+                    <div className="flex gap-2">
+                      {editingListing && <Button variant="outline" size="icon" onClick={() => {
+                      handleDeleteRoom(editingListing.id);
+                      setIsDialogOpen(false);
+                    }} className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="font-display tracking-widest">
+                        CANCEL
+                      </Button>
+                      <Button onClick={handleSaveRoom} disabled={savingRoom} className="font-display tracking-widest">
+                        {savingRoom ? '...' : editingListing ? 'UPDATE' : 'CREATE'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
-
-                {/* Actions */}
-                <div className="flex justify-between pt-4 border-t border-border">
-                  <div className="flex gap-2">
-                    {editingListing && <Button variant="outline" size="icon" onClick={() => {
-                    handleDeleteRoom(editingListing.id);
-                    setIsDialogOpen(false);
-                  }} className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>}
-                    <Button variant="outline" onClick={() => setPreviewOpen(true)} className="font-display tracking-widest">
-                      <Eye className="h-4 w-4 mr-2" />
-                      PREVIEW
-                    </Button>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="font-display tracking-widest">
-                      CANCEL
-                    </Button>
-                    <Button onClick={handleSaveRoom} disabled={savingRoom} className="font-display tracking-widest">
-                      {savingRoom ? '...' : editingListing ? 'UPDATE' : 'CREATE'}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Preview Sheet */}
-                <RoomPreviewSheet open={previewOpen} onOpenChange={setPreviewOpen} data={{
-                venue_name: roomFormData.venue_name,
-                room_name: roomFormData.room_name,
-                location: roomFormData.location,
-                capacity: roomFormData.capacity,
-                genres: roomFormData.genres,
-                backline_info: roomFormData.backline_info,
-                house_rules: roomFormData.house_rules,
-                pictures: pictures,
-                venueProfilePicture: formData.picture
-              }} />
-              </div>
+              )}
             </DialogContent>
           </Dialog>
         </div>
@@ -570,7 +686,7 @@ export default function VenueProfile() {
         {/* Listings Grid */}
         {listings.length === 0 ? <div className="text-center py-8 border border-dashed border-border rounded-lg">
             <h3 className="font-display text-lg text-muted-foreground mb-4">NO ROOMS</h3>
-            <Button onClick={() => openDialog()} className="font-display tracking-widest">
+            <Button onClick={() => openDialog(undefined, 'edit')} className="font-display tracking-widest">
               <Plus className="h-4 w-4 mr-2" />
               ADD ROOM
             </Button>
@@ -578,10 +694,7 @@ export default function VenueProfile() {
             {listings.map(listing => <div 
                 key={listing.id} 
                 className="bg-background border border-border overflow-hidden hover:border-primary/50 transition-colors rounded-lg cursor-pointer"
-                onClick={() => {
-                  setCardPreviewListing(listing);
-                  setCardPreviewOpen(true);
-                }}
+                onClick={() => openDialog(listing, 'preview')}
               >
                 {/* Image */}
                 <div className="aspect-[4/3] bg-secondary flex items-center justify-center overflow-hidden relative">
@@ -594,7 +707,7 @@ export default function VenueProfile() {
                     className="absolute top-2 right-2 h-8 w-8 bg-background/80 hover:bg-background border border-border" 
                     onClick={(e) => {
                       e.stopPropagation();
-                      openDialog(listing);
+                      openDialog(listing, 'edit');
                     }}
                   >
                     <Pencil className="h-4 w-4" />
@@ -627,25 +740,6 @@ export default function VenueProfile() {
               </div>)}
           </div>}
       </div>
-
-      {/* Card Preview Sheet */}
-      {cardPreviewListing && (
-        <RoomPreviewSheet 
-          open={cardPreviewOpen} 
-          onOpenChange={setCardPreviewOpen} 
-          data={{
-            venue_name: cardPreviewListing.venue_name,
-            room_name: cardPreviewListing.room_name || '',
-            location: cardPreviewListing.location || '',
-            capacity: cardPreviewListing.capacity?.toString() || '',
-            genres: cardPreviewListing.genres || [],
-            backline_info: cardPreviewListing.backline_info || '',
-            house_rules: cardPreviewListing.house_rules || '',
-            pictures: cardPreviewListing.pictures || [],
-            venueProfilePicture: formData.picture
-          }} 
-        />
-      )}
 
       {/* Account Information Section */}
       <AccountInformation />
