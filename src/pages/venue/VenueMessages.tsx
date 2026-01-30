@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft, Reply, PenSquare, MailX } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, Reply, PenSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
@@ -319,9 +319,20 @@ export default function VenueMessages() {
             const messageCount = thread.messages.length;
             return <div key={thread.thread_id} onClick={() => handleSelectThread(thread)} className={`p-3 border-b border-border cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}>
                     <div className="flex items-start gap-2">
-                      <div className="flex-shrink-0 mt-1">
+                      <button 
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (thread.hasUnread) {
+                            markThreadAsRead(thread.thread_id);
+                          } else {
+                            markThreadAsUnread(thread.thread_id);
+                          }
+                        }} 
+                        className="flex-shrink-0 p-1 hover:bg-secondary rounded"
+                        title={thread.hasUnread ? "Mark as read" : "Mark as unread"}
+                      >
                         {thread.hasUnread ? <Mail className="h-4 w-4 text-primary" /> : <MailOpen className="h-4 w-4 text-muted-foreground" />}
-                      </div>
+                      </button>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <span className={`text-sm truncate ${thread.hasUnread ? 'font-semibold' : ''}`}>
@@ -344,14 +355,6 @@ export default function VenueMessages() {
                 }} className="flex-shrink-0 p-1 hover:bg-secondary">
                         {thread.isStarred ? <Star className="h-4 w-4 text-primary fill-primary" /> : <Star className="h-4 w-4 text-muted-foreground" />}
                       </button>
-                      {!thread.hasUnread && (
-                        <button onClick={e => {
-                          e.stopPropagation();
-                          markThreadAsUnread(thread.thread_id);
-                        }} className="flex-shrink-0 p-1 hover:bg-secondary" title="Mark as unread">
-                          <MailX className="h-4 w-4 text-muted-foreground" />
-                        </button>
-                      )}
                     </div>
                   </div>;
           })}
