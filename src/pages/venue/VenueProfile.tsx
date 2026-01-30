@@ -81,6 +81,8 @@ export default function VenueProfile() {
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const pictureInputRef = useRef<HTMLInputElement>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [cardPreviewOpen, setCardPreviewOpen] = useState(false);
+  const [cardPreviewListing, setCardPreviewListing] = useState<VenueListing | null>(null);
   const [roomFormData, setRoomFormData] = useState({
     venue_name: '',
     room_name: '',
@@ -573,13 +575,28 @@ export default function VenueProfile() {
               ADD ROOM
             </Button>
           </div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {listings.map(listing => <div key={listing.id} className="bg-background border border-border overflow-hidden hover:border-primary/50 transition-colors rounded-lg">
+            {listings.map(listing => <div 
+                key={listing.id} 
+                className="bg-background border border-border overflow-hidden hover:border-primary/50 transition-colors rounded-lg cursor-pointer"
+                onClick={() => {
+                  setCardPreviewListing(listing);
+                  setCardPreviewOpen(true);
+                }}
+              >
                 {/* Image */}
                 <div className="aspect-[4/3] bg-secondary flex items-center justify-center overflow-hidden relative">
                   {listing.pictures && listing.pictures.length > 0 ? <img src={listing.pictures[0]} alt={listing.venue_name} className="w-full h-full object-cover" /> : <div className="bg-heat w-full h-full flex items-center justify-center">
                       <Music className="h-12 w-12 text-primary/30" />
                     </div>}
-                  <Button variant="secondary" size="icon" className="absolute top-2 right-2 h-8 w-8 bg-background/80 hover:bg-background border border-border" onClick={() => openDialog(listing)}>
+                  <Button 
+                    variant="secondary" 
+                    size="icon" 
+                    className="absolute top-2 right-2 h-8 w-8 bg-background/80 hover:bg-background border border-border" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openDialog(listing);
+                    }}
+                  >
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </div>
@@ -610,6 +627,25 @@ export default function VenueProfile() {
               </div>)}
           </div>}
       </div>
+
+      {/* Card Preview Sheet */}
+      {cardPreviewListing && (
+        <RoomPreviewSheet 
+          open={cardPreviewOpen} 
+          onOpenChange={setCardPreviewOpen} 
+          data={{
+            venue_name: cardPreviewListing.venue_name,
+            room_name: cardPreviewListing.room_name || '',
+            location: cardPreviewListing.location || '',
+            capacity: cardPreviewListing.capacity?.toString() || '',
+            genres: cardPreviewListing.genres || [],
+            backline_info: cardPreviewListing.backline_info || '',
+            house_rules: cardPreviewListing.house_rules || '',
+            pictures: cardPreviewListing.pictures || [],
+            venueProfilePicture: formData.picture
+          }} 
+        />
+      )}
 
       {/* Account Information Section */}
       <AccountInformation />
