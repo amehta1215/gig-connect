@@ -453,15 +453,6 @@ export default function VenueProfile() {
                   {editingListing && (
                     <div className="flex gap-2">
                       <Button
-                        variant={dialogMode === 'preview' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setDialogMode('preview')}
-                        className="font-display tracking-widest"
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        PREVIEW
-                      </Button>
-                      <Button
                         variant={dialogMode === 'edit' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setDialogMode('edit')}
@@ -469,6 +460,15 @@ export default function VenueProfile() {
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         EDIT
+                      </Button>
+                      <Button
+                        variant={dialogMode === 'preview' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setDialogMode('preview')}
+                        className="font-display tracking-widest"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        PREVIEW
                       </Button>
                     </div>
                   )}
