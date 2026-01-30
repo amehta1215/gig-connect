@@ -134,17 +134,21 @@ export default function ArtistCalendar() {
   };
   const gigDates = gigs.map(g => new Date(g.gig_date));
   const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
+  const today = startOfDay(new Date());
   const modifiers = {
-    hasGig: gigDates
+    hasGig: gigDates,
+    past: { before: today }
   };
   const modifiersStyles = {
     hasGig: {
       backgroundColor: '#b0177f',
       color: 'white',
       borderRadius: '0'
+    },
+    past: {
+      opacity: 0.3
     }
   };
-  const today = startOfDay(new Date());
   const canCreateEvent = selectedDate && selectedDate >= today;
   if (loading) {
     return <div className="space-y-6 animate-fade-in">
@@ -156,7 +160,7 @@ export default function ArtistCalendar() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Calendar */}
         <div className="bg-card border border-border p-4 flex items-center justify-center">
-          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} className="pointer-events-auto" />
+          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} disablePastDates={false} className="pointer-events-auto" />
         </div>
 
         {/* Events on selected date */}
