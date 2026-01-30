@@ -439,41 +439,28 @@ export default function VenueProfile() {
                   <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
                     {editingListing ? (roomFormData.room_name || roomFormData.venue_name || 'ROOM') : 'NEW ROOM'}
                   </DialogTitle>
-                  <div className="flex gap-2">
-                    {editingListing && (
-                      <>
-                        <Button
-                          variant={dialogMode === 'preview' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setDialogMode('preview')}
-                          className="font-display tracking-widest"
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          PREVIEW
-                        </Button>
-                        <Button
-                          variant={dialogMode === 'edit' ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => setDialogMode('edit')}
-                          className="font-display tracking-widest"
-                        >
-                          <Pencil className="h-4 w-4 mr-2" />
-                          EDIT
-                        </Button>
-                      </>
-                    )}
-                    {dialogMode === 'edit' && (
-                      <Button 
-                        onClick={handleSaveRoom} 
-                        disabled={savingRoom} 
+                  {editingListing && (
+                    <div className="flex gap-2">
+                      <Button
+                        variant={dialogMode === 'preview' ? 'default' : 'outline'}
                         size="sm"
+                        onClick={() => setDialogMode('preview')}
                         className="font-display tracking-widest"
                       >
-                        <Save className="h-4 w-4 mr-2" />
-                        {savingRoom ? '...' : 'SAVE CHANGES'}
+                        <Eye className="h-4 w-4 mr-2" />
+                        PREVIEW
                       </Button>
-                    )}
-                  </div>
+                      <Button
+                        variant={dialogMode === 'edit' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setDialogMode('edit')}
+                        className="font-display tracking-widest"
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        EDIT
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </DialogHeader>
 
@@ -586,7 +573,20 @@ export default function VenueProfile() {
                 </div>
               ) : (
                 /* Edit Content */
-                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                <div className="flex-1 overflow-y-auto">
+                  {/* Floating Save Button */}
+                  <div className="sticky top-0 z-10 bg-card px-6 py-3 border-b border-border">
+                    <Button 
+                      onClick={handleSaveRoom} 
+                      disabled={savingRoom} 
+                      className="font-display tracking-widest"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {savingRoom ? '...' : 'SAVE CHANGES'}
+                    </Button>
+                  </div>
+                  
+                  <div className="px-6 py-6 space-y-6">
                   {/* Photo Upload */}
                   <div className="space-y-4">
                     <h3 className="font-display text-sm text-primary tracking-widest">PHOTOS</h3>
@@ -681,6 +681,7 @@ export default function VenueProfile() {
                           <Trash2 className="h-4 w-4" />
                         </Button>}
                     </div>
+                  </div>
                   </div>
                 </div>
               )}
