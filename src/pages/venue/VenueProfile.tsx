@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -61,6 +61,7 @@ export default function VenueProfile() {
   } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<VenueProfileData | null>(null);
   const [formData, setFormData] = useState({
@@ -112,6 +113,7 @@ export default function VenueProfile() {
         picture: data.picture || null
       });
       fetchListings(data.id);
+      setInitialLoadDone(true);
     } else {
       setLoading(false);
     }
@@ -128,12 +130,11 @@ export default function VenueProfile() {
     }
     setLoading(false);
   };
-  const handleSave = async () => {
-    if (!user || !profile) return;
+  // Auto-save function
+  const autoSave = useCallback(async () => {
+    if (!user || !profile || !initialLoadDone) return;
     setSaving(true);
-    const {
-      error
-    } = await supabase.from('venue_profiles').update({
+    const { error } = await supabase.from('venue_profiles').update({
       venue_name: formData.venue_name || null,
       location: formData.location || null,
       bio: formData.bio || null,
@@ -141,13 +142,21 @@ export default function VenueProfile() {
       picture: formData.picture || null
     }).eq('id', profile.id);
     if (error) {
-      toast.error('Failed to save profile');
-      setSaving(false);
-    } else {
-      toast.success('Profile saved successfully');
-      navigate('/venue');
+      toast.error('Failed to save');
     }
-  };
+    setSaving(false);
+  }, [user, profile, formData, initialLoadDone]);
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (!initialLoadDone) return;
+    
+    const timeoutId = setTimeout(() => {
+      autoSave();
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [formData, autoSave, initialLoadDone]);
   const toggleEventType = (eventType: string) => {
     if (formData.event_types.includes(eventType)) {
       setFormData({
@@ -352,10 +361,9 @@ export default function VenueProfile() {
           </Button>
           <h1 className="font-display text-4xl text-accent font-bold">VENUE PROFILE</h1>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? 'Saving...' : 'Save Profile'}
-        </Button>
+        {saving && (
+          <span className="text-sm text-muted-foreground">Saving...</span>
+        )}
       </div>
 
       {/* Venue Picture Section */}
