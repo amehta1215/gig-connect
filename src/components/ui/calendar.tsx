@@ -6,18 +6,21 @@ import { startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  disablePastDates?: boolean;
+};
 
-function Calendar({ className, classNames, showOutsideDays = true, disabled, ...props }: CalendarProps) {
+function Calendar({ className, classNames, showOutsideDays = true, disabled, disablePastDates = true, ...props }: CalendarProps) {
   const today = startOfDay(new Date());
   
-  // Combine any existing disabled matcher with past dates
+  // Combine any existing disabled matcher with past dates (only if disablePastDates is true)
   const disabledMatcher = React.useMemo(() => {
+    if (!disablePastDates) return disabled;
     const pastDateMatcher = { before: today };
     if (!disabled) return pastDateMatcher;
     if (Array.isArray(disabled)) return [pastDateMatcher, ...disabled];
     return [pastDateMatcher, disabled];
-  }, [disabled, today]);
+  }, [disabled, today, disablePastDates]);
 
   return (
     <DayPicker
