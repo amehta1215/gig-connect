@@ -293,16 +293,14 @@ export default function VenueListingDetail() {
                   <Button variant="outline" onClick={() => navigate('/artist/applications')} className="mt-4 font-display tracking-widest">
                     VIEW APPLICATIONS
                   </Button>
+                </div> : isProfileComplete === false ? <div className="text-center py-4">
+                  <button 
+                    onClick={() => navigate('/artist/profile')} 
+                    className="text-lg text-accent font-display font-bold text-center hover:text-primary transition-colors cursor-pointer"
+                  >
+                    COMPLETE PROFILE BEFORE APPLYING
+                  </button>
                 </div> : <div className="relative">
-                  {/* Incomplete Profile Overlay */}
-                  {isProfileComplete === false && <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/95 backdrop-blur-sm rounded-lg py-8">
-                      <button 
-                        onClick={() => navigate('/artist/profile')} 
-                        className="text-xl text-accent font-display font-bold text-center px-4 hover:text-primary transition-colors cursor-pointer"
-                      >
-                        COMPLETE PROFILE BEFORE APPLYING
-                      </button>
-                    </div>}
 
                   {/* Availability */}
                   <div className="space-y-3">
@@ -383,7 +381,7 @@ export default function VenueListingDetail() {
                   </div>
 
                   {/* Submit */}
-                  <Button onClick={handleApply} disabled={applying || isProfileComplete === false} className="w-full font-display tracking-widest text-lg py-6 mt-6">
+                  <Button onClick={handleApply} disabled={applying} className="w-full font-display tracking-widest text-lg py-6 mt-6">
                     {applying ? 'APPLYING...' : 'APPLY'}
                   </Button>
                 </div>}
