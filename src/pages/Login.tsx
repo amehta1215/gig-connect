@@ -112,14 +112,21 @@ export default function Login() {
               )}
             </div>
 
-            <button
-              type="submit"
-              className="w-full h-12 font-display uppercase tracking-widest text-lg bg-primary text-background hover:bg-primary/90 transition-colors"
-              disabled={isLoading}
-            >
-              {isLoading ? "..." : "ENTER"}
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="w-full h-12 font-display uppercase tracking-widest text-lg bg-primary text-background hover:bg-primary/90 transition-colors"
+                disabled={isLoading}
+              >
+                {isLoading ? "..." : "ENTER"}
+              </button>
+            </form>
+
+            {/* Forgot password link */}
+            <p className="text-center mt-4 text-sm">
+              <Link to="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors">
+                Forgot password?
+              </Link>
+            </p>
 
           {/* Sign up link */}
           <p className="text-center mt-6 text-sm text-muted-foreground">
