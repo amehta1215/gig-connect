@@ -13,6 +13,7 @@ const passwordSchema = z.string().min(6, "Min 6 characters");
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<UserRole | null>(null);
@@ -43,6 +44,10 @@ export default function SignUp() {
       passwordSchema.parse(password);
     } catch (e) {
       if (e instanceof z.ZodError) newErrors.password = e.errors[0].message;
+    }
+
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords don't match";
     }
 
     if (!firstName.trim()) newErrors.firstName = "Required";
@@ -168,6 +173,19 @@ export default function SignUp() {
               />
               {errors.password && (
                 <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>
+              )}
+            </div>
+
+            <div>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="CONFIRM PASSWORD"
+                className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
+              />
+              {errors.confirmPassword && (
+                <p className="text-accent text-xs mt-1 font-display">{errors.confirmPassword}</p>
               )}
             </div>
 
