@@ -74,66 +74,62 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-background">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background px-4">
+      {/* Welcome Back header */}
+      <div className="py-4 md:py-5 text-center">
+        <h2 className="font-display uppercase tracking-tight text-2xl md:text-3xl lg:text-4xl font-black text-primary">
+          WELCOME BACK
+        </h2>
+      </div>
 
-      {/* Login section */}
-      <section className="flex-1 flex flex-col px-4 md:px-8 pb-8">
-        {/* Welcome Back header */}
-        <div className="py-4 md:py-5 text-center">
-          <h2 className="font-display uppercase tracking-tight text-2xl md:text-3xl lg:text-4xl font-black text-primary">
-            WELCOME BACK
-          </h2>
+      {/* Form */}
+      <div className="w-full max-w-xs bg-primary p-1 md:p-2">
+        <div className="bg-background p-6 md:p-8">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="EMAIL"
+                className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
+              />
+              {errors.email && (
+                <p className="text-accent text-xs mt-1 font-display">{errors.email}</p>
+              )}
+            </div>
+
+            <div>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="PASSWORD"
+                className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
+              />
+              {errors.password && (
+                <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full h-12 font-display uppercase tracking-widest text-lg bg-primary text-background hover:bg-primary/90 transition-colors"
+              disabled={isLoading}
+            >
+              {isLoading ? "..." : "ENTER"}
+            </button>
+          </form>
+
+          {/* Sign up link */}
+          <p className="text-center mt-6 text-sm text-muted-foreground">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-primary hover:underline font-medium">
+              Sign up
+            </Link>
+          </p>
         </div>
-
-        {/* Form */}
-        <div className="mt-6 bg-primary p-1 md:p-2">
-          <div className="bg-background p-6 md:p-8">
-            <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto">
-              <div>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="EMAIL"
-                  className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
-                />
-                {errors.email && (
-                  <p className="text-accent text-xs mt-1 font-display">{errors.email}</p>
-                )}
-              </div>
-
-              <div>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="PASSWORD"
-                  className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
-                />
-                {errors.password && (
-                  <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                className="w-full h-12 font-display uppercase tracking-widest text-lg bg-primary text-background hover:bg-primary/90 transition-colors"
-                disabled={isLoading}
-              >
-                {isLoading ? "..." : "ENTER"}
-              </button>
-            </form>
-
-            {/* Sign up link */}
-            <p className="text-center mt-6 text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/signup" className="text-primary hover:underline font-medium">
-                Sign up
-              </Link>
-            </p>
-          </div>
-        </div>
-      </section>
+      </div>
     </div>
   );
 }
