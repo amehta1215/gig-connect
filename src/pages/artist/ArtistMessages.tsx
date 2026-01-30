@@ -263,11 +263,11 @@ export default function ArtistMessages() {
           <div className="p-3 border-b border-border space-y-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-              <Input placeholder="Search mail..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-8 h-7 text-xs bg-background border-border" />
+              <Input placeholder="Search mail..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-8 h-6 text-xs bg-background border-border" />
             </div>
             <div className="flex gap-2">
               <Select value={filter} onValueChange={v => setFilter(v as FilterType)}>
-                <SelectTrigger className="flex-1 h-7 text-xs bg-background border-border">
+                <SelectTrigger className="flex-1 h-6 text-xs bg-background border-border">
                   <SelectValue placeholder="Filter" />
                 </SelectTrigger>
                 <SelectContent>
@@ -277,7 +277,7 @@ export default function ArtistMessages() {
                 </SelectContent>
               </Select>
               <Select value={sortBy} onValueChange={v => setSortBy(v as SortType)}>
-                <SelectTrigger className="flex-1 h-7 text-xs bg-background border-border">
+                <SelectTrigger className="flex-1 h-6 text-xs bg-background border-border">
                   <SelectValue placeholder="Sort" />
                 </SelectTrigger>
                 <SelectContent>
