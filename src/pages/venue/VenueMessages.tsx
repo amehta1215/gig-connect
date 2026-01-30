@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -74,6 +74,14 @@ export default function VenueMessages() {
   const [composeArtist, setComposeArtist] = useState<{ id: string; name: string; bandName: string | null } | null>(null);
   const [composeSubject, setComposeSubject] = useState<string>('');
   const [artistApplications, setArtistApplications] = useState<ArtistApplication[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when thread is selected
+  useEffect(() => {
+    if (selectedThreadId && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'instant' });
+    }
+  }, [selectedThreadId]);
 
   // Handle URL params for thread or compose
   useEffect(() => {
@@ -414,6 +422,7 @@ export default function VenueMessages() {
                       </div>
                     </div>;
             })}
+                <div ref={messagesEndRef} />
               </div>
 
               {showReplyForm ? <MessageReplyForm threadId={selectedThread.thread_id} originalSubject={selectedThread.latestMessage.subject} senderId={user?.id || ''} receiverId={selectedThread.otherParty.id} onSuccess={() => {
