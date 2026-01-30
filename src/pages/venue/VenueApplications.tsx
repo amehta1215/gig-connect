@@ -381,7 +381,7 @@ export default function VenueApplications() {
                 {application.message}
               </p>}
 
-            {/* Tags row - Genre, Act Type, Payment */}
+            {/* Tags row - Genre, Act Type, Payment, Submitted */}
             <div className="flex flex-wrap gap-1 mt-3">
               {application.artist_profile?.genre && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
                   {application.artist_profile.genre}
@@ -392,6 +392,9 @@ export default function VenueApplications() {
               {application.payment_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
                   {application.payment_preference.replace('_', ' ')}
                 </span>}
+              <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+                Submitted {format(new Date(application.created_at), 'M/d/yy')}
+              </span>
             </div>
           </div>
         </div>
