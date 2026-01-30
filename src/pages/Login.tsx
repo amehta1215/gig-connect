@@ -4,53 +4,49 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { z } from "zod";
-
 const emailSchema = z.string().email("Invalid email");
 const passwordSchema = z.string().min(6, "Min 6 characters");
-
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const { signIn, user, profile, loading } = useAuth();
+  const {
+    signIn,
+    user,
+    profile,
+    loading
+  } = useAuth();
   const navigate = useNavigate();
-
   useEffect(() => {
     if (!loading && user && profile) {
       const targetDashboard = profile.role === "venue" ? "/venue" : "/artist";
       navigate(targetDashboard);
     }
   }, [user, profile, loading, navigate]);
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
     try {
       emailSchema.parse(email);
     } catch (e) {
       if (e instanceof z.ZodError) newErrors.email = e.errors[0].message;
     }
-
     try {
       passwordSchema.parse(password);
     } catch (e) {
       if (e instanceof z.ZodError) newErrors.password = e.errors[0].message;
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-
     setIsLoading(true);
-
     try {
-      const { error } = await signIn(email, password);
+      const {
+        error
+      } = await signIn(email, password);
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
           toast.error("Wrong credentials");
@@ -64,21 +60,16 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+    return <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-pulse text-primary font-display text-6xl">RIFF</div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background px-4">
+  return <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background px-4">
       {/* Welcome Back header */}
       <div className="py-4 md:py-5 text-center">
         <h2 className="font-display uppercase tracking-tight text-2xl md:text-3xl lg:text-4xl font-black text-primary">
-          WELCOME BACK
+          WELCOME BACK!
         </h2>
       </div>
 
@@ -87,36 +78,16 @@ export default function Login() {
         <div className="bg-background p-6 md:p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="EMAIL"
-                className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
-              />
-              {errors.email && (
-                <p className="text-accent text-xs mt-1 font-display">{errors.email}</p>
-              )}
+              <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="EMAIL" className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12" />
+              {errors.email && <p className="text-accent text-xs mt-1 font-display">{errors.email}</p>}
             </div>
 
             <div>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="PASSWORD"
-                className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12"
-              />
-              {errors.password && (
-                <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>
-              )}
+              <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="PASSWORD" className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12" />
+              {errors.password && <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>}
             </div>
 
-              <button
-                type="submit"
-                className="w-full h-12 font-display uppercase tracking-widest text-lg bg-primary text-background hover:bg-primary/90 transition-colors"
-                disabled={isLoading}
-              >
+              <button type="submit" className="w-full h-12 font-display uppercase tracking-widest text-lg bg-primary text-background hover:bg-primary/90 transition-colors" disabled={isLoading}>
                 {isLoading ? "..." : "LOGIN"}
               </button>
             </form>
@@ -137,6 +108,5 @@ export default function Login() {
           </p>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
