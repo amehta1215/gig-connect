@@ -73,7 +73,12 @@ export default function ArtistFavorites() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in max-w-3xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <h1 className="font-display text-4xl text-accent font-black">FAVORITES</h1>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {venues.map((venue) => (
           <div
