@@ -292,7 +292,7 @@ export default function VenueListingDetail() {
                   </Button>
                 </div> : isProfileComplete === false ? <div className="text-center py-4">
                   <button 
-                    onClick={() => navigate('/artist/profile')} 
+                    onClick={() => navigate('/artist/profile', { state: { fromVenueListing: true } })} 
                     className="text-lg text-accent font-display font-bold text-center hover:text-primary transition-colors cursor-pointer"
                   >
                     COMPLETE PROFILE BEFORE APPLYING

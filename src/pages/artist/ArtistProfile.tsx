@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,8 @@ export default function ArtistProfile() {
     user
   } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const showBackButton = location.state?.fromVenueListing === true;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<ArtistProfile | null>(null);
@@ -212,9 +214,11 @@ export default function ArtistProfile() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          {showBackButton && (
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          )}
           <h1 className="font-display text-4xl text-accent font-black">ARTIST PROFILE</h1>
         </div>
         <Button onClick={handleSave} disabled={saving}>
