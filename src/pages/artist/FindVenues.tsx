@@ -193,12 +193,12 @@ export default function FindVenues() {
 
   const filtersContent = (
     <div className="space-y-4">
+      {genreMultiSelect("w-full")}
+      {capacityMultiSelect("w-full")}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border w-full" />
       </div>
-      {genreMultiSelect("w-full")}
-      {capacityMultiSelect("w-full")}
     </div>
   );
   return <div className="space-y-6 animate-fade-in">
@@ -214,12 +214,12 @@ export default function FindVenues() {
 
           {/* Desktop Filters */}
           <div className="hidden lg:flex gap-2">
+            {genreMultiSelect("w-36")}
+            {capacityMultiSelect("w-36")}
             <div className="relative w-48">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border" />
             </div>
-            {genreMultiSelect("w-36")}
-            {capacityMultiSelect("w-36")}
             {hasActiveFilters && (
               <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground">
                 <X className="h-3 w-3 mr-1" /> Reset
