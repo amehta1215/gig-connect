@@ -66,16 +66,13 @@ export default function Login() {
       </div>;
   }
   return <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background px-4">
-      {/* Welcome Back header */}
-      <div className="py-4 md:py-5 text-center">
-        <h2 className="font-display uppercase tracking-tight text-2xl md:text-3xl lg:text-4xl font-black text-primary">
-          WELCOME BACK!
-        </h2>
-      </div>
-
       {/* Form */}
       <div className="w-full max-w-xs bg-primary p-1 md:p-2">
         <div className="bg-background p-6 md:p-8">
+          {/* Welcome Back header */}
+          <h2 className="font-display uppercase tracking-tight text-2xl md:text-3xl lg:text-4xl font-black text-primary text-center mb-6">
+            WELCOME BACK!
+          </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="EMAIL" className="bg-background text-foreground placeholder:text-muted-foreground border-0 font-display text-lg h-12" />
