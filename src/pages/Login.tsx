@@ -117,7 +117,7 @@ export default function Login() {
                 className="w-full h-12 font-display uppercase tracking-widest text-lg bg-primary text-background hover:bg-primary/90 transition-colors"
                 disabled={isLoading}
               >
-                {isLoading ? "..." : "ENTER"}
+                {isLoading ? "..." : "LOGIN"}
               </button>
             </form>
 
