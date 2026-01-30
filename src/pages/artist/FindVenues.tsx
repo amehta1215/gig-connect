@@ -197,7 +197,7 @@ export default function FindVenues() {
       {capacityMultiSelect("w-full")}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border w-full" />
+        <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border w-full placeholder:text-muted-foreground" />
       </div>
     </div>
   );
@@ -218,7 +218,7 @@ export default function FindVenues() {
             {capacityMultiSelect("w-36")}
             <div className="relative w-48">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border" />
+              <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border placeholder:text-muted-foreground" />
             </div>
             {hasActiveFilters && (
               <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground">
