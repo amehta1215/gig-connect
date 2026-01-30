@@ -17,6 +17,7 @@ export default function SignUp() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<UserRole | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -73,7 +74,7 @@ export default function SignUp() {
           toast.error(error.message);
         }
       } else {
-        toast.success("Welcome to RIFF");
+        setEmailSent(true);
       }
     } catch {
       toast.error("Something went wrong");
@@ -86,6 +87,30 @@ export default function SignUp() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-pulse text-primary font-display text-6xl">RIFF</div>
+      </div>
+    );
+  }
+
+  // Show confirmation message after signup
+  if (emailSent) {
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background px-4">
+        <div className="w-full max-w-xs bg-primary p-1 md:p-2">
+          <div className="bg-background p-6 md:p-8 text-center">
+            <h2 className="font-display uppercase tracking-tight text-2xl md:text-3xl font-black text-primary mb-4">
+              CHECK YOUR EMAIL
+            </h2>
+            <p className="text-muted-foreground text-sm mb-6">
+              We sent a verification link to <span className="text-primary font-medium">{email}</span>. Click the link to activate your account.
+            </p>
+            <Link 
+              to="/login" 
+              className="text-primary hover:underline font-display text-sm uppercase tracking-widest"
+            >
+              Back to Login
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
