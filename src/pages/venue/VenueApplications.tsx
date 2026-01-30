@@ -369,8 +369,7 @@ export default function VenueApplications() {
                     Availability: <span className="text-primary">{availability}</span>
                   </p>}
               </div>
-              <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-wider flex-shrink-0">
-                <span>Submitted {format(new Date(application.created_at), 'M/d/yy')}</span>
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
                   <StatusIcon className="h-3 w-3" />
                   {config.label}
@@ -383,16 +382,21 @@ export default function VenueApplications() {
               </p>}
 
             {/* Tags row - Genre, Act Type, Payment */}
-            <div className="flex flex-wrap gap-1 mt-3">
-              {application.artist_profile?.genre && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
-                  {application.artist_profile.genre}
-                </span>}
-              {application.lineup_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
-                  {lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}
-                </span>}
-              {application.payment_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
-                  {application.payment_preference.replace('_', ' ')}
-                </span>}
+            <div className="flex items-end justify-between mt-3">
+              <div className="flex flex-wrap gap-1">
+                {application.artist_profile?.genre && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+                    {application.artist_profile.genre}
+                  </span>}
+                {application.lineup_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+                    {lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}
+                  </span>}
+                {application.payment_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+                    {application.payment_preference.replace('_', ' ')}
+                  </span>}
+              </div>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex-shrink-0">
+                Submitted {format(new Date(application.created_at), 'M/d/yy')}
+              </span>
             </div>
           </div>
         </div>
