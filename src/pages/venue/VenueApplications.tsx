@@ -351,6 +351,12 @@ export default function VenueApplications() {
                   <h3 className="font-display text-xl text-foreground tracking-wide">
                     {bandName}
                   </h3>
+                  <button
+                    onClick={(e) => toggleFavorite(e, application.id)}
+                    className="p-1 hover:bg-secondary/50 transition-colors"
+                  >
+                    <Heart className={`h-4 w-4 ${isFavorited ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                  </button>
                 </div>
                 
                 {/* Room/Venue applied to */}
@@ -365,12 +371,6 @@ export default function VenueApplications() {
               </div>
               <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-wider flex-shrink-0">
                 <span>Submitted {format(new Date(application.created_at), 'M/d/yy')}</span>
-                <button
-                  onClick={(e) => toggleFavorite(e, application.id)}
-                  className="p-1 hover:bg-secondary/50 transition-colors"
-                >
-                  <Heart className={`h-4 w-4 ${isFavorited ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
-                </button>
                 <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
                   <StatusIcon className="h-3 w-3" />
                   {config.label}
