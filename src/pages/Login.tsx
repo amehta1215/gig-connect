@@ -75,12 +75,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-background">
-      {/* Giant RIFF title */}
-      <header className="relative h-[50vh] overflow-hidden">
-        <h1 className="pointer-events-none absolute inset-x-0 bottom-0 text-center font-display text-primary leading-none text-[min(64vw,50vh)] tracking-[-0.06em] font-black">
-          RIFF
-        </h1>
-      </header>
 
       {/* Login section */}
       <section className="flex-1 flex flex-col px-4 md:px-8 pb-8">
