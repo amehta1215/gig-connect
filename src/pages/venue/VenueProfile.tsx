@@ -427,6 +427,11 @@ export default function VenueProfile() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-xl text-primary">ROOMS <span className="text-destructive">*</span></h2>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => openDialog(undefined, 'edit')} size="icon" variant="outline">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 bg-card border-border">
               <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
                 <div className="flex items-center justify-between">
