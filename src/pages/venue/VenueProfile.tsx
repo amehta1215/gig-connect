@@ -575,7 +575,7 @@ export default function VenueProfile() {
                 /* Edit Content */
                 <div className="flex-1 overflow-y-auto">
                   {/* Floating Save Button */}
-                  <div className="sticky top-0 z-10 bg-card px-6 py-3 border-b border-border">
+                  <div className="sticky top-0 z-10 px-6 pt-4">
                     <Button 
                       onClick={handleSaveRoom} 
                       disabled={savingRoom} 
