@@ -382,21 +382,16 @@ export default function VenueApplications() {
               </p>}
 
             {/* Tags row - Genre, Act Type, Payment */}
-            <div className="flex items-end justify-between mt-3">
-              <div className="flex flex-wrap gap-1">
-                {application.artist_profile?.genre && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
-                    {application.artist_profile.genre}
-                  </span>}
-                {application.lineup_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
-                    {lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}
-                  </span>}
-                {application.payment_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
-                    {application.payment_preference.replace('_', ' ')}
-                  </span>}
-              </div>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex-shrink-0">
-                Submitted {format(new Date(application.created_at), 'M/d/yy')}
-              </span>
+            <div className="flex flex-wrap gap-1 mt-3">
+              {application.artist_profile?.genre && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+                  {application.artist_profile.genre}
+                </span>}
+              {application.lineup_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+                  {lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}
+                </span>}
+              {application.payment_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+                  {application.payment_preference.replace('_', ' ')}
+                </span>}
             </div>
           </div>
         </div>
