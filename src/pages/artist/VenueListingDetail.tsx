@@ -280,7 +280,7 @@ export default function VenueListingDetail() {
         </div>
 
         {/* Right Column - Sticky Apply Form */}
-        <div className="lg:w-80 xl:w-96">
+        <div className="lg:w-80 xl:w-96 order-first lg:order-last">
           <div className="lg:sticky lg:top-4">
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
               <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
