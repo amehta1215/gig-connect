@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -71,6 +71,14 @@ export default function ArtistMessages() {
   const [sortBy, setSortBy] = useState<SortType>('newest');
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [artistApplications, setArtistApplications] = useState<ArtistApplication[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when thread is selected
+  useEffect(() => {
+    if (selectedThreadId && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'instant' });
+    }
+  }, [selectedThreadId]);
 
   useEffect(() => {
     if (user) {
@@ -387,6 +395,7 @@ export default function ArtistMessages() {
                       </div>
                     </div>;
             })}
+                <div ref={messagesEndRef} />
               </div>
 
               {showReplyForm ? <MessageReplyForm threadId={selectedThread.thread_id} originalSubject={selectedThread.latestMessage.subject} senderId={user?.id || ''} receiverId={selectedThread.otherParty.id} onSuccess={() => {
