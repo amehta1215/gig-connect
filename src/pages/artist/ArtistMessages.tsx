@@ -299,9 +299,20 @@ export default function ArtistMessages() {
             const messageCount = thread.messages.length;
             return <div key={thread.thread_id} onClick={() => handleSelectThread(thread)} className={`p-3 border-b border-border cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}>
                     <div className="flex items-start gap-2">
-                      <div className="flex-shrink-0 mt-1">
+                      <button 
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (thread.hasUnread) {
+                            markThreadAsRead(thread.thread_id);
+                          } else {
+                            markThreadAsUnread(thread.thread_id);
+                          }
+                        }} 
+                        className="flex-shrink-0 p-1 hover:bg-secondary rounded"
+                        title={thread.hasUnread ? "Mark as read" : "Mark as unread"}
+                      >
                         {thread.hasUnread ? <Mail className="h-4 w-4 text-primary" /> : <MailOpen className="h-4 w-4 text-muted-foreground" />}
-                      </div>
+                      </button>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <span className={`text-sm truncate ${thread.hasUnread ? 'font-semibold' : ''}`}>
