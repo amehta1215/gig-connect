@@ -83,7 +83,7 @@ export default function DashboardLayout({ children, tabs }: DashboardLayoutProps
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => navigate(editProfilePath)}>
+                <DropdownMenuItem onClick={() => navigate(editProfilePath, { state: { fromDropdown: true } })}>
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
