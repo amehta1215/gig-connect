@@ -697,21 +697,10 @@ export default function VenueProfile() {
                 onClick={() => openDialog(listing, 'preview')}
               >
                 {/* Image */}
-                <div className="aspect-[4/3] bg-secondary flex items-center justify-center overflow-hidden relative">
+                <div className="aspect-[4/3] bg-secondary flex items-center justify-center overflow-hidden">
                   {listing.pictures && listing.pictures.length > 0 ? <img src={listing.pictures[0]} alt={listing.venue_name} className="w-full h-full object-cover" /> : <div className="bg-heat w-full h-full flex items-center justify-center">
                       <Music className="h-12 w-12 text-primary/30" />
                     </div>}
-                  <Button 
-                    variant="secondary" 
-                    size="icon" 
-                    className="absolute top-2 right-2 h-8 w-8 bg-background/80 hover:bg-background border border-border" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openDialog(listing, 'edit');
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
                 </div>
 
                 {/* Content */}
