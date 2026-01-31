@@ -180,14 +180,24 @@ export default function PublicVenueDetail() {
 
           {/* Details */}
           <div className="space-y-4">
-            {listing.backline_info && <div className="bg-card border border-border rounded-lg p-4">
-                <h3 className="font-display text-sm text-primary tracking-widest mb-2">BIO</h3>
+            {listing.bio && (
+              <div className="bg-card border border-border rounded-lg p-4">
+                <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
+                <p className="text-muted-foreground text-sm">{listing.bio}</p>
+              </div>
+            )}
+            {listing.backline_info && (
+              <div className="bg-card border border-border rounded-lg p-4">
+                <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
                 <p className="text-muted-foreground text-sm">{listing.backline_info}</p>
-              </div>}
-            {listing.house_rules && <div className="bg-card border border-border rounded-lg p-4">
+              </div>
+            )}
+            {listing.house_rules && (
+              <div className="bg-card border border-border rounded-lg p-4">
                 <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
                 <p className="text-muted-foreground text-sm">{listing.house_rules}</p>
-              </div>}
+              </div>
+            )}
           </div>
         </div>
 
