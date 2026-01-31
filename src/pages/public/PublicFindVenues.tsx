@@ -191,9 +191,12 @@ export default function PublicFindVenues() {
 
   const filtersContent = (
     <div className="space-y-4">
-      <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Location" className="w-full" />
       {genreMultiSelect("w-full")}
       {capacityMultiSelect("w-full")}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border w-full placeholder:text-muted-foreground" />
+      </div>
     </div>
   );
 
@@ -202,16 +205,18 @@ export default function PublicFindVenues() {
       {/* Search and Filters */}
       <Collapsible open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search venue names..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border" />
+          <div className="flex-1">
+            <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Search venue locations..." className="w-full" />
           </div>
 
           {/* Desktop Filters */}
           <div className="hidden lg:flex gap-2">
-            <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Location" className="w-48" />
             {genreMultiSelect("w-36")}
             {capacityMultiSelect("w-36")}
+            <div className="relative w-48">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border placeholder:text-muted-foreground" />
+            </div>
             {hasActiveFilters && (
               <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground">
                 <X className="h-3 w-3 mr-1" /> Reset
