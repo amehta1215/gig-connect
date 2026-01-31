@@ -295,9 +295,9 @@ export default function VenueListingDetail() {
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
               <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
 
-              {hasApplied ? <div className="text-center py-8">
-                  <p className="text-lg text-muted-foreground">You've already applied to this room</p>
-                  <Button variant="outline" onClick={() => navigate('/artist/applications')} className="mt-4 font-display tracking-widest">
+              {hasApplied ? <div className="text-center">
+                  <p className="text-muted-foreground">You've already applied to this room</p>
+                  <Button variant="outline" onClick={() => navigate('/artist/applications')} className="mt-3 font-display tracking-widest">
                     VIEW APPLICATIONS
                   </Button>
                 </div> : isProfileComplete === false ? <div className="text-center py-4">
