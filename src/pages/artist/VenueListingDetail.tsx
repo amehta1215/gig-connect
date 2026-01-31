@@ -92,7 +92,7 @@ export default function VenueListingDetail() {
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
-  const [hasApplied, setHasApplied] = useState(false);
+  const [existingApplicationId, setExistingApplicationId] = useState<string | null>(null);
   const [isProfileComplete, setIsProfileComplete] = useState<boolean | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [availability, setAvailability] = useState<AvailabilityPreference>('flexible');
@@ -145,7 +145,7 @@ export default function VenueListingDetail() {
     const {
       data
     } = await supabase.from('applications').select('id').eq('artist_id', user.id).eq('venue_listing_id', id).maybeSingle();
-    setHasApplied(!!data);
+    setExistingApplicationId(data?.id || null);
   };
   const togglePayment = (payment: PaymentPreference) => {
     if (paymentPreferences.includes(payment)) {
@@ -295,10 +295,10 @@ export default function VenueListingDetail() {
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
               <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
 
-              {hasApplied ? <div className="text-center">
+              {existingApplicationId ? <div className="text-center">
                   <p className="text-muted-foreground">You've already applied to this room</p>
-                  <Button variant="outline" onClick={() => navigate('/artist/applications')} className="mt-3 font-display tracking-widest">
-                    VIEW APPLICATIONS
+                  <Button variant="outline" onClick={() => navigate(`/artist/applications/${existingApplicationId}`)} className="mt-3 font-display tracking-widest">
+                    VIEW APPLICATION
                   </Button>
                 </div> : isProfileComplete === false ? <div className="text-center py-4">
                   <button 
