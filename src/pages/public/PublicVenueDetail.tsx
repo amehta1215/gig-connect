@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ArrowLeft, MapPin, Users, Music, CalendarIcon } from 'lucide-react';
-
 interface VenueListing {
   id: string;
   venue_name: string;
@@ -21,100 +20,103 @@ interface VenueListing {
   house_rules: string | null;
   venue_profile_id: string;
 }
-
 interface VenueProfile {
   id: string;
   picture: string | null;
 }
-
-const availabilityOptions = [
-  { id: 'date_range', label: 'Date Range' },
-  { id: 'specific_dates', label: 'Specific Dates' },
-  { id: 'flexible', label: 'Flexible' }
-];
-
-const paymentOptions = [
-  { id: 'door_split', label: 'Door' },
-  { id: 'bar_split', label: 'Bar' },
-  { id: 'tip_based', label: 'Tips' },
-  { id: 'flat_fee', label: 'Flat' },
-  { id: 'rental', label: 'Rental' },
-  { id: 'no_preference', label: 'Flexible' }
-];
-
-const lineupOptions = [
-  { id: 'co_acts_needed', label: 'Co-acts Needed' },
-  { id: 'co_acts_confirmed', label: 'Co-acts Confirmed' },
-  { id: 'solo_performer', label: 'Solo' }
-];
-
+const availabilityOptions = [{
+  id: 'date_range',
+  label: 'Date Range'
+}, {
+  id: 'specific_dates',
+  label: 'Specific Dates'
+}, {
+  id: 'flexible',
+  label: 'Flexible'
+}];
+const paymentOptions = [{
+  id: 'door_split',
+  label: 'Door'
+}, {
+  id: 'bar_split',
+  label: 'Bar'
+}, {
+  id: 'tip_based',
+  label: 'Tips'
+}, {
+  id: 'flat_fee',
+  label: 'Flat'
+}, {
+  id: 'rental',
+  label: 'Rental'
+}, {
+  id: 'no_preference',
+  label: 'Flexible'
+}];
+const lineupOptions = [{
+  id: 'co_acts_needed',
+  label: 'Co-acts Needed'
+}, {
+  id: 'co_acts_confirmed',
+  label: 'Co-acts Confirmed'
+}, {
+  id: 'solo_performer',
+  label: 'Solo'
+}];
 export default function PublicVenueDetail() {
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const navigate = useNavigate();
   const [listing, setListing] = useState<VenueListing | null>(null);
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-
   useEffect(() => {
     if (id) {
       fetchListing();
     }
   }, [id]);
-
   const fetchListing = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('venue_listings')
-      .select('*')
-      .eq('id', id)
-      .maybeSingle();
-
+    const {
+      data,
+      error
+    } = await supabase.from('venue_listings').select('*').eq('id', id).maybeSingle();
     if (data && !error) {
       setListing(data as VenueListing);
-
-      const { data: profileData } = await supabase
-        .from('venue_profiles')
-        .select('id, picture')
-        .eq('id', data.venue_profile_id)
-        .maybeSingle();
-
+      const {
+        data: profileData
+      } = await supabase.from('venue_profiles').select('id, picture').eq('id', data.venue_profile_id).maybeSingle();
       if (profileData) {
         setVenueProfile(profileData as VenueProfile);
       }
     }
     setLoading(false);
   };
-
   const handleInteraction = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setAuthDialogOpen(true);
   };
-
   if (loading) {
-    return (
-      <div className="space-y-6 animate-fade-in">
+    return <div className="space-y-6 animate-fade-in">
         <div className="h-64 bg-card animate-pulse rounded-lg" />
         <div className="h-8 w-48 bg-card animate-pulse rounded" />
         <div className="h-32 bg-card animate-pulse rounded-lg" />
-      </div>
-    );
+      </div>;
   }
-
   if (!listing) {
-    return (
-      <div className="text-center py-20">
+    return <div className="text-center py-20">
         <h3 className="font-display text-2xl text-muted-foreground">ROOM NOT FOUND</h3>
         <Button onClick={() => navigate(-1)} variant="outline" className="mt-4">
           Go Back
         </Button>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="animate-fade-in max-w-6xl mx-auto">
+  return <div className="animate-fade-in max-w-6xl mx-auto">
       {/* Back Button */}
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
@@ -125,30 +127,24 @@ export default function PublicVenueDetail() {
       {/* All Pictures Gallery */}
       <div className="mb-6">
         {(() => {
-          const allPictures: string[] = [];
-          if (venueProfile?.picture) allPictures.push(venueProfile.picture);
-          if (listing.pictures && listing.pictures.length > 0) {
-            allPictures.push(...listing.pictures);
-          }
-          if (allPictures.length === 0) {
-            return (
-              <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
+        const allPictures: string[] = [];
+        if (venueProfile?.picture) allPictures.push(venueProfile.picture);
+        if (listing.pictures && listing.pictures.length > 0) {
+          allPictures.push(...listing.pictures);
+        }
+        if (allPictures.length === 0) {
+          return <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
                 <div className="w-full h-full flex items-center justify-center bg-heat">
                   <Music className="h-12 w-12 text-primary/30" />
                 </div>
-              </div>
-            );
-          }
-          return (
-            <div className="flex flex-wrap justify-center gap-2">
-              {allPictures.map((pic, index) => (
-                <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+              </div>;
+        }
+        return <div className="flex flex-wrap justify-center gap-2">
+              {allPictures.map((pic, index) => <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
                   <img src={pic} alt={`${listing.venue_name} ${index + 1}`} className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
-          );
-        })()}
+                </div>)}
+            </div>;
+      })()}
       </div>
 
       {/* Two Column Layout */}
@@ -165,51 +161,33 @@ export default function PublicVenueDetail() {
             </div>
 
             <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-              {listing.location && (
-                <span className="flex items-center gap-2">
+              {listing.location && <span className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   {listing.location}
-                </span>
-              )}
-              {listing.capacity && (
-                <span className="flex items-center gap-2">
+                </span>}
+              {listing.capacity && <span className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   {listing.capacity} capacity
-                </span>
-              )}
+                </span>}
             </div>
 
-            {listing.genres && listing.genres.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {listing.genres.map(genre => (
-                  <span key={genre} className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display">
+            {listing.genres && listing.genres.length > 0 && <div className="flex flex-wrap gap-2">
+                {listing.genres.map(genre => <span key={genre} className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display">
                     {genre}
-                  </span>
-                ))}
-              </div>
-            )}
+                  </span>)}
+              </div>}
           </div>
 
           {/* Details */}
           <div className="space-y-4">
-            {listing.bio && (
-              <div className="bg-card border border-border rounded-lg p-4">
-                <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
-                <p className="text-muted-foreground text-sm">{listing.bio}</p>
-              </div>
-            )}
-            {listing.backline_info && (
-              <div className="bg-card border border-border rounded-lg p-4">
-                <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
+            {listing.backline_info && <div className="bg-card border border-border rounded-lg p-4">
+                <h3 className="font-display text-sm text-primary tracking-widest mb-2">BIO</h3>
                 <p className="text-muted-foreground text-sm">{listing.backline_info}</p>
-              </div>
-            )}
-            {listing.house_rules && (
-              <div className="bg-card border border-border rounded-lg p-4">
+              </div>}
+            {listing.house_rules && <div className="bg-card border border-border rounded-lg p-4">
                 <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
                 <p className="text-muted-foreground text-sm">{listing.house_rules}</p>
-              </div>
-            )}
+              </div>}
           </div>
         </div>
 
@@ -224,22 +202,17 @@ export default function PublicVenueDetail() {
                 <h3 className="font-display text-sm text-primary tracking-widest">AVAILABILITY</h3>
                 <RadioGroup className="pointer-events-none">
                   <div className="flex flex-col gap-2">
-                    {availabilityOptions.map(option => (
-                      <div key={option.id} className="flex items-center space-x-2">
+                    {availabilityOptions.map(option => <div key={option.id} className="flex items-center space-x-2">
                         <RadioGroupItem value={option.id} id={`public-avail-${option.id}`} />
                         <Label htmlFor={`public-avail-${option.id}`} className="cursor-pointer">
                           {option.label}
                         </Label>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </RadioGroup>
 
                 {/* Date picker placeholder */}
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start text-left font-normal text-muted-foreground pointer-events-none"
-                >
+                <Button variant="outline" className="w-full justify-start text-left font-normal text-muted-foreground pointer-events-none">
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   <span>Select dates</span>
                 </Button>
@@ -249,15 +222,10 @@ export default function PublicVenueDetail() {
               <div className="space-y-3" onClick={handleInteraction}>
                 <h3 className="font-display text-sm text-primary tracking-widest">PAYMENT</h3>
                 <div className="grid grid-cols-2 gap-2 pointer-events-none">
-                  {paymentOptions.map(option => (
-                    <div 
-                      key={option.id} 
-                      className="flex items-center gap-2 p-2 rounded-lg border border-border text-sm"
-                    >
+                  {paymentOptions.map(option => <div key={option.id} className="flex items-center gap-2 p-2 rounded-lg border border-border text-sm">
                       <Checkbox className="h-4 w-4" />
                       <Label className="cursor-pointer text-sm">{option.label}</Label>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
               </div>
 
@@ -266,23 +234,18 @@ export default function PublicVenueDetail() {
                 <h3 className="font-display text-sm text-primary tracking-widest">LINEUP</h3>
                 <RadioGroup className="pointer-events-none">
                   <div className="flex flex-col gap-2">
-                    {lineupOptions.map(option => (
-                      <div key={option.id} className="flex items-center space-x-2">
+                    {lineupOptions.map(option => <div key={option.id} className="flex items-center space-x-2">
                         <RadioGroupItem value={option.id} id={`public-lineup-${option.id}`} />
                         <Label htmlFor={`public-lineup-${option.id}`} className="cursor-pointer">
                           {option.label}
                         </Label>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </RadioGroup>
               </div>
 
               {/* Submit Button */}
-              <Button 
-                onClick={handleInteraction} 
-                className="w-full font-display tracking-widest text-lg py-6"
-              >
+              <Button onClick={handleInteraction} className="w-full font-display tracking-widest text-lg py-6">
                 APPLY
               </Button>
             </div>
@@ -301,14 +264,10 @@ export default function PublicVenueDetail() {
               Create an account or sign in to submit your application
             </DialogDescription>
           </DialogHeader>
-          <Button 
-            onClick={() => navigate('/auth')} 
-            className="w-full font-display tracking-widest text-lg h-12 mt-4"
-          >
+          <Button onClick={() => navigate('/auth')} className="w-full font-display tracking-widest text-lg h-12 mt-4">
             LOGIN / SIGN UP
           </Button>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 }
