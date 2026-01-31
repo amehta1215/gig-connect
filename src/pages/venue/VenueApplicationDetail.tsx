@@ -362,9 +362,9 @@ export default function VenueApplicationDetail() {
           <h1 className="font-display text-4xl md:text-5xl text-accent font-bold tracking-wide">
             {bandName}
           </h1>
-          {venueListing && (
+        {venueListing && (
             <p className="text-lg text-muted-foreground mt-1">
-              Applied to: {venueListing.venue_name}{venueListing.room_name ? ` — ${venueListing.room_name}` : ''}
+              Applied to: {venueListing.room_name || venueListing.venue_name}
             </p>
           )}
         </div>
