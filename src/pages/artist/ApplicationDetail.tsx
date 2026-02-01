@@ -265,6 +265,13 @@ export default function ApplicationDetail() {
       </div>
 
       {/* Venue Details */}
+      {listing.bio && (
+        <div className="bg-card border border-border rounded-lg p-4">
+          <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
+          <p className="text-muted-foreground text-sm">{listing.bio}</p>
+        </div>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2">
         {listing.backline_info && (
           <div className="bg-card border border-border rounded-lg p-4">
