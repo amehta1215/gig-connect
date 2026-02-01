@@ -123,6 +123,16 @@
   }
 }
 
+/* Calendar past day styling */
+.day-past {
+  opacity: 0.3;
+}
+
+.day-past[aria-selected="true"] {
+  opacity: 0.5;
+  background-color: hsl(var(--accent) / 0.5) !important;
+}
+
 /* Scrollbar - minimal */
 ::-webkit-scrollbar {
   width: 4px;

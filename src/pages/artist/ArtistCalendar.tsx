@@ -144,10 +144,10 @@ export default function ArtistCalendar() {
       backgroundColor: '#b0177f',
       color: 'white',
       borderRadius: '0'
-    },
-    past: {
-      opacity: 0.3
     }
+  };
+  const modifiersClassNames = {
+    past: 'day-past'
   };
   const canCreateEvent = selectedDate && selectedDate >= today;
   if (loading) {
@@ -160,7 +160,7 @@ export default function ArtistCalendar() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Calendar */}
         <div className="bg-card border border-border p-4 flex items-center justify-center">
-          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} disablePastDates={false} className="pointer-events-auto" />
+          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} modifiersClassNames={modifiersClassNames} disablePastDates={false} className="pointer-events-auto" />
         </div>
 
         {/* Events on selected date */}
