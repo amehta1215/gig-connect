@@ -269,12 +269,12 @@ export default function ArtistMessages() {
         <div className={`w-full md:w-1/3 border-r border-border flex flex-col ${selectedThreadId ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-3 border-b border-border space-y-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-              <Input placeholder="Search mail..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-8 h-6 text-xs bg-background border-border" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 h-8 bg-background border-border" />
             </div>
             <div className="flex gap-2">
               <Select value={filter} onValueChange={v => setFilter(v as FilterType)}>
-                <SelectTrigger className="flex-1 h-6 text-xs bg-background border-border">
+                <SelectTrigger className="flex-1 h-8 text-xs bg-background border-border">
                   <SelectValue placeholder="Filter" />
                 </SelectTrigger>
                 <SelectContent>
@@ -284,7 +284,7 @@ export default function ArtistMessages() {
                 </SelectContent>
               </Select>
               <Select value={sortBy} onValueChange={v => setSortBy(v as SortType)}>
-                <SelectTrigger className="flex-1 h-6 text-xs bg-background border-border">
+                <SelectTrigger className="flex-1 h-8 text-xs bg-background border-border">
                   <SelectValue placeholder="Sort" />
                 </SelectTrigger>
                 <SelectContent>
@@ -351,7 +351,7 @@ export default function ArtistMessages() {
         {/* Thread Detail */}
         <div className={`flex-1 flex flex-col ${selectedThreadId ? 'flex' : 'hidden md:flex'}`}>
           {selectedThread ? <>
-              <div className="px-3 py-[17px] border-b border-border flex items-center gap-3">
+              <div className="p-3 border-b border-border flex items-center gap-3 min-h-[92px]">
                 <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedThreadId(null)}>
                   <ChevronLeft className="h-5 w-5" />
                 </Button>

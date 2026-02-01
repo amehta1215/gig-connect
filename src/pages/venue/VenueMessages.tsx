@@ -376,7 +376,7 @@ export default function VenueMessages() {
               initialSubject={composeSubject}
             />
           ) : selectedThread ? <>
-              <div className="p-4 border-b border-border flex items-center gap-3">
+              <div className="p-3 border-b border-border flex items-center gap-3 min-h-[92px]">
                 <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedThreadId(null)}>
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
