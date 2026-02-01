@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -18,7 +17,6 @@ interface MessageReplyFormProps {
   senderId: string;
   receiverId: string;
   onSuccess: () => void;
-  onCancel: () => void;
 }
 
 export function MessageReplyForm({
@@ -27,7 +25,6 @@ export function MessageReplyForm({
   senderId,
   receiverId,
   onSuccess,
-  onCancel,
 }: MessageReplyFormProps) {
   const [content, setContent] = useState('');
   const [sending, setSending] = useState(false);
@@ -124,17 +121,12 @@ export function MessageReplyForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-border p-4 pt-2 space-y-2 relative">
-      <div className="flex justify-end">
-        <Button type="button" variant="ghost" size="icon" onClick={onCancel} className="h-6 w-6">
-          <X className="h-3 w-3" />
-        </Button>
-      </div>
+    <form onSubmit={handleSubmit} className="border-t border-border p-3 space-y-2">
       <Textarea
-        placeholder="Write your reply..."
+        placeholder="Write your message..."
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        className="min-h-[120px] bg-background border-border resize-none"
+        className="min-h-[80px] bg-card border-border resize-none text-sm"
       />
       
       {/* Attachments Preview */}
@@ -174,22 +166,24 @@ export function MessageReplyForm({
             className="hidden"
             accept="image/*,.pdf,.doc,.docx,.txt,.zip"
           />
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="sm"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm"
           >
-            <Paperclip className="h-4 w-4 mr-1" />
+            <Paperclip className="h-4 w-4" />
             {uploading ? 'Uploading...' : 'Attach'}
-          </Button>
+          </button>
         </div>
-        <Button type="submit" disabled={sending || (!content.trim() && attachments.length === 0)}>
-          <Send className="h-4 w-4 mr-2" />
+        <button 
+          type="submit" 
+          disabled={sending || (!content.trim() && attachments.length === 0)}
+          className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+        >
+          <Send className="h-4 w-4" />
           {sending ? 'Sending...' : 'Send'}
-        </Button>
+        </button>
       </div>
     </form>
   );
