@@ -340,14 +340,14 @@ export default function ApplicationDetail() {
 
         {/* Withdraw Button - only show for pending applications */}
         {application.status === 'in_progress' && (
-          <div className="pt-4 border-t border-border">
+          <div className="pt-4 border-t border-border flex justify-end">
             <Button 
-              variant="destructive" 
+              variant="ghost" 
+              size="icon"
               onClick={() => setWithdrawDialogOpen(true)}
-              className="w-full"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Withdraw Application
+              <Trash2 className="h-5 w-5" />
             </Button>
           </div>
         )}
