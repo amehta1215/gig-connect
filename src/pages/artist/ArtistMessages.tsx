@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft, Reply } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
@@ -69,7 +69,7 @@ export default function ArtistMessages() {
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('newest');
-  const [showReplyForm, setShowReplyForm] = useState(false);
+  
   const [artistApplications, setArtistApplications] = useState<ArtistApplication[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -240,7 +240,6 @@ export default function ArtistMessages() {
   const selectedThread = threads.find(t => t.thread_id === selectedThreadId);
   const handleSelectThread = (thread: Thread) => {
     setSelectedThreadId(thread.thread_id);
-    setShowReplyForm(false);
     markThreadAsRead(thread.thread_id);
   };
   const unreadCount = threads.filter(t => t.hasUnread).length;
@@ -398,15 +397,13 @@ export default function ArtistMessages() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {showReplyForm ? <MessageReplyForm threadId={selectedThread.thread_id} originalSubject={selectedThread.latestMessage.subject} senderId={user?.id || ''} receiverId={selectedThread.otherParty.id} onSuccess={() => {
-            setShowReplyForm(false);
-            fetchMessages();
-          }} onCancel={() => setShowReplyForm(false)} /> : <div className="border-t border-border p-4">
-                  <Button onClick={() => setShowReplyForm(true)} className="w-full">
-                    <Reply className="h-4 w-4 mr-2" />
-                    Reply
-                  </Button>
-                </div>}
+              <MessageReplyForm 
+                threadId={selectedThread.thread_id} 
+                originalSubject={selectedThread.latestMessage.subject} 
+                senderId={user?.id || ''} 
+                receiverId={selectedThread.otherParty.id} 
+                onSuccess={fetchMessages} 
+              />
             </> : <div className="flex-1 flex items-center justify-center">
               <Mail className="h-12 w-12 text-muted-foreground/30" />
             </div>}
