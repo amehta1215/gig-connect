@@ -86,19 +86,13 @@ export default function ArtistFavorites() {
             onClick={() => navigate(`/artist/venues/${venue.id}`)}
             className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative"
           >
-            {/* Favorite Button */}
-            <button
-              onClick={(e) => handleToggleFavorite(e, venue.id)}
-              className="absolute top-2 left-2 z-10 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors"
-            >
-              <Heart
-                className={`h-5 w-5 transition-colors ${
-                  isFavorite(venue.id)
-                    ? 'fill-primary text-primary'
-                    : 'text-muted-foreground hover:text-primary'
-                }`}
-              />
-            </button>
+            {/* Capacity badge */}
+            {venue.capacity && (
+              <div className="absolute top-2 left-2 z-10 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                {venue.capacity}
+              </div>
+            )}
 
             {/* Image */}
             <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
@@ -113,13 +107,19 @@ export default function ArtistFavorites() {
                   <Music className="h-12 w-12 text-primary/30" />
                 </div>
               )}
-              {/* Capacity badge */}
-              {venue.capacity && (
-                <div className="absolute top-2 right-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
-                  <Users className="h-3 w-3" />
-                  {venue.capacity}
-                </div>
-              )}
+              {/* Favorite Button */}
+              <button
+                onClick={(e) => handleToggleFavorite(e, venue.id)}
+                className="absolute top-2 right-2 z-10 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors"
+              >
+                <Heart
+                  className={`h-5 w-5 transition-colors ${
+                    isFavorite(venue.id)
+                      ? 'fill-primary text-primary'
+                      : 'text-muted-foreground hover:text-primary'
+                  }`}
+                />
+              </button>
             </div>
 
             {/* Content */}
