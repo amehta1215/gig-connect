@@ -424,13 +424,16 @@ export default function VenueMessages() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <MessageReplyForm 
-                threadId={selectedThread.thread_id} 
-                originalSubject={selectedThread.latestMessage.subject} 
-                senderId={user?.id || ''} 
-                receiverId={selectedThread.otherParty.id} 
-                onSuccess={fetchMessages} 
-              />
+              {/* Hide reply form for system messages (Riff Team) */}
+              {selectedThread.otherParty.id !== '00000000-0000-0000-0000-000000000000' && (
+                <MessageReplyForm 
+                  threadId={selectedThread.thread_id} 
+                  originalSubject={selectedThread.latestMessage.subject} 
+                  senderId={user?.id || ''} 
+                  receiverId={selectedThread.otherParty.id} 
+                  onSuccess={fetchMessages} 
+                />
+              )}
             </> : <div className="flex-1 flex items-center justify-center">
               <Mail className="h-12 w-12 text-muted-foreground/30" />
             </div>}
