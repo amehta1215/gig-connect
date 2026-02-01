@@ -258,14 +258,11 @@ export default function VenueApplicationDetail() {
     }
 
     // No existing thread, navigate to messages with compose panel open
-    const roomName = venueListing?.room_name || '';
-    const venueName = venueListing?.venue_name || '';
-    const subject = roomName 
-      ? `Application for ${roomName} at ${venueName}`
-      : `Application for ${venueName}`;
-    
+    const roomName = venueListing?.room_name || venueListing?.venue_name || '';
     const artistName = `${application.artist?.first_name || ''} ${application.artist?.last_name || ''}`.trim();
     const bandName = artistProfile?.band_name || '';
+    const displayName = bandName || artistName;
+    const subject = `Application for ${roomName} - ${displayName}`;
     
     const params = new URLSearchParams({
       compose: 'true',
