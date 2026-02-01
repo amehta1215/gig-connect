@@ -11,6 +11,7 @@ interface Profile {
   last_name: string;
   email: string;
   role: UserRole;
+  created_at: string | null;
 }
 
 interface AuthContextType {
@@ -20,6 +21,8 @@ interface AuthContextType {
   activeRole: 'artist' | 'venue';
   setActiveRole: (role: 'artist' | 'venue') => void;
   loading: boolean;
+  isNewUser: boolean;
+  clearNewUserFlag: () => void;
   signUp: (email: string, password: string, firstName: string, lastName: string, role: UserRole) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -33,8 +36,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [activeRole, setActiveRole] = useState<'artist' | 'venue'>('artist');
   const [loading, setLoading] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
 
-  const fetchProfile = async (userId: string) => {
+  const clearNewUserFlag = () => {
+    setIsNewUser(false);
+  };
+
+  const checkIfNewUser = (profileCreatedAt: string | null) => {
+    if (!profileCreatedAt) return false;
+    const createdAt = new Date(profileCreatedAt);
+    const now = new Date();
+    // Consider user as "new" if profile was created within the last 2 minutes
+    const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
+    return createdAt > twoMinutesAgo;
+  };
+
+  const fetchProfile = async (userId: string, checkNew: boolean = false) => {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -49,6 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setActiveRole('artist');
       }
+      // Check if this is a new user (profile just created)
+      if (checkNew && checkIfNewUser(data.created_at)) {
+        setIsNewUser(true);
+      }
     }
   };
 
@@ -61,11 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (session?.user) {
           // Defer profile fetch to avoid deadlock
+          // Check for new user on SIGNED_IN event (happens after email verification)
+          const shouldCheckNew = event === 'SIGNED_IN';
           setTimeout(() => {
-            fetchProfile(session.user.id);
+            fetchProfile(session.user.id, shouldCheckNew);
           }, 0);
         } else {
           setProfile(null);
+          setIsNewUser(false);
         }
         setLoading(false);
       }
@@ -126,6 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       activeRole,
       setActiveRole,
       loading,
+      isNewUser,
+      clearNewUserFlag,
       signUp,
       signIn,
       signOut,
