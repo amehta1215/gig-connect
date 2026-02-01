@@ -281,16 +281,14 @@ export default function VenueMessages() {
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-background border-border" />
+                <Input placeholder="Search..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 h-8 bg-background border-border" />
               </div>
-              <Button 
+              <button 
                 onClick={() => { setIsComposing(true); setSelectedThreadId(null); }} 
-                size="icon"
-                variant="outline"
-                className="flex-shrink-0"
+                className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <PenSquare className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
             <div className="flex gap-2">
               <Select value={filter} onValueChange={v => setFilter(v as FilterType)}>
