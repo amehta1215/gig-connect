@@ -22,15 +22,23 @@ export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { signUp, user, profile, loading } = useAuth();
+  const { signUp, user, profile, loading, isNewUser, clearNewUserFlag } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && user && profile) {
-      const targetDashboard = profile.role === "venue" ? "/venue" : "/artist";
-      navigate(targetDashboard);
+      if (isNewUser) {
+        // New users go to profile edit page
+        const targetProfile = profile.role === "venue" ? "/venue/profile" : "/artist/profile";
+        clearNewUserFlag();
+        navigate(targetProfile);
+      } else {
+        // Existing users go to dashboard
+        const targetDashboard = profile.role === "venue" ? "/venue" : "/artist";
+        navigate(targetDashboard);
+      }
     }
-  }, [user, profile, loading, navigate]);
+  }, [user, profile, loading, isNewUser, navigate, clearNewUserFlag]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
