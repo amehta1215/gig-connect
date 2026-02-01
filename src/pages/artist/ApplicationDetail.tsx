@@ -282,7 +282,19 @@ export default function ApplicationDetail() {
 
       {/* Your Application */}
       <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-        <h2 className="font-display text-2xl text-accent font-bold">YOUR APPLICATION</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-2xl text-accent font-bold">YOUR APPLICATION</h2>
+          {application.status === 'in_progress' && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setWithdrawDialogOpen(true)}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="h-5 w-5" />
+            </Button>
+          )}
+        </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           {/* Availability */}
@@ -335,20 +347,6 @@ export default function ApplicationDetail() {
           <div className="space-y-1 pt-2 border-t border-border">
             <h3 className="font-display text-xs text-primary tracking-widest">MESSAGE</h3>
             <p className="text-muted-foreground text-sm">{application.message}</p>
-          </div>
-        )}
-
-        {/* Withdraw Button - only show for pending applications */}
-        {application.status === 'in_progress' && (
-          <div className="pt-4 border-t border-border flex justify-end">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setWithdrawDialogOpen(true)}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="h-5 w-5" />
-            </Button>
           </div>
         )}
       </div>
