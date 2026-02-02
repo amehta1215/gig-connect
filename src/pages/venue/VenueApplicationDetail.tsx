@@ -694,16 +694,14 @@ export default function VenueApplicationDetail() {
               <RadioGroup value={acceptType} onValueChange={(v) => setAcceptType(v as 'confirmed' | 'hold')}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="confirmed" id="confirmed" />
-                  <Label htmlFor="confirmed" className="cursor-pointer">
-                    <span className="font-display text-sm">CONFIRMED</span>
-                    <span className="text-xs text-muted-foreground block">Gig is finalized for this date</span>
+                  <Label htmlFor="confirmed" className="cursor-pointer font-display text-sm">
+                    CONFIRMED
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="hold" id="hold" />
-                  <Label htmlFor="hold" className="cursor-pointer">
-                    <span className="font-display text-sm">HOLD</span>
-                    <span className="text-xs text-muted-foreground block">Tentative booking, can be confirmed later</span>
+                  <Label htmlFor="hold" className="cursor-pointer font-display text-sm">
+                    HOLD
                   </Label>
                 </div>
               </RadioGroup>
