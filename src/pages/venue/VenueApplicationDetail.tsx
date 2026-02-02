@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +13,7 @@ import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, Messag
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import HoldsOrderList from '@/components/HoldsOrderList';
 
 interface ArtistProfile {
   band_name: string | null;
@@ -111,7 +112,8 @@ export default function VenueApplicationDetail() {
   const [selectedGigDate, setSelectedGigDate] = useState<Date | undefined>(undefined);
   const [selectedGigTime, setSelectedGigTime] = useState('');
   const [acceptType, setAcceptType] = useState<'confirmed' | 'hold'>('confirmed');
-  const [holdPriority, setHoldPriority] = useState('1');
+  const [holdPriority, setHoldPriority] = useState(1);
+  const [existingHolds, setExistingHolds] = useState<{ id: string; artist_name: string; hold_priority: number }[]>([]);
 
   useEffect(() => {
     if (id && user) {
@@ -200,17 +202,82 @@ export default function VenueApplicationDetail() {
     }
   };
 
+  const fetchExistingHolds = useCallback(async (date: Date) => {
+    if (!application?.venue_listing_id) return;
+    
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const { data: holds } = await supabase
+      .from('gig_listings')
+      .select('id, artist_id, manual_artist_name, hold_priority')
+      .eq('venue_listing_id', application.venue_listing_id)
+      .eq('gig_date', dateStr)
+      .eq('is_confirmed', false)
+      .order('hold_priority', { ascending: true });
+
+    if (holds && holds.length > 0) {
+      // Fetch artist names for each hold
+      const holdsWithNames = await Promise.all(
+        holds.map(async (hold) => {
+          if (hold.manual_artist_name) {
+            return { id: hold.id, artist_name: hold.manual_artist_name, hold_priority: hold.hold_priority || 99 };
+          }
+          const { data: artistProfile } = await supabase
+            .from('artist_profiles')
+            .select('band_name')
+            .eq('user_id', hold.artist_id)
+            .maybeSingle();
+          
+          if (artistProfile?.band_name) {
+            return { id: hold.id, artist_name: artistProfile.band_name, hold_priority: hold.hold_priority || 99 };
+          }
+          
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', hold.artist_id)
+            .maybeSingle();
+          
+          const name = profile ? `${profile.first_name} ${profile.last_name}` : 'Unknown Artist';
+          return { id: hold.id, artist_name: name, hold_priority: hold.hold_priority || 99 };
+        })
+      );
+      setExistingHolds(holdsWithNames);
+      setHoldPriority(holdsWithNames.length + 1);
+    } else {
+      setExistingHolds([]);
+      setHoldPriority(1);
+    }
+  }, [application?.venue_listing_id]);
+
   const handleAcceptClick = () => {
     // Pre-select a date from application if available
+    let initialDate: Date | undefined;
     if (application?.availability_start_date) {
-      setSelectedGigDate(new Date(application.availability_start_date));
+      initialDate = new Date(application.availability_start_date);
     } else if (application?.availability_specific_dates && application.availability_specific_dates.length > 0) {
-      setSelectedGigDate(new Date(application.availability_specific_dates[0]));
+      initialDate = new Date(application.availability_specific_dates[0]);
     }
-    // Reset accept type and priority
+    
+    setSelectedGigDate(initialDate);
     setAcceptType('confirmed');
-    setHoldPriority('1');
+    setExistingHolds([]);
+    setHoldPriority(1);
+    
+    if (initialDate) {
+      fetchExistingHolds(initialDate);
+    }
+    
     setAcceptDialogOpen(true);
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    setSelectedGigDate(date);
+    if (date) {
+      fetchExistingHolds(date);
+    } else {
+      setExistingHolds([]);
+      setHoldPriority(1);
+    }
   };
 
   const handleConfirmAccept = async () => {
@@ -220,6 +287,20 @@ export default function VenueApplicationDetail() {
     }
 
     const isHold = acceptType === 'hold';
+    const dateStr = format(selectedGigDate, 'yyyy-MM-dd');
+
+    // If adding as a hold and there are existing holds, update their priorities
+    if (isHold && existingHolds.length > 0) {
+      // Update priorities for holds that need to shift
+      for (const hold of existingHolds) {
+        if (hold.hold_priority >= holdPriority) {
+          await supabase
+            .from('gig_listings')
+            .update({ hold_priority: hold.hold_priority + 1 })
+            .eq('id', hold.id);
+        }
+      }
+    }
 
     // Create gig listing
     const { error: gigError } = await supabase
@@ -228,12 +309,12 @@ export default function VenueApplicationDetail() {
         application_id: application.id,
         venue_listing_id: application.venue_listing_id,
         artist_id: application.artist_id,
-        gig_date: format(selectedGigDate, 'yyyy-MM-dd'),
+        gig_date: dateStr,
         show_time: selectedGigTime || null,
         openers: [],
         notes: null,
         is_confirmed: !isHold,
-        hold_priority: isHold ? parseInt(holdPriority) : null,
+        hold_priority: isHold ? holdPriority : null,
       });
 
     if (gigError) {
@@ -585,7 +666,7 @@ export default function VenueApplicationDetail() {
                   <CalendarComponent
                     mode="single"
                     selected={selectedGigDate}
-                    onSelect={setSelectedGigDate}
+                    onSelect={handleDateChange}
                     initialFocus
                     className="p-3 pointer-events-auto"
                   />
@@ -634,23 +715,33 @@ export default function VenueApplicationDetail() {
                 <label className="font-display text-xs text-muted-foreground tracking-widest block">
                   HOLD PRIORITY
                 </label>
-                <div className="flex gap-2">
-                  {['1', '2', '3', '4', '5'].map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => setHoldPriority(num)}
-                      className={cn(
-                        "w-10 h-10 border font-display text-sm transition-colors",
-                        holdPriority === num 
-                          ? "bg-primary text-primary-foreground border-primary" 
-                          : "bg-background border-border hover:border-primary/50"
-                      )}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground">1 = 1st Hold (highest priority)</p>
+                {existingHolds.length > 0 ? (
+                  <HoldsOrderList
+                    holds={existingHolds}
+                    newArtistName={bandName}
+                    onOrderChange={setHoldPriority}
+                  />
+                ) : (
+                  <>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <button
+                          key={num}
+                          onClick={() => setHoldPriority(num)}
+                          className={cn(
+                            "w-10 h-10 border font-display text-sm transition-colors",
+                            holdPriority === num 
+                              ? "bg-primary text-primary-foreground border-primary" 
+                              : "bg-background border-border hover:border-primary/50"
+                          )}
+                        >
+                          {num}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">1 = 1st Hold (highest priority)</p>
+                  </>
+                )}
               </div>
             )}
 
