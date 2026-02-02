@@ -704,39 +704,17 @@ export default function VenueApplicationDetail() {
               </RadioGroup>
             </div>
 
-            {/* Hold Priority - Only show if hold is selected */}
-            {acceptType === 'hold' && (
+            {/* Hold Priority - Only show if hold is selected AND there are existing holds */}
+            {acceptType === 'hold' && existingHolds.length > 0 && (
               <div className="space-y-2">
                 <label className="font-display text-xs text-muted-foreground tracking-widest block">
                   HOLD PRIORITY
                 </label>
-                {existingHolds.length > 0 ? (
-                  <HoldsOrderList
-                    holds={existingHolds}
-                    newArtistName={bandName}
-                    onOrderChange={setHoldPriority}
-                  />
-                ) : (
-                  <>
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map((num) => (
-                        <button
-                          key={num}
-                          onClick={() => setHoldPriority(num)}
-                          className={cn(
-                            "w-10 h-10 border font-display text-sm transition-colors",
-                            holdPriority === num 
-                              ? "bg-primary text-primary-foreground border-primary" 
-                              : "bg-background border-border hover:border-primary/50"
-                          )}
-                        >
-                          {num}
-                        </button>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground">1 = highest priority</p>
-                  </>
-                )}
+                <HoldsOrderList
+                  holds={existingHolds}
+                  newArtistName={bandName}
+                  onOrderChange={setHoldPriority}
+                />
               </div>
             )}
 
