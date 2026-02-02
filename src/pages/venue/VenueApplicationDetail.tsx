@@ -739,7 +739,7 @@ export default function VenueApplicationDetail() {
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-muted-foreground">1 = 1st Hold (highest priority)</p>
+                    <p className="text-xs text-muted-foreground">1 = highest priority</p>
                   </>
                 )}
               </div>
