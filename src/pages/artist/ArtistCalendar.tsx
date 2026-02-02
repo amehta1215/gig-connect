@@ -228,7 +228,7 @@ export default function ArtistCalendar() {
                       >
                         <div className="flex items-center gap-2">
                           <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
-                            #{gig.hold_priority}
+                            HOLD
                           </span>
                           <p className="font-display text-lg text-accent">{venueName}</p>
                         </div>
@@ -265,7 +265,7 @@ export default function ArtistCalendar() {
                     <div className="flex items-center gap-2">
                       {isHold && (
                         <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
-                          HOLD #{gig.hold_priority}
+                          HOLD
                         </span>
                       )}
                       <p className="font-display text-accent">{venueName}</p>
