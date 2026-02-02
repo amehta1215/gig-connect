@@ -472,21 +472,81 @@ export default function VenueCalendar() {
       {/* Upcoming gigs list */}
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4">UPCOMING SHOWS</h2>
-        {gigs.length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
-            {gigs.filter(g => new Date(g.gig_date) >= new Date()).map(gig => {
-          const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
-          const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-          return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
-                  <div>
-                    <p className="font-display text-accent">{artistName}</p>
-                    <p className="text-xs text-muted-foreground">{roomDisplay}</p>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {format(new Date(gig.gig_date), 'MMM d, yyyy')}
-                  </span>
-                </button>;
-        })}
-          </div>}
+        {gigs.filter(g => new Date(g.gig_date) >= new Date()).length === 0 ? (
+          <p className="text-muted-foreground text-sm">No upcoming shows booked</p>
+        ) : (
+          <div className="space-y-6">
+            {/* Confirmed Shows */}
+            {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length > 0 && (
+              <div className="space-y-2">
+                <p className="font-display text-xs text-green-500 tracking-widest flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  CONFIRMED
+                </p>
+                {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
+                  const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+                  const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+                  return (
+                    <button
+                      key={gig.id}
+                      onClick={() => navigate(`/venue/calendar/${gig.id}`)}
+                      className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors"
+                    >
+                      <div>
+                        <p className="font-display text-accent">{artistName}</p>
+                        <p className="text-xs text-muted-foreground">{roomDisplay}</p>
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {format(new Date(gig.gig_date), 'MMM d, yyyy')}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Holds */}
+            {gigs.filter(g => new Date(g.gig_date) >= new Date() && !g.is_confirmed).length > 0 && (
+              <div className="space-y-2">
+                <p className="font-display text-xs text-yellow-500 tracking-widest flex items-center gap-1">
+                  <PauseCircle className="h-3 w-3" />
+                  HOLDS
+                </p>
+                {gigs.filter(g => new Date(g.gig_date) >= new Date() && !g.is_confirmed)
+                  .sort((a, b) => {
+                    // Sort by date first, then by hold priority
+                    const dateCompare = new Date(a.gig_date).getTime() - new Date(b.gig_date).getTime();
+                    if (dateCompare !== 0) return dateCompare;
+                    return (a.hold_priority || 99) - (b.hold_priority || 99);
+                  })
+                  .map(gig => {
+                    const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+                    const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+                    return (
+                      <button
+                        key={gig.id}
+                        onClick={() => navigate(`/venue/calendar/${gig.id}`)}
+                        className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
+                            #{gig.hold_priority}
+                          </span>
+                          <div>
+                            <p className="font-display text-accent">{artistName}</p>
+                            <p className="text-xs text-muted-foreground">{roomDisplay}</p>
+                          </div>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {format(new Date(gig.gig_date), 'MMM d, yyyy')}
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Create Event Dialog */}
