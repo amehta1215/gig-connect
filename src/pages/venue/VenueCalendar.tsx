@@ -6,6 +6,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
@@ -58,6 +59,23 @@ export default function VenueCalendar() {
   const [deletingAllHolds, setDeletingAllHolds] = useState(false);
   const [draggedHoldIndex, setDraggedHoldIndex] = useState<number | null>(null);
   const [localHoldOrder, setLocalHoldOrder] = useState<GigListing[]>([]);
+
+  // Confirm hold dialog state
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [confirmingHold, setConfirmingHold] = useState(false);
+  const [holdToConfirm, setHoldToConfirm] = useState<{
+    gigId: string;
+    gigDate: string;
+    venueListingId: string;
+    artistId: string;
+    artistName: string;
+    roomName: string;
+    otherHolds: { id: string; artistId: string; artistName: string; applicationId: string | null }[];
+  } | null>(null);
+  const [confirmMessage, setConfirmMessage] = useState('');
+  const [declineMessage, setDeclineMessage] = useState('');
+  const [sendConfirmMessage, setSendConfirmMessage] = useState(true);
+  const [sendDeclineMessage, setSendDeclineMessage] = useState(true);
   useEffect(() => {
     if (user) {
       fetchGigs();
@@ -170,7 +188,90 @@ export default function VenueCalendar() {
     }
   };
 
-  const handleConfirmHold = async (gigId: string, gigDate: string, venueListingId: string, artistId: string) => {
+  const openConfirmDialog = async (gigId: string, gigDate: string, venueListingId: string, artistId: string) => {
+    // Get artist info
+    const { data: artistProfile } = await supabase
+      .from('artist_profiles')
+      .select('band_name')
+      .eq('user_id', artistId)
+      .maybeSingle();
+
+    const { data: artist } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('id', artistId)
+      .maybeSingle();
+
+    const { data: venueListing } = await supabase
+      .from('venue_listings')
+      .select('venue_name, room_name')
+      .eq('id', venueListingId)
+      .single();
+
+    // Get other holds for the same date
+    const { data: otherHoldsData } = await supabase
+      .from('gig_listings')
+      .select('id, artist_id, application_id')
+      .eq('venue_listing_id', venueListingId)
+      .eq('gig_date', gigDate)
+      .eq('is_confirmed', false)
+      .neq('id', gigId);
+
+    // Enrich other holds with artist names
+    const otherHolds = await Promise.all((otherHoldsData || []).map(async (hold) => {
+      const { data: holdArtistProfile } = await supabase
+        .from('artist_profiles')
+        .select('band_name')
+        .eq('user_id', hold.artist_id)
+        .maybeSingle();
+      
+      const { data: holdArtist } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', hold.artist_id)
+        .maybeSingle();
+
+      return {
+        id: hold.id,
+        artistId: hold.artist_id,
+        artistName: holdArtistProfile?.band_name || (holdArtist ? `${holdArtist.first_name} ${holdArtist.last_name}` : 'Artist'),
+        applicationId: hold.application_id
+      };
+    }));
+
+    const artistName = artistProfile?.band_name || (artist ? `${artist.first_name} ${artist.last_name}` : 'Artist');
+    const roomName = venueListing?.room_name || venueListing?.venue_name || 'Venue';
+    const formattedDate = format(new Date(gigDate), 'MMMM d, yyyy');
+
+    setHoldToConfirm({
+      gigId,
+      gigDate,
+      venueListingId,
+      artistId,
+      artistName,
+      roomName,
+      otherHolds
+    });
+
+    // Set default messages
+    setConfirmMessage(`Great news! Your performance at ${roomName} on ${formattedDate} has been confirmed. This is no longer a hold - you're officially booked!\n\nWe're looking forward to having you perform.`);
+    
+    if (otherHolds.length > 0) {
+      setDeclineMessage(`We appreciate your interest in performing at ${roomName} on ${formattedDate}. Unfortunately, we've decided to go with another artist for this date.\n\nWe hope to work with you in the future and encourage you to apply for other dates.`);
+    }
+    
+    setSendConfirmMessage(true);
+    setSendDeclineMessage(otherHolds.length > 0);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmHold = async () => {
+    if (!holdToConfirm || !user) return;
+    
+    setConfirmingHold(true);
+    const { gigId, gigDate, venueListingId, artistId, artistName, roomName, otherHolds } = holdToConfirm;
+    const formattedDate = format(new Date(gigDate), 'MMMM d, yyyy');
+
     // Confirm this gig
     const { error: confirmError } = await supabase
       .from('gig_listings')
@@ -179,21 +280,14 @@ export default function VenueCalendar() {
 
     if (confirmError) {
       toast.error('Failed to confirm gig');
+      setConfirmingHold(false);
       return;
     }
 
-    // Get all other holds for the same date and venue listing
-    const { data: otherHolds } = await supabase
-      .from('gig_listings')
-      .select('id, application_id')
-      .eq('venue_listing_id', venueListingId)
-      .eq('gig_date', gigDate)
-      .eq('is_confirmed', false)
-      .neq('id', gigId);
-
-    if (otherHolds && otherHolds.length > 0) {
+    // Handle other holds
+    if (otherHolds.length > 0) {
       // Archive the applications for deleted holds
-      const applicationIds = otherHolds.map(h => h.application_id).filter(Boolean);
+      const applicationIds = otherHolds.map(h => h.applicationId).filter(Boolean);
       if (applicationIds.length > 0) {
         await supabase
           .from('applications')
@@ -206,38 +300,40 @@ export default function VenueCalendar() {
         .from('gig_listings')
         .delete()
         .in('id', otherHolds.map(h => h.id));
+
+      // Send decline messages if enabled
+      if (sendDeclineMessage && declineMessage.trim()) {
+        for (const hold of otherHolds) {
+          await supabase.from('messages').insert({
+            thread_id: crypto.randomUUID(),
+            sender_id: user.id,
+            receiver_id: hold.artistId,
+            subject: `Update: ${roomName} on ${formattedDate}`,
+            content: declineMessage,
+            is_read: false,
+            is_starred: false,
+          });
+        }
+      }
     }
 
-    // Send confirmation message to the artist
-    const { data: artistProfile } = await supabase
-      .from('artist_profiles')
-      .select('band_name')
-      .eq('user_id', artistId)
-      .single();
-
-    const { data: venueListing } = await supabase
-      .from('venue_listings')
-      .select('venue_name, room_name')
-      .eq('id', venueListingId)
-      .single();
-
-    if (venueListing && user) {
-      const roomName = venueListing.room_name || venueListing.venue_name;
-      const artistName = artistProfile?.band_name || 'Artist';
-      const formattedDate = format(new Date(gigDate), 'MMMM d, yyyy');
-      
+    // Send confirmation message if enabled
+    if (sendConfirmMessage && confirmMessage.trim()) {
       await supabase.from('messages').insert({
         thread_id: crypto.randomUUID(),
         sender_id: user.id,
         receiver_id: artistId,
         subject: `Gig Confirmed: ${roomName} on ${formattedDate}`,
-        content: `Great news! Your performance at ${roomName} on ${formattedDate} has been confirmed. This is no longer a hold - you're officially booked!\n\nWe're looking forward to having you perform.`,
+        content: confirmMessage,
         is_read: false,
         is_starred: false,
       });
     }
 
-    toast.success('Gig confirmed! Other holds for this date have been archived.');
+    setConfirmingHold(false);
+    setConfirmDialogOpen(false);
+    setHoldToConfirm(null);
+    toast.success('Gig confirmed!');
     fetchGigs();
   };
 
@@ -498,7 +594,7 @@ export default function VenueCalendar() {
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleConfirmHold(gig.id, gig.gig_date, gig.venue_listing_id, gig.artist_id);
+                              openConfirmDialog(gig.id, gig.gig_date, gig.venue_listing_id, gig.artist_id);
                             }}
                             className="bg-green-600 hover:bg-green-700"
                           >
@@ -678,6 +774,92 @@ export default function VenueCalendar() {
               variant="destructive"
             >
               {deletingAllHolds ? 'Deleting...' : 'Delete All Holds'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Hold Dialog */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl">CONFIRM GIG</DialogTitle>
+          </DialogHeader>
+          
+          {holdToConfirm && (
+            <div className="space-y-6 py-4">
+              <p className="text-muted-foreground">
+                Confirm <span className="text-accent font-medium">{holdToConfirm.artistName}</span> for {holdToConfirm.roomName} on {format(new Date(holdToConfirm.gigDate), 'MMMM d, yyyy')}?
+              </p>
+
+              {/* Message to confirmed artist */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="font-display text-xs text-primary tracking-widest">
+                    MESSAGE TO {holdToConfirm.artistName.toUpperCase()}
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={sendConfirmMessage}
+                      onChange={(e) => setSendConfirmMessage(e.target.checked)}
+                      className="rounded border-border"
+                    />
+                    Send message
+                  </label>
+                </div>
+                <Textarea
+                  value={confirmMessage}
+                  onChange={(e) => setConfirmMessage(e.target.value)}
+                  disabled={!sendConfirmMessage}
+                  className="min-h-[120px] text-sm"
+                  placeholder="Message to the confirmed artist..."
+                />
+              </div>
+
+              {/* Message to declined artists */}
+              {holdToConfirm.otherHolds.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="font-display text-xs text-primary tracking-widest">
+                      MESSAGE TO DECLINED HOLDS ({holdToConfirm.otherHolds.length})
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={sendDeclineMessage}
+                        onChange={(e) => setSendDeclineMessage(e.target.checked)}
+                        className="rounded border-border"
+                      />
+                      Send message
+                    </label>
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    This message will be sent to: {holdToConfirm.otherHolds.map(h => h.artistName).join(', ')}
+                  </div>
+                  <Textarea
+                    value={declineMessage}
+                    onChange={(e) => setDeclineMessage(e.target.value)}
+                    disabled={!sendDeclineMessage}
+                    className="min-h-[120px] text-sm"
+                    placeholder="Message to declined artists..."
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirmHold} 
+              disabled={confirmingHold}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <CheckCircle2 className="h-4 w-4 mr-1" />
+              {confirmingHold ? 'Confirming...' : 'Confirm Gig'}
             </Button>
           </DialogFooter>
         </DialogContent>
