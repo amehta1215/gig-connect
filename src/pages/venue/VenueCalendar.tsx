@@ -429,7 +429,7 @@ export default function VenueCalendar() {
                         >
                           <div className="flex items-center gap-2">
                             <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
-                              #{gig.hold_priority}
+                              HOLD
                             </span>
                             <p className="font-display text-lg text-accent">{artistName}</p>
                           </div>
@@ -529,9 +529,9 @@ export default function VenueCalendar() {
                         className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
-                            #{gig.hold_priority}
-                          </span>
+                        <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
+                          HOLD
+                        </span>
                           <div>
                             <p className="font-display text-accent">{artistName}</p>
                             <p className="text-xs text-muted-foreground">{roomDisplay}</p>
