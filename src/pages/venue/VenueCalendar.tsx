@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar } from '@/components/ui/calendar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical } from 'lucide-react';
-import { format, startOfDay } from 'date-fns';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical, ChevronDown } from 'lucide-react';
+import { format, startOfDay, addDays, addMonths } from 'date-fns';
 import { toast } from 'sonner';
 
 interface GigListing {
@@ -57,6 +58,7 @@ export default function VenueCalendar() {
   const [creating, setCreating] = useState(false);
   const [deleteAllHoldsDialogOpen, setDeleteAllHoldsDialogOpen] = useState(false);
   const [deletingAllHolds, setDeletingAllHolds] = useState(false);
+  const [deleteScope, setDeleteScope] = useState<'week' | 'month' | 'all'>('week');
   const [draggedHoldIndex, setDraggedHoldIndex] = useState<number | null>(null);
   const [localHoldOrder, setLocalHoldOrder] = useState<GigListing[]>([]);
 
@@ -361,11 +363,13 @@ export default function VenueCalendar() {
     fetchGigs();
   };
 
+  const openDeleteHoldsDialog = (scope: 'week' | 'month' | 'all') => {
+    setDeleteScope(scope);
+    setDeleteAllHoldsDialogOpen(true);
+  };
+
   const handleDeleteAllHolds = async () => {
-    if (!selectedDate) return;
-    
     setDeletingAllHolds(true);
-    const dateStr = format(selectedDate, 'yyyy-MM-dd');
     
     // Get all venue listing IDs for this user
     const { data: venueProfile } = await supabase
@@ -390,14 +394,25 @@ export default function VenueCalendar() {
     }
 
     const listingIds = listings.map(l => l.id);
+    const today = new Date();
 
-    // Get all holds for this date
-    const { data: holds } = await supabase
+    // Build query based on scope
+    let query = supabase
       .from('gig_listings')
       .select('id, application_id')
       .in('venue_listing_id', listingIds)
-      .eq('gig_date', dateStr)
       .eq('is_confirmed', false);
+
+    if (deleteScope === 'week') {
+      const weekEnd = format(addDays(today, 7), 'yyyy-MM-dd');
+      query = query.gte('gig_date', format(today, 'yyyy-MM-dd')).lte('gig_date', weekEnd);
+    } else if (deleteScope === 'month') {
+      const monthEnd = format(addMonths(today, 1), 'yyyy-MM-dd');
+      query = query.gte('gig_date', format(today, 'yyyy-MM-dd')).lte('gig_date', monthEnd);
+    }
+    // 'all' scope doesn't need date filtering
+
+    const { data: holds } = await query;
 
     if (holds && holds.length > 0) {
       // Archive the applications
@@ -414,11 +429,15 @@ export default function VenueCalendar() {
         .from('gig_listings')
         .delete()
         .in('id', holds.map(h => h.id));
+      
+      const scopeText = deleteScope === 'week' ? 'this week' : deleteScope === 'month' ? 'this month' : '';
+      toast.success(`${holds.length} hold${holds.length > 1 ? 's' : ''} deleted${scopeText ? ` for ${scopeText}` : ''}`);
+    } else {
+      toast.info('No holds to delete');
     }
 
     setDeletingAllHolds(false);
     setDeleteAllHoldsDialogOpen(false);
-    toast.success('All holds for this date have been deleted');
     fetchGigs();
   };
 
@@ -544,15 +563,30 @@ export default function VenueCalendar() {
                       <PauseCircle className="h-3 w-3" />
                       HOLDS
                     </p>
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      onClick={() => setDeleteAllHoldsDialogOpen(true)}
-                      className="text-xs text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      Delete All Holds
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-xs text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Delete All Holds
+                          <ChevronDown className="h-3 w-3 ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openDeleteHoldsDialog('week')}>
+                          For this week
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openDeleteHoldsDialog('month')}>
+                          For this month
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openDeleteHoldsDialog('all')}>
+                          All holds
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                   {localHoldOrder.map((gig, index) => {
                     const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
@@ -754,13 +788,17 @@ export default function VenueCalendar() {
       <Dialog open={deleteAllHoldsDialogOpen} onOpenChange={setDeleteAllHoldsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display text-2xl">DELETE ALL HOLDS</DialogTitle>
+            <DialogTitle className="font-display text-2xl">DELETE HOLDS</DialogTitle>
+            <DialogDescription>
+              {deleteScope === 'week' && 'Delete all holds for the next 7 days.'}
+              {deleteScope === 'month' && 'Delete all holds for the next 30 days.'}
+              {deleteScope === 'all' && 'Delete all holds across all dates.'}
+            </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
             <p className="text-muted-foreground">
-              Are you sure you want to delete all holds for {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'this date'}? 
-              The associated applications will be moved to archived.
+              The associated applications will be moved to archived. This action cannot be undone.
             </p>
           </div>
 
@@ -773,7 +811,7 @@ export default function VenueCalendar() {
               disabled={deletingAllHolds}
               variant="destructive"
             >
-              {deletingAllHolds ? 'Deleting...' : 'Delete All Holds'}
+              {deletingAllHolds ? 'Deleting...' : 'Delete Holds'}
             </Button>
           </DialogFooter>
         </DialogContent>
