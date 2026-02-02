@@ -667,7 +667,6 @@ export default function VenueCalendar() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button size="sm" variant="ghost" className="text-xs text-destructive hover:text-destructive h-6 px-2">
-                        <Trash2 className="h-3 w-3 mr-1" />
                         Delete All Holds
                         <ChevronDown className="h-3 w-3 ml-1" />
                       </Button>
