@@ -427,12 +427,7 @@ export default function VenueCalendar() {
                           onClick={() => navigate(`/venue/calendar/${gig.id}`)}
                           className="text-left flex-1 hover:opacity-80 transition-opacity"
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
-                              HOLD
-                            </span>
-                            <p className="font-display text-lg text-accent">{artistName}</p>
-                          </div>
+                          <p className="font-display text-lg text-accent">{artistName}</p>
                           <p className="text-sm text-muted-foreground">{roomDisplay}</p>
                         </button>
                         <div className="flex gap-2 ml-4">
@@ -528,14 +523,9 @@ export default function VenueCalendar() {
                         onClick={() => navigate(`/venue/calendar/${gig.id}`)}
                         className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors"
                       >
-                        <div className="flex items-center gap-2">
-                        <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
-                          HOLD
-                        </span>
-                          <div>
-                            <p className="font-display text-accent">{artistName}</p>
-                            <p className="text-xs text-muted-foreground">{roomDisplay}</p>
-                          </div>
+                        <div>
+                          <p className="font-display text-accent">{artistName}</p>
+                          <p className="text-xs text-muted-foreground">{roomDisplay}</p>
                         </div>
                         <span className="text-sm text-muted-foreground">
                           {format(new Date(gig.gig_date), 'MMM d, yyyy')}
