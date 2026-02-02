@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle } from 'lucide-react';
+import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -56,6 +56,8 @@ export default function VenueCalendar() {
   const [creating, setCreating] = useState(false);
   const [deleteAllHoldsDialogOpen, setDeleteAllHoldsDialogOpen] = useState(false);
   const [deletingAllHolds, setDeletingAllHolds] = useState(false);
+  const [draggedHoldIndex, setDraggedHoldIndex] = useState<number | null>(null);
+  const [localHoldOrder, setLocalHoldOrder] = useState<GigListing[]>([]);
   useEffect(() => {
     if (user) {
       fetchGigs();
@@ -328,6 +330,47 @@ export default function VenueCalendar() {
   const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
   const confirmedGigs = gigsOnSelectedDate.filter(g => g.is_confirmed);
   const holdGigs = gigsOnSelectedDate.filter(g => !g.is_confirmed).sort((a, b) => (a.hold_priority || 99) - (b.hold_priority || 99));
+
+  // Sync local hold order when holdGigs change
+  useEffect(() => {
+    setLocalHoldOrder(holdGigs);
+  }, [gigs, selectedDate]);
+
+  const handleHoldDragStart = (index: number) => {
+    setDraggedHoldIndex(index);
+  };
+
+  const handleHoldDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedHoldIndex === null || draggedHoldIndex === index) return;
+
+    const newOrder = [...localHoldOrder];
+    const draggedItem = newOrder[draggedHoldIndex];
+    newOrder.splice(draggedHoldIndex, 1);
+    newOrder.splice(index, 0, draggedItem);
+    setLocalHoldOrder(newOrder);
+    setDraggedHoldIndex(index);
+  };
+
+  const handleHoldDragEnd = async () => {
+    setDraggedHoldIndex(null);
+    
+    // Update priorities in database
+    const updates = localHoldOrder.map((gig, index) => ({
+      id: gig.id,
+      hold_priority: index + 1
+    }));
+
+    for (const update of updates) {
+      await supabase
+        .from('gig_listings')
+        .update({ hold_priority: update.hold_priority })
+        .eq('id', update.id);
+    }
+
+    toast.success('Hold order updated');
+    fetchGigs();
+  };
   const today = startOfDay(new Date());
   const modifiers = {
     hasGig: gigDates,
@@ -415,21 +458,30 @@ export default function VenueCalendar() {
                       Delete All Holds
                     </Button>
                   </div>
-                  {holdGigs.map(gig => {
+                  {localHoldOrder.map((gig, index) => {
                     const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
                     const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
                     return (
                       <div 
                         key={gig.id} 
-                        className="bg-secondary p-4 flex items-center justify-between"
+                        draggable
+                        onDragStart={() => handleHoldDragStart(index)}
+                        onDragOver={(e) => handleHoldDragOver(e, index)}
+                        onDragEnd={handleHoldDragEnd}
+                        className={`bg-secondary p-4 flex items-center justify-between cursor-grab active:cursor-grabbing transition-opacity ${
+                          draggedHoldIndex === index ? 'opacity-50' : ''
+                        }`}
                       >
-                        <button 
-                          onClick={() => navigate(`/venue/calendar/${gig.id}`)}
-                          className="text-left flex-1 hover:opacity-80 transition-opacity"
-                        >
-                          <p className="font-display text-lg text-accent">{artistName}</p>
-                          <p className="text-sm text-muted-foreground">{roomDisplay}</p>
-                        </button>
+                        <div className="flex items-center gap-3 flex-1">
+                          <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                          <button 
+                            onClick={() => navigate(`/venue/calendar/${gig.id}`)}
+                            className="text-left flex-1 hover:opacity-80 transition-opacity"
+                          >
+                            <p className="font-display text-lg text-accent">{artistName}</p>
+                            <p className="text-sm text-muted-foreground">{roomDisplay}</p>
+                          </button>
+                        </div>
                         <div className="flex gap-2 ml-4">
                           <Button 
                             size="sm" 
