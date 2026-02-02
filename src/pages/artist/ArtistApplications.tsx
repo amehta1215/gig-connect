@@ -3,8 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, CheckCircle2, Archive, MapPin, Calendar } from 'lucide-react';
+import { Clock, CheckCircle2, Archive, MapPin, Calendar, PauseCircle } from 'lucide-react';
 import { format } from 'date-fns';
+
+interface GigListing {
+  id: string;
+  is_confirmed: boolean;
+  hold_priority: number | null;
+}
+
 interface Application {
   id: string;
   artist_id: string;
@@ -17,6 +24,7 @@ interface Application {
     room_name: string | null;
     location: string | null;
   };
+  gig_listing?: GigListing | null;
 }
 export default function ArtistApplications() {
   const navigate = useNavigate();
@@ -44,7 +52,19 @@ export default function ArtistApplications() {
       ascending: false
     });
     if (data && !error) {
-      setApplications(data as Application[]);
+      // Fetch gig listings for accepted applications to check hold status
+      const enrichedApps = await Promise.all(data.map(async (app) => {
+        if (app.status === 'accepted') {
+          const { data: gigData } = await supabase
+            .from('gig_listings')
+            .select('id, is_confirmed, hold_priority')
+            .eq('application_id', app.id)
+            .maybeSingle();
+          return { ...app, gig_listing: gigData };
+        }
+        return { ...app, gig_listing: null };
+      }));
+      setApplications(enrichedApps as Application[]);
     }
     setLoading(false);
   };
@@ -64,6 +84,12 @@ export default function ArtistApplications() {
       color: 'text-green-500',
       bgColor: 'bg-green-500/10'
     },
+    accepted_hold: {
+      icon: PauseCircle,
+      label: 'ACCEPTED / HOLD',
+      color: 'text-yellow-500',
+      bgColor: 'bg-yellow-500/10'
+    },
     archived: {
       icon: Archive,
       label: 'ARCHIVED',
@@ -76,8 +102,12 @@ export default function ArtistApplications() {
   }: {
     application: Application;
   }) => {
-    const config = statusConfig[application.status];
+    // Determine if this is a hold
+    const isHold = application.status === 'accepted' && application.gig_listing && !application.gig_listing.is_confirmed;
+    const configKey = isHold ? 'accepted_hold' : application.status;
+    const config = statusConfig[configKey as keyof typeof statusConfig];
     const StatusIcon = config.icon;
+    const holdPriority = isHold ? application.gig_listing?.hold_priority : null;
     return <div className="bg-card border border-border p-4 hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate(`/artist/applications/${application.id}`)}>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
@@ -92,6 +122,7 @@ export default function ArtistApplications() {
           <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
             <StatusIcon className="h-3 w-3" />
             {config.label}
+            {holdPriority && <span className="ml-1">#{holdPriority}</span>}
           </div>
         </div>
 
