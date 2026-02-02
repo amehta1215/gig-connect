@@ -600,7 +600,7 @@ export default function GigDetail() {
           <p className="text-muted-foreground">
             {isManualEvent 
               ? "Cancelling this gig will remove the event from your calendar."
-              : "Are you sure you want to cancel this gig? This will remove the event from both your calendar and the artist's calendar. The application will be reverted to pending status."}
+              : "Canceling this gig will remove the event from both your calendar and the artist's calendar. The application will be reverted to pending status."}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
