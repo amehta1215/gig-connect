@@ -558,36 +558,10 @@ export default function VenueCalendar() {
               {/* Holds */}
               {holdGigs.length > 0 && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <p className="font-display text-xs text-yellow-500 tracking-widest flex items-center gap-1">
-                      <PauseCircle className="h-3 w-3" />
-                      HOLDS
-                    </p>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="text-xs text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3 mr-1" />
-                          Delete All Holds
-                          <ChevronDown className="h-3 w-3 ml-1" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openDeleteHoldsDialog('week')}>
-                          For this week
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openDeleteHoldsDialog('month')}>
-                          For this month
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openDeleteHoldsDialog('all')}>
-                          All holds
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                  <p className="font-display text-xs text-yellow-500 tracking-widest flex items-center gap-1">
+                    <PauseCircle className="h-3 w-3" />
+                    HOLDS
+                  </p>
                   {localHoldOrder.map((gig, index) => {
                     const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
                     const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
@@ -685,10 +659,32 @@ export default function VenueCalendar() {
             {/* Holds */}
             {gigs.filter(g => new Date(g.gig_date) >= new Date() && !g.is_confirmed).length > 0 && (
               <div className="space-y-2">
-                <p className="font-display text-xs text-yellow-500 tracking-widest flex items-center gap-1">
-                  <PauseCircle className="h-3 w-3" />
-                  HOLDS
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="font-display text-xs text-yellow-500 tracking-widest flex items-center gap-1">
+                    <PauseCircle className="h-3 w-3" />
+                    HOLDS
+                  </p>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" variant="ghost" className="text-xs text-destructive hover:text-destructive h-6 px-2">
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete All Holds
+                        <ChevronDown className="h-3 w-3 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => openDeleteHoldsDialog('week')}>
+                        For this week
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => openDeleteHoldsDialog('month')}>
+                        For this month
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => openDeleteHoldsDialog('all')}>
+                        All holds
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
                 {gigs.filter(g => new Date(g.gig_date) >= new Date() && !g.is_confirmed)
                   .sort((a, b) => {
                     // Sort by date first, then by hold priority
