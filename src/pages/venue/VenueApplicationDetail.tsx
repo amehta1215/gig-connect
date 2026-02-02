@@ -637,13 +637,10 @@ export default function VenueApplicationDetail() {
         <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="font-display text-xl tracking-wide">
-              ADD GIG DETAILS
+              ADD GIG DETAILS FOR {bandName?.toUpperCase()}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <p className="text-muted-foreground text-sm">
-              Choose the date and time for {bandName}'s performance
-            </p>
             
             <div className="space-y-2">
               <label className="font-display text-xs text-muted-foreground tracking-widest block">
