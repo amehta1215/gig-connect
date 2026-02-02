@@ -7,7 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon, PauseCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -108,6 +110,8 @@ export default function VenueApplicationDetail() {
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [selectedGigDate, setSelectedGigDate] = useState<Date | undefined>(undefined);
   const [selectedGigTime, setSelectedGigTime] = useState('');
+  const [acceptType, setAcceptType] = useState<'confirmed' | 'hold'>('confirmed');
+  const [holdPriority, setHoldPriority] = useState('1');
 
   useEffect(() => {
     if (id && user) {
@@ -203,6 +207,9 @@ export default function VenueApplicationDetail() {
     } else if (application?.availability_specific_dates && application.availability_specific_dates.length > 0) {
       setSelectedGigDate(new Date(application.availability_specific_dates[0]));
     }
+    // Reset accept type and priority
+    setAcceptType('confirmed');
+    setHoldPriority('1');
     setAcceptDialogOpen(true);
   };
 
@@ -211,6 +218,8 @@ export default function VenueApplicationDetail() {
       toast.error('Please select a gig date');
       return;
     }
+
+    const isHold = acceptType === 'hold';
 
     // Create gig listing
     const { error: gigError } = await supabase
@@ -223,6 +232,8 @@ export default function VenueApplicationDetail() {
         show_time: selectedGigTime || null,
         openers: [],
         notes: null,
+        is_confirmed: !isHold,
+        hold_priority: isHold ? parseInt(holdPriority) : null,
       });
 
     if (gigError) {
@@ -236,7 +247,7 @@ export default function VenueApplicationDetail() {
       .update({ status: 'accepted' })
       .eq('id', application.id);
 
-    toast.success('Application accepted! Gig created.');
+    toast.success(isHold ? `Application accepted as Hold #${holdPriority}!` : 'Application accepted! Gig confirmed.');
     setAcceptDialogOpen(false);
     navigate('/venue');
   };
@@ -584,7 +595,7 @@ export default function VenueApplicationDetail() {
 
             <div className="space-y-2">
               <label className="font-display text-xs text-muted-foreground tracking-widest block">
-                TIME OF SHOW
+                TIME OF SHOW (OPTIONAL)
               </label>
               <Input
                 type="time"
@@ -594,7 +605,56 @@ export default function VenueApplicationDetail() {
               />
             </div>
 
-            <div className="flex justify-end gap-2">
+            {/* Hold vs Confirmed Selection */}
+            <div className="space-y-3">
+              <label className="font-display text-xs text-muted-foreground tracking-widest block">
+                ACCEPTANCE TYPE
+              </label>
+              <RadioGroup value={acceptType} onValueChange={(v) => setAcceptType(v as 'confirmed' | 'hold')}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="confirmed" id="confirmed" />
+                  <Label htmlFor="confirmed" className="cursor-pointer">
+                    <span className="font-display text-sm">CONFIRMED</span>
+                    <span className="text-xs text-muted-foreground block">Gig is finalized for this date</span>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="hold" id="hold" />
+                  <Label htmlFor="hold" className="cursor-pointer">
+                    <span className="font-display text-sm">HOLD</span>
+                    <span className="text-xs text-muted-foreground block">Tentative booking, can be confirmed later</span>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Hold Priority - Only show if hold is selected */}
+            {acceptType === 'hold' && (
+              <div className="space-y-2">
+                <label className="font-display text-xs text-muted-foreground tracking-widest block">
+                  HOLD PRIORITY
+                </label>
+                <div className="flex gap-2">
+                  {['1', '2', '3', '4', '5'].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => setHoldPriority(num)}
+                      className={cn(
+                        "w-10 h-10 border font-display text-sm transition-colors",
+                        holdPriority === num 
+                          ? "bg-primary text-primary-foreground border-primary" 
+                          : "bg-background border-border hover:border-primary/50"
+                      )}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">1 = 1st Hold (highest priority)</p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setAcceptDialogOpen(false)}>
                 Cancel
               </Button>
@@ -603,7 +663,7 @@ export default function VenueApplicationDetail() {
                 disabled={!selectedGigDate}
                 className="bg-primary hover:bg-primary/90"
               >
-                Accept & Create Gig
+                {acceptType === 'hold' ? `Accept as Hold #${holdPriority}` : 'Accept & Confirm Gig'}
               </Button>
             </div>
           </div>

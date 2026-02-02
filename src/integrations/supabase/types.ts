@@ -211,7 +211,9 @@ export type Database = {
           artist_id: string
           created_at: string
           gig_date: string
+          hold_priority: number | null
           id: string
+          is_confirmed: boolean
           manual_artist_name: string | null
           manual_location: string | null
           manual_venue_name: string | null
@@ -226,7 +228,9 @@ export type Database = {
           artist_id: string
           created_at?: string
           gig_date: string
+          hold_priority?: number | null
           id?: string
+          is_confirmed?: boolean
           manual_artist_name?: string | null
           manual_location?: string | null
           manual_venue_name?: string | null
@@ -241,7 +245,9 @@ export type Database = {
           artist_id?: string
           created_at?: string
           gig_date?: string
+          hold_priority?: number | null
           id?: string
+          is_confirmed?: boolean
           manual_artist_name?: string | null
           manual_location?: string | null
           manual_venue_name?: string | null
