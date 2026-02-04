@@ -84,6 +84,12 @@ export default function FindVenues() {
     }
     setLoading(false);
   };
+  // Count rooms per venue profile to determine if room name should be shown
+  const roomCountByVenueProfile = venues.reduce((acc, venue) => {
+    acc[venue.venue_profile_id] = (acc[venue.venue_profile_id] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
   const filteredVenues = venues.filter(venue => {
     const matchesSearch = venue.venue_name.toLowerCase().includes(searchTerm.toLowerCase()) || venue.room_name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGenre = selectedGenres.length === 0 || selectedGenres.some(g => venue.genres?.includes(g));
@@ -293,7 +299,7 @@ export default function FindVenues() {
               {/* Content */}
               <div className="p-3">
                 <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors tracking-wide">
-                  {venue.venue_name}{venue.room_name && <span className="text-muted-foreground"> • {venue.room_name}</span>}
+                  {venue.venue_name}{venue.room_name && roomCountByVenueProfile[venue.venue_profile_id] > 1 && <span className="text-muted-foreground"> • {venue.room_name}</span>}
                 </h3>
                 {venue.location && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                     <MapPin className="h-3 w-3" />
