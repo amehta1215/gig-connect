@@ -534,8 +534,14 @@ export default function VenueProfile() {
                       disabled={savingRoom} 
                       className="font-display tracking-widest"
                     >
-                      <Save className="h-4 w-4 mr-2" />
-                      {savingRoom ? '...' : 'SAVE CHANGES'}
+                      {editingListing ? (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          {savingRoom ? '...' : 'SAVE CHANGES'}
+                        </>
+                      ) : (
+                        savingRoom ? '...' : 'CREATE ROOM'
+                      )}
                     </Button>
                   </div>
                   
