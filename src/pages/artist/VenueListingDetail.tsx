@@ -28,10 +28,6 @@ interface VenueListing {
   house_rules: string | null;
   venue_profile_id: string;
 }
-interface VenueProfile {
-  id: string;
-  picture: string | null;
-}
 type AvailabilityPreference = 'date_range' | 'specific_dates' | 'flexible';
 type PaymentPreference = 'door_split' | 'bar_split' | 'tip_based' | 'flat_fee' | 'rental' | 'no_preference';
 type LineupPreference = 'co_acts_needed' | 'co_acts_confirmed' | 'solo_performer';
@@ -89,7 +85,6 @@ export default function VenueListingDetail() {
     isFavorite
   } = useFavorites();
   const [listing, setListing] = useState<VenueListing | null>(null);
-  const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [existingApplicationId, setExistingApplicationId] = useState<string | null>(null);
@@ -129,14 +124,6 @@ export default function VenueListingDetail() {
     } = await supabase.from('venue_listings').select('*').eq('id', id).maybeSingle();
     if (data && !error) {
       setListing(data as VenueListing);
-
-      // Fetch venue profile for the general picture
-      const {
-        data: profileData
-      } = await supabase.from('venue_profiles').select('id, picture').eq('id', data.venue_profile_id).maybeSingle();
-      if (profileData) {
-        setVenueProfile(profileData as VenueProfile);
-      }
     }
     setLoading(false);
   };
@@ -218,11 +205,7 @@ export default function VenueListingDetail() {
       {/* All Pictures Gallery - side by side */}
       <div className="mb-6">
         {(() => {
-        const allPictures: string[] = [];
-        if (venueProfile?.picture) allPictures.push(venueProfile.picture);
-        if (listing.pictures && listing.pictures.length > 0) {
-          allPictures.push(...listing.pictures);
-        }
+        const allPictures: string[] = listing.pictures || [];
         if (allPictures.length === 0) {
           return <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
                 <div className="w-full h-full flex items-center justify-center bg-heat">

@@ -18,7 +18,6 @@ interface VenueProfile {
   location: string | null;
   bio: string | null;
   event_types: string[] | null;
-  picture: string | null;
 }
 interface VenueListing {
   id: string;
@@ -109,7 +108,7 @@ export default function VenueApplications() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const isProfileComplete = venueProfile && venueProfile.picture && venueProfile.venue_name && venueProfile.location && venueProfile.bio && venueProfile.event_types && venueProfile.event_types.length > 0;
+  const isProfileComplete = venueProfile && venueProfile.venue_name && venueProfile.location && venueProfile.bio && venueProfile.event_types && venueProfile.event_types.length > 0;
   const isVenueDiscoverable = isProfileComplete && hasRooms;
   useEffect(() => {
     if (user) {
@@ -166,7 +165,7 @@ export default function VenueApplications() {
     // Fetch full venue profile for completeness check
     const {
       data: venueProfileData
-    } = await supabase.from('venue_profiles').select('id, venue_name, location, bio, event_types, picture').eq('user_id', user.id).single();
+    } = await supabase.from('venue_profiles').select('id, venue_name, location, bio, event_types').eq('user_id', user.id).single();
     if (!venueProfileData) {
       setLoading(false);
       setVenueProfile(null);
@@ -415,7 +414,6 @@ export default function VenueApplications() {
           {!isProfileComplete && <div className="text-sm text-muted-foreground">
               
               <ul className="list-disc list-inside space-y-1">
-                {!venueProfile?.picture}
                 {!venueProfile?.venue_name && <li>Venue Name</li>}
                 {!venueProfile?.location && <li>Location</li>}
                 {!venueProfile?.bio && <li>Bio</li>}
