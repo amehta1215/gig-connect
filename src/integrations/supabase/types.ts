@@ -396,6 +396,7 @@ export type Database = {
           genres: string[] | null
           house_rules: string | null
           id: string
+          is_published: boolean
           location: string | null
           pictures: string[] | null
           room_name: string | null
@@ -411,6 +412,7 @@ export type Database = {
           genres?: string[] | null
           house_rules?: string | null
           id?: string
+          is_published?: boolean
           location?: string | null
           pictures?: string[] | null
           room_name?: string | null
@@ -426,6 +428,7 @@ export type Database = {
           genres?: string[] | null
           house_rules?: string | null
           id?: string
+          is_published?: boolean
           location?: string | null
           pictures?: string[] | null
           room_name?: string | null
