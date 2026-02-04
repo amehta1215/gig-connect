@@ -34,6 +34,7 @@ interface VenueListing {
   bio: string | null;
   backline_info: string | null;
   house_rules: string | null;
+  is_published: boolean;
 }
 const eventTypeOptions = [{
   id: 'dj',
@@ -275,7 +276,8 @@ export default function VenueProfile() {
       genres: roomFormData.genres,
       pictures: pictures,
       backline_info: roomFormData.backline_info || null,
-      house_rules: roomFormData.house_rules || null
+      house_rules: roomFormData.house_rules || null,
+      is_published: publish
     };
     let error;
     if (editingListing) {
@@ -680,10 +682,15 @@ export default function VenueProfile() {
                 onClick={() => openDialog(listing, 'preview')}
               >
                 {/* Image */}
-                <div className="aspect-[4/3] bg-secondary flex items-center justify-center overflow-hidden">
+                <div className="aspect-[4/3] bg-secondary flex items-center justify-center overflow-hidden relative">
                   {listing.pictures && listing.pictures.length > 0 ? <img src={listing.pictures[0]} alt={listing.venue_name} className="w-full h-full object-cover" /> : <div className="bg-heat w-full h-full flex items-center justify-center">
                       <Music className="h-12 w-12 text-primary/30" />
                     </div>}
+                  {!listing.is_published && (
+                    <div className="absolute top-2 left-2 bg-muted text-muted-foreground text-xs font-display tracking-widest px-2 py-1 rounded">
+                      DRAFT
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
