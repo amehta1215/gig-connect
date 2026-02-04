@@ -14,7 +14,7 @@ interface RoomPreviewData {
   backline_info: string;
   house_rules: string;
   pictures: string[];
-  venueProfilePicture?: string | null;
+  
 }
 
 interface RoomPreviewSheetProps {
@@ -45,12 +45,8 @@ const lineupOptions = [
 ];
 
 export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetProps) {
-  // Combine venue profile picture and room pictures
-  const allPictures: string[] = [];
-  if (data.venueProfilePicture) allPictures.push(data.venueProfilePicture);
-  if (data.pictures && data.pictures.length > 0) {
-    allPictures.push(...data.pictures);
-  }
+  // Room pictures only
+  const allPictures: string[] = data.pictures || [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

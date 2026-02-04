@@ -20,10 +20,6 @@ interface VenueListing {
   house_rules: string | null;
   venue_profile_id: string;
 }
-interface VenueProfile {
-  id: string;
-  picture: string | null;
-}
 const availabilityOptions = [{
   id: 'date_range',
   label: 'Date Range'
@@ -71,7 +67,6 @@ export default function PublicVenueDetail() {
   }>();
   const navigate = useNavigate();
   const [listing, setListing] = useState<VenueListing | null>(null);
-  const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   useEffect(() => {
@@ -87,12 +82,6 @@ export default function PublicVenueDetail() {
     } = await supabase.from('venue_listings').select('*').eq('id', id).maybeSingle();
     if (data && !error) {
       setListing(data as VenueListing);
-      const {
-        data: profileData
-      } = await supabase.from('venue_profiles').select('id, picture').eq('id', data.venue_profile_id).maybeSingle();
-      if (profileData) {
-        setVenueProfile(profileData as VenueProfile);
-      }
     }
     setLoading(false);
   };
@@ -127,11 +116,7 @@ export default function PublicVenueDetail() {
       {/* All Pictures Gallery */}
       <div className="mb-6">
         {(() => {
-        const allPictures: string[] = [];
-        if (venueProfile?.picture) allPictures.push(venueProfile.picture);
-        if (listing.pictures && listing.pictures.length > 0) {
-          allPictures.push(...listing.pictures);
-        }
+        const allPictures: string[] = listing.pictures || [];
         if (allPictures.length === 0) {
           return <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
                 <div className="w-full h-full flex items-center justify-center bg-heat">

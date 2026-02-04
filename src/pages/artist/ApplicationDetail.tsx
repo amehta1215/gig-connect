@@ -34,10 +34,6 @@ interface ApplicationData {
   };
 }
 
-interface VenueProfile {
-  id: string;
-  picture: string | null;
-}
 
 const statusConfig = {
   in_progress: {
@@ -85,7 +81,6 @@ export default function ApplicationDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [application, setApplication] = useState<ApplicationData | null>(null);
-  const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
@@ -111,19 +106,6 @@ export default function ApplicationDetail() {
     if (data && !error) {
       const appData = data as unknown as ApplicationData;
       setApplication(appData);
-      
-      // Fetch venue profile for the general picture
-      if (appData.venue_listing?.venue_profile_id) {
-        const { data: profileData } = await supabase
-          .from('venue_profiles')
-          .select('id, picture')
-          .eq('id', appData.venue_listing.venue_profile_id)
-          .maybeSingle();
-        
-        if (profileData) {
-          setVenueProfile(profileData as VenueProfile);
-        }
-      }
     }
     setLoading(false);
   };
@@ -192,11 +174,7 @@ export default function ApplicationDetail() {
       {/* Pictures Gallery */}
       <div className="mb-6">
         {(() => {
-          const allPictures: string[] = [];
-          if (venueProfile?.picture) allPictures.push(venueProfile.picture);
-          if (listing.pictures && listing.pictures.length > 0) {
-            allPictures.push(...listing.pictures);
-          }
+          const allPictures: string[] = listing.pictures || [];
           
           if (allPictures.length === 0) {
             return (
