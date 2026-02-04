@@ -293,13 +293,8 @@ export default function FindVenues() {
               {/* Content */}
               <div className="p-3">
                 <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors tracking-wide">
-                  {venue.venue_name}
+                  {venue.venue_name}{venue.room_name && <span className="text-muted-foreground"> • {venue.room_name}</span>}
                 </h3>
-                {venue.room_name && (
-                  <p className="text-sm font-bold text-primary uppercase tracking-wide mt-0.5">
-                    {venue.room_name}
-                  </p>
-                )}
                 {venue.location && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                     <MapPin className="h-3 w-3" />
                     {venue.location}
