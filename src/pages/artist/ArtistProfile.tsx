@@ -196,11 +196,10 @@ export default function ArtistProfile() {
     }).eq('id', profile.id);
     if (error) {
       toast.error('Failed to save profile');
-      setSaving(false);
     } else {
       toast.success('Profile saved successfully');
-      navigate('/artist');
     }
+    setSaving(false);
   };
   if (loading) {
     return <div className="space-y-6 animate-fade-in">
