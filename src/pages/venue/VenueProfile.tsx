@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
@@ -90,6 +91,7 @@ export default function VenueProfile() {
     backline_info: '',
     house_rules: ''
   });
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
   useEffect(() => {
     if (user) {
       fetchProfile();
@@ -242,12 +244,28 @@ export default function VenueProfile() {
   const removeRoomPicture = (index: number) => {
     setPictures(prev => prev.filter((_, i) => i !== index));
   };
-  const handleSaveRoom = async () => {
+  const handleCreateRoomClick = () => {
+    if (!profile || !roomFormData.venue_name) {
+      toast.error('Venue name required');
+      return;
+    }
+    // For new rooms, show publish confirmation dialog
+    if (!editingListing) {
+      setShowPublishDialog(true);
+      return;
+    }
+    // For existing rooms, save directly
+    handleSaveRoom(true);
+  };
+
+  const handleSaveRoom = async (publish: boolean = true) => {
     if (!profile || !roomFormData.venue_name) {
       toast.error('Venue name required');
       return;
     }
     setSavingRoom(true);
+    setShowPublishDialog(false);
+    
     const listingData = {
       venue_profile_id: profile.id,
       venue_name: roomFormData.venue_name,
@@ -270,7 +288,7 @@ export default function VenueProfile() {
     if (error) {
       toast.error('Failed');
     } else {
-      toast.success(editingListing ? 'Updated' : 'Created');
+      toast.success(editingListing ? 'Updated' : (publish ? 'Room published!' : 'Room saved as draft'));
       setIsDialogOpen(false);
       resetRoomForm();
       fetchListings(profile.id);
@@ -530,7 +548,7 @@ export default function VenueProfile() {
                   {/* Floating Save Button */}
                   <div className="sticky top-0 z-10 px-6 pt-4 flex justify-end">
                     <Button 
-                      onClick={handleSaveRoom} 
+                      onClick={handleCreateRoomClick} 
                       disabled={savingRoom} 
                       className="font-display tracking-widest"
                     >
@@ -697,5 +715,31 @@ export default function VenueProfile() {
 
       {/* Account Information Section */}
       <AccountInformation />
+
+      {/* Publish Confirmation Dialog */}
+      <AlertDialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-xl text-accent">Ready to go live?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Listing this room makes it publicly available. You can edit or unpublish at any time.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel 
+              onClick={() => handleSaveRoom(false)}
+              className="font-display tracking-widest"
+            >
+              No, save as draft
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => handleSaveRoom(true)}
+              className="font-display tracking-widest"
+            >
+              Yes, publish!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }
