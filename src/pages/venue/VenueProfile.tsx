@@ -491,6 +491,12 @@ export default function VenueProfile() {
 
                       {/* Details */}
                       <div className="space-y-4">
+                        {formData.bio && (
+                          <div className="bg-background border border-border rounded-lg p-4">
+                            <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
+                            <p className="text-muted-foreground text-sm">{formData.bio}</p>
+                          </div>
+                        )}
                         {roomFormData.backline_info && (
                           <div className="bg-background border border-border rounded-lg p-4">
                             <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
