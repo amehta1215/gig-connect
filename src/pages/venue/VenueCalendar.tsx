@@ -12,7 +12,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical, ChevronDown } from 'lucide-react';
 import { format, startOfDay, addDays, addMonths } from 'date-fns';
 import { toast } from 'sonner';
-
 interface GigListing {
   id: string;
   gig_date: string;
@@ -75,7 +74,12 @@ export default function VenueCalendar() {
     artistId: string;
     artistName: string;
     roomName: string;
-    otherHolds: { id: string; artistId: string; artistName: string; applicationId: string | null }[];
+    otherHolds: {
+      id: string;
+      artistId: string;
+      artistName: string;
+      applicationId: string | null;
+    }[];
   } | null>(null);
   const [confirmMessage, setConfirmMessage] = useState('');
   const [declineMessage, setDeclineMessage] = useState('');
@@ -152,24 +156,20 @@ export default function VenueCalendar() {
     setEventIsHold(false);
     setEventHoldPriority(1);
     setSelectedListingId(venueListings.length === 1 ? venueListings[0].id : '');
-    
+
     // Fetch existing holds for this date
     if (selectedDate && venueListings.length > 0) {
       const listingIds = venueListings.map(l => l.id);
-      const { data: holds } = await supabase
-        .from('gig_listings')
-        .select('*')
-        .in('venue_listing_id', listingIds)
-        .eq('gig_date', format(selectedDate, 'yyyy-MM-dd'))
-        .eq('is_confirmed', false)
-        .order('hold_priority', { ascending: true });
-      
+      const {
+        data: holds
+      } = await supabase.from('gig_listings').select('*').in('venue_listing_id', listingIds).eq('gig_date', format(selectedDate, 'yyyy-MM-dd')).eq('is_confirmed', false).order('hold_priority', {
+        ascending: true
+      });
       setExistingHoldsForDate(holds || []);
       setEventHoldPriority((holds?.length || 0) + 1);
     } else {
       setExistingHoldsForDate([]);
     }
-    
     setCreateDialogOpen(true);
   };
   const handleCreateEvent = async () => {
@@ -214,50 +214,31 @@ export default function VenueCalendar() {
       navigate(`/venue/calendar/${newGig.id}`);
     }
   };
-
   const openConfirmDialog = async (gigId: string, gigDate: string, venueListingId: string, artistId: string) => {
     // Get artist info
-    const { data: artistProfile } = await supabase
-      .from('artist_profiles')
-      .select('band_name')
-      .eq('user_id', artistId)
-      .maybeSingle();
-
-    const { data: artist } = await supabase
-      .from('profiles')
-      .select('first_name, last_name')
-      .eq('id', artistId)
-      .maybeSingle();
-
-    const { data: venueListing } = await supabase
-      .from('venue_listings')
-      .select('venue_name, room_name')
-      .eq('id', venueListingId)
-      .single();
+    const {
+      data: artistProfile
+    } = await supabase.from('artist_profiles').select('band_name').eq('user_id', artistId).maybeSingle();
+    const {
+      data: artist
+    } = await supabase.from('profiles').select('first_name, last_name').eq('id', artistId).maybeSingle();
+    const {
+      data: venueListing
+    } = await supabase.from('venue_listings').select('venue_name, room_name').eq('id', venueListingId).single();
 
     // Get other holds for the same date
-    const { data: otherHoldsData } = await supabase
-      .from('gig_listings')
-      .select('id, artist_id, application_id')
-      .eq('venue_listing_id', venueListingId)
-      .eq('gig_date', gigDate)
-      .eq('is_confirmed', false)
-      .neq('id', gigId);
+    const {
+      data: otherHoldsData
+    } = await supabase.from('gig_listings').select('id, artist_id, application_id').eq('venue_listing_id', venueListingId).eq('gig_date', gigDate).eq('is_confirmed', false).neq('id', gigId);
 
     // Enrich other holds with artist names
-    const otherHolds = await Promise.all((otherHoldsData || []).map(async (hold) => {
-      const { data: holdArtistProfile } = await supabase
-        .from('artist_profiles')
-        .select('band_name')
-        .eq('user_id', hold.artist_id)
-        .maybeSingle();
-      
-      const { data: holdArtist } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', hold.artist_id)
-        .maybeSingle();
-
+    const otherHolds = await Promise.all((otherHoldsData || []).map(async hold => {
+      const {
+        data: holdArtistProfile
+      } = await supabase.from('artist_profiles').select('band_name').eq('user_id', hold.artist_id).maybeSingle();
+      const {
+        data: holdArtist
+      } = await supabase.from('profiles').select('first_name, last_name').eq('id', hold.artist_id).maybeSingle();
       return {
         id: hold.id,
         artistId: hold.artist_id,
@@ -265,11 +246,9 @@ export default function VenueCalendar() {
         applicationId: hold.application_id
       };
     }));
-
     const artistName = artistProfile?.band_name || (artist ? `${artist.first_name} ${artist.last_name}` : 'Artist');
     const roomName = venueListing?.room_name || venueListing?.venue_name || 'Venue';
     const formattedDate = format(new Date(gigDate), 'MMMM d, yyyy');
-
     setHoldToConfirm({
       gigId,
       gigDate,
@@ -282,29 +261,34 @@ export default function VenueCalendar() {
 
     // Set default messages
     setConfirmMessage(`Great news! Your performance at ${roomName} on ${formattedDate} has been confirmed. This is no longer a hold - you're officially booked!\n\nWe're looking forward to having you perform.`);
-    
     if (otherHolds.length > 0) {
       setDeclineMessage(`We appreciate your interest in performing at ${roomName} on ${formattedDate}. Unfortunately, we've decided to go with another artist for this date.\n\nWe hope to work with you in the future and encourage you to apply for other dates.`);
     }
-    
     setSendConfirmMessage(true);
     setSendDeclineMessage(otherHolds.length > 0);
     setConfirmDialogOpen(true);
   };
-
   const handleConfirmHold = async () => {
     if (!holdToConfirm || !user) return;
-    
     setConfirmingHold(true);
-    const { gigId, gigDate, venueListingId, artistId, artistName, roomName, otherHolds } = holdToConfirm;
+    const {
+      gigId,
+      gigDate,
+      venueListingId,
+      artistId,
+      artistName,
+      roomName,
+      otherHolds
+    } = holdToConfirm;
     const formattedDate = format(new Date(gigDate), 'MMMM d, yyyy');
 
     // Confirm this gig
-    const { error: confirmError } = await supabase
-      .from('gig_listings')
-      .update({ is_confirmed: true, hold_priority: null })
-      .eq('id', gigId);
-
+    const {
+      error: confirmError
+    } = await supabase.from('gig_listings').update({
+      is_confirmed: true,
+      hold_priority: null
+    }).eq('id', gigId);
     if (confirmError) {
       toast.error('Failed to confirm gig');
       setConfirmingHold(false);
@@ -316,17 +300,13 @@ export default function VenueCalendar() {
       // Archive the applications for deleted holds
       const applicationIds = otherHolds.map(h => h.applicationId).filter(Boolean);
       if (applicationIds.length > 0) {
-        await supabase
-          .from('applications')
-          .update({ status: 'archived' })
-          .in('id', applicationIds);
+        await supabase.from('applications').update({
+          status: 'archived'
+        }).in('id', applicationIds);
       }
 
       // Delete the other holds
-      await supabase
-        .from('gig_listings')
-        .delete()
-        .in('id', otherHolds.map(h => h.id));
+      await supabase.from('gig_listings').delete().in('id', otherHolds.map(h => h.id));
 
       // Send decline messages if enabled
       if (sendDeclineMessage && declineMessage.trim()) {
@@ -338,7 +318,7 @@ export default function VenueCalendar() {
             subject: `Update: ${roomName} on ${formattedDate}`,
             content: declineMessage,
             is_read: false,
-            is_starred: false,
+            is_starred: false
           });
         }
       }
@@ -353,24 +333,20 @@ export default function VenueCalendar() {
         subject: `Gig Confirmed: ${roomName} on ${formattedDate}`,
         content: confirmMessage,
         is_read: false,
-        is_starred: false,
+        is_starred: false
       });
     }
-
     setConfirmingHold(false);
     setConfirmDialogOpen(false);
     setHoldToConfirm(null);
     toast.success('Gig confirmed!');
     fetchGigs();
   };
-
   const handleDeleteHold = async (gigId: string, applicationId: string | null) => {
     // Delete the gig listing
-    const { error } = await supabase
-      .from('gig_listings')
-      .delete()
-      .eq('id', gigId);
-
+    const {
+      error
+    } = await supabase.from('gig_listings').delete().eq('id', gigId);
     if (error) {
       toast.error('Failed to delete hold');
       return;
@@ -378,56 +354,40 @@ export default function VenueCalendar() {
 
     // Archive the application
     if (applicationId) {
-      await supabase
-        .from('applications')
-        .update({ status: 'archived' })
-        .eq('id', applicationId);
+      await supabase.from('applications').update({
+        status: 'archived'
+      }).eq('id', applicationId);
     }
-
     toast.success('Hold deleted and application archived');
     fetchGigs();
   };
-
   const openDeleteHoldsDialog = (scope: 'week' | 'month' | 'all') => {
     setDeleteScope(scope);
     setDeleteAllHoldsDialogOpen(true);
   };
-
   const handleDeleteAllHolds = async () => {
     setDeletingAllHolds(true);
-    
+
     // Get all venue listing IDs for this user
-    const { data: venueProfile } = await supabase
-      .from('venue_profiles')
-      .select('id')
-      .eq('user_id', user!.id)
-      .single();
-    
+    const {
+      data: venueProfile
+    } = await supabase.from('venue_profiles').select('id').eq('user_id', user!.id).single();
     if (!venueProfile) {
       setDeletingAllHolds(false);
       return;
     }
-
-    const { data: listings } = await supabase
-      .from('venue_listings')
-      .select('id')
-      .eq('venue_profile_id', venueProfile.id);
-
+    const {
+      data: listings
+    } = await supabase.from('venue_listings').select('id').eq('venue_profile_id', venueProfile.id);
     if (!listings) {
       setDeletingAllHolds(false);
       return;
     }
-
     const listingIds = listings.map(l => l.id);
     const today = new Date();
 
     // Build query based on scope
-    let query = supabase
-      .from('gig_listings')
-      .select('id, application_id')
-      .in('venue_listing_id', listingIds)
-      .eq('is_confirmed', false);
-
+    let query = supabase.from('gig_listings').select('id, application_id').in('venue_listing_id', listingIds).eq('is_confirmed', false);
     if (deleteScope === 'week') {
       const weekEnd = format(addDays(today, 7), 'yyyy-MM-dd');
       query = query.gte('gig_date', format(today, 'yyyy-MM-dd')).lte('gig_date', weekEnd);
@@ -437,35 +397,29 @@ export default function VenueCalendar() {
     }
     // 'all' scope doesn't need date filtering
 
-    const { data: holds } = await query;
-
+    const {
+      data: holds
+    } = await query;
     if (holds && holds.length > 0) {
       // Archive the applications
       const applicationIds = holds.map(h => h.application_id).filter(Boolean);
       if (applicationIds.length > 0) {
-        await supabase
-          .from('applications')
-          .update({ status: 'archived' })
-          .in('id', applicationIds);
+        await supabase.from('applications').update({
+          status: 'archived'
+        }).in('id', applicationIds);
       }
 
       // Delete the holds
-      await supabase
-        .from('gig_listings')
-        .delete()
-        .in('id', holds.map(h => h.id));
-      
+      await supabase.from('gig_listings').delete().in('id', holds.map(h => h.id));
       const scopeText = deleteScope === 'week' ? 'this week' : deleteScope === 'month' ? 'this month' : '';
       toast.success(`${holds.length} hold${holds.length > 1 ? 's' : ''} deleted${scopeText ? ` for ${scopeText}` : ''}`);
     } else {
       toast.info('No holds to delete');
     }
-
     setDeletingAllHolds(false);
     setDeleteAllHoldsDialogOpen(false);
     fetchGigs();
   };
-
   const gigDates = gigs.map(g => new Date(g.gig_date));
   const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
   const confirmedGigs = gigsOnSelectedDate.filter(g => g.is_confirmed);
@@ -475,15 +429,12 @@ export default function VenueCalendar() {
   useEffect(() => {
     setLocalHoldOrder(holdGigs);
   }, [gigs, selectedDate]);
-
   const handleHoldDragStart = (index: number) => {
     setDraggedHoldIndex(index);
   };
-
   const handleHoldDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     if (draggedHoldIndex === null || draggedHoldIndex === index) return;
-
     const newOrder = [...localHoldOrder];
     const draggedItem = newOrder[draggedHoldIndex];
     newOrder.splice(draggedHoldIndex, 1);
@@ -491,30 +442,28 @@ export default function VenueCalendar() {
     setLocalHoldOrder(newOrder);
     setDraggedHoldIndex(index);
   };
-
   const handleHoldDragEnd = async () => {
     setDraggedHoldIndex(null);
-    
+
     // Update priorities in database
     const updates = localHoldOrder.map((gig, index) => ({
       id: gig.id,
       hold_priority: index + 1
     }));
-
     for (const update of updates) {
-      await supabase
-        .from('gig_listings')
-        .update({ hold_priority: update.hold_priority })
-        .eq('id', update.id);
+      await supabase.from('gig_listings').update({
+        hold_priority: update.hold_priority
+      }).eq('id', update.id);
     }
-
     toast.success('Hold order updated');
     fetchGigs();
   };
   const today = startOfDay(new Date());
   const modifiers = {
     hasGig: gigDates,
-    past: { before: today }
+    past: {
+      before: today
+    }
   };
   const modifiersStyles = {
     hasGig: {
@@ -552,121 +501,75 @@ export default function VenueCalendar() {
               </Button>}
           </div>
           
-          {gigsOnSelectedDate.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No events on this date</p>
-          ) : (
-            <div className="space-y-4">
+          {gigsOnSelectedDate.length === 0 ? <p className="text-muted-foreground text-sm">No events on this date</p> : <div className="space-y-4">
               {/* Confirmed Shows */}
-              {confirmedGigs.length > 0 && (
-                <div className="space-y-2">
+              {confirmedGigs.length > 0 && <div className="space-y-2">
                   <p className="font-display text-xs text-green-500 tracking-widest flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3" />
                     CONFIRMED
                   </p>
                   {confirmedGigs.map(gig => {
-                    const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
-                    const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-                    return (
-                      <button 
-                        key={gig.id} 
-                        onClick={() => navigate(`/venue/calendar/${gig.id}`)} 
-                        className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors"
-                      >
+              const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+              const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+              return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
                         <p className="font-display text-lg text-accent">{artistName}</p>
                         <p className="text-sm text-muted-foreground">{roomDisplay}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                      </button>;
+            })}
+                </div>}
 
               {/* Holds */}
-              {holdGigs.length > 0 && (
-                <div className="space-y-2">
+              {holdGigs.length > 0 && <div className="space-y-2">
                   <p className="font-display text-xs text-yellow-500 tracking-widest flex items-center gap-1">
                     <PauseCircle className="h-3 w-3" />
                     HOLDS
                   </p>
                   {localHoldOrder.map((gig, index) => {
-                    const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
-                    const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-                    return (
-                      <div 
-                        key={gig.id} 
-                        draggable
-                        onDragStart={() => handleHoldDragStart(index)}
-                        onDragOver={(e) => handleHoldDragOver(e, index)}
-                        onDragEnd={handleHoldDragEnd}
-                        className={`bg-secondary p-4 flex items-center justify-between cursor-grab active:cursor-grabbing transition-opacity ${
-                          draggedHoldIndex === index ? 'opacity-50' : ''
-                        }`}
-                      >
+              const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+              const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+              return <div key={gig.id} draggable onDragStart={() => handleHoldDragStart(index)} onDragOver={e => handleHoldDragOver(e, index)} onDragEnd={handleHoldDragEnd} className={`bg-secondary p-4 flex items-center justify-between cursor-grab active:cursor-grabbing transition-opacity ${draggedHoldIndex === index ? 'opacity-50' : ''}`}>
                         <div className="flex items-center gap-3 flex-1">
                           <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                          <button 
-                            onClick={() => navigate(`/venue/calendar/${gig.id}`)}
-                            className="text-left flex-1 hover:opacity-80 transition-opacity"
-                          >
-                            <p className="font-display text-lg text-accent">{artistName}</p>
+                          <button onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="text-left flex-1 hover:opacity-80 transition-opacity">
+                            <p className="font-display text-lg text-primary">{artistName}</p>
                             <p className="text-sm text-muted-foreground">{roomDisplay}</p>
                           </button>
                         </div>
                         <div className="flex gap-2 ml-4">
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteHold(gig.id, gig.application_id);
-                            }}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
+                          <Button size="sm" variant="ghost" onClick={e => {
+                    e.stopPropagation();
+                    handleDeleteHold(gig.id, gig.application_id);
+                  }} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openConfirmDialog(gig.id, gig.gig_date, gig.venue_listing_id, gig.artist_id);
-                            }}
-                            className="bg-green-600 hover:bg-green-700 h-8 w-8"
-                          >
+                          <Button size="icon" onClick={e => {
+                    e.stopPropagation();
+                    openConfirmDialog(gig.id, gig.gig_date, gig.venue_listing_id, gig.artist_id);
+                  }} className="bg-green-600 hover:bg-green-700 h-8 w-8">
                             <CheckCircle2 className="h-4 w-4" />
                           </Button>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+                      </div>;
+            })}
+                </div>}
+            </div>}
         </div>
       </div>
 
       {/* Upcoming gigs list */}
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4">UPCOMING SHOWS</h2>
-        {gigs.filter(g => new Date(g.gig_date) >= new Date()).length === 0 ? (
-          <p className="text-muted-foreground text-sm">No upcoming shows booked</p>
-        ) : (
-          <div className="space-y-6">
+        {gigs.filter(g => new Date(g.gig_date) >= new Date()).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-6">
             {/* Confirmed Shows */}
-            {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length > 0 && (
-              <div className="space-y-2">
+            {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length > 0 && <div className="space-y-2">
                 <p className="font-display text-xs text-green-500 tracking-widest flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" />
                   CONFIRMED
                 </p>
                 {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
-                  const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
-                  const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-                  return (
-                    <button
-                      key={gig.id}
-                      onClick={() => navigate(`/venue/calendar/${gig.id}`)}
-                      className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors"
-                    >
+            const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+            const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+            return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                       <div>
                         <p className="font-display text-accent">{artistName}</p>
                         <p className="text-xs text-muted-foreground">{roomDisplay}</p>
@@ -674,15 +577,12 @@ export default function VenueCalendar() {
                       <span className="text-sm text-muted-foreground">
                         {format(new Date(gig.gig_date), 'MMM d, yyyy')}
                       </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                    </button>;
+          })}
+              </div>}
 
             {/* Holds */}
-            {gigs.filter(g => new Date(g.gig_date) >= new Date() && !g.is_confirmed).length > 0 && (
-              <div className="space-y-2">
+            {gigs.filter(g => new Date(g.gig_date) >= new Date() && !g.is_confirmed).length > 0 && <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="font-display text-xs text-yellow-500 tracking-widest flex items-center gap-1">
                     <PauseCircle className="h-3 w-3" />
@@ -708,22 +608,15 @@ export default function VenueCalendar() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                {gigs.filter(g => new Date(g.gig_date) >= new Date() && !g.is_confirmed)
-                  .sort((a, b) => {
-                    // Sort by date first, then by hold priority
-                    const dateCompare = new Date(a.gig_date).getTime() - new Date(b.gig_date).getTime();
-                    if (dateCompare !== 0) return dateCompare;
-                    return (a.hold_priority || 99) - (b.hold_priority || 99);
-                  })
-                  .map(gig => {
-                    const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
-                    const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-                    return (
-                      <button
-                        key={gig.id}
-                        onClick={() => navigate(`/venue/calendar/${gig.id}`)}
-                        className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors"
-                      >
+                {gigs.filter(g => new Date(g.gig_date) >= new Date() && !g.is_confirmed).sort((a, b) => {
+            // Sort by date first, then by hold priority
+            const dateCompare = new Date(a.gig_date).getTime() - new Date(b.gig_date).getTime();
+            if (dateCompare !== 0) return dateCompare;
+            return (a.hold_priority || 99) - (b.hold_priority || 99);
+          }).map(gig => {
+            const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+            const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+            return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                         <div>
                           <p className="font-display text-accent">{artistName}</p>
                           <p className="text-xs text-muted-foreground">{roomDisplay}</p>
@@ -731,13 +624,10 @@ export default function VenueCalendar() {
                         <span className="text-sm text-muted-foreground">
                           {format(new Date(gig.gig_date), 'MMM d, yyyy')}
                         </span>
-                      </button>
-                    );
-                  })}
-              </div>
-            )}
-          </div>
-        )}
+                      </button>;
+          })}
+              </div>}
+          </div>}
       </div>
 
       {/* Create Event Dialog */}
@@ -795,21 +685,11 @@ export default function VenueCalendar() {
             <div className="space-y-2">
               <label className="font-display text-xs text-primary tracking-widest">STATUS</label>
               <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={!eventIsHold ? 'default' : 'outline'}
-                  onClick={() => setEventIsHold(false)}
-                  className={!eventIsHold ? 'bg-green-600 hover:bg-green-700 flex-1' : 'flex-1'}
-                >
+                <Button type="button" variant={!eventIsHold ? 'default' : 'outline'} onClick={() => setEventIsHold(false)} className={!eventIsHold ? 'bg-green-600 hover:bg-green-700 flex-1' : 'flex-1'}>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                   Confirmed
                 </Button>
-                <Button
-                  type="button"
-                  variant={eventIsHold ? 'default' : 'outline'}
-                  onClick={() => setEventIsHold(true)}
-                  className={eventIsHold ? 'bg-yellow-600 hover:bg-yellow-700 flex-1' : 'flex-1'}
-                >
+                <Button type="button" variant={eventIsHold ? 'default' : 'outline'} onClick={() => setEventIsHold(true)} className={eventIsHold ? 'bg-yellow-600 hover:bg-yellow-700 flex-1' : 'flex-1'}>
                   <PauseCircle className="h-4 w-4 mr-2" />
                   Hold
                 </Button>
@@ -817,28 +697,19 @@ export default function VenueCalendar() {
             </div>
 
             {/* Hold Priority - only show if hold and existing holds exist */}
-            {eventIsHold && existingHoldsForDate.length > 0 && (
-              <div className="space-y-2">
+            {eventIsHold && existingHoldsForDate.length > 0 && <div className="space-y-2">
                 <label className="font-display text-xs text-primary tracking-widest">HOLD PRIORITY</label>
                 <div className="flex gap-2 flex-wrap">
-                  {Array.from({ length: existingHoldsForDate.length + 1 }, (_, i) => i + 1).map((num) => (
-                    <Button
-                      key={num}
-                      type="button"
-                      size="sm"
-                      variant={eventHoldPriority === num ? 'default' : 'outline'}
-                      onClick={() => setEventHoldPriority(num)}
-                      className={eventHoldPriority === num ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
-                    >
+                  {Array.from({
+                length: existingHoldsForDate.length + 1
+              }, (_, i) => i + 1).map(num => <Button key={num} type="button" size="sm" variant={eventHoldPriority === num ? 'default' : 'outline'} onClick={() => setEventHoldPriority(num)} className={eventHoldPriority === num ? 'bg-yellow-600 hover:bg-yellow-700' : ''}>
                       #{num}
-                    </Button>
-                  ))}
+                    </Button>)}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {existingHoldsForDate.length} existing hold{existingHoldsForDate.length !== 1 ? 's' : ''} on this date
                 </p>
-              </div>
-            )}
+              </div>}
           </div>
 
           <div className="flex gap-3 justify-end">
@@ -874,11 +745,7 @@ export default function VenueCalendar() {
             <Button variant="outline" onClick={() => setDeleteAllHoldsDialogOpen(false)}>
               Cancel
             </Button>
-            <Button 
-              onClick={handleDeleteAllHolds} 
-              disabled={deletingAllHolds}
-              variant="destructive"
-            >
+            <Button onClick={handleDeleteAllHolds} disabled={deletingAllHolds} variant="destructive">
               {deletingAllHolds ? 'Deleting...' : 'Delete Holds'}
             </Button>
           </DialogFooter>
@@ -892,8 +759,7 @@ export default function VenueCalendar() {
             <DialogTitle className="font-display text-2xl">CONFIRM GIG</DialogTitle>
           </DialogHeader>
           
-          {holdToConfirm && (
-            <div className="space-y-6 py-4">
+          {holdToConfirm && <div className="space-y-6 py-4">
               <p className="text-muted-foreground">
                 Confirm <span className="text-accent font-medium">{holdToConfirm.artistName}</span> for {holdToConfirm.roomName} on {format(new Date(holdToConfirm.gigDate), 'MMMM d, yyyy')}?
               </p>
@@ -905,65 +771,36 @@ export default function VenueCalendar() {
                     MESSAGE TO {holdToConfirm.artistName.toUpperCase()}
                   </label>
                   <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={sendConfirmMessage}
-                      onChange={(e) => setSendConfirmMessage(e.target.checked)}
-                      className="rounded border-border"
-                    />
+                    <input type="checkbox" checked={sendConfirmMessage} onChange={e => setSendConfirmMessage(e.target.checked)} className="rounded border-border" />
                     Send message
                   </label>
                 </div>
-                <Textarea
-                  value={confirmMessage}
-                  onChange={(e) => setConfirmMessage(e.target.value)}
-                  disabled={!sendConfirmMessage}
-                  className="min-h-[120px] text-sm"
-                  placeholder="Message to the confirmed artist..."
-                />
+                <Textarea value={confirmMessage} onChange={e => setConfirmMessage(e.target.value)} disabled={!sendConfirmMessage} className="min-h-[120px] text-sm" placeholder="Message to the confirmed artist..." />
               </div>
 
               {/* Message to declined artists */}
-              {holdToConfirm.otherHolds.length > 0 && (
-                <div className="space-y-3">
+              {holdToConfirm.otherHolds.length > 0 && <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="font-display text-xs text-primary tracking-widest">
                       MESSAGE TO DECLINED HOLDS ({holdToConfirm.otherHolds.length})
                     </label>
                     <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={sendDeclineMessage}
-                        onChange={(e) => setSendDeclineMessage(e.target.checked)}
-                        className="rounded border-border"
-                      />
+                      <input type="checkbox" checked={sendDeclineMessage} onChange={e => setSendDeclineMessage(e.target.checked)} className="rounded border-border" />
                       Send message
                     </label>
                   </div>
                   <div className="text-xs text-muted-foreground mb-2">
                     This message will be sent to: {holdToConfirm.otherHolds.map(h => h.artistName).join(', ')}
                   </div>
-                  <Textarea
-                    value={declineMessage}
-                    onChange={(e) => setDeclineMessage(e.target.value)}
-                    disabled={!sendDeclineMessage}
-                    className="min-h-[120px] text-sm"
-                    placeholder="Message to declined artists..."
-                  />
-                </div>
-              )}
-            </div>
-          )}
+                  <Textarea value={declineMessage} onChange={e => setDeclineMessage(e.target.value)} disabled={!sendDeclineMessage} className="min-h-[120px] text-sm" placeholder="Message to declined artists..." />
+                </div>}
+            </div>}
 
           <DialogFooter className="flex gap-3 justify-end">
             <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
               Cancel
             </Button>
-            <Button 
-              onClick={handleConfirmHold} 
-              disabled={confirmingHold}
-              className="bg-green-600 hover:bg-green-700"
-            >
+            <Button onClick={handleConfirmHold} disabled={confirmingHold} className="bg-green-600 hover:bg-green-700">
               <CheckCircle2 className="h-4 w-4 mr-1" />
               {confirmingHold ? 'Confirming...' : 'Confirm Gig'}
             </Button>
