@@ -229,7 +229,7 @@ export default function ApplicationDetail() {
             <p className="text-foreground">
               {application.availability_preference ? availabilityLabels[application.availability_preference] : 'Not specified'}
             </p>
-            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && <p className="text-sm text-muted-foreground flex items-center gap-1">
+            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && <p className="text-sm flex items-center gap-1 text-primary">
                 <Calendar className="h-3 w-3" />
                 {format(new Date(application.availability_start_date), 'MMM d')} - {format(new Date(application.availability_end_date), 'MMM d, yyyy')}
               </p>}
