@@ -96,7 +96,7 @@ export default function Login() {
 
             {/* Forgot password link */}
             <p className="text-right text-sm">
-              <Link to="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/forgot-password" className="transition-colors text-muted">
                 Forgot password?
               </Link>
             </p>
@@ -109,7 +109,7 @@ export default function Login() {
           {/* Sign up link */}
           <p className="text-center mt-6 text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-primary hover:underline font-medium">
+            <Link to="/signup" className="hover:underline font-medium text-primary-foreground">
               Sign up
             </Link>
           </p>
