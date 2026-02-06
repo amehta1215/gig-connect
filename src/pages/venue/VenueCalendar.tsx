@@ -622,7 +622,7 @@ export default function VenueCalendar() {
             return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                         <div>
                           <p className="font-display text-primary">
-                            <span className="text-muted-foreground text-sm mr-2">#{gig.hold_priority || '—'}</span>
+                            <span className="text-sm mr-2 text-primary">#{gig.hold_priority || '—'}</span>
                             {artistName}
                           </p>
                           <p className="text-xs text-muted-foreground">{roomDisplay}</p>
