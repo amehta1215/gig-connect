@@ -19,21 +19,38 @@ interface VenueListing {
   bio: string | null;
   venue_profile_id: string;
 }
-
 interface VenueProfile {
   id: string;
   picture: string | null;
 }
 const genres = ['Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
-const capacityRanges = [
-  { label: '<100', value: '0-100', min: 0, max: 100 },
-  { label: '100-300', value: '100-300', min: 100, max: 300 },
-  { label: '300-500', value: '300-500', min: 300, max: 500 },
-  { label: '500+', value: '500+', min: 500, max: Infinity },
-];
+const capacityRanges = [{
+  label: '<100',
+  value: '0-100',
+  min: 0,
+  max: 100
+}, {
+  label: '100-300',
+  value: '100-300',
+  min: 100,
+  max: 300
+}, {
+  label: '300-500',
+  value: '300-500',
+  min: 300,
+  max: 500
+}, {
+  label: '500+',
+  value: '500+',
+  min: 500,
+  max: Infinity
+}];
 export default function FindVenues() {
   const navigate = useNavigate();
-  const { toggleFavorite, isFavorite } = useFavorites();
+  const {
+    toggleFavorite,
+    isFavorite
+  } = useFavorites();
   const [venues, setVenues] = useState<VenueListing[]>([]);
   const [venueProfiles, setVenueProfiles] = useState<Record<string, VenueProfile>>({});
   const [loading, setLoading] = useState(true);
@@ -42,7 +59,6 @@ export default function FindVenues() {
   const [selectedCapacities, setSelectedCapacities] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState('');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-
   const handleToggleFavorite = async (e: React.MouseEvent, venueId: string) => {
     e.stopPropagation();
     await toggleFavorite(venueId);
@@ -52,25 +68,23 @@ export default function FindVenues() {
   }, []);
   const fetchVenues = async () => {
     setLoading(true);
-    
+
     // Fetch venues
-    const { data: venuesData, error: venuesError } = await supabase
-      .from('venue_listings')
-      .select('*');
-    
+    const {
+      data: venuesData,
+      error: venuesError
+    } = await supabase.from('venue_listings').select('*');
     if (venuesData && !venuesError) {
       setVenues(venuesData as VenueListing[]);
-      
+
       // Get unique venue profile IDs
       const profileIds = [...new Set(venuesData.map(v => v.venue_profile_id))];
-      
+
       // Fetch venue profiles for pictures
       if (profileIds.length > 0) {
-        const { data: profilesData } = await supabase
-          .from('venue_profiles')
-          .select('id, picture')
-          .in('id', profileIds);
-        
+        const {
+          data: profilesData
+        } = await supabase.from('venue_profiles').select('id, picture').in('id', profileIds);
         if (profilesData) {
           const profilesMap: Record<string, VenueProfile> = {};
           profilesData.forEach(p => {
@@ -87,7 +101,6 @@ export default function FindVenues() {
     acc[venue.venue_profile_id] = (acc[venue.venue_profile_id] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
-
   const filteredVenues = venues.filter(venue => {
     const q = searchTerm.toLowerCase();
     const matchesSearch = !searchTerm || venue.venue_name.toLowerCase().includes(q) || venue.room_name?.toLowerCase().includes(q) || venue.location?.toLowerCase().includes(q);
@@ -109,41 +122,26 @@ export default function FindVenues() {
     return matchesSearch && matchesGenre && matchesLocation && matchesCapacity;
   });
   const toggleGenre = (genre: string) => {
-    setSelectedGenres(prev => 
-      prev.includes(genre) 
-        ? prev.filter(g => g !== genre)
-        : [...prev, genre]
-    );
+    setSelectedGenres(prev => prev.includes(genre) ? prev.filter(g => g !== genre) : [...prev, genre]);
   };
-
   const toggleCapacity = (capacity: string) => {
-    setSelectedCapacities(prev => 
-      prev.includes(capacity) 
-        ? prev.filter(c => c !== capacity)
-        : [...prev, capacity]
-    );
+    setSelectedCapacities(prev => prev.includes(capacity) ? prev.filter(c => c !== capacity) : [...prev, capacity]);
   };
-
   const hasActiveFilters = selectedGenres.length > 0 || selectedCapacities.length > 0 || selectedLocation !== '' || searchTerm !== '';
-  
   const clearAllFilters = () => {
     setSelectedGenres([]);
     setSelectedCapacities([]);
     setSelectedLocation('');
     setSearchTerm('');
   };
-
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location);
     setSearchTerm('');
   };
-
   const handleVenueSelect = (venueId: string) => {
     navigate(`/artist/venues/${venueId}`);
   };
-
-  const genreMultiSelect = (className?: string) => (
-    <Popover>
+  const genreMultiSelect = (className?: string) => <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className={`bg-card border-border justify-start ${className || ''}`}>
           <Music className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -152,32 +150,17 @@ export default function FindVenues() {
       </PopoverTrigger>
       <PopoverContent className="w-48 p-2" align="start">
         <div className="space-y-2">
-          {selectedGenres.length > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full justify-start text-xs text-muted-foreground"
-              onClick={() => setSelectedGenres([])}
-            >
+          {selectedGenres.length > 0 && <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground" onClick={() => setSelectedGenres([])}>
               <X className="h-3 w-3 mr-1" /> Clear all
-            </Button>
-          )}
-          {genres.map(genre => (
-            <label key={genre} className="flex items-center gap-2 cursor-pointer hover:bg-secondary p-1.5 rounded">
-              <Checkbox 
-                checked={selectedGenres.includes(genre)}
-                onCheckedChange={() => toggleGenre(genre)}
-              />
+            </Button>}
+          {genres.map(genre => <label key={genre} className="flex items-center gap-2 cursor-pointer hover:bg-secondary p-1.5 rounded">
+              <Checkbox checked={selectedGenres.includes(genre)} onCheckedChange={() => toggleGenre(genre)} />
               <span className="text-sm">{genre}</span>
-            </label>
-          ))}
+            </label>)}
         </div>
       </PopoverContent>
-    </Popover>
-  );
-
-  const capacityMultiSelect = (className?: string) => (
-    <Popover>
+    </Popover>;
+  const capacityMultiSelect = (className?: string) => <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className={`bg-card border-border justify-start ${className || ''}`}>
           <Users className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -186,36 +169,20 @@ export default function FindVenues() {
       </PopoverTrigger>
       <PopoverContent className="w-48 p-2" align="start">
         <div className="space-y-2">
-          {selectedCapacities.length > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full justify-start text-xs text-muted-foreground"
-              onClick={() => setSelectedCapacities([])}
-            >
+          {selectedCapacities.length > 0 && <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground" onClick={() => setSelectedCapacities([])}>
               <X className="h-3 w-3 mr-1" /> Clear all
-            </Button>
-          )}
-          {capacityRanges.map(range => (
-            <label key={range.value} className="flex items-center gap-2 cursor-pointer hover:bg-secondary p-1.5 rounded">
-              <Checkbox 
-                checked={selectedCapacities.includes(range.value)}
-                onCheckedChange={() => toggleCapacity(range.value)}
-              />
+            </Button>}
+          {capacityRanges.map(range => <label key={range.value} className="flex items-center gap-2 cursor-pointer hover:bg-secondary p-1.5 rounded">
+              <Checkbox checked={selectedCapacities.includes(range.value)} onCheckedChange={() => toggleCapacity(range.value)} />
               <span className="text-sm">{range.label}</span>
-            </label>
-          ))}
+            </label>)}
         </div>
       </PopoverContent>
-    </Popover>
-  );
-
-  const filtersContent = (
-    <div className="space-y-4">
+    </Popover>;
+  const filtersContent = <div className="space-y-4">
       {genreMultiSelect("w-full")}
       {capacityMultiSelect("w-full")}
-    </div>
-  );
+    </div>;
   return <div className="space-y-6 animate-fade-in">
       {/* Header */}
       
@@ -224,24 +191,16 @@ export default function FindVenues() {
       <Collapsible open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <div className="flex gap-2">
           <div className="flex-1">
-            <UnifiedVenueSearch
-              onLocationSelect={handleLocationSelect}
-              onVenueSelect={handleVenueSelect}
-              onSearchChange={setSearchTerm}
-              venues={venues}
-              className="w-full"
-            />
+            <UnifiedVenueSearch onLocationSelect={handleLocationSelect} onVenueSelect={handleVenueSelect} onSearchChange={setSearchTerm} venues={venues} className="w-full" />
           </div>
 
           {/* Desktop Filters */}
           <div className="hidden lg:flex gap-2">
             {genreMultiSelect("w-36")}
             {capacityMultiSelect("w-36")}
-            {hasActiveFilters && (
-              <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground">
+            {hasActiveFilters && <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground">
                 <X className="h-3 w-3 mr-1" /> Reset
-              </Button>
-            )}
+              </Button>}
           </div>
 
           {/* Mobile Filter Toggle */}
@@ -256,11 +215,9 @@ export default function FindVenues() {
         <CollapsibleContent className="lg:hidden">
           <div className="mt-3 p-4 bg-card border border-border space-y-4">
             {filtersContent}
-            {hasActiveFilters && (
-              <Button variant="ghost" size="sm" onClick={clearAllFilters} className="w-full text-xs text-muted-foreground hover:text-foreground">
+            {hasActiveFilters && <Button variant="ghost" size="sm" onClick={clearAllFilters} className="w-full text-xs text-muted-foreground hover:text-foreground">
                 <X className="h-3 w-3 mr-1" /> Reset All Filters
-              </Button>
-            )}
+              </Button>}
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -273,33 +230,19 @@ export default function FindVenues() {
         </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredVenues.map(venue => <div key={venue.id} onClick={() => navigate(`/artist/venues/${venue.id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative">
               {/* Favorite Button */}
-              <button
-                onClick={(e) => handleToggleFavorite(e, venue.id)}
-                className="absolute top-2 right-2 z-10 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors"
-              >
-                <Heart
-                  className={`h-5 w-5 transition-colors ${
-                    isFavorite(venue.id)
-                      ? 'fill-primary text-primary'
-                      : 'text-muted-foreground hover:text-primary'
-                  }`}
-                />
+              <button onClick={e => handleToggleFavorite(e, venue.id)} className="absolute top-2 right-2 z-10 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors">
+                <Heart className={`h-5 w-5 transition-colors ${isFavorite(venue.id) ? 'fill-primary text-primary' : 'text-muted-foreground hover:text-primary'}`} />
               </button>
 
               {/* Image - prioritize venue profile picture, fallback to room picture */}
               <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
                 {(() => {
-                  const venueProfile = venueProfiles[venue.venue_profile_id];
-                  const displayPicture = venueProfile?.picture || (venue.pictures && venue.pictures.length > 0 ? venue.pictures[0] : null);
-                  
-                  return displayPicture ? (
-                    <img src={displayPicture} alt={venue.venue_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-heat">
+            const venueProfile = venueProfiles[venue.venue_profile_id];
+            const displayPicture = venueProfile?.picture || (venue.pictures && venue.pictures.length > 0 ? venue.pictures[0] : null);
+            return displayPicture ? <img src={displayPicture} alt={venue.venue_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="absolute inset-0 flex items-center justify-center bg-heat">
                       <Music className="h-12 w-12 text-primary/30" />
-                    </div>
-                  );
-                })()}
+                    </div>;
+          })()}
                 {/* Capacity badge */}
                 {venue.capacity && <div className="absolute top-2 left-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
                     <Users className="h-3 w-3" />
@@ -312,12 +255,12 @@ export default function FindVenues() {
                 <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors tracking-wide">
                   {venue.venue_name}{venue.room_name && roomCountByVenueProfile[venue.venue_profile_id] > 1 && <span className="text-muted-foreground"> • {venue.room_name}</span>}
                 </h3>
-                {venue.location && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                {venue.location && <p className="text-xs flex items-center gap-1 mt-1 text-primary">
                     <MapPin className="h-3 w-3" />
                     {venue.location}
                   </p>}
                 {venue.genres && venue.genres.length > 0 && <div className="flex flex-wrap gap-1 mt-2">
-                    {venue.genres.slice(0, 2).map(genre => <span key={genre} className="text-[10px] bg-secondary px-2 py-0.5 text-muted-foreground uppercase tracking-wider">
+                    {venue.genres.slice(0, 2).map(genre => <span key={genre} className="text-[10px] px-2 py-0.5 uppercase tracking-wider text-primary bg-gray-200">
                         {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
                       </span>)}
                   </div>}
