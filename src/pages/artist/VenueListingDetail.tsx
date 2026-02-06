@@ -224,7 +224,7 @@ export default function VenueListingDetail() {
       {/* Venue Info - Full Width */}
       <div className="space-y-4 mb-8">
         <div>
-          <h1 className="font-display text-4xl md:text-5xl text-accent font-bold tracking-wide">
+          <h1 className="font-display text-4xl md:text-5xl font-bold tracking-wide text-primary">
             {listing.venue_name}
           </h1>
           {listing.room_name && <p className="text-lg mt-1 text-primary">{listing.room_name}</p>}
