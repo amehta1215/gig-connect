@@ -422,7 +422,7 @@ export default function VenueApplicationDetail() {
           <h1 className="font-display text-4xl md:text-5xl tracking-wide text-primary font-semibold">
             {bandName}
           </h1>
-        {venueListing && <p className="text-lg text-muted-foreground mt-1">
+        {venueListing && <p className="text-lg mt-1 text-primary">
               Applied to: {venueListing.room_name || venueListing.venue_name}
             </p>}
         </div>
@@ -493,7 +493,7 @@ export default function VenueApplicationDetail() {
       {/* Artist Bio */}
       {artistProfile?.bio && <div className="bg-card border border-border p-6">
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">BIO</h2>
-          <p className="text-muted-foreground whitespace-pre-wrap">{artistProfile.bio}</p>
+          <p className="whitespace-pre-wrap text-primary">{artistProfile.bio}</p>
         </div>}
 
       {/* Social Links */}
