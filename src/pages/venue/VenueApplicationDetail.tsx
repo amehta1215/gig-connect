@@ -14,7 +14,6 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import HoldsOrderList from '@/components/HoldsOrderList';
-
 interface ArtistProfile {
   band_name: string | null;
   genre: string | null;
@@ -31,7 +30,6 @@ interface ArtistProfile {
   past_gigs: string[] | null;
   press_links: string[] | null;
 }
-
 interface ApplicationData {
   id: string;
   artist_id: string;
@@ -50,197 +48,184 @@ interface ApplicationData {
     last_name: string;
   };
 }
-
 interface VenueListing {
   id: string;
   venue_name: string;
   room_name: string | null;
 }
-
 const statusConfig = {
   in_progress: {
     icon: Clock,
     label: 'PENDING',
     color: 'text-yellow-500',
-    bgColor: 'bg-yellow-500/10',
+    bgColor: 'bg-yellow-500/10'
   },
   accepted: {
     icon: CheckCircle2,
     label: 'ACCEPTED',
     color: 'text-green-500',
-    bgColor: 'bg-green-500/10',
+    bgColor: 'bg-green-500/10'
   },
   archived: {
     icon: Archive,
     label: 'ARCHIVED',
     color: 'text-muted-foreground',
-    bgColor: 'bg-muted',
-  },
+    bgColor: 'bg-muted'
+  }
 };
-
 const paymentLabels: Record<string, string> = {
   door_split: 'Door Split',
   bar_split: 'Bar Split',
   tip_based: 'Tip Based',
   flat_fee: 'Flat Fee',
-  rental: 'Rental',
+  rental: 'Rental'
 };
-
 const lineupLabels: Record<string, string> = {
   co_acts_needed: 'Co-acts Needed',
   co_acts_confirmed: 'Co-acts Confirmed',
-  solo_performer: 'Solo Performer',
+  solo_performer: 'Solo Performer'
 };
-
 const availabilityLabels: Record<string, string> = {
   date_range: 'Date Range',
   specific_dates: 'Specific Dates',
-  flexible: 'Flexible',
+  flexible: 'Flexible'
 };
-
 export default function VenueApplicationDetail() {
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const [application, setApplication] = useState<ApplicationData | null>(null);
   const [artistProfile, setArtistProfile] = useState<ArtistProfile | null>(null);
   const [venueListing, setVenueListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
   // Accept dialog state
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [selectedGigDate, setSelectedGigDate] = useState<Date | undefined>(undefined);
   const [selectedGigTime, setSelectedGigTime] = useState('');
   const [acceptType, setAcceptType] = useState<'confirmed' | 'hold'>('confirmed');
   const [holdPriority, setHoldPriority] = useState(1);
-  const [existingHolds, setExistingHolds] = useState<{ id: string; artist_name: string; hold_priority: number }[]>([]);
-
+  const [existingHolds, setExistingHolds] = useState<{
+    id: string;
+    artist_name: string;
+    hold_priority: number;
+  }[]>([]);
   useEffect(() => {
     if (id && user) {
       fetchApplication();
     }
   }, [id, user]);
-
   const fetchApplication = async () => {
     setLoading(true);
-    
+
     // First fetch the application with artist info
-    const { data, error } = await supabase
-      .from('applications')
-      .select(`
+    const {
+      data,
+      error
+    } = await supabase.from('applications').select(`
         *,
         artist:profiles!applications_artist_id_fkey(first_name, last_name)
-      `)
-      .eq('id', id)
-      .maybeSingle();
-
+      `).eq('id', id).maybeSingle();
     if (!data || error) {
       setLoading(false);
       return;
     }
-
     setApplication(data as unknown as ApplicationData);
 
     // Fetch venue listing info
-    const { data: listingData } = await supabase
-      .from('venue_listings')
-      .select('id, venue_name, room_name')
-      .eq('id', data.venue_listing_id)
-      .single();
-
+    const {
+      data: listingData
+    } = await supabase.from('venue_listings').select('id, venue_name, room_name').eq('id', data.venue_listing_id).single();
     if (listingData) {
       setVenueListing(listingData);
     }
 
     // Fetch artist profile
-    const { data: profileData } = await supabase
-      .from('artist_profiles')
-      .select('*')
-      .eq('user_id', data.artist_id)
-      .single();
-
+    const {
+      data: profileData
+    } = await supabase.from('artist_profiles').select('*').eq('user_id', data.artist_id).single();
     if (profileData) {
       setArtistProfile(profileData as ArtistProfile);
     }
 
     // Mark as read
-    await supabase
-      .from('applications')
-      .update({ is_read: true })
-      .eq('id', id);
-
+    await supabase.from('applications').update({
+      is_read: true
+    }).eq('id', id);
     setLoading(false);
   };
-
   const updateStatus = async (newStatus: 'accepted' | 'archived' | 'in_progress') => {
     if (!application) return;
-    
+
     // If rescinding acceptance, delete the associated gig listing first
     if (application.status === 'accepted' && newStatus === 'in_progress') {
-      const { error: deleteError } = await supabase
-        .from('gig_listings')
-        .delete()
-        .eq('application_id', application.id);
-      
+      const {
+        error: deleteError
+      } = await supabase.from('gig_listings').delete().eq('application_id', application.id);
       if (deleteError) {
         toast.error('Failed to remove gig listing');
         return;
       }
       toast.success('Acceptance rescinded and gig removed from calendar');
     }
-    
-    await supabase
-      .from('applications')
-      .update({ status: newStatus })
-      .eq('id', application.id);
-    
+    await supabase.from('applications').update({
+      status: newStatus
+    }).eq('id', application.id);
+
     // Stay on page for rescind/unarchive, navigate back for accept/archive
     if (newStatus === 'in_progress') {
-      setApplication({ ...application, status: newStatus });
+      setApplication({
+        ...application,
+        status: newStatus
+      });
     } else {
       navigate('/venue');
     }
   };
-
   const fetchExistingHolds = useCallback(async (date: Date) => {
     if (!application?.venue_listing_id) return;
-    
     const dateStr = format(date, 'yyyy-MM-dd');
-    const { data: holds } = await supabase
-      .from('gig_listings')
-      .select('id, artist_id, manual_artist_name, hold_priority')
-      .eq('venue_listing_id', application.venue_listing_id)
-      .eq('gig_date', dateStr)
-      .eq('is_confirmed', false)
-      .order('hold_priority', { ascending: true });
-
+    const {
+      data: holds
+    } = await supabase.from('gig_listings').select('id, artist_id, manual_artist_name, hold_priority').eq('venue_listing_id', application.venue_listing_id).eq('gig_date', dateStr).eq('is_confirmed', false).order('hold_priority', {
+      ascending: true
+    });
     if (holds && holds.length > 0) {
       // Fetch artist names for each hold
-      const holdsWithNames = await Promise.all(
-        holds.map(async (hold) => {
-          if (hold.manual_artist_name) {
-            return { id: hold.id, artist_name: hold.manual_artist_name, hold_priority: hold.hold_priority || 99 };
-          }
-          const { data: artistProfile } = await supabase
-            .from('artist_profiles')
-            .select('band_name')
-            .eq('user_id', hold.artist_id)
-            .maybeSingle();
-          
-          if (artistProfile?.band_name) {
-            return { id: hold.id, artist_name: artistProfile.band_name, hold_priority: hold.hold_priority || 99 };
-          }
-          
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('first_name, last_name')
-            .eq('id', hold.artist_id)
-            .maybeSingle();
-          
-          const name = profile ? `${profile.first_name} ${profile.last_name}` : 'Unknown Artist';
-          return { id: hold.id, artist_name: name, hold_priority: hold.hold_priority || 99 };
-        })
-      );
+      const holdsWithNames = await Promise.all(holds.map(async hold => {
+        if (hold.manual_artist_name) {
+          return {
+            id: hold.id,
+            artist_name: hold.manual_artist_name,
+            hold_priority: hold.hold_priority || 99
+          };
+        }
+        const {
+          data: artistProfile
+        } = await supabase.from('artist_profiles').select('band_name').eq('user_id', hold.artist_id).maybeSingle();
+        if (artistProfile?.band_name) {
+          return {
+            id: hold.id,
+            artist_name: artistProfile.band_name,
+            hold_priority: hold.hold_priority || 99
+          };
+        }
+        const {
+          data: profile
+        } = await supabase.from('profiles').select('first_name, last_name').eq('id', hold.artist_id).maybeSingle();
+        const name = profile ? `${profile.first_name} ${profile.last_name}` : 'Unknown Artist';
+        return {
+          id: hold.id,
+          artist_name: name,
+          hold_priority: hold.hold_priority || 99
+        };
+      }));
       setExistingHolds(holdsWithNames);
       setHoldPriority(holdsWithNames.length + 1);
     } else {
@@ -248,7 +233,6 @@ export default function VenueApplicationDetail() {
       setHoldPriority(1);
     }
   }, [application?.venue_listing_id]);
-
   const handleAcceptClick = () => {
     // Pre-select a date from application if available
     let initialDate: Date | undefined;
@@ -257,19 +241,15 @@ export default function VenueApplicationDetail() {
     } else if (application?.availability_specific_dates && application.availability_specific_dates.length > 0) {
       initialDate = new Date(application.availability_specific_dates[0]);
     }
-    
     setSelectedGigDate(initialDate);
     setAcceptType('confirmed');
     setExistingHolds([]);
     setHoldPriority(1);
-    
     if (initialDate) {
       fetchExistingHolds(initialDate);
     }
-    
     setAcceptDialogOpen(true);
   };
-
   const handleDateChange = (date: Date | undefined) => {
     setSelectedGigDate(date);
     if (date) {
@@ -279,13 +259,11 @@ export default function VenueApplicationDetail() {
       setHoldPriority(1);
     }
   };
-
   const handleConfirmAccept = async () => {
     if (!application || !selectedGigDate) {
       toast.error('Please select a gig date');
       return;
     }
-
     const isHold = acceptType === 'hold';
     const dateStr = format(selectedGigDate, 'yyyy-MM-dd');
 
@@ -294,55 +272,47 @@ export default function VenueApplicationDetail() {
       // Update priorities for holds that need to shift
       for (const hold of existingHolds) {
         if (hold.hold_priority >= holdPriority) {
-          await supabase
-            .from('gig_listings')
-            .update({ hold_priority: hold.hold_priority + 1 })
-            .eq('id', hold.id);
+          await supabase.from('gig_listings').update({
+            hold_priority: hold.hold_priority + 1
+          }).eq('id', hold.id);
         }
       }
     }
 
     // Create gig listing
-    const { error: gigError } = await supabase
-      .from('gig_listings')
-      .insert({
-        application_id: application.id,
-        venue_listing_id: application.venue_listing_id,
-        artist_id: application.artist_id,
-        gig_date: dateStr,
-        show_time: selectedGigTime || null,
-        openers: [],
-        notes: null,
-        is_confirmed: !isHold,
-        hold_priority: isHold ? holdPriority : null,
-      });
-
+    const {
+      error: gigError
+    } = await supabase.from('gig_listings').insert({
+      application_id: application.id,
+      venue_listing_id: application.venue_listing_id,
+      artist_id: application.artist_id,
+      gig_date: dateStr,
+      show_time: selectedGigTime || null,
+      openers: [],
+      notes: null,
+      is_confirmed: !isHold,
+      hold_priority: isHold ? holdPriority : null
+    });
     if (gigError) {
       toast.error('Failed to create gig listing');
       return;
     }
 
     // Update application status
-    await supabase
-      .from('applications')
-      .update({ status: 'accepted' })
-      .eq('id', application.id);
-
+    await supabase.from('applications').update({
+      status: 'accepted'
+    }).eq('id', application.id);
     toast.success(isHold ? `Application accepted as Hold #${holdPriority}!` : 'Application accepted! Gig confirmed.');
     setAcceptDialogOpen(false);
     navigate('/venue');
   };
-
   const handleMessageClick = async () => {
     if (!user || !application) return;
 
     // Check if a thread already exists between the venue and artist
-    const { data: existingMessages } = await supabase
-      .from('messages')
-      .select('thread_id')
-      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${application.artist_id}),and(sender_id.eq.${application.artist_id},receiver_id.eq.${user.id})`)
-      .limit(1);
-
+    const {
+      data: existingMessages
+    } = await supabase.from('messages').select('thread_id').or(`and(sender_id.eq.${user.id},receiver_id.eq.${application.artist_id}),and(sender_id.eq.${application.artist_id},receiver_id.eq.${user.id})`).limit(1);
     if (existingMessages && existingMessages.length > 0) {
       // Thread exists, navigate to messages with the thread selected
       navigate(`/venue/messages?thread=${existingMessages[0].thread_id}`);
@@ -355,54 +325,61 @@ export default function VenueApplicationDetail() {
     const bandName = artistProfile?.band_name || '';
     const displayName = bandName || artistName;
     const subject = `Application for ${roomName} - ${displayName}`;
-    
     const params = new URLSearchParams({
       compose: 'true',
       artistId: application.artist_id,
       artistName: artistName,
-      ...(bandName && { bandName }),
-      subject: subject,
+      ...(bandName && {
+        bandName
+      }),
+      subject: subject
     });
-    
     navigate(`/venue/messages?${params.toString()}`);
   };
-
   if (loading) {
-    return (
-      <div className="space-y-6 animate-fade-in">
+    return <div className="space-y-6 animate-fade-in">
         <div className="h-8 w-48 bg-card animate-pulse" />
         <div className="h-64 bg-card animate-pulse" />
         <div className="h-32 bg-card animate-pulse" />
-      </div>
-    );
+      </div>;
   }
-
   if (!application) {
-    return (
-      <div className="text-center py-20">
+    return <div className="text-center py-20">
         <h3 className="font-display text-2xl text-muted-foreground">APPLICATION NOT FOUND</h3>
         <Button onClick={() => navigate('/venue')} variant="outline" className="mt-4">
           Go Back
         </Button>
-      </div>
-    );
+      </div>;
   }
-
   const config = statusConfig[application.status];
   const StatusIcon = config.icon;
   const bandName = artistProfile?.band_name || `${application.artist?.first_name} ${application.artist?.last_name}`;
-
-  const socialLinks = [
-    { key: 'spotify_link', label: 'Spotify', value: artistProfile?.spotify_link },
-    { key: 'soundcloud_link', label: 'SoundCloud', value: artistProfile?.soundcloud_link },
-    { key: 'apple_music_link', label: 'Apple Music', value: artistProfile?.apple_music_link },
-    { key: 'youtube_link', label: 'YouTube', value: artistProfile?.youtube_link },
-    { key: 'facebook_link', label: 'Facebook', value: artistProfile?.facebook_link },
-    { key: 'tiktok_link', label: 'TikTok', value: artistProfile?.tiktok_link },
-  ].filter(link => link.value);
-
-  return (
-    <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+  const socialLinks = [{
+    key: 'spotify_link',
+    label: 'Spotify',
+    value: artistProfile?.spotify_link
+  }, {
+    key: 'soundcloud_link',
+    label: 'SoundCloud',
+    value: artistProfile?.soundcloud_link
+  }, {
+    key: 'apple_music_link',
+    label: 'Apple Music',
+    value: artistProfile?.apple_music_link
+  }, {
+    key: 'youtube_link',
+    label: 'YouTube',
+    value: artistProfile?.youtube_link
+  }, {
+    key: 'facebook_link',
+    label: 'Facebook',
+    value: artistProfile?.facebook_link
+  }, {
+    key: 'tiktok_link',
+    label: 'TikTok',
+    value: artistProfile?.tiktok_link
+  }].filter(link => link.value);
+  return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       {/* Back Button */}
       <Button variant="ghost" size="icon" onClick={() => navigate('/venue')}>
         <ArrowLeft className="h-5 w-5" />
@@ -422,50 +399,40 @@ export default function VenueApplicationDetail() {
             <MessageSquare className="h-4 w-4 mr-1" />
             Message
           </Button>
-          {application.status === 'in_progress' && (
-            <>
+          {application.status === 'in_progress' && <>
               <Button size="sm" onClick={handleAcceptClick} className="bg-primary hover:bg-primary/90">
                 Accept
               </Button>
               <Button size="sm" onClick={() => updateStatus('archived')} className="bg-primary hover:bg-primary/90">
                 Archive
               </Button>
-            </>
-          )}
-          {application.status === 'accepted' && (
-            <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
+            </>}
+          {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
               Rescind Acceptance
-            </Button>
-          )}
-          {application.status === 'archived' && (
-            <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
+            </Button>}
+          {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
               Unarchive
-            </Button>
-          )}
+            </Button>}
         </div>
       </div>
 
       {/* Artist Header */}
       <div className="space-y-4">
         <div>
-          <h1 className="font-display text-4xl md:text-5xl text-accent font-bold tracking-wide">
+          <h1 className="font-display text-4xl md:text-5xl tracking-wide text-primary font-semibold">
             {bandName}
           </h1>
-        {venueListing && (
-            <p className="text-lg text-muted-foreground mt-1">
+        {venueListing && <p className="text-lg text-muted-foreground mt-1">
               Applied to: {venueListing.room_name || venueListing.venue_name}
-            </p>
-          )}
+            </p>}
         </div>
 
       </div>
 
       {/* Main Artist Picture */}
-      {artistProfile?.pictures && artistProfile.pictures.length > 0 && (
-        <div className="flex justify-center">
+      {artistProfile?.pictures && artistProfile.pictures.length > 0 && <div className="flex justify-center">
           <img src={artistProfile.pictures[0]} alt={`${bandName} main photo`} className="max-h-64 w-auto object-contain" />
-        </div>
-      )}
+        </div>}
 
       {/* Application Details */}
       <div className="bg-card border border-border p-6 space-y-4">
@@ -473,52 +440,38 @@ export default function VenueApplicationDetail() {
 
         <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
           {/* Genre */}
-          {artistProfile?.genre && (
-            <div className="space-y-1">
+          {artistProfile?.genre && <div className="space-y-1">
               <h3 className="font-display text-xs text-primary tracking-widest">GENRE</h3>
               <p className="text-foreground">{artistProfile.genre}</p>
-            </div>
-          )}
+            </div>}
 
           {/* Based In */}
-          {artistProfile?.location && (
-            <div className="space-y-1">
+          {artistProfile?.location && <div className="space-y-1">
               <h3 className="font-display text-xs text-primary tracking-widest">BASED IN</h3>
               <p className="text-foreground">{artistProfile.location}</p>
-            </div>
-          )}
+            </div>}
           {/* Availability */}
           <div className="space-y-1">
             <h3 className="font-display text-xs text-primary tracking-widest">AVAILABILITY</h3>
             <p className="text-foreground">
-              {application.availability_preference 
-                ? availabilityLabels[application.availability_preference] 
-                : 'Not specified'}
+              {application.availability_preference ? availabilityLabels[application.availability_preference] : 'Not specified'}
             </p>
-            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && (
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
+            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 {format(new Date(application.availability_start_date), 'MMM d, yyyy')} - {format(new Date(application.availability_end_date), 'MMM d, yyyy')}
-              </p>
-            )}
-            {application.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {application.availability_specific_dates.map((date, i) => (
-                  <span key={i} className="text-xs bg-secondary px-2 py-0.5">
+              </p>}
+            {application.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0 && <div className="flex flex-wrap gap-1 mt-1">
+                {application.availability_specific_dates.map((date, i) => <span key={i} className="text-xs bg-secondary px-2 py-0.5">
                     {format(new Date(date), 'MMM d, yyyy')}
-                  </span>
-                ))}
-              </div>
-            )}
+                  </span>)}
+              </div>}
           </div>
 
           {/* Payment */}
           <div className="space-y-1">
             <h3 className="font-display text-xs text-primary tracking-widest">PAYMENT PREFERENCE</h3>
             <p className="text-foreground">
-              {application.payment_preference 
-                ? paymentLabels[application.payment_preference] 
-                : 'Not specified'}
+              {application.payment_preference ? paymentLabels[application.payment_preference] : 'Not specified'}
             </p>
           </div>
 
@@ -526,111 +479,74 @@ export default function VenueApplicationDetail() {
           <div className="space-y-1">
             <h3 className="font-display text-xs text-primary tracking-widest">LINEUP</h3>
             <p className="text-foreground">
-              {application.lineup_preference 
-                ? lineupLabels[application.lineup_preference] 
-                : 'Not specified'}
+              {application.lineup_preference ? lineupLabels[application.lineup_preference] : 'Not specified'}
             </p>
           </div>
         </div>
 
-        {application.message && (
-          <div className="space-y-1 pt-2 border-t border-border">
+        {application.message && <div className="space-y-1 pt-2 border-t border-border">
             <h3 className="font-display text-xs text-primary tracking-widest">MESSAGE</h3>
             <p className="text-muted-foreground text-sm whitespace-pre-wrap">{application.message}</p>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Artist Bio */}
-      {artistProfile?.bio && (
-        <div className="bg-card border border-border p-6">
+      {artistProfile?.bio && <div className="bg-card border border-border p-6">
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">BIO</h2>
           <p className="text-muted-foreground whitespace-pre-wrap">{artistProfile.bio}</p>
-        </div>
-      )}
+        </div>}
 
       {/* Social Links */}
-      {socialLinks.length > 0 && (
-        <div className="bg-card border border-border p-6">
+      {socialLinks.length > 0 && <div className="bg-card border border-border p-6">
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">LINKS</h2>
           <div className="flex flex-wrap gap-2">
-            {socialLinks.map((link) => (
-              <a
-                key={link.key}
-                href={link.value!}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-sm bg-secondary px-3 py-1.5 hover:bg-secondary/80 transition-colors"
-              >
+            {socialLinks.map(link => <a key={link.key} href={link.value!} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm bg-secondary px-3 py-1.5 hover:bg-secondary/80 transition-colors">
                 {link.label}
                 <ExternalLink className="h-3 w-3" />
-              </a>
-            ))}
+              </a>)}
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Featured Samples */}
-      {artistProfile?.featured_samples && artistProfile.featured_samples.length > 0 && (
-        <div className="bg-card border border-border p-6">
+      {artistProfile?.featured_samples && artistProfile.featured_samples.length > 0 && <div className="bg-card border border-border p-6">
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">FEATURED SAMPLES</h2>
           <div className="space-y-2">
-            {artistProfile.featured_samples.map((sample, i) => (
-              <audio key={i} controls className="w-full">
+            {artistProfile.featured_samples.map((sample, i) => <audio key={i} controls className="w-full">
                 <source src={sample} />
-              </audio>
-            ))}
+              </audio>)}
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Past Gigs */}
-      {artistProfile?.past_gigs && artistProfile.past_gigs.length > 0 && (
-        <div className="bg-card border border-border p-6">
+      {artistProfile?.past_gigs && artistProfile.past_gigs.length > 0 && <div className="bg-card border border-border p-6">
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">PAST GIGS</h2>
           <ul className="space-y-1">
-            {artistProfile.past_gigs.map((gig, i) => (
-              <li key={i} className="text-muted-foreground text-sm">{gig}</li>
-            ))}
+            {artistProfile.past_gigs.map((gig, i) => <li key={i} className="text-muted-foreground text-sm">{gig}</li>)}
           </ul>
-        </div>
-      )}
+        </div>}
 
       {/* Press Links */}
-      {artistProfile?.press_links && artistProfile.press_links.length > 0 && (
-        <div className="bg-card border border-border p-6">
+      {artistProfile?.press_links && artistProfile.press_links.length > 0 && <div className="bg-card border border-border p-6">
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">PRESS</h2>
           <ul className="space-y-1">
-            {artistProfile.press_links.map((link, i) => (
-              <li key={i}>
-                <a
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline flex items-center gap-1"
-                >
+            {artistProfile.press_links.map((link, i) => <li key={i}>
+                <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1">
                   {link}
                   <ExternalLink className="h-3 w-3" />
                 </a>
-              </li>
-            ))}
+              </li>)}
           </ul>
-        </div>
-      )}
+        </div>}
 
       {/* Additional Photos */}
-      {artistProfile?.pictures && artistProfile.pictures.length > 1 && (
-        <div className="bg-card border border-border p-6">
+      {artistProfile?.pictures && artistProfile.pictures.length > 1 && <div className="bg-card border border-border p-6">
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">ADDITIONAL PHOTOS</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {artistProfile.pictures.slice(1).map((pic, i) => (
-              <div key={i} className="aspect-square bg-secondary overflow-hidden">
+            {artistProfile.pictures.slice(1).map((pic, i) => <div key={i} className="aspect-square bg-secondary overflow-hidden">
                 <img src={pic} alt={`${bandName} photo ${i + 2}`} className="w-full h-full object-cover" />
-              </div>
-            ))}
+              </div>)}
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Accept Dialog with Date and Time Picker */}
       <Dialog open={acceptDialogOpen} onOpenChange={setAcceptDialogOpen}>
@@ -648,25 +564,13 @@ export default function VenueApplicationDetail() {
               </label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !selectedGigDate && "text-muted-foreground"
-                    )}
-                  >
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !selectedGigDate && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {selectedGigDate ? format(selectedGigDate, "PPP") : "Pick a date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={selectedGigDate}
-                    onSelect={handleDateChange}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
+                  <CalendarComponent mode="single" selected={selectedGigDate} onSelect={handleDateChange} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
             </div>
@@ -675,12 +579,7 @@ export default function VenueApplicationDetail() {
               <label className="font-display text-xs text-muted-foreground tracking-widest block">
                 TIME OF SHOW (OPTIONAL)
               </label>
-              <Input
-                type="time"
-                value={selectedGigTime}
-                onChange={(e) => setSelectedGigTime(e.target.value)}
-                className="bg-background border-border"
-              />
+              <Input type="time" value={selectedGigTime} onChange={e => setSelectedGigTime(e.target.value)} className="bg-background border-border" />
             </div>
 
             {/* Hold vs Confirmed Selection */}
@@ -688,7 +587,7 @@ export default function VenueApplicationDetail() {
               <label className="font-display text-xs text-muted-foreground tracking-widest block">
                 ACCEPTANCE TYPE
               </label>
-              <RadioGroup value={acceptType} onValueChange={(v) => setAcceptType(v as 'confirmed' | 'hold')}>
+              <RadioGroup value={acceptType} onValueChange={v => setAcceptType(v as 'confirmed' | 'hold')}>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="confirmed" id="confirmed" />
                   <Label htmlFor="confirmed" className="cursor-pointer font-display text-sm">
@@ -705,34 +604,23 @@ export default function VenueApplicationDetail() {
             </div>
 
             {/* Hold Priority - Only show if hold is selected AND there are existing holds */}
-            {acceptType === 'hold' && existingHolds.length > 0 && (
-              <div className="space-y-2">
+            {acceptType === 'hold' && existingHolds.length > 0 && <div className="space-y-2">
                 <label className="font-display text-xs text-muted-foreground tracking-widest block">
                   HOLD PRIORITY
                 </label>
-                <HoldsOrderList
-                  holds={existingHolds}
-                  newArtistName={bandName}
-                  onOrderChange={setHoldPriority}
-                />
-              </div>
-            )}
+                <HoldsOrderList holds={existingHolds} newArtistName={bandName} onOrderChange={setHoldPriority} />
+              </div>}
 
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setAcceptDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button 
-                onClick={handleConfirmAccept} 
-                disabled={!selectedGigDate}
-                className="bg-primary hover:bg-primary/90"
-              >
+              <Button onClick={handleConfirmAccept} disabled={!selectedGigDate} className="bg-primary hover:bg-primary/90">
                 {acceptType === 'hold' ? `Accept as Hold #${holdPriority}` : 'Accept & Confirm Gig'}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 }
