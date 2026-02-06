@@ -91,7 +91,12 @@ export default function FindVenues() {
   const filteredVenues = venues.filter(venue => {
     const matchesSearch = venue.venue_name.toLowerCase().includes(searchTerm.toLowerCase()) || venue.room_name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGenre = selectedGenres.length === 0 || selectedGenres.some(g => venue.genres?.includes(g));
-    const matchesLocation = !selectedLocation || venue.location?.toLowerCase().includes(selectedLocation.toLowerCase());
+    const matchesLocation = !selectedLocation || (() => {
+      const venueLoc = venue.location?.toLowerCase() || '';
+      const searchLoc = selectedLocation.toLowerCase();
+      // Match if either contains the other (handles "New York" matching "New York, New York")
+      return venueLoc.includes(searchLoc) || searchLoc.includes(venueLoc);
+    })();
     let matchesCapacity = true;
     if (selectedCapacities.length > 0 && venue.capacity) {
       matchesCapacity = selectedCapacities.some(cap => {
