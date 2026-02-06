@@ -521,7 +521,7 @@ export default function VenueApplicationDetail() {
       {artistProfile?.past_gigs && artistProfile.past_gigs.length > 0 && <div className="bg-card border border-border p-6">
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">PAST GIGS</h2>
           <ul className="space-y-1">
-            {artistProfile.past_gigs.map((gig, i) => <li key={i} className="text-muted-foreground text-sm">{gig}</li>)}
+            {artistProfile.past_gigs.map((gig, i) => <li key={i} className="text-sm text-primary">{gig}</li>)}
           </ul>
         </div>}
 
