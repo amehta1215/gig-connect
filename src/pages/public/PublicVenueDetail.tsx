@@ -246,7 +246,7 @@ export default function PublicVenueDetail() {
       <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
         <DialogContent className="bg-card border-border max-w-sm text-center">
           <DialogHeader>
-            <DialogTitle className="font-display text-2xl text-accent tracking-wide">
+            <DialogTitle className="font-display text-2xl text-black tracking-wide">
               Login or sign up to apply
             </DialogTitle>
             <DialogDescription className="text-muted-foreground">
