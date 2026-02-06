@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, MapPin, Users, Music, Filter, X, Heart } from 'lucide-react';
+import { MapPin, Users, Music, Filter, X, Heart } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { LocationAutocomplete } from '@/components/LocationAutocomplete';
+import { UnifiedVenueSearch } from '@/components/UnifiedVenueSearch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -85,9 +84,14 @@ export default function PublicFindVenues() {
     setLoading(false);
   };
   const filteredVenues = venues.filter(venue => {
-    const matchesSearch = venue.venue_name.toLowerCase().includes(searchTerm.toLowerCase()) || venue.room_name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const q = searchTerm.toLowerCase();
+    const matchesSearch = !searchTerm || venue.venue_name.toLowerCase().includes(q) || venue.room_name?.toLowerCase().includes(q) || venue.location?.toLowerCase().includes(q);
     const matchesGenre = selectedGenres.length === 0 || selectedGenres.some(g => venue.genres?.includes(g));
-    const matchesLocation = !selectedLocation || venue.location?.toLowerCase().includes(selectedLocation.toLowerCase());
+    const matchesLocation = !selectedLocation || (() => {
+      const venueLoc = venue.location?.toLowerCase() || '';
+      const searchLoc = selectedLocation.toLowerCase();
+      return venueLoc.includes(searchLoc) || searchLoc.includes(venueLoc);
+    })();
     let matchesCapacity = true;
     if (selectedCapacities.length > 0 && venue.capacity) {
       matchesCapacity = selectedCapacities.some(cap => {
@@ -104,7 +108,14 @@ export default function PublicFindVenues() {
   const toggleCapacity = (capacity: string) => {
     setSelectedCapacities(prev => prev.includes(capacity) ? prev.filter(c => c !== capacity) : [...prev, capacity]);
   };
-  const hasActiveFilters = selectedGenres.length > 0 || selectedCapacities.length > 0 || selectedLocation !== '';
+  const hasActiveFilters = selectedGenres.length > 0 || selectedCapacities.length > 0 || selectedLocation !== '' || searchTerm !== '';
+  const handleLocationSelect = (location: string) => {
+    setSelectedLocation(location);
+    setSearchTerm('');
+  };
+  const handleVenueSelect = (venueId: string) => {
+    navigate(`/venues/${venueId}`);
+  };
   const clearAllFilters = () => {
     setSelectedGenres([]);
     setSelectedCapacities([]);
@@ -152,27 +163,19 @@ export default function PublicFindVenues() {
   const filtersContent = <div className="space-y-4">
       {genreMultiSelect("w-full")}
       {capacityMultiSelect("w-full")}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border w-full placeholder:text-muted-foreground" />
-      </div>
     </div>;
   return <div className="space-y-6 animate-fade-in">
       {/* Search and Filters */}
       <Collapsible open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <div className="flex gap-2">
           <div className="flex-1">
-            <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Search venue locations..." className="w-full" />
+            <UnifiedVenueSearch onLocationSelect={handleLocationSelect} onVenueSelect={handleVenueSelect} onSearchChange={setSearchTerm} venues={venues} className="w-full" />
           </div>
 
           {/* Desktop Filters */}
           <div className="hidden lg:flex gap-2">
             {genreMultiSelect("w-36")}
             {capacityMultiSelect("w-36")}
-            <div className="relative w-48">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border placeholder:text-muted-foreground" />
-            </div>
             {hasActiveFilters && <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground">
                 <X className="h-3 w-3 mr-1" /> Reset
               </Button>}
