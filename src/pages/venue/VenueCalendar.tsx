@@ -565,7 +565,7 @@ export default function VenueCalendar() {
         {gigs.filter(g => new Date(g.gig_date) >= new Date()).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-6">
             {/* Confirmed Shows */}
             {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length > 0 && <div className="space-y-2">
-                <p className="font-display text-xs text-green-500 tracking-widest flex items-center gap-1">
+                <p className="font-display text-xs tracking-widest flex items-center gap-1 text-primary">
                   <CheckCircle2 className="h-3 w-3" />
                   CONFIRMED
                 </p>
