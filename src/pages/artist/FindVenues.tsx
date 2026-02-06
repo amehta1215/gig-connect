@@ -89,7 +89,8 @@ export default function FindVenues() {
   }, {} as Record<string, number>);
 
   const filteredVenues = venues.filter(venue => {
-    const matchesSearch = venue.venue_name.toLowerCase().includes(searchTerm.toLowerCase()) || venue.room_name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const q = searchTerm.toLowerCase();
+    const matchesSearch = !searchTerm || venue.venue_name.toLowerCase().includes(q) || venue.room_name?.toLowerCase().includes(q) || venue.location?.toLowerCase().includes(q);
     const matchesGenre = selectedGenres.length === 0 || selectedGenres.some(g => venue.genres?.includes(g));
     const matchesLocation = !selectedLocation || (() => {
       const venueLoc = venue.location?.toLowerCase() || '';
