@@ -135,7 +135,9 @@ export default function VenueProfile() {
   const autoSave = useCallback(async () => {
     if (!user || !profile || !initialLoadDone) return;
     setSaving(true);
-    const { error } = await supabase.from('venue_profiles').update({
+    const {
+      error
+    } = await supabase.from('venue_profiles').update({
       venue_name: formData.venue_name || null,
       location: formData.location || null,
       bio: formData.bio || null,
@@ -150,11 +152,9 @@ export default function VenueProfile() {
   // Debounced auto-save effect
   useEffect(() => {
     if (!initialLoadDone) return;
-    
     const timeoutId = setTimeout(() => {
       autoSave();
     }, 1000);
-
     return () => clearTimeout(timeoutId);
   }, [formData, autoSave, initialLoadDone]);
   const toggleEventType = (eventType: string) => {
@@ -258,7 +258,6 @@ export default function VenueProfile() {
     // For existing rooms, save directly
     handleSaveRoom(true);
   };
-
   const handleSaveRoom = async (publish: boolean = true) => {
     if (!profile || !roomFormData.venue_name) {
       toast.error('Venue name required');
@@ -266,7 +265,6 @@ export default function VenueProfile() {
     }
     setSavingRoom(true);
     setShowPublishDialog(false);
-    
     const listingData = {
       venue_profile_id: profile.id,
       venue_name: roomFormData.venue_name,
@@ -290,7 +288,7 @@ export default function VenueProfile() {
     if (error) {
       toast.error('Failed');
     } else {
-      toast.success(editingListing ? 'Updated' : (publish ? 'Room published!' : 'Room saved as draft'));
+      toast.success(editingListing ? 'Updated' : publish ? 'Room published!' : 'Room saved as draft');
       setIsDialogOpen(false);
       resetRoomForm();
       fetchListings(profile.id);
@@ -334,16 +332,12 @@ export default function VenueProfile() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {!fromDropdown && (
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          {!fromDropdown && <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
               <ArrowLeft className="h-5 w-5" />
-            </Button>
-          )}
-          <h1 className="font-display text-4xl text-accent font-bold">VENUE PROFILE</h1>
+            </Button>}
+          <h1 className="font-display text-4xl font-bold text-primary">VENUE PROFILE</h1>
         </div>
-        {saving && (
-          <span className="text-sm text-muted-foreground">Saving...</span>
-        )}
+        {saving && <span className="text-sm text-muted-foreground">Saving...</span>}
       </div>
 
 
@@ -406,64 +400,37 @@ export default function VenueProfile() {
               <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
                 <div className="flex items-center justify-between">
                   <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
-                    {editingListing ? (roomFormData.room_name || roomFormData.venue_name || 'ROOM') : 'NEW ROOM'}
+                    {editingListing ? roomFormData.room_name || roomFormData.venue_name || 'ROOM' : 'NEW ROOM'}
                   </DialogTitle>
-                  {editingListing && (
-                    <div className="flex gap-2">
-                      <Button
-                        variant={dialogMode === 'edit' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setDialogMode('edit')}
-                        className="font-display tracking-widest"
-                      >
+                  {editingListing && <div className="flex gap-2">
+                      <Button variant={dialogMode === 'edit' ? 'default' : 'outline'} size="sm" onClick={() => setDialogMode('edit')} className="font-display tracking-widest">
                         <Pencil className="h-4 w-4 mr-2" />
                         EDIT
                       </Button>
-                      <Button
-                        variant={dialogMode === 'preview' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setDialogMode('preview')}
-                        className="font-display tracking-widest"
-                      >
+                      <Button variant={dialogMode === 'preview' ? 'default' : 'outline'} size="sm" onClick={() => setDialogMode('preview')} className="font-display tracking-widest">
                         <Eye className="h-4 w-4 mr-2" />
                         PREVIEW
                       </Button>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </DialogHeader>
 
-              {dialogMode === 'preview' && editingListing ? (
-                /* Preview Content - Inline version of RoomPreviewSheet */
-                <div className="flex-1 overflow-y-auto px-6 py-6">
+              {dialogMode === 'preview' && editingListing ? (/* Preview Content - Inline version of RoomPreviewSheet */
+            <div className="flex-1 overflow-y-auto px-6 py-6">
                   {/* Pictures Gallery */}
                   <div className="mb-10">
                     {(() => {
-                      const allPictures: string[] = [...pictures];
-                      
-                      return allPictures.length === 0 ? (
-                        <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
+                  const allPictures: string[] = [...pictures];
+                  return allPictures.length === 0 ? <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
                           <div className="w-full h-full flex items-center justify-center bg-heat">
                             <Music className="h-12 w-12 text-primary/30" />
                           </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-wrap justify-center gap-2">
-                          {allPictures.map((pic, index) => (
-                            <div 
-                              key={index} 
-                              className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden"
-                            >
-                              <img 
-                                src={pic} 
-                                alt={`${roomFormData.venue_name} ${index + 1}`} 
-                                className="w-full h-full object-cover" 
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    })()}
+                        </div> : <div className="flex flex-wrap justify-center gap-2">
+                          {allPictures.map((pic, index) => <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+                              <img src={pic} alt={`${roomFormData.venue_name} ${index + 1}`} className="w-full h-full object-cover" />
+                            </div>)}
+                        </div>;
+                })()}
                   </div>
 
                   {/* Two Column Layout */}
@@ -475,60 +442,41 @@ export default function VenueProfile() {
                           <h1 className="font-display text-3xl text-accent font-bold tracking-wide">
                             {roomFormData.venue_name || 'Venue Name'}
                           </h1>
-                          {roomFormData.room_name && (
-                            <p className="text-lg text-muted-foreground mt-1">{roomFormData.room_name}</p>
-                          )}
+                          {roomFormData.room_name && <p className="text-lg text-muted-foreground mt-1">{roomFormData.room_name}</p>}
                         </div>
 
                         <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-                          {roomFormData.location && (
-                            <span className="flex items-center gap-2">
+                          {roomFormData.location && <span className="flex items-center gap-2">
                               <MapPin className="h-4 w-4" />
                               {roomFormData.location}
-                            </span>
-                          )}
-                          {roomFormData.capacity && (
-                            <span className="flex items-center gap-2">
+                            </span>}
+                          {roomFormData.capacity && <span className="flex items-center gap-2">
                               <Users className="h-4 w-4" />
                               {roomFormData.capacity} capacity
-                            </span>
-                          )}
+                            </span>}
                         </div>
 
-                        {roomFormData.genres && roomFormData.genres.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {roomFormData.genres.map(genre => (
-                              <span 
-                                key={genre} 
-                                className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display"
-                              >
+                        {roomFormData.genres && roomFormData.genres.length > 0 && <div className="flex flex-wrap gap-2">
+                            {roomFormData.genres.map(genre => <span key={genre} className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display">
                                 {genre}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                              </span>)}
+                          </div>}
                       </div>
 
                       {/* Details */}
                       <div className="space-y-4">
-                        {formData.bio && (
-                          <div className="bg-background border border-border rounded-lg p-4">
+                        {formData.bio && <div className="bg-background border border-border rounded-lg p-4">
                             <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
                             <p className="text-muted-foreground text-sm">{formData.bio}</p>
-                          </div>
-                        )}
-                        {roomFormData.backline_info && (
-                          <div className="bg-background border border-border rounded-lg p-4">
+                          </div>}
+                        {roomFormData.backline_info && <div className="bg-background border border-border rounded-lg p-4">
                             <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
                             <p className="text-muted-foreground text-sm">{roomFormData.backline_info}</p>
-                          </div>
-                        )}
-                        {roomFormData.house_rules && (
-                          <div className="bg-background border border-border rounded-lg p-4">
+                          </div>}
+                        {roomFormData.house_rules && <div className="bg-background border border-border rounded-lg p-4">
                             <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
                             <p className="text-muted-foreground text-sm">{roomFormData.house_rules}</p>
-                          </div>
-                        )}
+                          </div>}
                       </div>
                     </div>
 
@@ -543,25 +491,15 @@ export default function VenueProfile() {
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                /* Edit Content */
-                <div className="flex-1 overflow-y-auto">
+                </div>) : (/* Edit Content */
+            <div className="flex-1 overflow-y-auto">
                   {/* Floating Save Button */}
                   <div className="sticky top-0 z-10 px-6 pt-4 flex justify-end">
-                    <Button 
-                      onClick={handleCreateRoomClick} 
-                      disabled={savingRoom} 
-                      className="font-display tracking-widest"
-                    >
-                      {editingListing ? (
-                        <>
+                    <Button onClick={handleCreateRoomClick} disabled={savingRoom} className="font-display tracking-widest">
+                      {editingListing ? <>
                           <Save className="h-4 w-4 mr-2" />
                           {savingRoom ? '...' : 'SAVE CHANGES'}
-                        </>
-                      ) : (
-                        savingRoom ? '...' : 'CREATE ROOM'
-                      )}
+                        </> : savingRoom ? '...' : 'CREATE ROOM'}
                     </Button>
                   </div>
                   
@@ -662,8 +600,7 @@ export default function VenueProfile() {
                     </div>
                   </div>
                   </div>
-                </div>
-              )}
+                </div>)}
             </DialogContent>
           </Dialog>
         </div>
@@ -676,21 +613,15 @@ export default function VenueProfile() {
               ADD ROOM
             </Button>
           </div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {listings.map(listing => <div 
-                key={listing.id} 
-                className="bg-background border border-border overflow-hidden hover:border-primary/50 transition-colors rounded-lg cursor-pointer"
-                onClick={() => openDialog(listing, 'preview')}
-              >
+            {listings.map(listing => <div key={listing.id} className="bg-background border border-border overflow-hidden hover:border-primary/50 transition-colors rounded-lg cursor-pointer" onClick={() => openDialog(listing, 'preview')}>
                 {/* Image */}
                 <div className="aspect-[4/3] bg-secondary flex items-center justify-center overflow-hidden relative">
                   {listing.pictures && listing.pictures.length > 0 ? <img src={listing.pictures[0]} alt={listing.venue_name} className="w-full h-full object-cover" /> : <div className="bg-heat w-full h-full flex items-center justify-center">
                       <Music className="h-12 w-12 text-primary/30" />
                     </div>}
-                  {!listing.is_published && (
-                    <div className="absolute top-2 left-2 bg-muted text-muted-foreground text-xs font-display tracking-widest px-2 py-1 rounded">
+                  {!listing.is_published && <div className="absolute top-2 left-2 bg-muted text-muted-foreground text-xs font-display tracking-widest px-2 py-1 rounded">
                       DRAFT
-                    </div>
-                  )}
+                    </div>}
                 </div>
 
                 {/* Content */}
@@ -733,16 +664,10 @@ export default function VenueProfile() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel 
-              onClick={() => handleSaveRoom(false)}
-              className="font-display tracking-widest"
-            >
+            <AlertDialogCancel onClick={() => handleSaveRoom(false)} className="font-display tracking-widest">
               No, save as draft
             </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => handleSaveRoom(true)}
-              className="font-display tracking-widest"
-            >
+            <AlertDialogAction onClick={() => handleSaveRoom(true)} className="font-display tracking-widest">
               Yes, publish!
             </AlertDialogAction>
           </AlertDialogFooter>
