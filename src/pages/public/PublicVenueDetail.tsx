@@ -240,7 +240,7 @@ export default function PublicVenueDetail() {
               </div>
 
               {/* Submit Button */}
-              <Button onClick={handleInteraction} className="w-full font-display tracking-widest text-lg py-6">
+              <Button onClick={handleInteraction} className="w-full font-display tracking-widest text-lg py-6 bg-accent hover:bg-accent/90 text-accent-foreground">
                 APPLY
               </Button>
             </div>
