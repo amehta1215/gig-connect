@@ -366,7 +366,7 @@ export default function VenueApplications() {
 
             {/* Tags row - Genre, Act Type, Payment, Submitted */}
             <div className="flex flex-wrap gap-1 mt-3">
-              {application.artist_profile?.genre && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+              {application.artist_profile?.genre && <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200">
                   {application.artist_profile.genre}
                 </span>}
               {application.lineup_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
