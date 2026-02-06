@@ -190,7 +190,7 @@ export default function PublicVenueDetail() {
         <div className="lg:w-80 xl:w-96">
           <div className="lg:sticky lg:top-20">
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-              <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
+              <h2 className="font-display text-2xl text-black font-bold">APPLY</h2>
 
               {/* Availability */}
               <div className="space-y-3" onClick={handleInteraction}>
