@@ -357,8 +357,8 @@ export default function VenueMessages() {
                       <button onClick={e => {
                   e.stopPropagation();
                   toggleStar(thread.thread_id, thread.isStarred);
-                }} className="flex-shrink-0 p-1 hover:bg-secondary">
-                        {thread.isStarred ? <Star className="h-4 w-4 text-primary fill-primary" /> : <Star className="h-4 w-4 text-muted-foreground" />}
+                }} className="flex-shrink-0 p-1 hover:bg-secondary/50 rounded">
+                        {thread.isStarred ? <Star className="h-4 w-4 fill-[#FDDA0D] text-[#FDDA0D]" /> : <Star className="h-4 w-4 text-muted-foreground" />}
                       </button>
                     </div>
                   </div>;
