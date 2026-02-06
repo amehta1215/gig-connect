@@ -21,7 +21,8 @@ serve(async (req) => {
     }
 
     // Use Nominatim (OpenStreetMap) - free, no API key needed
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&countrycodes=us`;
+    // Filter to cities, towns, villages, suburbs, neighbourhoods only
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=10&countrycodes=us`;
     
     console.log("Nominatim request for:", query);
 
@@ -33,13 +34,29 @@ serve(async (req) => {
     
     const data = await response.json();
     
-    console.log("Nominatim response count:", data.length);
+    // Filter to only place-level results (cities, towns, suburbs, neighbourhoods)
+    const placeTypes = ['city', 'town', 'village', 'suburb', 'neighbourhood', 'borough', 'quarter', 'hamlet', 'state', 'county'];
+    const filtered = data.filter((place: any) => {
+      return placeTypes.includes(place.type) || 
+             place.class === 'place' || 
+             place.class === 'boundary';
+    });
+    
+    console.log("Nominatim response count:", data.length, "filtered:", filtered.length);
 
-    const suggestions = data.map((place: any) => ({
-      id: place.place_id.toString(),
-      name: place.display_name,
-      text: place.display_name.split(',')[0],
-    }));
+    const suggestions = filtered.slice(0, 5).map((place: any) => {
+      // Build a cleaner display name: City/Neighborhood, State
+      const addr = place.address || {};
+      const primaryName = addr.neighbourhood || addr.suburb || addr.city || addr.town || addr.village || addr.county || place.display_name.split(',')[0];
+      const state = addr.state || '';
+      const displayName = state ? `${primaryName}, ${state}` : primaryName;
+      
+      return {
+        id: place.place_id.toString(),
+        name: displayName,
+        text: displayName,
+      };
+    });
 
     return new Response(
       JSON.stringify({ suggestions }),
