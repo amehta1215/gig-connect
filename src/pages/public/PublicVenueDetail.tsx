@@ -139,7 +139,7 @@ export default function PublicVenueDetail() {
           {/* Venue Info */}
           <div className="space-y-4">
             <div>
-              <h1 className="font-display text-4xl md:text-5xl text-accent font-bold tracking-wide">
+              <h1 className="font-display text-4xl md:text-5xl text-black font-bold tracking-wide">
                 {listing.venue_name}
               </h1>
               {listing.room_name && <p className="text-lg text-muted-foreground mt-1">{listing.room_name}</p>}
