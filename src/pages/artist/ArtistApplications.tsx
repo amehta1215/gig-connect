@@ -5,13 +5,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, CheckCircle2, Archive, MapPin, Calendar, PauseCircle } from 'lucide-react';
 import { format } from 'date-fns';
-
 interface GigListing {
   id: string;
   is_confirmed: boolean;
   hold_priority: number | null;
 }
-
 interface Application {
   id: string;
   artist_id: string;
@@ -53,24 +51,26 @@ export default function ArtistApplications() {
     });
     if (data && !error) {
       // Fetch gig listings for accepted applications to check hold status
-      const enrichedApps = await Promise.all(data.map(async (app) => {
+      const enrichedApps = await Promise.all(data.map(async app => {
         if (app.status === 'accepted') {
-          const { data: gigData } = await supabase
-            .from('gig_listings')
-            .select('id, is_confirmed, hold_priority')
-            .eq('application_id', app.id)
-            .maybeSingle();
-          return { ...app, gig_listing: gigData };
+          const {
+            data: gigData
+          } = await supabase.from('gig_listings').select('id, is_confirmed, hold_priority').eq('application_id', app.id).maybeSingle();
+          return {
+            ...app,
+            gig_listing: gigData
+          };
         }
-        return { ...app, gig_listing: null };
+        return {
+          ...app,
+          gig_listing: null
+        };
       }));
       setApplications(enrichedApps as Application[]);
     }
     setLoading(false);
   };
-  const filteredApplications = activeTab === 'all' 
-    ? applications 
-    : applications.filter(app => app.status === activeTab);
+  const filteredApplications = activeTab === 'all' ? applications : applications.filter(app => app.status === activeTab);
   const statusConfig = {
     in_progress: {
       icon: Clock,
@@ -114,7 +114,7 @@ export default function ArtistApplications() {
             <h3 className="font-display text-xl text-foreground tracking-wide">
               {application.venue_listing?.venue_name}
             </h3>
-            {application.venue_listing?.location && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+            {application.venue_listing?.location && <p className="text-xs flex items-center gap-1 mt-1 text-primary">
                 <MapPin className="h-3 w-3" />
                 {application.venue_listing.location}
               </p>}
@@ -126,7 +126,7 @@ export default function ArtistApplications() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-3 uppercase tracking-wider">
+        <div className="flex items-center gap-1 text-[10px] mt-3 uppercase tracking-wider text-primary">
           <Calendar className="h-3 w-3" />
           Submitted: {format(new Date(application.created_at), 'MMM d, yyyy')}
         </div>
