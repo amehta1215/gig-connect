@@ -372,7 +372,7 @@ export default function VenueApplications() {
               {application.lineup_preference && <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200">
                   {lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}
                 </span>}
-              {application.payment_preference && <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+              {application.payment_preference && <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200">
                   {application.payment_preference.replace('_', ' ')}
                 </span>}
               <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
