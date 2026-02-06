@@ -143,8 +143,8 @@ export default function FindVenues() {
   };
   const genreMultiSelect = (className?: string) => <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className={`bg-card border-border justify-start ${className || ''}`}>
-          <Music className="h-4 w-4 mr-2 text-muted-foreground" />
+        <Button variant="outline" className={`bg-card border-border justify-start text-muted-foreground ${className || ''}`}>
+          <Music className="h-4 w-4 mr-2" />
           {selectedGenres.length === 0 ? 'Genre' : `${selectedGenres.length} selected`}
         </Button>
       </PopoverTrigger>
@@ -162,8 +162,8 @@ export default function FindVenues() {
     </Popover>;
   const capacityMultiSelect = (className?: string) => <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className={`bg-card border-border justify-start ${className || ''}`}>
-          <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+        <Button variant="outline" className={`bg-card border-border justify-start text-muted-foreground ${className || ''}`}>
+          <Users className="h-4 w-4 mr-2" />
           {selectedCapacities.length === 0 ? 'Capacity' : `${selectedCapacities.length} selected`}
         </Button>
       </PopoverTrigger>
