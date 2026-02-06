@@ -163,7 +163,7 @@ export default function FindVenues() {
   const capacityMultiSelect = (className?: string) => <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className={`bg-card border-border justify-start ${className || ''}`}>
-          <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+          <Users className="h-4 w-4 mr-2 text-primary" />
           {selectedCapacities.length === 0 ? 'Capacity' : `${selectedCapacities.length} selected`}
         </Button>
       </PopoverTrigger>
