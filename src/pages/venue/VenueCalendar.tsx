@@ -532,10 +532,10 @@ export default function VenueCalendar() {
                           <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                           <button onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="text-left flex-1 hover:opacity-80 transition-opacity">
                             <p className="font-display text-lg text-primary">
-                              <span className="text-muted-foreground text-sm mr-2">#{index + 1}</span>
+                              <span className="text-sm mr-2 text-primary">#{index + 1}</span>
                               {artistName}
                             </p>
-                            <p className="text-sm text-muted-foreground">{roomDisplay}</p>
+                            <p className="text-sm text-primary">{roomDisplay}</p>
                           </button>
                         </div>
                         <div className="flex gap-2 ml-4">
