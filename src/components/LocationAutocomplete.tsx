@@ -108,7 +108,7 @@ export function LocationAutocomplete({
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground z-10" />
+      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black z-10" />
       <Input
         placeholder={placeholder}
         value={inputValue}
