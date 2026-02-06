@@ -322,7 +322,7 @@ export default function ArtistMessages() {
                   e.stopPropagation();
                   toggleStar(thread.thread_id, thread.isStarred);
                 }} className="flex-shrink-0 p-1 hover:bg-secondary">
-                        {thread.isStarred ? <Star className="h-4 w-4 text-primary fill-primary" /> : <Star className="h-4 w-4 text-muted-foreground" />}
+                        {thread.isStarred ? <Star className="h-4 w-4 fill-primary text-accent-foreground" /> : <Star className="h-4 w-4 text-muted-foreground" />}
                       </button>
                     </div>
                   </div>;
