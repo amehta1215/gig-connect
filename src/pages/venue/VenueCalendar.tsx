@@ -520,7 +520,7 @@ export default function VenueCalendar() {
 
               {/* Holds */}
               {holdGigs.length > 0 && <div className="space-y-2">
-                  <p className="font-display text-xs text-yellow-500 tracking-widest flex items-center gap-1">
+                  <p className="font-display text-xs tracking-widest flex items-center gap-1 text-primary">
                     <PauseCircle className="h-3 w-3" />
                     HOLDS
                   </p>
