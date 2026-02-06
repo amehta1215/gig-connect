@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin, Music } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,7 +32,7 @@ export function UnifiedVenueSearch({
   className = "",
 }: UnifiedVenueSearchProps) {
   const [query, setQuery] = useState('');
-  const [locationSuggestions, setLocationSuggestions] = useState<LocationSuggestion[]>([]);
+  const [externalLocations, setExternalLocations] = useState<LocationSuggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,9 +48,38 @@ export function UnifiedVenueSearch({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const searchLocations = async (q: string) => {
-    if (q.length < 2) {
-      setLocationSuggestions([]);
+  // Extract unique venue locations from loaded venues
+  const venueLocations = useMemo(() => {
+    const locMap = new Map<string, string>();
+    venues.forEach(v => {
+      if (v.location) {
+        const key = v.location.toLowerCase();
+        if (!locMap.has(key)) locMap.set(key, v.location);
+      }
+    });
+    return Array.from(locMap.values());
+  }, [venues]);
+
+  // Matching venue locations from the database (instant, no API call)
+  const matchingLocations = useMemo(() => {
+    if (query.length < 1) return [];
+    const q = query.toLowerCase();
+    return venueLocations.filter(loc => loc.toLowerCase().includes(q));
+  }, [query, venueLocations]);
+
+  // Matching venues by name
+  const matchingVenues = useMemo(() => {
+    if (query.length < 2) return [];
+    const q = query.toLowerCase();
+    return venues.filter(v =>
+      v.venue_name.toLowerCase().includes(q) ||
+      v.room_name?.toLowerCase().includes(q)
+    ).slice(0, 5);
+  }, [query, venues]);
+
+  const searchExternalLocations = async (q: string) => {
+    if (q.length < 3) {
+      setExternalLocations([]);
       return;
     }
     setIsLoading(true);
@@ -59,53 +88,61 @@ export function UnifiedVenueSearch({
         body: { query: q },
       });
       if (error) throw error;
-      setLocationSuggestions(data.suggestions || []);
+      // Filter out locations already shown from venue locations
+      const external = (data.suggestions || []).filter((s: LocationSuggestion) =>
+        !matchingLocations.some(loc => loc.toLowerCase() === s.text.toLowerCase())
+      );
+      setExternalLocations(external);
     } catch (err) {
       console.error('Location search error:', err);
-      setLocationSuggestions([]);
+      setExternalLocations([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const matchingVenues = query.length >= 2
-    ? venues.filter(v =>
-        v.venue_name.toLowerCase().includes(query.toLowerCase()) ||
-        v.room_name?.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 5)
-    : [];
-
-  const hasResults = locationSuggestions.length > 0 || matchingVenues.length > 0;
+  const hasResults = matchingLocations.length > 0 || matchingVenues.length > 0 || externalLocations.length > 0;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setQuery(newValue);
     onSearchChange(newValue);
 
+    if (newValue.length >= 1) {
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+      setExternalLocations([]);
+    }
+
+    // Debounce external location search
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      searchLocations(newValue);
-      if (newValue.length >= 2) {
-        setIsOpen(true);
-      } else {
-        setIsOpen(false);
-      }
-    }, 300);
+      searchExternalLocations(newValue);
+    }, 400);
   };
 
-  const handleLocationSelect = (suggestion: LocationSuggestion) => {
-    setQuery(suggestion.text);
-    onLocationSelect(suggestion.text);
+  const handleLocationSelect = (locationText: string) => {
+    setQuery(locationText);
+    onLocationSelect(locationText);
     onSearchChange('');
     setIsOpen(false);
-    setLocationSuggestions([]);
+    setExternalLocations([]);
   };
 
   const handleVenueSelect = (venue: VenueSuggestion) => {
     setQuery('');
     onVenueSelect(venue.id);
     setIsOpen(false);
-    setLocationSuggestions([]);
+    setExternalLocations([]);
+  };
+
+  const handleClear = () => {
+    setQuery('');
+    onSearchChange('');
+    onLocationSelect('');
+    setIsOpen(false);
+    setExternalLocations([]);
   };
 
   return (
@@ -115,13 +152,23 @@ export function UnifiedVenueSearch({
         placeholder="Search venues, neighborhoods, cities..."
         value={query}
         onChange={handleInputChange}
-        onFocus={() => hasResults && query.length >= 2 && setIsOpen(true)}
+        onFocus={() => query.length >= 1 && hasResults && setIsOpen(true)}
         className="pl-10 bg-card border-border"
       />
 
+      {query.length > 0 && (
+        <button
+          type="button"
+          onClick={handleClear}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10"
+        >
+          ×
+        </button>
+      )}
+
       {isOpen && hasResults && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 max-h-72 overflow-y-auto">
-          {/* Venue matches */}
+          {/* Venue name matches */}
           {matchingVenues.length > 0 && (
             <div>
               <div className="px-3 py-1.5 text-[10px] font-display uppercase tracking-widest text-muted-foreground border-b border-border">
@@ -149,17 +196,39 @@ export function UnifiedVenueSearch({
             </div>
           )}
 
-          {/* Location matches */}
-          {locationSuggestions.length > 0 && (
+          {/* Venue locations from DB (instant) */}
+          {matchingLocations.length > 0 && (
             <div>
               <div className="px-3 py-1.5 text-[10px] font-display uppercase tracking-widest text-muted-foreground border-b border-border">
                 Locations
               </div>
-              {locationSuggestions.map((s) => (
+              {matchingLocations.map((loc) => (
+                <button
+                  key={loc}
+                  type="button"
+                  onClick={() => handleLocationSelect(loc)}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-secondary transition-colors flex items-center gap-2"
+                >
+                  <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                  <span className="truncate text-foreground">{loc}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* External location suggestions (from Nominatim) */}
+          {externalLocations.length > 0 && (
+            <div>
+              {matchingLocations.length === 0 && (
+                <div className="px-3 py-1.5 text-[10px] font-display uppercase tracking-widest text-muted-foreground border-b border-border">
+                  Locations
+                </div>
+              )}
+              {externalLocations.map((s) => (
                 <button
                   key={s.id}
                   type="button"
-                  onClick={() => handleLocationSelect(s)}
+                  onClick={() => handleLocationSelect(s.text)}
                   className="w-full px-3 py-2 text-left text-sm hover:bg-secondary transition-colors flex items-center gap-2"
                 >
                   <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
@@ -172,7 +241,7 @@ export function UnifiedVenueSearch({
       )}
 
       {isLoading && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+        <div className="absolute right-8 top-1/2 -translate-y-1/2">
           <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       )}
