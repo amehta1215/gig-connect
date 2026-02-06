@@ -231,7 +231,7 @@ export default function FindVenues() {
           {filteredVenues.map(venue => <div key={venue.id} onClick={() => navigate(`/artist/venues/${venue.id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative">
               {/* Favorite Button */}
               <button onClick={e => handleToggleFavorite(e, venue.id)} className="absolute top-2 right-2 z-10 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors">
-                <Heart className={`h-5 w-5 transition-colors ${isFavorite(venue.id) ? 'fill-primary text-primary' : 'text-muted-foreground hover:text-primary'}`} />
+                <Heart className={`h-5 w-5 transition-colors ${isFavorite(venue.id) ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
               </button>
 
               {/* Image - prioritize venue profile picture, fallback to room picture */}

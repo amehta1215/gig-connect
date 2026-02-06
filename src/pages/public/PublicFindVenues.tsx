@@ -212,7 +212,7 @@ export default function PublicFindVenues() {
           e.stopPropagation();
           setAuthDialogOpen(true);
         }} className="absolute top-2 right-2 z-10 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors">
-                <Heart className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+                <Heart className="h-5 w-5 text-muted-foreground hover:text-[#E8556D] transition-colors" />
               </button>
 
               {/* Image */}
