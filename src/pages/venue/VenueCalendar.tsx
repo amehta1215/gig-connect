@@ -531,7 +531,10 @@ export default function VenueCalendar() {
                         <div className="flex items-center gap-3 flex-1">
                           <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                           <button onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="text-left flex-1 hover:opacity-80 transition-opacity">
-                            <p className="font-display text-lg text-primary">{artistName}</p>
+                            <p className="font-display text-lg text-primary">
+                              <span className="text-muted-foreground text-sm mr-2">#{index + 1}</span>
+                              {artistName}
+                            </p>
                             <p className="text-sm text-muted-foreground">{roomDisplay}</p>
                           </button>
                         </div>
@@ -618,7 +621,10 @@ export default function VenueCalendar() {
             const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
             return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                         <div>
-                          <p className="font-display text-primary">{artistName}</p>
+                          <p className="font-display text-primary">
+                            <span className="text-muted-foreground text-sm mr-2">#{gig.hold_priority || '—'}</span>
+                            {artistName}
+                          </p>
                           <p className="text-xs text-muted-foreground">{roomDisplay}</p>
                         </div>
                         <span className="text-sm text-muted-foreground">
