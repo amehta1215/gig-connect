@@ -375,7 +375,7 @@ export default function VenueApplications() {
               {application.payment_preference && <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200">
                   {application.payment_preference.replace('_', ' ')}
                 </span>}
-              <span className="text-[10px] bg-secondary px-2 py-0.5 uppercase tracking-wider">
+              <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200">
                 Submitted {format(new Date(application.created_at), 'M/d/yy')}
               </span>
             </div>
