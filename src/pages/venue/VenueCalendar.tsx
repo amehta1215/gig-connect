@@ -574,7 +574,7 @@ export default function VenueCalendar() {
             const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
             return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                       <div>
-                        <p className="font-display text-accent">{artistName}</p>
+                        <p className="font-display text-primary">{artistName}</p>
                         <p className="text-xs text-muted-foreground">{roomDisplay}</p>
                       </div>
                       <span className="text-sm text-muted-foreground">
