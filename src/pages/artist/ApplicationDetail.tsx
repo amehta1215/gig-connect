@@ -7,7 +7,6 @@ import { ArrowLeft, MapPin, Users, Music, Calendar, Clock, CheckCircle2, Archive
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-
 interface ApplicationData {
   id: string;
   status: 'in_progress' | 'accepted' | 'archived';
@@ -33,130 +32,110 @@ interface ApplicationData {
     venue_profile_id: string;
   };
 }
-
-
 const statusConfig = {
   in_progress: {
     icon: Clock,
     label: 'PENDING',
     color: 'text-yellow-500',
-    bgColor: 'bg-yellow-500/10',
+    bgColor: 'bg-yellow-500/10'
   },
   accepted: {
     icon: CheckCircle2,
     label: 'ACCEPTED',
     color: 'text-green-500',
-    bgColor: 'bg-green-500/10',
+    bgColor: 'bg-green-500/10'
   },
   archived: {
     icon: Archive,
     label: 'ARCHIVED',
     color: 'text-muted-foreground',
-    bgColor: 'bg-muted',
-  },
+    bgColor: 'bg-muted'
+  }
 };
-
 const paymentLabels: Record<string, string> = {
   door_split: 'Door Split',
   bar_split: 'Bar Split',
   tip_based: 'Tip Based',
   flat_fee: 'Flat Fee',
-  rental: 'Rental',
+  rental: 'Rental'
 };
-
 const lineupLabels: Record<string, string> = {
   co_acts_needed: 'Co-acts Needed',
   co_acts_confirmed: 'Co-acts Confirmed',
-  solo_performer: 'Solo Performer',
+  solo_performer: 'Solo Performer'
 };
-
 const availabilityLabels: Record<string, string> = {
   date_range: 'Date Range',
   specific_dates: 'Specific Dates',
-  flexible: 'Flexible',
+  flexible: 'Flexible'
 };
-
 export default function ApplicationDetail() {
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const [application, setApplication] = useState<ApplicationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
-
   useEffect(() => {
     if (id && user) {
       fetchApplication();
     }
   }, [id, user]);
-
   const fetchApplication = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('applications')
-      .select(`
+    const {
+      data,
+      error
+    } = await supabase.from('applications').select(`
         *,
         venue_listing:venue_listings(*)
-      `)
-      .eq('id', id)
-      .eq('artist_id', user?.id)
-      .maybeSingle();
-
+      `).eq('id', id).eq('artist_id', user?.id).maybeSingle();
     if (data && !error) {
       const appData = data as unknown as ApplicationData;
       setApplication(appData);
     }
     setLoading(false);
   };
-
   const handleWithdraw = async () => {
     if (!application) return;
-    
     setWithdrawing(true);
-    const { error } = await supabase
-      .from('applications')
-      .delete()
-      .eq('id', application.id);
-    
+    const {
+      error
+    } = await supabase.from('applications').delete().eq('id', application.id);
     setWithdrawing(false);
-    
     if (error) {
       toast.error('Failed to withdraw application');
       return;
     }
-    
     toast.success('Application withdrawn');
     navigate('/artist/applications');
   };
-
   if (loading) {
-    return (
-      <div className="space-y-6 animate-fade-in">
+    return <div className="space-y-6 animate-fade-in">
         <div className="h-64 bg-card animate-pulse rounded-lg" />
         <div className="h-8 w-48 bg-card animate-pulse rounded" />
         <div className="h-32 bg-card animate-pulse rounded-lg" />
-      </div>
-    );
+      </div>;
   }
-
   if (!application) {
-    return (
-      <div className="text-center py-20">
+    return <div className="text-center py-20">
         <h3 className="font-display text-2xl text-muted-foreground">APPLICATION NOT FOUND</h3>
         <Button onClick={() => navigate('/artist/applications')} variant="outline" className="mt-4">
           Go Back
         </Button>
-      </div>
-    );
+      </div>;
   }
-
   const config = statusConfig[application.status];
   const StatusIcon = config.icon;
   const listing = application.venue_listing;
-
-  return (
-    <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+  return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       {/* Back Button */}
       <Button variant="ghost" size="icon" onClick={() => navigate('/artist/applications')}>
         <ArrowLeft className="h-5 w-5" />
@@ -174,111 +153,73 @@ export default function ApplicationDetail() {
       {/* Pictures Gallery */}
       <div className="mb-6">
         {(() => {
-          const allPictures: string[] = listing.pictures || [];
-          
-          if (allPictures.length === 0) {
-            return (
-              <div className="aspect-[4/3] max-w-xs mx-auto bg-secondary rounded-lg overflow-hidden">
+        const allPictures: string[] = listing.pictures || [];
+        if (allPictures.length === 0) {
+          return <div className="aspect-[4/3] max-w-xs mx-auto bg-secondary rounded-lg overflow-hidden">
                 <div className="w-full h-full flex items-center justify-center bg-heat">
                   <Music className="h-12 w-12 text-primary/30" />
                 </div>
-              </div>
-            );
-          }
-          
-          return (
-            <div className="flex flex-wrap justify-center gap-2">
-              {allPictures.map((pic, index) => (
-                <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
-                  <img
-                    src={pic}
-                    alt={`${listing.venue_name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          );
-        })()}
+              </div>;
+        }
+        return <div className="flex flex-wrap justify-center gap-2">
+              {allPictures.map((pic, index) => <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+                  <img src={pic} alt={`${listing.venue_name} ${index + 1}`} className="w-full h-full object-cover" />
+                </div>)}
+            </div>;
+      })()}
       </div>
 
       {/* Venue Info */}
       <div className="space-y-4">
         <div>
-          <h1 className="font-display text-4xl md:text-5xl text-accent font-bold tracking-wide">
+          <h1 className="font-display text-4xl md:text-5xl font-bold tracking-wide text-primary">
             {listing.venue_name}
           </h1>
-          {listing.room_name && (
-            <p className="text-lg text-muted-foreground mt-1">{listing.room_name}</p>
-          )}
+          {listing.room_name && <p className="text-lg mt-1 text-primary">{listing.room_name}</p>}
         </div>
 
         <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-          {listing.location && (
-            <span className="flex items-center gap-2">
+          {listing.location && <span className="flex items-center gap-2 text-primary">
               <MapPin className="h-4 w-4" />
               {listing.location}
-            </span>
-          )}
-          {listing.capacity && (
-            <span className="flex items-center gap-2">
+            </span>}
+          {listing.capacity && <span className="flex items-center gap-2 text-primary">
               <Users className="h-4 w-4" />
               {listing.capacity} capacity
-            </span>
-          )}
+            </span>}
         </div>
 
-        {listing.genres && listing.genres.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {listing.genres.map((genre) => (
-              <span
-                key={genre}
-                className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display"
-              >
+        {listing.genres && listing.genres.length > 0 && <div className="flex flex-wrap gap-2">
+            {listing.genres.map(genre => <span key={genre} className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display">
                 {genre}
-              </span>
-            ))}
-          </div>
-        )}
+              </span>)}
+          </div>}
       </div>
 
       {/* Venue Details */}
-      {listing.bio && (
-        <div className="bg-card border border-border rounded-lg p-4">
+      {listing.bio && <div className="bg-card border border-border rounded-lg p-4">
           <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
           <p className="text-muted-foreground text-sm">{listing.bio}</p>
-        </div>
-      )}
+        </div>}
 
       <div className="grid gap-6 md:grid-cols-2">
-        {listing.backline_info && (
-          <div className="bg-card border border-border rounded-lg p-4">
+        {listing.backline_info && <div className="bg-card border border-border rounded-lg p-4">
             <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
             <p className="text-muted-foreground text-sm">{listing.backline_info}</p>
-          </div>
-        )}
-        {listing.house_rules && (
-          <div className="bg-card border border-border rounded-lg p-4">
+          </div>}
+        {listing.house_rules && <div className="bg-card border border-border rounded-lg p-4">
             <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
             <p className="text-muted-foreground text-sm">{listing.house_rules}</p>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Your Application */}
       <div className="bg-card border border-border rounded-lg p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl text-accent font-bold">YOUR APPLICATION</h2>
-          {application.status === 'in_progress' && (
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setWithdrawDialogOpen(true)}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
+          {application.status === 'in_progress' && <Button variant="ghost" size="icon" onClick={() => setWithdrawDialogOpen(true)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
               <Trash2 className="h-5 w-5" />
-            </Button>
-          )}
+            </Button>}
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -286,34 +227,24 @@ export default function ApplicationDetail() {
           <div className="space-y-1">
             <h3 className="font-display text-xs text-primary tracking-widest">AVAILABILITY</h3>
             <p className="text-foreground">
-              {application.availability_preference 
-                ? availabilityLabels[application.availability_preference] 
-                : 'Not specified'}
+              {application.availability_preference ? availabilityLabels[application.availability_preference] : 'Not specified'}
             </p>
-            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && (
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
+            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && <p className="text-sm text-muted-foreground flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 {format(new Date(application.availability_start_date), 'MMM d')} - {format(new Date(application.availability_end_date), 'MMM d, yyyy')}
-              </p>
-            )}
-            {application.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {application.availability_specific_dates.map((date, i) => (
-                  <span key={i} className="text-xs bg-secondary px-2 py-0.5 rounded">
+              </p>}
+            {application.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0 && <div className="flex flex-wrap gap-1 mt-1">
+                {application.availability_specific_dates.map((date, i) => <span key={i} className="text-xs bg-secondary px-2 py-0.5 rounded">
                     {format(new Date(date), 'MMM d')}
-                  </span>
-                ))}
-              </div>
-            )}
+                  </span>)}
+              </div>}
           </div>
 
           {/* Payment */}
           <div className="space-y-1">
             <h3 className="font-display text-xs text-primary tracking-widest">PAYMENT PREFERENCE</h3>
             <p className="text-foreground">
-              {application.payment_preference 
-                ? paymentLabels[application.payment_preference] 
-                : 'Not specified'}
+              {application.payment_preference ? paymentLabels[application.payment_preference] : 'Not specified'}
             </p>
           </div>
 
@@ -321,19 +252,15 @@ export default function ApplicationDetail() {
           <div className="space-y-1">
             <h3 className="font-display text-xs text-primary tracking-widest">LINEUP</h3>
             <p className="text-foreground">
-              {application.lineup_preference 
-                ? lineupLabels[application.lineup_preference] 
-                : 'Not specified'}
+              {application.lineup_preference ? lineupLabels[application.lineup_preference] : 'Not specified'}
             </p>
           </div>
         </div>
 
-        {application.message && (
-          <div className="space-y-1 pt-2 border-t border-border">
+        {application.message && <div className="space-y-1 pt-2 border-t border-border">
             <h3 className="font-display text-xs text-primary tracking-widest">MESSAGE</h3>
             <p className="text-muted-foreground text-sm">{application.message}</p>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Withdraw Confirmation Dialog */}
@@ -350,16 +277,11 @@ export default function ApplicationDetail() {
             <Button variant="outline" onClick={() => setWithdrawDialogOpen(false)}>
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleWithdraw}
-              disabled={withdrawing}
-            >
+            <Button variant="destructive" onClick={handleWithdraw} disabled={withdrawing}>
               {withdrawing ? 'Withdrawing...' : 'Withdraw'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 }
