@@ -166,7 +166,7 @@ export default function PublicFindVenues() {
           </div>
 
           {/* Desktop Filters */}
-          <div className="hidden lg:flex gap-2 text-muted-foreground">
+          <div className="hidden lg:flex gap-2">
             {genreMultiSelect("w-36")}
             {capacityMultiSelect("w-36")}
             <div className="relative w-48">
