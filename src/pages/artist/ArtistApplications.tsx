@@ -111,7 +111,7 @@ export default function ArtistApplications() {
     return <div className="bg-card border border-border p-4 hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate(`/artist/applications/${application.id}`)}>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <h3 className="font-display text-xl text-foreground tracking-wide">
+            <h3 className="font-display text-xl text-foreground tracking-wide font-medium">
               {application.venue_listing?.venue_name}
             </h3>
             {application.venue_listing?.location && <p className="text-xs flex items-center gap-1 mt-1 text-primary">
