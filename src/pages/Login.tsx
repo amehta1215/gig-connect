@@ -80,7 +80,7 @@ export default function Login() {
       <div className="w-full max-w-xs bg-primary p-1 md:p-2">
         <div className="p-6 md:p-8 bg-primary">
           {/* Welcome Back header */}
-          <h2 className="font-display uppercase tracking-tight text-2xl md:text-3xl lg:text-4xl font-black text-center mb-6 bg-primary text-red-600">
+          <h2 className="font-display uppercase tracking-tight text-2xl md:text-3xl lg:text-4xl font-black text-center mb-6 bg-primary text-primary-foreground">
             WELCOME BACK!
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -101,7 +101,7 @@ export default function Login() {
               </Link>
             </p>
 
-              <button type="submit" className="w-full h-12 font-display uppercase tracking-widest text-lg text-background transition-colors bg-primary" disabled={isLoading}>
+              <button type="submit" className="w-full h-12 font-display uppercase tracking-widest text-lg text-background transition-colors bg-accent" disabled={isLoading}>
                 {isLoading ? "..." : "LOGIN"}
               </button>
             </form>
