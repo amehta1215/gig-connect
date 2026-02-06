@@ -113,7 +113,7 @@ export default function PublicFindVenues() {
   };
   const genreMultiSelect = (className?: string) => <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className={`bg-card border-border justify-start text-foreground ${className || ''}`}>
+        <Button variant="outline" className={`bg-card border-border justify-start text-muted-foreground ${className || ''}`}>
           <Music className="h-4 w-4 mr-2 text-muted-foreground" />
           {selectedGenres.length === 0 ? 'Genre' : `${selectedGenres.length} selected`}
         </Button>
@@ -132,7 +132,7 @@ export default function PublicFindVenues() {
     </Popover>;
   const capacityMultiSelect = (className?: string) => <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className={`bg-card border-border justify-start text-foreground ${className || ''}`}>
+        <Button variant="outline" className={`bg-card border-border justify-start text-muted-foreground ${className || ''}`}>
           <Users className="h-4 w-4 mr-2 text-muted-foreground" />
           {selectedCapacities.length === 0 ? 'Capacity' : `${selectedCapacities.length} selected`}
         </Button>
