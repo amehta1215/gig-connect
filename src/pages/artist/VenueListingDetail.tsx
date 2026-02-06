@@ -227,22 +227,22 @@ export default function VenueListingDetail() {
           <h1 className="font-display text-4xl md:text-5xl text-accent font-bold tracking-wide">
             {listing.venue_name}
           </h1>
-          {listing.room_name && <p className="text-lg text-muted-foreground mt-1">{listing.room_name}</p>}
+          {listing.room_name && <p className="text-lg mt-1 text-primary">{listing.room_name}</p>}
         </div>
 
         <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-          {listing.location && <span className="flex items-center gap-2">
+          {listing.location && <span className="flex items-center gap-2 text-primary">
               <MapPin className="h-4 w-4" />
               {listing.location}
             </span>}
-          {listing.capacity && <span className="flex items-center gap-2">
+          {listing.capacity && <span className="flex items-center gap-2 text-primary">
               <Users className="h-4 w-4" />
               {listing.capacity} capacity
             </span>}
         </div>
 
         {listing.genres && listing.genres.length > 0 && <div className="flex flex-wrap gap-2">
-            {listing.genres.map(genre => <span key={genre} className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display">
+            {listing.genres.map(genre => <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
                 {genre}
               </span>)}
           </div>}
@@ -252,31 +252,25 @@ export default function VenueListingDetail() {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Column - Venue Details */}
         <div className="flex-1 space-y-4">
-          {listing.bio && (
-            <div className="bg-card border border-border rounded-lg p-4">
+          {listing.bio && <div className="bg-card border border-border rounded-lg p-4">
               <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
               <p className="text-muted-foreground text-sm">{listing.bio}</p>
-            </div>
-          )}
-          {listing.backline_info && (
-            <div className="bg-card border border-border rounded-lg p-4">
+            </div>}
+          {listing.backline_info && <div className="bg-card border border-border rounded-lg p-4">
               <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
               <p className="text-muted-foreground text-sm">{listing.backline_info}</p>
-            </div>
-          )}
-          {listing.house_rules && (
-            <div className="bg-card border border-border rounded-lg p-4">
+            </div>}
+          {listing.house_rules && <div className="bg-card border border-border rounded-lg p-4">
               <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
               <p className="text-muted-foreground text-sm">{listing.house_rules}</p>
-            </div>
-          )}
+            </div>}
         </div>
 
         {/* Right Column - Sticky Apply Form */}
         <div className="lg:w-80 xl:w-96 order-first lg:order-last">
           <div className="lg:sticky lg:top-4">
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-              <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
+              <h2 className="font-display text-2xl font-bold text-primary">APPLY</h2>
 
               {existingApplicationId ? <div className="text-center">
                   <p className="text-muted-foreground">You've already applied to this room</p>
@@ -284,10 +278,11 @@ export default function VenueListingDetail() {
                     VIEW APPLICATION
                   </Button>
                 </div> : isProfileComplete === false ? <div className="text-center py-4">
-                  <button 
-                    onClick={() => navigate('/artist/profile', { state: { fromVenueListing: true } })} 
-                    className="text-lg text-accent font-display font-bold text-center hover:text-primary transition-colors cursor-pointer"
-                  >
+                  <button onClick={() => navigate('/artist/profile', {
+                state: {
+                  fromVenueListing: true
+                }
+              })} className="text-lg text-accent font-display font-bold text-center hover:text-primary transition-colors cursor-pointer">
                     COMPLETE PROFILE BEFORE APPLYING
                   </button>
                 </div> : <div className="relative">
