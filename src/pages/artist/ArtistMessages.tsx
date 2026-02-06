@@ -10,7 +10,6 @@ import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 import { MessageAttachments } from '@/components/MessageAttachments';
-
 interface Message {
   id: string;
   sender_id: string;
@@ -49,13 +48,11 @@ interface Thread {
     venueName?: string;
   };
 }
-
 interface ArtistApplication {
   id: string;
   venue_listing_id: string;
   venue_user_id: string;
 }
-
 type FilterType = 'all' | 'unread' | 'starred';
 type SortType = 'newest' | 'oldest';
 export default function ArtistMessages() {
@@ -69,17 +66,17 @@ export default function ArtistMessages() {
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('newest');
-  
   const [artistApplications, setArtistApplications] = useState<ArtistApplication[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when thread is selected
   useEffect(() => {
     if (selectedThreadId && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'instant' });
+      messagesEndRef.current.scrollIntoView({
+        behavior: 'instant'
+      });
     }
   }, [selectedThreadId]);
-
   useEffect(() => {
     if (user) {
       fetchMessages();
@@ -104,14 +101,13 @@ export default function ArtistMessages() {
     }
     setLoading(false);
   };
-
   const fetchArtistApplications = async () => {
     if (!user) return;
-    
+
     // Get applications for this artist with venue profile info
-    const { data: applications } = await supabase
-      .from('applications')
-      .select(`
+    const {
+      data: applications
+    } = await supabase.from('applications').select(`
         id,
         venue_listing_id,
         venue_listing:venue_listings!applications_venue_listing_id_fkey(
@@ -119,9 +115,7 @@ export default function ArtistMessages() {
             user_id
           )
         )
-      `)
-      .eq('artist_id', user.id);
-    
+      `).eq('artist_id', user.id);
     if (applications) {
       const formattedApplications = applications.map(app => ({
         id: app.id,
@@ -136,11 +130,9 @@ export default function ArtistMessages() {
   const getApplicationForVenue = (venueUserId: string) => {
     return artistApplications.find(app => app.venue_user_id === venueUserId);
   };
-
   const handleViewApplication = (applicationId: string) => {
     navigate(`/artist/applications/${applicationId}`);
   };
-
 
   // Group messages by thread
   const threads = useMemo(() => {
@@ -205,7 +197,6 @@ export default function ArtistMessages() {
       } : m));
     }
   };
-
   const markThreadAsUnread = async (threadId: string) => {
     const thread = threads.find(t => t.thread_id === threadId);
     if (!thread) return;
@@ -228,7 +219,6 @@ export default function ArtistMessages() {
     const matchesName = thread.otherParty.name.toLowerCase().includes(searchLower);
     const matchesVenueName = thread.otherParty.venueName?.toLowerCase().includes(searchLower);
     const matchesSearch = !searchTerm || matchesSubject || matchesContent || matchesName || matchesVenueName;
-    
     if (filter === 'unread') return matchesSearch && thread.hasUnread;
     if (filter === 'starred') return matchesSearch && thread.isStarred;
     return matchesSearch;
@@ -249,11 +239,7 @@ export default function ArtistMessages() {
     if (!searchTerm.trim()) return text;
     const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     const parts = text.split(regex);
-    return parts.map((part, i) => 
-      regex.test(part) ? (
-        <mark key={i} className="bg-primary/20 text-foreground rounded-sm px-0.5">{part}</mark>
-      ) : part
-    );
+    return parts.map((part, i) => regex.test(part) ? <mark key={i} className="bg-primary/20 text-foreground rounded-sm px-0.5">{part}</mark> : part);
   };
 
   // Get the base subject (without Re: prefix)
@@ -306,18 +292,14 @@ export default function ArtistMessages() {
             const messageCount = thread.messages.length;
             return <div key={thread.thread_id} onClick={() => handleSelectThread(thread)} className={`p-3 border-b border-border cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}>
                     <div className="flex items-start gap-2">
-                      <button 
-                        onClick={e => {
-                          e.stopPropagation();
-                          if (thread.hasUnread) {
-                            markThreadAsRead(thread.thread_id);
-                          } else {
-                            markThreadAsUnread(thread.thread_id);
-                          }
-                        }} 
-                        className="flex-shrink-0 p-1 hover:bg-secondary rounded"
-                        title={thread.hasUnread ? "Mark as read" : "Mark as unread"}
-                      >
+                      <button onClick={e => {
+                  e.stopPropagation();
+                  if (thread.hasUnread) {
+                    markThreadAsRead(thread.thread_id);
+                  } else {
+                    markThreadAsUnread(thread.thread_id);
+                  }
+                }} className="flex-shrink-0 p-1 hover:bg-secondary rounded" title={thread.hasUnread ? "Mark as read" : "Mark as unread"}>
                         {thread.hasUnread ? <Mail className="h-4 w-4 text-primary" /> : <MailOpen className="h-4 w-4 text-muted-foreground" />}
                       </button>
                       <div className="flex-1 min-w-0">
@@ -362,19 +344,14 @@ export default function ArtistMessages() {
                   </p>
                 </div>
                 {(() => {
-                  const application = getApplicationForVenue(selectedThread.otherParty.id);
-                  if (application) {
-                    return (
-                      <button
-                        onClick={() => handleViewApplication(application.id)}
-                        className="text-xs text-primary hover:underline transition-colors cursor-pointer"
-                      >
+              const application = getApplicationForVenue(selectedThread.otherParty.id);
+              if (application) {
+                return <button onClick={() => handleViewApplication(application.id)} className="text-xs text-primary hover:underline transition-colors cursor-pointer">
                         View Your Application
-                      </button>
-                    );
-                  }
-                  return null;
-                })()}
+                      </button>;
+              }
+              return null;
+            })()}
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -398,15 +375,7 @@ export default function ArtistMessages() {
               </div>
 
               {/* Hide reply form for system messages (Riff Team) */}
-              {selectedThread.otherParty.id !== '00000000-0000-0000-0000-000000000000' && (
-                <MessageReplyForm 
-                  threadId={selectedThread.thread_id} 
-                  originalSubject={selectedThread.latestMessage.subject} 
-                  senderId={user?.id || ''} 
-                  receiverId={selectedThread.otherParty.id} 
-                  onSuccess={fetchMessages} 
-                />
-              )}
+              {selectedThread.otherParty.id !== '00000000-0000-0000-0000-000000000000' && <MessageReplyForm threadId={selectedThread.thread_id} originalSubject={selectedThread.latestMessage.subject} senderId={user?.id || ''} receiverId={selectedThread.otherParty.id} onSuccess={fetchMessages} />}
             </> : <div className="flex-1 flex items-center justify-center">
               <Mail className="h-12 w-12 text-muted-foreground/30" />
             </div>}
