@@ -253,7 +253,7 @@ export default function FindVenues() {
               {/* Content */}
               <div className="p-3">
                 <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors tracking-wide">
-                  {venue.venue_name}{venue.room_name && roomCountByVenueProfile[venue.venue_profile_id] > 1 && <span className="text-muted-foreground"> • {venue.room_name}</span>}
+                  {venue.venue_name}{venue.room_name && roomCountByVenueProfile[venue.venue_profile_id] > 1 && <span className="text-primary"> • {venue.room_name}</span>}
                 </h3>
                 {venue.location && <p className="text-xs flex items-center gap-1 mt-1 text-primary">
                     <MapPin className="h-3 w-3" />
