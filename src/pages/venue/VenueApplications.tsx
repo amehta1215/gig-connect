@@ -116,39 +116,31 @@ export default function VenueApplications() {
       fetchFavorites();
     }
   }, [user]);
-
   const fetchFavorites = async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from('venue_application_favorites')
-      .select('application_id')
-      .eq('venue_user_id', user.id);
+    const {
+      data
+    } = await supabase.from('venue_application_favorites').select('application_id').eq('venue_user_id', user.id);
     if (data) {
       setFavorites(new Set(data.map(f => f.application_id)));
     }
   };
-
   const toggleFavorite = async (e: React.MouseEvent, applicationId: string) => {
     e.stopPropagation();
     if (!user) return;
-    
     const isFavorited = favorites.has(applicationId);
-    
     if (isFavorited) {
-      await supabase
-        .from('venue_application_favorites')
-        .delete()
-        .eq('venue_user_id', user.id)
-        .eq('application_id', applicationId);
+      await supabase.from('venue_application_favorites').delete().eq('venue_user_id', user.id).eq('application_id', applicationId);
       setFavorites(prev => {
         const next = new Set(prev);
         next.delete(applicationId);
         return next;
       });
     } else {
-      await supabase
-        .from('venue_application_favorites')
-        .insert({ venue_user_id: user.id, application_id: applicationId });
+      await supabase.from('venue_application_favorites').insert({
+        venue_user_id: user.id,
+        application_id: applicationId
+      });
       setFavorites(prev => new Set(prev).add(applicationId));
     }
   };
@@ -328,26 +320,21 @@ export default function VenueApplications() {
     const availability = formatAvailability(application);
     const isFavorited = favorites.has(application.id);
     const mainPicture = application.artist_profile?.pictures?.[0];
-    
     return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className={`bg-card border px-4 py-3 transition-colors cursor-pointer ${!application.is_read ? 'border-primary/50' : 'border-border hover:border-primary/30'}`}>
         <div className="flex items-start gap-4">
           {/* Artist Picture */}
-          {mainPicture ? (
-            <div className="w-[92px] h-[92px] flex-shrink-0 mt-1.5">
+          {mainPicture ? <div className="w-[92px] h-[92px] flex-shrink-0 mt-1.5">
               <img src={mainPicture} alt={bandName} className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <div className="w-[92px] h-[92px] flex-shrink-0 mt-1.5 bg-secondary flex items-center justify-center">
+            </div> : <div className="w-[92px] h-[92px] flex-shrink-0 mt-1.5 bg-secondary flex items-center justify-center">
               <Music className="h-8 w-8 text-muted-foreground" />
-            </div>
-          )}
+            </div>}
           
           <div className="flex-1 min-w-0 pt-0.5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   {!application.is_read && <div className="w-2 h-2 bg-primary" />}
-                  <h3 className="font-display text-xl text-foreground tracking-wide">
+                  <h3 className="font-display text-xl text-foreground tracking-wide font-semibold">
                     {bandName}
                   </h3>
                   <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
@@ -367,10 +354,7 @@ export default function VenueApplications() {
                   </p>}
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={(e) => toggleFavorite(e, application.id)}
-                  className="p-1 hover:bg-secondary/50 transition-colors"
-                >
+                <button onClick={e => toggleFavorite(e, application.id)} className="p-1 hover:bg-secondary/50 transition-colors">
                   <Heart className={`h-4 w-4 ${isFavorited ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
                 </button>
               </div>
@@ -453,24 +437,15 @@ export default function VenueApplications() {
               ARCHIVED
             </TabsTrigger>
           </TabsList>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`h-8 px-3 flex items-center justify-center transition-colors text-xs font-display tracking-wider ${showFilters ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}
-          >
+          <button onClick={() => setShowFilters(!showFilters)} className={`h-8 px-3 flex items-center justify-center transition-colors text-xs font-display tracking-wider ${showFilters ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}>
             <ListFilter className="h-3 w-3 mr-1" />
             FILTER
           </button>
         </div>
 
         {/* Filters - hidden by default */}
-        {showFilters && (
-          <div className="flex flex-wrap gap-2 items-center mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFilterFavorites(!filterFavorites)}
-              className={`h-8 px-2 ${filterFavorites ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:text-foreground'}`}
-            >
+        {showFilters && <div className="flex flex-wrap gap-2 items-center mt-4">
+            <Button variant="outline" size="sm" onClick={() => setFilterFavorites(!filterFavorites)} className={`h-8 px-2 ${filterFavorites ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:text-foreground'}`}>
               <Heart className={`h-3 w-3 ${filterFavorites ? 'fill-current' : ''}`} />
             </Button>
 
@@ -542,25 +517,19 @@ export default function VenueApplications() {
                 <X className="h-3 w-3" />
               </Button>}
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => {
-                setFilterFavorites(false);
-                setSortBy('newest');
-                setFilterGenre('all');
-                setFilterPayment('all');
-                setFilterLineup('all');
-                setFilterRoom('all');
-                setDateRange(undefined);
-              }}
-            >
+            <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground hover:text-foreground" onClick={() => {
+            setFilterFavorites(false);
+            setSortBy('newest');
+            setFilterGenre('all');
+            setFilterPayment('all');
+            setFilterLineup('all');
+            setFilterRoom('all');
+            setDateRange(undefined);
+          }}>
               <RotateCcw className="h-3 w-3 mr-1" />
               RESET
             </Button>
-          </div>
-        )}
+          </div>}
 
         <TabsContent value={activeTab} className="mt-4">
           {loading ? <div className="space-y-3">
