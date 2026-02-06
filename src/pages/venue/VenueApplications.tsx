@@ -355,7 +355,7 @@ export default function VenueApplications() {
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button onClick={e => toggleFavorite(e, application.id)} className="p-1 hover:bg-secondary/50 transition-colors">
-                  <Heart className={`h-4 w-4 ${isFavorited ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                  <Heart className={`h-4 w-4 ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground'}`} />
                 </button>
               </div>
             </div>
@@ -445,7 +445,7 @@ export default function VenueApplications() {
 
         {/* Filters - hidden by default */}
         {showFilters && <div className="flex flex-wrap gap-2 items-center mt-4">
-            <Button variant="outline" size="sm" onClick={() => setFilterFavorites(!filterFavorites)} className={`h-8 px-2 ${filterFavorites ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground hover:text-foreground'}`}>
+            <Button variant="outline" size="sm" onClick={() => setFilterFavorites(!filterFavorites)} className={`h-8 px-2 ${filterFavorites ? 'bg-[#E8556D] text-white border-[#E8556D]' : 'bg-card border-border text-muted-foreground hover:text-foreground'}`}>
               <Heart className={`h-3 w-3 ${filterFavorites ? 'fill-current' : ''}`} />
             </Button>
 
