@@ -108,8 +108,16 @@ export default function SignUp() {
         </div>
       </div>;
   }
-  return <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background px-4">
+  return <div className="min-h-screen w-full flex flex-col bg-background px-4">
+      {/* Logo */}
+      <div className="p-4 md:p-6">
+        <Link to="/" className="font-display text-3xl tracking-tight text-accent">
+          RIFF
+        </Link>
+      </div>
+      
       {/* Form */}
+      <div className="flex-1 flex flex-col items-center justify-center -mt-16">
       <div className="w-full max-w-xs bg-primary p-1 md:p-2">
         <div className="bg-background p-6 md:p-8">
           {/* Sign Up header */}
@@ -166,6 +174,7 @@ export default function SignUp() {
             </Link>
           </p>
         </div>
+      </div>
       </div>
     </div>;
 }
