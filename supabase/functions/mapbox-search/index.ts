@@ -34,12 +34,10 @@ serve(async (req) => {
     
     const data = await response.json();
     
-    // Filter to only place-level results (cities, towns, suburbs, neighbourhoods)
-    const placeTypes = ['city', 'town', 'village', 'suburb', 'neighbourhood', 'borough', 'quarter', 'hamlet', 'state', 'county'];
+    // Strictly filter to populated places only — no rivers, lakes, parks, buildings, peaks
+    const allowedAddressTypes = ['city', 'town', 'village', 'suburb', 'neighbourhood', 'borough', 'state', 'county', 'municipality', 'township'];
     const filtered = data.filter((place: any) => {
-      return placeTypes.includes(place.type) || 
-             place.class === 'place' || 
-             place.class === 'boundary';
+      return allowedAddressTypes.includes(place.addresstype);
     });
     
     console.log("Nominatim response count:", data.length, "filtered:", filtered.length);
