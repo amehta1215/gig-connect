@@ -144,7 +144,7 @@ export default function FindVenues() {
   const genreMultiSelect = (className?: string) => <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className={`bg-card border-border justify-start ${className || ''}`}>
-          <Music className="h-4 w-4 mr-2 text-secondary" />
+          <Music className="h-4 w-4 mr-2 text-sidebar-accent" />
           {selectedGenres.length === 0 ? 'Genre' : `${selectedGenres.length} selected`}
         </Button>
       </PopoverTrigger>
