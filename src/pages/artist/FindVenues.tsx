@@ -2,12 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useFavorites } from '@/hooks/useFavorites';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, MapPin, Users, Music, Filter, X, Heart } from 'lucide-react';
+import { MapPin, Users, Music, Filter, X, Heart } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { LocationAutocomplete } from '@/components/LocationAutocomplete';
+import { UnifiedVenueSearch } from '@/components/UnifiedVenueSearch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 interface VenueListing {
@@ -42,7 +40,7 @@ export default function FindVenues() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedCapacities, setSelectedCapacities] = useState<string[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<string>('');
+  const [selectedLocation, setSelectedLocation] = useState('');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const handleToggleFavorite = async (e: React.MouseEvent, venueId: string) => {
@@ -120,13 +118,22 @@ export default function FindVenues() {
     );
   };
 
-  const hasActiveFilters = selectedGenres.length > 0 || selectedCapacities.length > 0 || selectedLocation !== '';
+  const hasActiveFilters = selectedGenres.length > 0 || selectedCapacities.length > 0 || selectedLocation !== '' || searchTerm !== '';
   
   const clearAllFilters = () => {
     setSelectedGenres([]);
     setSelectedCapacities([]);
     setSelectedLocation('');
     setSearchTerm('');
+  };
+
+  const handleLocationSelect = (location: string) => {
+    setSelectedLocation(location);
+    setSearchTerm('');
+  };
+
+  const handleVenueSelect = (venueId: string) => {
+    navigate(`/artist/venues/${venueId}`);
   };
 
   const genreMultiSelect = (className?: string) => (
@@ -201,10 +208,6 @@ export default function FindVenues() {
     <div className="space-y-4">
       {genreMultiSelect("w-full")}
       {capacityMultiSelect("w-full")}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border w-full placeholder:text-muted-foreground" />
-      </div>
     </div>
   );
   return <div className="space-y-6 animate-fade-in">
@@ -215,17 +218,19 @@ export default function FindVenues() {
       <Collapsible open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <div className="flex gap-2">
           <div className="flex-1">
-            <LocationAutocomplete value={selectedLocation} onChange={setSelectedLocation} placeholder="Search venue locations..." className="w-full" />
+            <UnifiedVenueSearch
+              onLocationSelect={handleLocationSelect}
+              onVenueSelect={handleVenueSelect}
+              onSearchChange={setSearchTerm}
+              venues={venues}
+              className="w-full"
+            />
           </div>
 
           {/* Desktop Filters */}
           <div className="hidden lg:flex gap-2">
             {genreMultiSelect("w-36")}
             {capacityMultiSelect("w-36")}
-            <div className="relative w-48">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Venue name" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-card border-border placeholder:text-muted-foreground" />
-            </div>
             {hasActiveFilters && (
               <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground">
                 <X className="h-3 w-3 mr-1" /> Reset
