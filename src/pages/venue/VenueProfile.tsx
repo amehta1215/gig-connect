@@ -397,7 +397,7 @@ export default function VenueProfile() {
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 bg-card border-border">
-              <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
+              <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0 pr-12">
                 <div className="flex items-center justify-between">
                   <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
                     {editingListing ? roomFormData.room_name || roomFormData.venue_name || 'ROOM' : 'NEW ROOM'}
