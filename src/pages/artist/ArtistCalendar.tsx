@@ -223,12 +223,16 @@ export default function ArtistCalendar() {
                     return (
                       <button 
                         key={gig.id} 
-                        onClick={() => navigate(`/artist/calendar/${gig.id}`)} 
+                        onClick={() => {
+                          if (gig.application_id) {
+                            navigate(`/artist/applications/${gig.application_id}`);
+                          }
+                        }}
                         className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors"
                       >
                         <div className="flex items-center gap-2">
                           <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
-                            HOLD
+                            HOLD #{gig.hold_priority || '—'}
                           </span>
                           <p className="font-display text-lg text-accent">{venueName}</p>
                         </div>
