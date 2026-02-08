@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -13,6 +14,7 @@ import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, Messag
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { DateRange } from 'react-day-picker';
 import HoldsOrderList from '@/components/HoldsOrderList';
 interface ArtistProfile {
   band_name: string | null;
@@ -116,6 +118,11 @@ export default function VenueApplicationDetail() {
     artist_name: string;
     hold_priority: number;
   }[]>([]);
+  const [dateMode, setDateMode] = useState<'single' | 'range' | 'specific'>('single');
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange | undefined>(undefined);
+  const [selectedSpecificDates, setSelectedSpecificDates] = useState<Date[]>([]);
+  const [sendAcceptMessage, setSendAcceptMessage] = useState(true);
+  const [acceptMessage, setAcceptMessage] = useState('');
   useEffect(() => {
     if (id && user) {
       fetchApplication();
@@ -234,20 +241,45 @@ export default function VenueApplicationDetail() {
     }
   }, [application?.venue_listing_id]);
   const handleAcceptClick = () => {
-    // Pre-select a date from application if available
+    // Pre-select date mode and dates from application availability
     let initialDate: Date | undefined;
-    if (application?.availability_start_date) {
-      initialDate = new Date(application.availability_start_date);
-    } else if (application?.availability_specific_dates && application.availability_specific_dates.length > 0) {
-      initialDate = new Date(application.availability_specific_dates[0]);
-    }
-    setSelectedGigDate(initialDate);
-    setAcceptType('confirmed');
+    setSelectedGigTime('');
     setExistingHolds([]);
     setHoldPriority(1);
+    setSelectedDateRange(undefined);
+    setSelectedSpecificDates([]);
+
+    if (application?.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date) {
+      setDateMode('range');
+      setSelectedDateRange({
+        from: new Date(application.availability_start_date),
+        to: new Date(application.availability_end_date)
+      });
+      setAcceptType('hold');
+    } else if (application?.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0) {
+      setDateMode('specific');
+      setSelectedSpecificDates(application.availability_specific_dates.map(d => new Date(d)));
+      setAcceptType('hold');
+    } else {
+      setDateMode('single');
+      if (application?.availability_start_date) {
+        initialDate = new Date(application.availability_start_date);
+      } else if (application?.availability_specific_dates && application.availability_specific_dates.length > 0) {
+        initialDate = new Date(application.availability_specific_dates[0]);
+      }
+      setAcceptType('confirmed');
+    }
+
+    setSelectedGigDate(initialDate);
     if (initialDate) {
       fetchExistingHolds(initialDate);
     }
+
+    // Set default accept message
+    const roomName = venueListing?.room_name || venueListing?.venue_name || 'our venue';
+    setSendAcceptMessage(true);
+    setAcceptMessage(`We're pleased to let you know that your application for ${roomName} has been accepted!\n\nWe'll be in touch with more details soon.`);
+
     setAcceptDialogOpen(true);
   };
   const handleDateChange = (date: Date | undefined) => {
@@ -260,16 +292,39 @@ export default function VenueApplicationDetail() {
     }
   };
   const handleConfirmAccept = async () => {
-    if (!application || !selectedGigDate) {
-      toast.error('Please select a gig date');
-      return;
-    }
-    const isHold = acceptType === 'hold';
-    const dateStr = format(selectedGigDate, 'yyyy-MM-dd');
+    if (!application || !user) return;
 
-    // If adding as a hold and there are existing holds, update their priorities
-    if (isHold && existingHolds.length > 0) {
-      // Update priorities for holds that need to shift
+    let dates: Date[] = [];
+
+    if (dateMode === 'single') {
+      if (!selectedGigDate) {
+        toast.error('Please select a gig date');
+        return;
+      }
+      dates = [selectedGigDate];
+    } else if (dateMode === 'range') {
+      if (!selectedDateRange?.from || !selectedDateRange?.to) {
+        toast.error('Please select a date range');
+        return;
+      }
+      const current = new Date(selectedDateRange.from);
+      const end = new Date(selectedDateRange.to);
+      while (current <= end) {
+        dates.push(new Date(current));
+        current.setDate(current.getDate() + 1);
+      }
+    } else {
+      if (selectedSpecificDates.length === 0) {
+        toast.error('Please select at least one date');
+        return;
+      }
+      dates = [...selectedSpecificDates];
+    }
+
+    const isHold = dateMode !== 'single' || acceptType === 'hold';
+
+    // For single date with hold, handle priority shifting
+    if (dateMode === 'single' && isHold && existingHolds.length > 0) {
       for (const hold of existingHolds) {
         if (hold.hold_priority >= holdPriority) {
           await supabase.from('gig_listings').update({
@@ -279,30 +334,67 @@ export default function VenueApplicationDetail() {
       }
     }
 
-    // Create gig listing
-    const {
-      error: gigError
-    } = await supabase.from('gig_listings').insert({
-      application_id: application.id,
-      venue_listing_id: application.venue_listing_id,
-      artist_id: application.artist_id,
-      gig_date: dateStr,
-      show_time: selectedGigTime || null,
-      openers: [],
-      notes: null,
-      is_confirmed: !isHold,
-      hold_priority: isHold ? holdPriority : null
-    });
-    if (gigError) {
-      toast.error('Failed to create gig listing');
-      return;
+    // Create gig listings for each date
+    for (const date of dates) {
+      const dateStr = format(date, 'yyyy-MM-dd');
+
+      let priority: number | null = null;
+      if (isHold) {
+        if (dateMode === 'single') {
+          priority = holdPriority;
+        } else {
+          // For range/specific dates, auto-assign priority at end
+          const { data: existingDateHolds } = await supabase
+            .from('gig_listings')
+            .select('hold_priority')
+            .eq('venue_listing_id', application.venue_listing_id)
+            .eq('gig_date', dateStr)
+            .eq('is_confirmed', false)
+            .order('hold_priority', { ascending: false })
+            .limit(1);
+          priority = (existingDateHolds?.[0]?.hold_priority || 0) + 1;
+        }
+      }
+
+      const { error: gigError } = await supabase.from('gig_listings').insert({
+        application_id: application.id,
+        venue_listing_id: application.venue_listing_id,
+        artist_id: application.artist_id,
+        gig_date: dateStr,
+        show_time: dateMode === 'single' && selectedGigTime ? selectedGigTime : null,
+        openers: [],
+        notes: null,
+        is_confirmed: !isHold,
+        hold_priority: isHold ? priority : null
+      });
+      if (gigError) {
+        toast.error('Failed to create gig listing');
+        return;
+      }
     }
 
     // Update application status
     await supabase.from('applications').update({
       status: 'accepted'
     }).eq('id', application.id);
-    toast.success(isHold ? `Application accepted as Hold #${holdPriority}!` : 'Application accepted! Gig confirmed.');
+
+    // Send message if enabled
+    if (sendAcceptMessage && acceptMessage.trim()) {
+      await supabase.from('messages').insert({
+        thread_id: crypto.randomUUID(),
+        sender_id: user.id,
+        receiver_id: application.artist_id,
+        subject: `Application Update: ${venueListing?.room_name || venueListing?.venue_name || 'Venue'}`,
+        content: acceptMessage,
+        is_read: false,
+        is_starred: false
+      });
+    }
+
+    const dateText = dates.length === 1
+      ? format(dates[0], 'MMM d, yyyy')
+      : `${dates.length} dates`;
+    toast.success(isHold ? `Application accepted as hold for ${dateText}!` : 'Application accepted! Gig confirmed.');
     setAcceptDialogOpen(false);
     navigate('/venue');
   };
@@ -550,73 +642,165 @@ export default function VenueApplicationDetail() {
 
       {/* Accept Dialog with Date and Time Picker */}
       <Dialog open={acceptDialogOpen} onOpenChange={setAcceptDialogOpen}>
-        <DialogContent className="bg-card border-border">
+        <DialogContent className="bg-card border-border sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-xl tracking-wide">
               ADD GIG DETAILS FOR {bandName?.toUpperCase()}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            
+
+            {/* Date Selection Mode */}
             <div className="space-y-2">
-              <label className="font-display text-xs text-muted-foreground tracking-widest block">
-                DATE
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !selectedGigDate && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedGigDate ? format(selectedGigDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent mode="single" selected={selectedGigDate} onSelect={handleDateChange} initialFocus className="p-3 pointer-events-auto" />
-                </PopoverContent>
-              </Popover>
+              <label className="font-display text-xs text-muted-foreground tracking-widest block">DATE SELECTION</label>
+              <div className="flex gap-2">
+                <Button type="button" size="sm" variant={dateMode === 'single' ? 'default' : 'outline'} onClick={() => setDateMode('single')}>
+                  Single Date
+                </Button>
+                <Button type="button" size="sm" variant={dateMode === 'range' ? 'default' : 'outline'} onClick={() => setDateMode('range')}>
+                  Date Range
+                </Button>
+                <Button type="button" size="sm" variant={dateMode === 'specific' ? 'default' : 'outline'} onClick={() => setDateMode('specific')}>
+                  Specific Dates
+                </Button>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="font-display text-xs text-muted-foreground tracking-widest block">
-                TIME OF SHOW (OPTIONAL)
-              </label>
-              <Input type="time" value={selectedGigTime} onChange={e => setSelectedGigTime(e.target.value)} className="bg-background border-border" />
-            </div>
+            {/* Single Date Picker */}
+            {dateMode === 'single' && (
+              <div className="space-y-2">
+                <label className="font-display text-xs text-muted-foreground tracking-widest block">DATE</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !selectedGigDate && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedGigDate ? format(selectedGigDate, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent mode="single" selected={selectedGigDate} onSelect={handleDateChange} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
 
-            {/* Hold vs Confirmed Selection */}
-            <div className="space-y-3">
-              <label className="font-display text-xs text-muted-foreground tracking-widest block">
-                ACCEPTANCE TYPE
-              </label>
-              <RadioGroup value={acceptType} onValueChange={v => setAcceptType(v as 'confirmed' | 'hold')}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="confirmed" id="confirmed" />
-                  <Label htmlFor="confirmed" className="cursor-pointer font-display text-sm">
-                    CONFIRMED
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="hold" id="hold" />
-                  <Label htmlFor="hold" className="cursor-pointer font-display text-sm">
-                    HOLD
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
+            {/* Date Range Picker */}
+            {dateMode === 'range' && (
+              <div className="space-y-2">
+                <label className="font-display text-xs text-muted-foreground tracking-widest block">DATE RANGE</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !selectedDateRange?.from && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedDateRange?.from ? (
+                        selectedDateRange.to
+                          ? `${format(selectedDateRange.from, "MMM d")} - ${format(selectedDateRange.to, "MMM d, yyyy")}`
+                          : format(selectedDateRange.from, "PPP")
+                      ) : "Pick a date range"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent mode="range" selected={selectedDateRange} onSelect={setSelectedDateRange} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
 
-            {/* Hold Priority - Only show if hold is selected AND there are existing holds */}
-            {acceptType === 'hold' && existingHolds.length > 0 && <div className="space-y-2">
-                <label className="font-display text-xs text-muted-foreground tracking-widest block">
-                  HOLD PRIORITY
-                </label>
+            {/* Specific Dates Picker */}
+            {dateMode === 'specific' && (
+              <div className="space-y-2">
+                <label className="font-display text-xs text-muted-foreground tracking-widest block">SPECIFIC DATES</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", selectedSpecificDates.length === 0 && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedSpecificDates.length > 0
+                        ? `${selectedSpecificDates.length} date${selectedSpecificDates.length !== 1 ? 's' : ''} selected`
+                        : "Pick dates"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent mode="multiple" selected={selectedSpecificDates} onSelect={(dates) => setSelectedSpecificDates(dates || [])} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+                {selectedSpecificDates.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {selectedSpecificDates.sort((a, b) => a.getTime() - b.getTime()).map((date, i) => (
+                      <span key={i} className="text-xs bg-secondary px-2 py-0.5">
+                        {format(date, 'MMM d, yyyy')}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Time - only for single date */}
+            {dateMode === 'single' && (
+              <div className="space-y-2">
+                <label className="font-display text-xs text-muted-foreground tracking-widest block">TIME OF SHOW (OPTIONAL)</label>
+                <Input type="time" value={selectedGigTime} onChange={e => setSelectedGigTime(e.target.value)} className="bg-background border-border" />
+              </div>
+            )}
+
+            {/* Accept Type - only for single date */}
+            {dateMode === 'single' && (
+              <div className="space-y-3">
+                <label className="font-display text-xs text-muted-foreground tracking-widest block">ACCEPTANCE TYPE</label>
+                <RadioGroup value={acceptType} onValueChange={v => setAcceptType(v as 'confirmed' | 'hold')}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="confirmed" id="confirmed" />
+                    <Label htmlFor="confirmed" className="cursor-pointer font-display text-sm">CONFIRMED</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="hold" id="hold" />
+                    <Label htmlFor="hold" className="cursor-pointer font-display text-sm">HOLD</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
+
+            {/* Hold note for range/specific */}
+            {dateMode !== 'single' && (
+              <p className="text-xs text-muted-foreground">All dates will be created as holds.</p>
+            )}
+
+            {/* Hold Priority - Only for single+hold with existing holds */}
+            {dateMode === 'single' && acceptType === 'hold' && existingHolds.length > 0 && (
+              <div className="space-y-2">
+                <label className="font-display text-xs text-muted-foreground tracking-widest block">HOLD PRIORITY</label>
                 <HoldsOrderList holds={existingHolds} newArtistName={bandName} onOrderChange={setHoldPriority} />
-              </div>}
+              </div>
+            )}
+
+            {/* Message to Artist */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="font-display text-xs text-muted-foreground tracking-widest">MESSAGE TO ARTIST</label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={sendAcceptMessage} onChange={e => setSendAcceptMessage(e.target.checked)} className="rounded border-border" />
+                  Send message
+                </label>
+              </div>
+              <Textarea value={acceptMessage} onChange={e => setAcceptMessage(e.target.value)} disabled={!sendAcceptMessage} className="min-h-[100px] text-sm" placeholder="Message to the artist..." />
+            </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setAcceptDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleConfirmAccept} disabled={!selectedGigDate} className="bg-primary hover:bg-primary/90">
-                {acceptType === 'hold' ? `Accept as Hold #${holdPriority}` : 'Accept & Confirm Gig'}
+              <Button
+                onClick={handleConfirmAccept}
+                disabled={
+                  dateMode === 'single' ? !selectedGigDate
+                    : dateMode === 'range' ? !(selectedDateRange?.from && selectedDateRange?.to)
+                    : selectedSpecificDates.length === 0
+                }
+                className="bg-primary hover:bg-primary/90"
+              >
+                {dateMode === 'single'
+                  ? (acceptType === 'hold' ? `Accept as Hold #${holdPriority}` : 'Accept & Confirm Gig')
+                  : 'Accept as Holds'}
               </Button>
             </div>
           </div>
