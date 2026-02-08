@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -106,6 +107,7 @@ export default function VenueApplicationDetail() {
   const [artistProfile, setArtistProfile] = useState<ArtistProfile | null>(null);
   const [venueListing, setVenueListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   // Accept dialog state
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
@@ -198,7 +200,36 @@ export default function VenueApplicationDetail() {
     await supabase.from('applications').update({
       is_read: true
     }).eq('id', id);
+
+    // Check if this application is favorited
+    if (user) {
+      const { data: favData } = await supabase
+        .from('venue_application_favorites')
+        .select('id')
+        .eq('venue_user_id', user.id)
+        .eq('application_id', data.id)
+        .maybeSingle();
+      setIsFavorited(!!favData);
+    }
+
     setLoading(false);
+  };
+
+  const toggleFavorite = async () => {
+    if (!user || !application) return;
+    if (isFavorited) {
+      await supabase
+        .from('venue_application_favorites')
+        .delete()
+        .eq('venue_user_id', user.id)
+        .eq('application_id', application.id);
+      setIsFavorited(false);
+    } else {
+      await supabase
+        .from('venue_application_favorites')
+        .insert({ venue_user_id: user.id, application_id: application.id });
+      setIsFavorited(true);
+    }
   };
   const updateStatus = async (newStatus: 'accepted' | 'archived' | 'in_progress') => {
     if (!application) return;
@@ -521,10 +552,15 @@ export default function VenueApplicationDetail() {
     value: artistProfile?.tiktok_link
   }].filter(link => link.value);
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
-      {/* Back Button */}
-      <Button variant="ghost" size="icon" onClick={() => navigate('/venue')}>
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
+      {/* Back Button & Favorite */}
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/venue')}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={toggleFavorite} className="h-9 w-9">
+          <Heart className={`h-6 w-6 transition-colors ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
+        </Button>
+      </div>
 
       {/* Status Banner */}
       <div className={`flex items-center justify-between gap-2 px-4 py-2 ${config.bgColor} ${config.color}`}>
