@@ -55,7 +55,7 @@ export default function ArtistApplications() {
         if (app.status === 'accepted') {
           const {
             data: gigData
-          } = await supabase.from('gig_listings').select('id, is_confirmed, hold_priority').eq('application_id', app.id).maybeSingle();
+          } = await supabase.from('gig_listings').select('id, is_confirmed, hold_priority').eq('application_id', app.id).eq('is_confirmed', false).order('hold_priority', { ascending: true }).limit(1).maybeSingle();
           return {
             ...app,
             gig_listing: gigData
@@ -121,8 +121,7 @@ export default function ArtistApplications() {
           </div>
           <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
             <StatusIcon className="h-3 w-3" />
-            {config.label}
-            {holdPriority && <span className="ml-1">#{holdPriority}</span>}
+            {isHold ? `ACCEPTED / HOLD #${holdPriority || '—'}` : config.label}
           </div>
         </div>
 
