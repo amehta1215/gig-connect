@@ -275,10 +275,20 @@ export default function VenueApplicationDetail() {
       fetchExistingHolds(initialDate);
     }
 
-    // Set default accept message
+    // Set default accept message based on date mode
     const roomName = venueListing?.room_name || venueListing?.venue_name || 'our venue';
     setSendAcceptMessage(true);
-    setAcceptMessage(`We're pleased to let you know that your application for ${roomName} has been accepted!\n\nWe'll be in touch with more details soon.`);
+
+    if (application?.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date) {
+      const startFormatted = format(new Date(application.availability_start_date), 'MMM d, yyyy');
+      const endFormatted = format(new Date(application.availability_end_date), 'MMM d, yyyy');
+      setAcceptMessage(`We're pleased to let you know that you have been put on hold for ${roomName} for the following dates: ${startFormatted} - ${endFormatted}.\n\nWe'll be in touch with more details soon.`);
+    } else if (application?.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0) {
+      const datesFormatted = application.availability_specific_dates.map(d => format(new Date(d), 'MMM d, yyyy')).join(', ');
+      setAcceptMessage(`We're pleased to let you know that you have been put on hold for ${roomName} for the following dates: ${datesFormatted}.\n\nWe'll be in touch with more details soon.`);
+    } else {
+      setAcceptMessage(`We're pleased to let you know that your application for ${roomName} has been accepted!\n\nWe'll be in touch with more details soon.`);
+    }
 
     setAcceptDialogOpen(true);
   };
@@ -378,23 +388,41 @@ export default function VenueApplicationDetail() {
       status: 'accepted'
     }).eq('id', application.id);
 
+    // Build date text for the message
+    let dateText = '';
+    if (dateMode === 'single') {
+      dateText = format(dates[0], 'MMM d, yyyy');
+    } else if (dateMode === 'range' && selectedDateRange?.from && selectedDateRange?.to) {
+      dateText = `${format(selectedDateRange.from, 'MMM d, yyyy')} - ${format(selectedDateRange.to, 'MMM d, yyyy')}`;
+    } else {
+      dateText = dates.map(d => format(d, 'MMM d, yyyy')).join(', ');
+    }
+
     // Send message if enabled
     if (sendAcceptMessage && acceptMessage.trim()) {
+      // If message still matches default template, update with date info
+      const roomName = venueListing?.room_name || venueListing?.venue_name || 'our venue';
+      let messageToSend = acceptMessage;
+      const defaultMsg = `We're pleased to let you know that your application for ${roomName} has been accepted!\n\nWe'll be in touch with more details soon.`;
+      if (acceptMessage.trim() === defaultMsg.trim() && isHold) {
+        messageToSend = `We're pleased to let you know that you have been put on hold for ${roomName} for the following dates: ${dateText}.\n\nWe'll be in touch with more details soon.`;
+      }
+
       await supabase.from('messages').insert({
         thread_id: crypto.randomUUID(),
         sender_id: user.id,
         receiver_id: application.artist_id,
         subject: `Application Update: ${venueListing?.room_name || venueListing?.venue_name || 'Venue'}`,
-        content: acceptMessage,
+        content: messageToSend,
         is_read: false,
         is_starred: false
       });
     }
 
-    const dateText = dates.length === 1
+    const toastDateText = dates.length === 1
       ? format(dates[0], 'MMM d, yyyy')
       : `${dates.length} dates`;
-    toast.success(isHold ? `Application accepted as hold for ${dateText}!` : 'Application accepted! Gig confirmed.');
+    toast.success(isHold ? `Application accepted as hold for ${toastDateText}!` : 'Application accepted! Gig confirmed.');
     setAcceptDialogOpen(false);
     navigate('/venue');
   };
@@ -799,8 +827,8 @@ export default function VenueApplicationDetail() {
                 className="bg-primary hover:bg-primary/90"
               >
                 {dateMode === 'single'
-                  ? (acceptType === 'hold' ? `Accept as Hold #${holdPriority}` : 'Accept & Confirm Gig')
-                  : 'Accept as Holds'}
+                  ? (acceptType === 'hold' ? `Accept Hold` : 'Accept & Confirm Gig')
+                  : 'Accept Hold'}
               </Button>
             </div>
           </div>
