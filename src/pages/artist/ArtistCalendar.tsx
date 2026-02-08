@@ -243,18 +243,17 @@ export default function ArtistCalendar() {
         </div>
       </div>
 
-      {/* Upcoming gigs list */}
+      {/* Upcoming confirmed shows */}
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4">UPCOMING SHOWS</h2>
-        {gigs.filter(g => new Date(g.gig_date) >= new Date()).length === 0 ? (
+        {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? (
           <p className="text-muted-foreground text-sm">No upcoming shows booked</p>
         ) : (
           <div className="space-y-2">
-            {gigs.filter(g => new Date(g.gig_date) >= new Date()).map(gig => {
+            {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
               const isManual = !gig.application_id && gig.manual_venue_name;
               const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
-              const isHold = !gig.is_confirmed;
               return (
                 <button 
                   key={gig.id} 
@@ -262,14 +261,7 @@ export default function ArtistCalendar() {
                   className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors"
                 >
                   <div>
-                    <div className="flex items-center gap-2">
-                      {isHold && (
-                        <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
-                          HOLD
-                        </span>
-                      )}
-                      <p className="font-display text-accent">{venueName}</p>
-                    </div>
+                    <p className="font-display text-accent">{venueName}</p>
                     {location && <p className="text-xs text-muted-foreground">{location}</p>}
                   </div>
                   <span className="text-sm text-muted-foreground">
