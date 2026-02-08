@@ -198,7 +198,7 @@ export default function VenueListingDetail() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         {id && <Button variant="ghost" size="icon" onClick={() => toggleFavorite(id)} className="h-9 w-9">
-            <Heart className={`h-6 w-6 transition-colors ${isFavorite(id) ? 'fill-primary text-primary' : 'text-muted-foreground hover:text-primary'}`} />
+            <Heart className={`h-6 w-6 transition-colors ${isFavorite(id) ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
           </Button>}
       </div>
 
