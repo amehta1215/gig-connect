@@ -24,6 +24,9 @@ interface Application {
   };
   gig_listing?: GigListing | null;
 }
+
+type DisplayStatus = 'in_progress' | 'accepted' | 'hold' | 'archived';
+
 export default function ArtistApplications() {
   const navigate = useNavigate();
   const {
@@ -70,7 +73,18 @@ export default function ArtistApplications() {
     }
     setLoading(false);
   };
-  const filteredApplications = activeTab === 'all' ? applications : applications.filter(app => app.status === activeTab);
+
+  const getDisplayStatus = (app: Application): DisplayStatus => {
+    if (app.status === 'accepted' && app.gig_listing && !app.gig_listing.is_confirmed) {
+      return 'hold';
+    }
+    return app.status as DisplayStatus;
+  };
+
+  const filteredApplications = activeTab === 'all'
+    ? applications
+    : applications.filter(app => getDisplayStatus(app) === activeTab);
+
   const statusConfig = {
     in_progress: {
       icon: Clock,
@@ -84,9 +98,9 @@ export default function ArtistApplications() {
       color: 'text-green-500',
       bgColor: 'bg-green-500/10'
     },
-    accepted_hold: {
+    hold: {
       icon: PauseCircle,
-      label: 'ACCEPTED / HOLD',
+      label: 'HOLD',
       color: 'text-yellow-500',
       bgColor: 'bg-yellow-500/10'
     },
@@ -102,12 +116,10 @@ export default function ArtistApplications() {
   }: {
     application: Application;
   }) => {
-    // Determine if this is a hold
-    const isHold = application.status === 'accepted' && application.gig_listing && !application.gig_listing.is_confirmed;
-    const configKey = isHold ? 'accepted_hold' : application.status;
-    const config = statusConfig[configKey as keyof typeof statusConfig];
+    const displayStatus = getDisplayStatus(application);
+    const config = statusConfig[displayStatus];
     const StatusIcon = config.icon;
-    const holdPriority = isHold ? application.gig_listing?.hold_priority : null;
+    const holdPriority = displayStatus === 'hold' ? application.gig_listing?.hold_priority : null;
     return <div className="bg-card border border-border p-4 hover:border-primary/50 transition-colors cursor-pointer" onClick={() => navigate(`/artist/applications/${application.id}`)}>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
@@ -121,7 +133,7 @@ export default function ArtistApplications() {
           </div>
           <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
             <StatusIcon className="h-3 w-3" />
-            {isHold ? `ACCEPTED / HOLD #${holdPriority || '—'}` : config.label}
+            {displayStatus === 'hold' ? `HOLD #${holdPriority || '—'}` : config.label}
           </div>
         </div>
 
@@ -142,6 +154,9 @@ export default function ArtistApplications() {
           </TabsTrigger>
           <TabsTrigger value="in_progress" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
             PENDING
+          </TabsTrigger>
+          <TabsTrigger value="hold" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+            HOLD
           </TabsTrigger>
           <TabsTrigger value="accepted" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
             ACCEPTED
