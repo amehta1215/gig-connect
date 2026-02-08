@@ -3,10 +3,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, Users, Music, Calendar, Clock, CheckCircle2, Archive, Trash2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Users, Music, Calendar, Clock, CheckCircle2, Archive, Trash2, PauseCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+
+interface GigListing {
+  id: string;
+  is_confirmed: boolean;
+  hold_priority: number | null;
+}
+
 interface ApplicationData {
   id: string;
   status: 'in_progress' | 'accepted' | 'archived';
@@ -31,6 +38,7 @@ interface ApplicationData {
     house_rules: string | null;
     venue_profile_id: string;
   };
+  gig_listing?: GigListing | null;
 }
 const statusConfig = {
   in_progress: {
@@ -44,6 +52,12 @@ const statusConfig = {
     label: 'ACCEPTED',
     color: 'text-green-500',
     bgColor: 'bg-green-500/10'
+  },
+  hold: {
+    icon: PauseCircle,
+    label: 'HOLD',
+    color: 'text-yellow-500',
+    bgColor: 'bg-yellow-500/10'
   },
   archived: {
     icon: Archive,
@@ -99,6 +113,20 @@ export default function ApplicationDetail() {
       `).eq('id', id).eq('artist_id', user?.id).maybeSingle();
     if (data && !error) {
       const appData = data as unknown as ApplicationData;
+
+      // Fetch gig listing to check hold status
+      if (appData.status === 'accepted') {
+        const { data: gigData } = await supabase
+          .from('gig_listings')
+          .select('id, is_confirmed, hold_priority')
+          .eq('application_id', appData.id)
+          .eq('is_confirmed', false)
+          .order('hold_priority', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        appData.gig_listing = gigData;
+      }
+
       setApplication(appData);
     }
     setLoading(false);
@@ -132,8 +160,11 @@ export default function ApplicationDetail() {
         </Button>
       </div>;
   }
-  const config = statusConfig[application.status];
+  const isHold = application.status === 'accepted' && application.gig_listing && !application.gig_listing.is_confirmed;
+  const displayStatus = isHold ? 'hold' : application.status;
+  const config = statusConfig[displayStatus as keyof typeof statusConfig];
   const StatusIcon = config.icon;
+  const holdPriority = isHold ? application.gig_listing?.hold_priority : null;
   const listing = application.venue_listing;
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       {/* Back Button */}
@@ -144,7 +175,7 @@ export default function ApplicationDetail() {
       {/* Status Banner */}
       <div className={`flex items-center gap-2 px-4 py-2 ${config.bgColor} ${config.color} font-display tracking-widest text-sm`}>
         <StatusIcon className="h-4 w-4" />
-        {config.label}
+        {isHold ? `HOLD #${holdPriority || '—'}` : config.label}
         <span className="text-muted-foreground ml-2">
           Applied {format(new Date(application.created_at), 'MMM d, yyyy')}
         </span>
