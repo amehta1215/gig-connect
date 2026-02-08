@@ -123,6 +123,39 @@ export default function VenueApplicationDetail() {
   const [selectedSpecificDates, setSelectedSpecificDates] = useState<Date[]>([]);
   const [sendAcceptMessage, setSendAcceptMessage] = useState(true);
   const [acceptMessage, setAcceptMessage] = useState('');
+
+  // Dynamically update the draft message when dates/mode/acceptType change
+  useEffect(() => {
+    if (!acceptDialogOpen) return;
+    const roomName = venueListing?.room_name || venueListing?.venue_name || 'our venue';
+    const isHold = dateMode !== 'single' || acceptType === 'hold';
+
+    if (isHold) {
+      let dateStr = '';
+      if (dateMode === 'single' && selectedGigDate) {
+        dateStr = format(selectedGigDate, 'MMM d, yyyy');
+      } else if (dateMode === 'range' && selectedDateRange?.from) {
+        dateStr = selectedDateRange.to
+          ? `${format(selectedDateRange.from, 'MMM d, yyyy')} - ${format(selectedDateRange.to, 'MMM d, yyyy')}`
+          : format(selectedDateRange.from, 'MMM d, yyyy');
+      } else if (dateMode === 'specific' && selectedSpecificDates.length > 0) {
+        dateStr = selectedSpecificDates
+          .sort((a, b) => a.getTime() - b.getTime())
+          .map(d => format(d, 'MMM d, yyyy'))
+          .join(', ');
+      }
+      const dateClause = dateStr ? ` for the following dates: ${dateStr}` : '';
+      setAcceptMessage(`We're pleased to let you know that you have been put on hold for ${roomName}${dateClause}.\n\nWe'll be in touch with more details soon.`);
+    } else {
+      if (selectedGigDate) {
+        const dateStr = format(selectedGigDate, 'MMM d, yyyy');
+        setAcceptMessage(`We're pleased to let you know that your application for ${roomName} has been accepted and confirmed for ${dateStr}!\n\nWe'll be in touch with more details soon.`);
+      } else {
+        setAcceptMessage(`We're pleased to let you know that your application for ${roomName} has been accepted!\n\nWe'll be in touch with more details soon.`);
+      }
+    }
+  }, [acceptDialogOpen, dateMode, acceptType, selectedGigDate, selectedDateRange, selectedSpecificDates, venueListing]);
+
   useEffect(() => {
     if (id && user) {
       fetchApplication();
@@ -275,20 +308,8 @@ export default function VenueApplicationDetail() {
       fetchExistingHolds(initialDate);
     }
 
-    // Set default accept message based on date mode
-    const roomName = venueListing?.room_name || venueListing?.venue_name || 'our venue';
+    // Message will be auto-populated by the useEffect
     setSendAcceptMessage(true);
-
-    if (application?.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date) {
-      const startFormatted = format(new Date(application.availability_start_date), 'MMM d, yyyy');
-      const endFormatted = format(new Date(application.availability_end_date), 'MMM d, yyyy');
-      setAcceptMessage(`We're pleased to let you know that you have been put on hold for ${roomName} for the following dates: ${startFormatted} - ${endFormatted}.\n\nWe'll be in touch with more details soon.`);
-    } else if (application?.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0) {
-      const datesFormatted = application.availability_specific_dates.map(d => format(new Date(d), 'MMM d, yyyy')).join(', ');
-      setAcceptMessage(`We're pleased to let you know that you have been put on hold for ${roomName} for the following dates: ${datesFormatted}.\n\nWe'll be in touch with more details soon.`);
-    } else {
-      setAcceptMessage(`We're pleased to let you know that your application for ${roomName} has been accepted!\n\nWe'll be in touch with more details soon.`);
-    }
 
     setAcceptDialogOpen(true);
   };
