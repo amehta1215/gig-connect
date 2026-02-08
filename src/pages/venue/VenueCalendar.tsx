@@ -508,7 +508,13 @@ export default function VenueCalendar() {
               return <div key={gig.id} draggable onDragStart={() => handleHoldDragStart(index)} onDragOver={e => handleHoldDragOver(e, index)} onDragEnd={handleHoldDragEnd} className={`bg-secondary p-4 flex items-center justify-between cursor-grab active:cursor-grabbing transition-opacity ${draggedHoldIndex === index ? 'opacity-50' : ''}`}>
                         <div className="flex items-center gap-3 flex-1">
                           <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                          <button onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="text-left flex-1 hover:opacity-80 transition-opacity">
+                          <button onClick={() => {
+                            if (gig.application_id) {
+                              navigate(`/venue/applications/${gig.application_id}`);
+                            } else {
+                              navigate(`/venue/calendar/${gig.id}`);
+                            }
+                          }} className="text-left flex-1 hover:opacity-80 transition-opacity">
                             <p className="font-display text-lg text-primary">
                               <span className="text-sm mr-2 text-primary">#{index + 1}</span>
                               {artistName}
