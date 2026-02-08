@@ -30,6 +30,7 @@ interface GigData {
   venue_listing_id: string;
   artist_id: string;
   manual_artist_name: string | null;
+  is_confirmed: boolean;
 }
 
 interface VenueListing {
@@ -370,15 +371,17 @@ export default function GigDetail() {
         <Button variant="ghost" size="icon" onClick={() => navigate('/venue/calendar')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={handleDownloadPoster}
-          disabled={downloading}
-          title="Download poster as PDF"
-        >
-          <Download className="h-5 w-5" />
-        </Button>
+        {gig.is_confirmed && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleDownloadPoster}
+            disabled={downloading}
+            title="Download poster as PDF"
+          >
+            <Download className="h-5 w-5" />
+          </Button>
+        )}
       </div>
 
       {/* Gig Flyer Style Card */}
