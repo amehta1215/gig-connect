@@ -134,16 +134,24 @@ export default function ArtistCalendar() {
       navigate(`/artist/calendar/${newGig.id}`);
     }
   };
+  const gigDates = gigs.map(g => new Date(g.gig_date));
   const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
   const confirmedGigs = gigsOnSelectedDate.filter(g => g.is_confirmed);
   const holdGigs = gigsOnSelectedDate.filter(g => !g.is_confirmed).sort((a, b) => (a.hold_priority || 99) - (b.hold_priority || 99));
   const today = startOfDay(new Date());
   const modifiers = {
+    hasGig: gigDates,
     past: {
       before: today
     }
   };
-  const modifiersStyles = {};
+  const modifiersStyles = {
+    hasGig: {
+      backgroundColor: 'hsl(14, 79%, 52%)',
+      color: 'white',
+      borderRadius: '0'
+    }
+  };
   const modifiersClassNames = {
     past: 'day-past'
   };
