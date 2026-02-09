@@ -222,7 +222,6 @@ export default function VenueCalendar() {
     const {
       data: artistOtherHolds
     } = await supabase.from('gig_listings').select('id, application_id').in('venue_listing_id', listingIds).eq('artist_id', artistId).eq('is_confirmed', false).neq('id', gigId);
-
     const artistName = artistProfile?.band_name || (artist ? `${artist.first_name} ${artist.last_name}` : 'Artist');
     const roomName = venueListing?.room_name || venueListing?.venue_name || 'Venue';
     const formattedDate = format(new Date(gigDate), 'MMMM d, yyyy');
@@ -236,7 +235,6 @@ export default function VenueCalendar() {
       artistOtherHoldIds: (artistOtherHolds || []).map(h => h.id),
       artistOtherApplicationIds: (artistOtherHolds || []).map(h => h.application_id)
     });
-
     setConfirmMessage(`Great news! Your performance at ${roomName} on ${formattedDate} has been confirmed. This is no longer a hold - you're officially booked!\n\nWe're looking forward to having you perform.`);
     setSendConfirmMessage(true);
     setConfirmDialogOpen(true);
@@ -355,11 +353,17 @@ export default function VenueCalendar() {
   };
   const today = startOfDay(new Date());
   const modifiers = {
+    hasGig: gigDates,
     past: {
       before: today
     }
   };
   const modifiersStyles = {
+    hasGig: {
+      backgroundColor: '#b0177f',
+      color: 'white',
+      borderRadius: '0'
+    },
     past: {
       opacity: 0.3
     }
@@ -375,7 +379,7 @@ export default function VenueCalendar() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Calendar */}
         <div className="bg-card border border-border p-4 flex items-start justify-center min-h-[400px]">
-          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} disablePastDates={false} className="pointer-events-auto w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full" />
+          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} disablePastDates={false} className="pointer-events-auto w-full [&_.rdp-month]:w-full [&_.rdp-table]:w-full font-semibold" />
         </div>
 
         {/* Events on selected date */}
@@ -422,12 +426,12 @@ export default function VenueCalendar() {
                         <div className="flex items-center gap-3 flex-1">
                           <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                           <button onClick={() => {
-                            if (gig.application_id) {
-                              navigate(`/venue/applications/${gig.application_id}`);
-                            } else {
-                              navigate(`/venue/calendar/${gig.id}`);
-                            }
-                          }} className="text-left flex-1 hover:opacity-80 transition-opacity">
+                    if (gig.application_id) {
+                      navigate(`/venue/applications/${gig.application_id}`);
+                    } else {
+                      navigate(`/venue/calendar/${gig.id}`);
+                    }
+                  }} className="text-left flex-1 hover:opacity-80 transition-opacity">
                             <p className="font-display text-lg text-primary">
                               <span className="text-sm mr-2 text-primary">#{index + 1}</span>
                               {artistName}
@@ -459,15 +463,11 @@ export default function VenueCalendar() {
       {/* Upcoming confirmed shows */}
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4">UPCOMING SHOWS</h2>
-        {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? (
-          <p className="text-muted-foreground text-sm">No upcoming shows booked</p>
-        ) : (
-          <div className="space-y-2">
+        {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
             {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
-              const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
-              const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-              return (
-                <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
+          const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+          const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+          return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                   <div>
                     <p className="font-display text-primary">{artistName}</p>
                     <p className="text-xs text-muted-foreground">{roomDisplay}</p>
@@ -475,11 +475,9 @@ export default function VenueCalendar() {
                   <span className="text-sm text-muted-foreground">
                     {format(new Date(gig.gig_date), 'MMM d, yyyy')}
                   </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+                </button>;
+        })}
+          </div>}
       </div>
 
       {/* Create Event Dialog */}
@@ -588,11 +586,9 @@ export default function VenueCalendar() {
                 Confirm <span className="text-accent font-medium">{holdToConfirm.artistName}</span> for {holdToConfirm.roomName} on {format(new Date(holdToConfirm.gigDate), 'MMMM d, yyyy')}?
               </p>
 
-              {holdToConfirm.artistOtherHoldIds.length > 0 && (
-                <p className="text-sm text-muted-foreground">
+              {holdToConfirm.artistOtherHoldIds.length > 0 && <p className="text-sm text-muted-foreground">
                   This will also remove {holdToConfirm.artistOtherHoldIds.length} other hold{holdToConfirm.artistOtherHoldIds.length !== 1 ? 's' : ''} for this artist.
-                </p>
-              )}
+                </p>}
 
               {/* Message to confirmed artist */}
               <div className="space-y-3">
