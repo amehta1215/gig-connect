@@ -444,7 +444,7 @@ export default function VenueCalendar() {
                   const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
                   return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
                     <p className="font-display text-primary text-base">{artistName}</p>
-                    <p className="text-sm text-muted-foreground">{timeDisplay ? `${timeDisplay} · ` : ''}{roomDisplay}</p>
+                    <p className="text-sm text-muted-foreground">{roomDisplay}{timeDisplay ? ` · ${timeDisplay}` : ''}</p>
                   </button>;
                 })}
                 <div
