@@ -238,7 +238,7 @@ export default function ArtistCalendar() {
           const location = isManual ? gig.manual_location : gig.venue_listing?.location;
           return <button key={gig.id} onClick={() => navigate(`/artist/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                   <div>
-                    <p className="font-display text-accent">{venueName}</p>
+                    <p className="font-display text-primary">{venueName}</p>
                     {location && <p className="text-xs text-muted-foreground">{location}</p>}
                   </div>
                   <span className="text-sm text-muted-foreground">
