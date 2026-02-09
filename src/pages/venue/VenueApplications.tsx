@@ -459,11 +459,11 @@ export default function VenueApplications() {
             <TabsTrigger value="in_progress" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
               PENDING
             </TabsTrigger>
-            <TabsTrigger value="confirmed" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
-              CONFIRMED
-            </TabsTrigger>
             <TabsTrigger value="hold" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
               HOLD
+            </TabsTrigger>
+            <TabsTrigger value="confirmed" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+              CONFIRMED
             </TabsTrigger>
             <TabsTrigger value="archived" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
               ARCHIVED
