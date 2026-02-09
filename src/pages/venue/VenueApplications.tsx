@@ -307,8 +307,8 @@ export default function VenueApplications() {
     hold: {
       icon: PauseCircle,
       label: 'HOLD',
-      color: 'text-yellow-500',
-      bgColor: 'bg-yellow-500/10'
+      color: 'text-green-400',
+      bgColor: 'bg-green-400/10'
     },
     in_progress: {
       icon: Clock,
@@ -368,7 +368,7 @@ export default function VenueApplications() {
                   </h3>
                   <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
                     <StatusIcon className="h-3 w-3" />
-                    {displayStatus === 'hold' ? `HOLD #${holdPriority || '—'}` : config.label}
+                    {config.label}
                   </div>
                 </div>
                 
