@@ -438,7 +438,7 @@ export default function VenueCalendar() {
                               <span className="text-sm mr-2 text-primary">#{index + 1}</span>
                               {artistName}
                             </p>
-                            <p className="text-sm text-primary">{roomDisplay}</p>
+                            <p className="text-sm text-muted-foreground">{roomDisplay}</p>
                           </button>
                         </div>
                         <div className="flex gap-2 ml-4">
