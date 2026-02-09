@@ -25,9 +25,9 @@ function Calendar({ className, classNames, showOutsideDays = true, disabled, dis
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      fixedWeeks
+      fixedWeeks={false}
       disabled={disabledMatcher}
-      className={cn("p-3", className)}
+      className={cn("p-3 mx-auto", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
         month: "space-y-4 w-full",
