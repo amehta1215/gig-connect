@@ -395,7 +395,7 @@ export default function VenueCalendar() {
               </Button>}
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-2">
               {/* Confirmed Shows - always visible */}
               <div className="space-y-2">
                 <p className="font-display text-xs tracking-widest flex items-center gap-1 text-primary">
