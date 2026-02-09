@@ -339,6 +339,10 @@ export default function VenueCalendar() {
   const handleHoldDragEnd = async () => {
     setDraggedHoldIndex(null);
 
+    // Check if order actually changed
+    const orderChanged = localHoldOrder.some((gig, index) => gig.hold_priority !== index + 1);
+    if (!orderChanged) return;
+
     // Update priorities in database
     const updates = localHoldOrder.map((gig, index) => ({
       id: gig.id,
