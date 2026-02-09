@@ -10,7 +10,6 @@ import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
-
 interface GigListing {
   id: string;
   gig_date: string;
@@ -142,7 +141,9 @@ export default function ArtistCalendar() {
   const today = startOfDay(new Date());
   const modifiers = {
     hasGig: gigDates,
-    past: { before: today }
+    past: {
+      before: today
+    }
   };
   const modifiersStyles = {
     hasGig: {
@@ -171,7 +172,7 @@ export default function ArtistCalendar() {
         {/* Events on selected date */}
         <div className="bg-card border border-border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-sm text-primary tracking-widest">
+            <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
             </h2>
             {canCreateEvent && <Button size="sm" onClick={handleCreateEventClick} className="bg-primary hover:bg-primary/90">
@@ -180,56 +181,39 @@ export default function ArtistCalendar() {
               </Button>}
           </div>
           
-          {gigsOnSelectedDate.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No shows on this date</p>
-          ) : (
-            <div className="space-y-4">
+          {gigsOnSelectedDate.length === 0 ? <p className="text-muted-foreground text-sm">No shows on this date</p> : <div className="space-y-4">
               {/* Confirmed Shows */}
-              {confirmedGigs.length > 0 && (
-                <div className="space-y-2">
+              {confirmedGigs.length > 0 && <div className="space-y-2">
                   <p className="font-display text-xs text-green-500 tracking-widest flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3" />
                     CONFIRMED
                   </p>
                   {confirmedGigs.map(gig => {
-                    const isManual = !gig.application_id && gig.manual_venue_name;
-                    const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
-                    const location = isManual ? gig.manual_location : gig.venue_listing?.location;
-                    return (
-                      <button 
-                        key={gig.id} 
-                        onClick={() => navigate(`/artist/calendar/${gig.id}`)} 
-                        className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors"
-                      >
+              const isManual = !gig.application_id && gig.manual_venue_name;
+              const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
+              const location = isManual ? gig.manual_location : gig.venue_listing?.location;
+              return <button key={gig.id} onClick={() => navigate(`/artist/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
                         <p className="font-display text-lg text-accent">{venueName}</p>
                         {location && <p className="text-sm text-muted-foreground">{location}</p>}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                      </button>;
+            })}
+                </div>}
 
               {/* Holds */}
-              {holdGigs.length > 0 && (
-                <div className="space-y-2">
+              {holdGigs.length > 0 && <div className="space-y-2">
                   <p className="font-display text-xs text-yellow-500 tracking-widest flex items-center gap-1">
                     <PauseCircle className="h-3 w-3" />
                     HOLDS
                   </p>
                   {holdGigs.map(gig => {
-                    const isManual = !gig.application_id && gig.manual_venue_name;
-                    const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
-                    const location = isManual ? gig.manual_location : gig.venue_listing?.location;
-                    return (
-                      <button 
-                        key={gig.id} 
-                        onClick={() => {
-                          if (gig.application_id) {
-                            navigate(`/artist/applications/${gig.application_id}`);
-                          }
-                        }}
-                        className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors"
-                      >
+              const isManual = !gig.application_id && gig.manual_venue_name;
+              const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
+              const location = isManual ? gig.manual_location : gig.venue_listing?.location;
+              return <button key={gig.id} onClick={() => {
+                if (gig.application_id) {
+                  navigate(`/artist/applications/${gig.application_id}`);
+                }
+              }} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
                         <div className="flex items-center gap-2">
                           <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
                             HOLD #{gig.hold_priority || '—'}
@@ -237,33 +221,22 @@ export default function ArtistCalendar() {
                           <p className="font-display text-lg text-accent">{venueName}</p>
                         </div>
                         {location && <p className="text-sm text-muted-foreground">{location}</p>}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+                      </button>;
+            })}
+                </div>}
+            </div>}
         </div>
       </div>
 
       {/* Upcoming confirmed shows */}
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4">UPCOMING SHOWS</h2>
-        {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? (
-          <p className="text-muted-foreground text-sm">No upcoming shows booked</p>
-        ) : (
-          <div className="space-y-2">
+        {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
             {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
-              const isManual = !gig.application_id && gig.manual_venue_name;
-              const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
-              const location = isManual ? gig.manual_location : gig.venue_listing?.location;
-              return (
-                <button 
-                  key={gig.id} 
-                  onClick={() => navigate(`/artist/calendar/${gig.id}`)} 
-                  className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors"
-                >
+          const isManual = !gig.application_id && gig.manual_venue_name;
+          const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
+          const location = isManual ? gig.manual_location : gig.venue_listing?.location;
+          return <button key={gig.id} onClick={() => navigate(`/artist/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                   <div>
                     <p className="font-display text-accent">{venueName}</p>
                     {location && <p className="text-xs text-muted-foreground">{location}</p>}
@@ -271,11 +244,9 @@ export default function ArtistCalendar() {
                   <span className="text-sm text-muted-foreground">
                     {format(new Date(gig.gig_date), 'MMM d, yyyy')}
                   </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+                </button>;
+        })}
+          </div>}
       </div>
 
       {/* Create Event Dialog */}
