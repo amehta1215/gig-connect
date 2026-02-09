@@ -494,7 +494,7 @@ export default function VenueCalendar() {
                           <Button size="sm" variant="ghost" onClick={e => {
                     e.stopPropagation();
                     openDeleteDialog(gig);
-                  }} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                  }} className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
