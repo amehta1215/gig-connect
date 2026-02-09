@@ -582,8 +582,8 @@ export default function VenueCalendar() {
           </DialogHeader>
           
           {holdToConfirm && <div className="space-y-6 py-4">
-              <p className="text-muted-foreground">
-                Confirm <span className="text-accent font-medium">{holdToConfirm.artistName}</span> for {holdToConfirm.roomName} on {format(new Date(holdToConfirm.gigDate), 'MMMM d, yyyy')}?
+              <p className="text-primary">
+                Confirm <span className="font-medium text-primary">{holdToConfirm.artistName}</span> for {holdToConfirm.roomName} on {format(new Date(holdToConfirm.gigDate), 'MMMM d, yyyy')}?
               </p>
 
               {holdToConfirm.artistOtherHoldIds.length > 0 && <p className="text-sm text-muted-foreground">
