@@ -47,7 +47,7 @@ function Calendar({ className, classNames, showOutsideDays = true, disabled, dis
         day: cn(buttonVariants({ variant: "ghost" }), "h-9 w-9 p-0 font-normal aria-selected:opacity-100"),
         day_range_end: "day-range-end",
         day_selected:
-          "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground [&.rdp-day_disabled]:bg-accent/50 [&.rdp-day_disabled]:text-accent-foreground/50",
+          "bg-accent/60 text-accent-foreground hover:bg-accent/60 hover:text-accent-foreground focus:bg-accent/60 focus:text-accent-foreground [&.rdp-day_disabled]:bg-accent/30 [&.rdp-day_disabled]:text-accent-foreground/50",
         day_today: "bg-accent text-accent-foreground rounded-full",
         day_outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
