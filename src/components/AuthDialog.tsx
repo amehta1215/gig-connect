@@ -170,7 +170,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
       <DialogContent className="bg-card border-border max-w-md p-8 sm:p-10">
         <DialogHeader className="pr-8">
           <DialogTitle className="font-display text-3xl md:text-4xl tracking-wide text-foreground text-center">
-            {mode === 'login' ? 'SIGN IN' : 'SIGN UP'}
+            {mode === 'login' ? 'LOGIN' : 'SIGN UP'}
           </DialogTitle>
           {promptMessage && (
             <DialogDescription className="text-muted-foreground text-center mt-2">
