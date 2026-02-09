@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart, RotateCcw } from 'lucide-react';
+import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart, RotateCcw, PauseCircle } from 'lucide-react';
 import { format, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
@@ -23,6 +23,11 @@ interface VenueListing {
   id: string;
   venue_name: string;
   room_name: string | null;
+}
+interface GigListing {
+  id: string;
+  is_confirmed: boolean;
+  hold_priority: number | null;
 }
 interface Application {
   id: string;
@@ -48,7 +53,9 @@ interface Application {
     pictures: string[] | null;
   };
   venue_listing?: VenueListing;
+  gig_listing?: GigListing | null;
 }
+type DisplayStatus = 'confirmed' | 'hold' | 'in_progress' | 'archived';
 const genres = ['Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
 const paymentPreferences = [{
   value: 'all',
@@ -95,7 +102,7 @@ export default function VenueApplications() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [venueListings, setVenueListings] = useState<Map<string, VenueListing>>(new Map());
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState<string>('confirmed');
   const [sortBy, setSortBy] = useState('newest');
   const [filterGenre, setFilterGenre] = useState('all');
   const [filterPayment, setFilterPayment] = useState('all');
@@ -218,14 +225,36 @@ export default function VenueApplications() {
       artist_profile: profileByUserId.get(app.artist_id),
       venue_listing: listingsMap.get(app.venue_listing_id)
     }));
-    setApplications(merged as unknown as Application[]);
+    // Enrich accepted applications with gig listing data
+    const enrichedApps = await Promise.all(merged.map(async (app: any) => {
+      if (app.status === 'accepted') {
+        const { data: gigData } = await supabase
+          .from('gig_listings')
+          .select('id, is_confirmed, hold_priority')
+          .eq('application_id', app.id)
+          .order('hold_priority', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        return { ...app, gig_listing: gigData };
+      }
+      return { ...app, gig_listing: null };
+    }));
+    setApplications(enrichedApps as unknown as Application[]);
     setLoading(false);
   };
+  const getDisplayStatus = (app: Application): DisplayStatus => {
+    if (app.status === 'accepted') {
+      if (app.gig_listing && app.gig_listing.is_confirmed) return 'confirmed';
+      if (app.gig_listing && !app.gig_listing.is_confirmed) return 'hold';
+      return 'confirmed'; // accepted with no gig listing = confirmed
+    }
+    if (app.status === 'archived') return 'archived';
+    return 'in_progress';
+  };
+
   const getFilteredApplications = () => {
     let filtered = [...applications];
-    if (activeTab !== 'all') {
-      filtered = filtered.filter(app => app.status === activeTab);
-    }
+    filtered = filtered.filter(app => getDisplayStatus(app) === activeTab);
     if (filterFavorites) {
       filtered = filtered.filter(app => favorites.has(app.id));
     }
@@ -245,28 +274,18 @@ export default function VenueApplications() {
       const filterFrom = startOfDay(dateRange.from);
       const filterTo = dateRange.to ? endOfDay(dateRange.to) : endOfDay(dateRange.from);
       filtered = filtered.filter(app => {
-        // Flexible means available for any date
-        if (app.availability_preference === 'flexible') {
-          return true;
-        }
-
-        // Date range: check if ranges overlap
+        if (app.availability_preference === 'flexible') return true;
         if (app.availability_preference === 'date_range' && app.availability_start_date && app.availability_end_date) {
           const appStart = startOfDay(new Date(app.availability_start_date));
           const appEnd = endOfDay(new Date(app.availability_end_date));
-          // Ranges overlap if one starts before the other ends
           return appStart <= filterTo && appEnd >= filterFrom;
         }
-
-        // Specific dates: check if any date falls within filter range
         if (app.availability_preference === 'specific_dates' && app.availability_specific_dates?.length) {
           return app.availability_specific_dates.some(dateStr => {
             const specificDate = new Date(dateStr);
             return specificDate >= filterFrom && specificDate <= filterTo;
           });
         }
-
-        // No availability info - include by default
         return true;
       });
     }
@@ -276,18 +295,24 @@ export default function VenueApplications() {
     return filtered;
   };
   const filteredApplications = getFilteredApplications();
-  const statusConfig = {
+  const statusConfig: Record<DisplayStatus, { icon: typeof Clock; label: string; color: string; bgColor: string }> = {
+    confirmed: {
+      icon: CheckCircle2,
+      label: 'CONFIRMED',
+      color: 'text-green-500',
+      bgColor: 'bg-green-500/10'
+    },
+    hold: {
+      icon: PauseCircle,
+      label: 'HOLD',
+      color: 'text-yellow-500',
+      bgColor: 'bg-yellow-500/10'
+    },
     in_progress: {
       icon: Clock,
       label: 'PENDING',
       color: 'text-yellow-500',
       bgColor: 'bg-yellow-500/10'
-    },
-    accepted: {
-      icon: CheckCircle2,
-      label: 'ACCEPTED',
-      color: 'text-green-500',
-      bgColor: 'bg-green-500/10'
     },
     archived: {
       icon: Archive,
@@ -313,8 +338,10 @@ export default function VenueApplications() {
   }: {
     application: Application;
   }) => {
-    const config = statusConfig[application.status];
+    const displayStatus = getDisplayStatus(application);
+    const config = statusConfig[displayStatus];
     const StatusIcon = config.icon;
+    const holdPriority = displayStatus === 'hold' ? application.gig_listing?.hold_priority : null;
     const bandName = application.artist_profile?.band_name || `${application.artist?.first_name} ${application.artist?.last_name}`;
     const roomDisplay = application.venue_listing?.room_name || application.venue_listing?.venue_name || '';
     const availability = formatAvailability(application);
@@ -339,7 +366,7 @@ export default function VenueApplications() {
                   </h3>
                   <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
                     <StatusIcon className="h-3 w-3" />
-                    {config.label}
+                    {displayStatus === 'hold' ? `HOLD #${holdPriority || '—'}` : config.label}
                   </div>
                 </div>
                 
@@ -424,11 +451,11 @@ export default function VenueApplications() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex items-center gap-2">
           <TabsList className="bg-card border border-border p-0 h-auto">
-            <TabsTrigger value="all" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
-              ALL
+            <TabsTrigger value="confirmed" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+              CONFIRMED
             </TabsTrigger>
-            <TabsTrigger value="accepted" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
-              ACCEPTED
+            <TabsTrigger value="hold" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+              HOLD
             </TabsTrigger>
             <TabsTrigger value="in_progress" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
               PENDING
