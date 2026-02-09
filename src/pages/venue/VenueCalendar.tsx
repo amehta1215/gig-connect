@@ -462,7 +462,7 @@ export default function VenueCalendar() {
 
       {/* Upcoming confirmed shows */}
       <div className="bg-card border border-border p-6">
-        <h2 className="font-display text-sm text-primary tracking-widest mb-4">UPCOMING SHOWS</h2>
+        <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
         {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
             {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
           const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
