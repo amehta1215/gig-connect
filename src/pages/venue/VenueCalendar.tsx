@@ -71,6 +71,7 @@ export default function VenueCalendar() {
   // Confirm hold dialog state
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [confirmingHold, setConfirmingHold] = useState(false);
+  const [confirmShowTime, setConfirmShowTime] = useState('');
   const [holdToConfirm, setHoldToConfirm] = useState<{
     gigId: string;
     gigDate: string;
@@ -244,6 +245,7 @@ export default function VenueCalendar() {
     });
     setConfirmMessage(`Great news! Your performance at ${roomName} on ${formattedDate} has been confirmed. This is no longer a hold - you're officially booked!\n\nWe're looking forward to having you perform.`);
     setSendConfirmMessage(true);
+    setConfirmShowTime('');
     setConfirmDialogOpen(true);
   };
   const handleConfirmHold = async () => {
@@ -264,7 +266,8 @@ export default function VenueCalendar() {
       error: confirmError
     } = await supabase.from('gig_listings').update({
       is_confirmed: true,
-      hold_priority: null
+      hold_priority: null,
+      ...(confirmShowTime ? { show_time: confirmShowTime } : {})
     }).eq('id', gigId);
     if (confirmError) {
       toast.error('Failed to confirm gig');
@@ -637,6 +640,12 @@ export default function VenueCalendar() {
               {holdToConfirm.artistOtherHoldIds.length > 0 && <p className="text-sm text-muted-foreground">
                   This will also remove {holdToConfirm.artistOtherHoldIds.length} other hold{holdToConfirm.artistOtherHoldIds.length !== 1 ? 's' : ''} for this artist.
                 </p>}
+
+              {/* Show Time */}
+              <div className="space-y-2">
+                <label className="font-display text-xs text-primary tracking-widest">SHOW TIME</label>
+                <Input type="time" value={confirmShowTime} onChange={e => setConfirmShowTime(e.target.value)} className="w-40" />
+              </div>
 
               {/* Message to confirmed artist */}
               <div className="space-y-3">
