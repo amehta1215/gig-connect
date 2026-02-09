@@ -395,7 +395,7 @@ export default function VenueCalendar() {
               </Button>}
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-4">
               {/* Confirmed Shows - always visible */}
               <div className="space-y-2">
                 <p className="font-display text-xs tracking-widest flex items-center gap-1 text-primary">
@@ -421,7 +421,7 @@ export default function VenueCalendar() {
                   className={`min-h-[48px] transition-colors rounded-sm ${confirmDropHighlight ? 'bg-green-600/20 border-2 border-dashed border-green-600' : ''}`}
                 >
                   {confirmedGigs.length === 0 ? (
-                    <div className="py-3" />
+                    <p className="text-muted-foreground text-sm py-3 px-2">No Artists Confirmed Yet</p>
                   ) : (
                     confirmedGigs.map(gig => {
                       const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
