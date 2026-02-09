@@ -432,7 +432,7 @@ export default function VenueCalendar() {
                     }
                   }} className="text-left flex-1 hover:opacity-80 transition-opacity">
                             <p className="font-display text-primary text-base">
-                              <span className="mr-2 text-primary text-base">#{index + 1}</span>
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-primary text-primary text-xs font-bold mr-2 flex-shrink-0">{index + 1}</span>
                               {artistName}
                             </p>
                             <p className="text-sm text-muted-foreground">{roomDisplay}</p>
