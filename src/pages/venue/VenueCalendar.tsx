@@ -415,7 +415,7 @@ export default function VenueCalendar() {
               {holdGigs.length > 0 && <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <p className="font-display text-xs tracking-widest flex items-center gap-1 text-primary">
-                      <PauseCircle className="h-3 w-3" />
+                      
                       HOLDS
                     </p>
                   </div>
