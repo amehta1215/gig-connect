@@ -58,9 +58,6 @@ export default function VenueCalendar() {
   const [eventHoldPriority, setEventHoldPriority] = useState(1);
   const [existingHoldsForDate, setExistingHoldsForDate] = useState<GigListing[]>([]);
   const [creating, setCreating] = useState(false);
-  const [deleteAllHoldsDialogOpen, setDeleteAllHoldsDialogOpen] = useState(false);
-  const [deletingAllHolds, setDeletingAllHolds] = useState(false);
-  const [deleteScope, setDeleteScope] = useState<'week' | 'month' | 'all'>('week');
   const [draggedHoldIndex, setDraggedHoldIndex] = useState<number | null>(null);
   const [localHoldOrder, setLocalHoldOrder] = useState<GigListing[]>([]);
 
@@ -318,65 +315,6 @@ export default function VenueCalendar() {
     toast.success('Hold deleted and application archived');
     fetchGigs();
   };
-  const openDeleteHoldsDialog = (scope: 'week' | 'month' | 'all') => {
-    setDeleteScope(scope);
-    setDeleteAllHoldsDialogOpen(true);
-  };
-  const handleDeleteAllHolds = async () => {
-    setDeletingAllHolds(true);
-
-    // Get all venue listing IDs for this user
-    const {
-      data: venueProfile
-    } = await supabase.from('venue_profiles').select('id').eq('user_id', user!.id).single();
-    if (!venueProfile) {
-      setDeletingAllHolds(false);
-      return;
-    }
-    const {
-      data: listings
-    } = await supabase.from('venue_listings').select('id').eq('venue_profile_id', venueProfile.id);
-    if (!listings) {
-      setDeletingAllHolds(false);
-      return;
-    }
-    const listingIds = listings.map(l => l.id);
-    const today = new Date();
-
-    // Build query based on scope
-    let query = supabase.from('gig_listings').select('id, application_id').in('venue_listing_id', listingIds).eq('is_confirmed', false);
-    if (deleteScope === 'week') {
-      const weekEnd = format(addDays(today, 7), 'yyyy-MM-dd');
-      query = query.gte('gig_date', format(today, 'yyyy-MM-dd')).lte('gig_date', weekEnd);
-    } else if (deleteScope === 'month') {
-      const monthEnd = format(addMonths(today, 1), 'yyyy-MM-dd');
-      query = query.gte('gig_date', format(today, 'yyyy-MM-dd')).lte('gig_date', monthEnd);
-    }
-    // 'all' scope doesn't need date filtering
-
-    const {
-      data: holds
-    } = await query;
-    if (holds && holds.length > 0) {
-      // Archive the applications
-      const applicationIds = holds.map(h => h.application_id).filter(Boolean);
-      if (applicationIds.length > 0) {
-        await supabase.from('applications').update({
-          status: 'archived'
-        }).in('id', applicationIds);
-      }
-
-      // Delete the holds
-      await supabase.from('gig_listings').delete().in('id', holds.map(h => h.id));
-      const scopeText = deleteScope === 'week' ? 'this week' : deleteScope === 'month' ? 'this month' : '';
-      toast.success(`${holds.length} hold${holds.length > 1 ? 's' : ''} deleted${scopeText ? ` for ${scopeText}` : ''}`);
-    } else {
-      toast.info('No holds to delete');
-    }
-    setDeletingAllHolds(false);
-    setDeleteAllHoldsDialogOpen(false);
-    fetchGigs();
-  };
   const gigDates = gigs.map(g => new Date(g.gig_date));
   const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
   const confirmedGigs = gigsOnSelectedDate.filter(g => g.is_confirmed);
@@ -482,25 +420,6 @@ export default function VenueCalendar() {
                       <PauseCircle className="h-3 w-3" />
                       HOLDS
                     </p>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button size="sm" variant="ghost" className="text-xs text-destructive hover:text-destructive h-6 px-2">
-                          Delete All
-                          <ChevronDown className="h-3 w-3 ml-1" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openDeleteHoldsDialog('week')}>
-                          For this week
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openDeleteHoldsDialog('month')}>
-                          For this month
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openDeleteHoldsDialog('all')}>
-                          All holds
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </div>
                   {localHoldOrder.map((gig, index) => {
               const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
@@ -662,34 +581,6 @@ export default function VenueCalendar() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete All Holds Confirmation Dialog */}
-      <Dialog open={deleteAllHoldsDialogOpen} onOpenChange={setDeleteAllHoldsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-display text-2xl">DELETE HOLDS</DialogTitle>
-            <DialogDescription>
-              {deleteScope === 'week' && 'Delete all holds for the next 7 days.'}
-              {deleteScope === 'month' && 'Delete all holds for the next 30 days.'}
-              {deleteScope === 'all' && 'Delete all holds across all dates.'}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4">
-            <p className="text-muted-foreground">
-              The associated applications will be moved to archived. This action cannot be undone.
-            </p>
-          </div>
-
-          <DialogFooter className="flex gap-3 justify-end">
-            <Button variant="outline" onClick={() => setDeleteAllHoldsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleDeleteAllHolds} disabled={deletingAllHolds} variant="destructive">
-              {deletingAllHolds ? 'Deleting...' : 'Delete Holds'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Confirm Hold Dialog */}
       <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
