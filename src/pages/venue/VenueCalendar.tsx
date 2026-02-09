@@ -431,10 +431,10 @@ export default function VenueCalendar() {
                       navigate(`/venue/calendar/${gig.id}`);
                     }
                   }} className="text-left flex-1 hover:opacity-80 transition-opacity">
-                            <p className="font-display text-primary text-base">
+                            <div className="flex items-center">
                               <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-primary text-primary text-[10px] font-bold mr-2 flex-shrink-0">{index + 1}</span>
-                              {artistName}
-                            </p>
+                              <span className="font-display text-primary text-base">{artistName}</span>
+                            </div>
                             <p className="text-sm text-muted-foreground">{roomDisplay}</p>
                           </button>
                         </div>
