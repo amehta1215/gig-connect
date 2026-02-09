@@ -423,8 +423,7 @@ export default function VenueCalendar() {
               const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
               const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
               return <div key={gig.id} draggable onDragStart={() => handleHoldDragStart(index)} onDragOver={e => handleHoldDragOver(e, index)} onDragEnd={handleHoldDragEnd} className={`bg-secondary p-4 flex items-center justify-between cursor-grab active:cursor-grabbing transition-opacity ${draggedHoldIndex === index ? 'opacity-50' : ''}`}>
-                        <div className="flex items-center gap-3 flex-1">
-                          <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="flex items-center gap-3 flex-1">
                           <button onClick={() => {
                     if (gig.application_id) {
                       navigate(`/venue/applications/${gig.application_id}`);
@@ -453,6 +452,7 @@ export default function VenueCalendar() {
                             <CheckCircle2 className="h-4 w-4" />
                           </Button>
                         </div>
+                        <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0 ml-3" />
                       </div>;
             })}
                 </div>}
