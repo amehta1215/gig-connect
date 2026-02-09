@@ -355,17 +355,11 @@ export default function VenueCalendar() {
   };
   const today = startOfDay(new Date());
   const modifiers = {
-    hasGig: gigDates,
     past: {
       before: today
     }
   };
   const modifiersStyles = {
-    hasGig: {
-      backgroundColor: '#b0177f',
-      color: 'white',
-      borderRadius: '0'
-    },
     past: {
       opacity: 0.3
     }
