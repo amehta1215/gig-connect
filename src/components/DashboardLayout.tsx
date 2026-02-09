@@ -26,7 +26,7 @@ export default function DashboardLayout({
   const navigate = useNavigate();
   const handleSignOut = async () => {
     await signOut();
-    navigate('/auth');
+    navigate('/');
   };
   const handleSwitchRole = () => {
     const newRole = activeRole === 'artist' ? 'venue' : 'artist';
