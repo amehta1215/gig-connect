@@ -62,6 +62,11 @@ export default function VenueCalendar() {
   const [localHoldOrder, setLocalHoldOrder] = useState<GigListing[]>([]);
   const [confirmDropHighlight, setConfirmDropHighlight] = useState(false);
 
+  // Delete hold dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [holdToDelete, setHoldToDelete] = useState<{ gigId: string; applicationId: string | null; artistId: string; artistName: string } | null>(null);
+  const [deletingHold, setDeletingHold] = useState(false);
+
   // Confirm hold dialog state
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [confirmingHold, setConfirmingHold] = useState(false);
@@ -295,23 +300,50 @@ export default function VenueCalendar() {
     toast.success('Gig confirmed!');
     fetchGigs();
   };
-  const handleDeleteHold = async (gigId: string, applicationId: string | null) => {
-    // Delete the gig listing
-    const {
-      error
-    } = await supabase.from('gig_listings').delete().eq('id', gigId);
-    if (error) {
-      toast.error('Failed to delete hold');
-      return;
-    }
+  const openDeleteDialog = async (gig: GigListing) => {
+    const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'Artist');
+    setHoldToDelete({ gigId: gig.id, applicationId: gig.application_id, artistId: gig.artist_id, artistName });
+    setDeleteDialogOpen(true);
+  };
 
-    // Archive the application
-    if (applicationId) {
-      await supabase.from('applications').update({
-        status: 'archived'
-      }).eq('id', applicationId);
+  const handleDeleteHoldThisDay = async () => {
+    if (!holdToDelete) return;
+    setDeletingHold(true);
+    const { error } = await supabase.from('gig_listings').delete().eq('id', holdToDelete.gigId);
+    if (error) { toast.error('Failed to delete hold'); setDeletingHold(false); return; }
+    if (holdToDelete.applicationId) {
+      await supabase.from('applications').update({ status: 'archived' }).eq('id', holdToDelete.applicationId);
     }
-    toast.success('Hold deleted and application archived');
+    setDeletingHold(false);
+    setDeleteDialogOpen(false);
+    setHoldToDelete(null);
+    toast.success('Hold deleted');
+    fetchGigs();
+  };
+
+  const handleDeleteAllHoldsForArtist = async () => {
+    if (!holdToDelete) return;
+    setDeletingHold(true);
+    const listingIds = venueListings.map(l => l.id);
+    // Get all holds for this artist across all venue listings
+    const { data: allHolds } = await supabase
+      .from('gig_listings')
+      .select('id, application_id')
+      .in('venue_listing_id', listingIds)
+      .eq('artist_id', holdToDelete.artistId)
+      .eq('is_confirmed', false);
+    if (allHolds && allHolds.length > 0) {
+      const holdIds = allHolds.map(h => h.id);
+      const appIds = allHolds.map(h => h.application_id).filter(Boolean) as string[];
+      await supabase.from('gig_listings').delete().in('id', holdIds);
+      if (appIds.length > 0) {
+        await supabase.from('applications').update({ status: 'archived' }).in('id', appIds);
+      }
+    }
+    setDeletingHold(false);
+    setDeleteDialogOpen(false);
+    setHoldToDelete(null);
+    toast.success('All holds for this artist deleted');
     fetchGigs();
   };
   const gigDates = gigs.map(g => new Date(g.gig_date));
@@ -458,10 +490,10 @@ export default function VenueCalendar() {
                             <p className="text-sm text-muted-foreground">{roomDisplay}</p>
                           </button>
                         </div>
-                        <div className="flex gap-2 ml-4">
+                        <div className="flex gap-1 ml-6">
                           <Button size="sm" variant="ghost" onClick={e => {
                     e.stopPropagation();
-                    handleDeleteHold(gig.id, gig.application_id);
+                    openDeleteDialog(gig);
                   }} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -628,6 +660,38 @@ export default function VenueCalendar() {
               {confirmingHold ? 'Confirming...' : 'Confirm Gig'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Hold Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl">DELETE HOLD</DialogTitle>
+            <DialogDescription>
+              {holdToDelete && `Remove hold for ${holdToDelete.artistName}?`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 py-4">
+            <Button
+              variant="outline"
+              onClick={handleDeleteHoldThisDay}
+              disabled={deletingHold}
+              className="w-full justify-start"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {deletingHold ? 'Deleting...' : 'Delete hold for this date only'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDeleteAllHoldsForArtist}
+              disabled={deletingHold}
+              className="w-full justify-start text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {deletingHold ? 'Deleting...' : 'Delete all holds for this artist'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>;
