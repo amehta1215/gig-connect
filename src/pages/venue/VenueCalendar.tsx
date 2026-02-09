@@ -468,12 +468,6 @@ export default function VenueCalendar() {
                   }} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" onClick={e => {
-                    e.stopPropagation();
-                    openConfirmDialog(gig.id, gig.gig_date, gig.venue_listing_id, gig.artist_id);
-                  }} className="bg-green-600 hover:bg-green-700 h-8 w-8">
-                            <CheckCircle2 className="h-4 w-4" />
-                          </Button>
                         </div>
                         <GripVertical className="h-5 w-5 text-muted-foreground flex-shrink-0 ml-3" />
                       </div>;
