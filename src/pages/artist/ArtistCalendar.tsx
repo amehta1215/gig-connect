@@ -164,8 +164,8 @@ export default function ArtistCalendar() {
   return <div className="space-y-6 animate-fade-in">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Calendar */}
-        <div className="bg-card border border-border p-4 flex items-center justify-center">
-          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} modifiersClassNames={modifiersClassNames} disablePastDates={false} className="pointer-events-auto" />
+        <div className="bg-card border border-border p-4 flex items-stretch justify-center min-h-[400px]">
+          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} modifiersClassNames={modifiersClassNames} disablePastDates={false} className="pointer-events-auto w-full h-full [&_.rdp]:h-full [&_.rdp-months]:h-full [&_.rdp-month]:h-full [&_.rdp-month]:flex [&_.rdp-month]:flex-col [&_.rdp-month]:w-full [&_.rdp-table]:w-full [&_.rdp-table]:flex-1 [&_.rdp-tbody]:h-full [&_.rdp-head_row]:flex [&_.rdp-head_cell]:flex-1 [&_.rdp-head_cell]:flex [&_.rdp-head_cell]:items-center [&_.rdp-head_cell]:justify-center [&_.rdp-row]:flex [&_.rdp-row]:flex-1 [&_.rdp-cell]:flex-1 [&_.rdp-cell]:flex [&_.rdp-cell]:items-center [&_.rdp-cell]:justify-center [&_.rdp-day]:w-full [&_.rdp-day]:h-full font-semibold" />
         </div>
 
         {/* Events on selected date */}
