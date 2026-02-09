@@ -405,36 +405,29 @@ export default function VenueCalendar() {
                 <p className="font-display text-xs tracking-widest flex items-center gap-1 text-primary">
                   CONFIRMED
                 </p>
+                {confirmedGigs.map(gig => {
+                  const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+                  const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+                  return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
+                    <p className="font-display text-primary text-base">{artistName}</p>
+                    <p className="text-sm text-muted-foreground">{roomDisplay}</p>
+                  </button>;
+                })}
                 <div
-                  onDragOver={e => {
-                    e.preventDefault();
-                    setConfirmDropHighlight(true);
-                  }}
+                  onDragOver={e => { e.preventDefault(); setConfirmDropHighlight(true); }}
                   onDragLeave={() => setConfirmDropHighlight(false)}
                   onDrop={e => {
                     e.preventDefault();
                     setConfirmDropHighlight(false);
                     if (draggedHoldIndex !== null) {
                       const gig = localHoldOrder[draggedHoldIndex];
-                      if (gig) {
-                        setDraggedHoldIndex(null);
-                        openConfirmDialog(gig.id, gig.gig_date, gig.venue_listing_id, gig.artist_id);
-                      }
+                      if (gig) { setDraggedHoldIndex(null); openConfirmDialog(gig.id, gig.gig_date, gig.venue_listing_id, gig.artist_id); }
                     }
                   }}
                   className={`min-h-[48px] transition-colors rounded-sm ${confirmDropHighlight ? 'bg-green-600/20 border-2 border-dashed border-green-600' : ''}`}
                 >
-                  {confirmedGigs.length === 0 ? (
+                  {confirmedGigs.length === 0 && !confirmDropHighlight && (
                     <p className="text-muted-foreground text-sm py-3 px-2">No Artists Confirmed Yet</p>
-                  ) : (
-                    confirmedGigs.map(gig => {
-                      const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
-                      const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-                      return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
-                        <p className="font-display text-primary text-base">{artistName}</p>
-                        <p className="text-sm text-muted-foreground">{roomDisplay}</p>
-                      </button>;
-                    })
                   )}
                 </div>
               </div>
