@@ -424,10 +424,10 @@ export default function VenueCalendar() {
                       if (gig) { setDraggedHoldIndex(null); openConfirmDialog(gig.id, gig.gig_date, gig.venue_listing_id, gig.artist_id); }
                     }
                   }}
-                  className={`transition-all rounded-sm ${confirmDropHighlight ? 'min-h-[56px] bg-green-600/20 border-2 border-dashed border-green-600 py-4' : 'min-h-0 h-2'}`}
+                  className={`transition-all rounded-sm ${confirmDropHighlight ? 'min-h-[56px] bg-green-600/20 border-2 border-dashed border-green-600 py-4' : confirmedGigs.length === 0 ? 'min-h-[40px]' : 'min-h-0 h-2'}`}
                 >
                   {confirmedGigs.length === 0 && !confirmDropHighlight && (
-                    <p className="text-muted-foreground text-sm py-3 px-2">No Artists Confirmed Yet</p>
+                    <p className="text-muted-foreground text-sm py-2 px-2">No Artists Confirmed Yet</p>
                   )}
                 </div>
               </div>
