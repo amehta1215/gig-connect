@@ -102,7 +102,7 @@ export default function VenueApplications() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [venueListings, setVenueListings] = useState<Map<string, VenueListing>>(new Map());
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>('confirmed');
+  const [activeTab, setActiveTab] = useState<string>('all');
   const [sortBy, setSortBy] = useState('newest');
   const [filterGenre, setFilterGenre] = useState('all');
   const [filterPayment, setFilterPayment] = useState('all');
@@ -254,7 +254,9 @@ export default function VenueApplications() {
 
   const getFilteredApplications = () => {
     let filtered = [...applications];
-    filtered = filtered.filter(app => getDisplayStatus(app) === activeTab);
+    if (activeTab !== 'all') {
+      filtered = filtered.filter(app => getDisplayStatus(app) === activeTab);
+    }
     if (filterFavorites) {
       filtered = filtered.filter(app => favorites.has(app.id));
     }
@@ -451,14 +453,17 @@ export default function VenueApplications() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex items-center gap-2">
           <TabsList className="bg-card border border-border p-0 h-auto">
+            <TabsTrigger value="all" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+              ALL
+            </TabsTrigger>
+            <TabsTrigger value="in_progress" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+              PENDING
+            </TabsTrigger>
             <TabsTrigger value="confirmed" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
               CONFIRMED
             </TabsTrigger>
             <TabsTrigger value="hold" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
               HOLD
-            </TabsTrigger>
-            <TabsTrigger value="in_progress" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
-              PENDING
             </TabsTrigger>
             <TabsTrigger value="archived" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
               ARCHIVED
