@@ -230,7 +230,7 @@ export default function ArtistCalendar() {
                           <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
                             HOLD #{gig.hold_priority || '—'}
                           </span>
-                          <p className="font-display text-lg text-primary">{venueName}</p>
+                          <p className="font-display text-primary text-base">{venueName}</p>
                         </div>
                         {(location || timeDisplay) && <p className="text-sm text-muted-foreground">{[location, timeDisplay].filter(Boolean).join(' · ')}</p>}
                       </button>;
