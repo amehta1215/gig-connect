@@ -426,7 +426,7 @@ export default function VenueCalendar() {
   return <div className="space-y-6 animate-fade-in">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Calendar */}
-        <div className="bg-card border border-border p-4 flex items-stretch justify-center min-h-[400px]">
+        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch justify-center min-h-[400px]">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -435,28 +435,6 @@ export default function VenueCalendar() {
             modifiersStyles={modifiersStyles}
             disablePastDates={false}
             className="pointer-events-auto w-full h-full font-semibold"
-            classNames={{
-              months: "flex flex-col h-full w-full",
-              month: "flex flex-col h-full w-full space-y-2",
-              caption: "flex justify-center pt-1 relative items-center",
-              caption_label: "text-sm font-medium",
-              nav: "space-x-1 flex items-center",
-              nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input",
-              nav_button_previous: "absolute left-1",
-              nav_button_next: "absolute right-1",
-              table: "w-full flex-1 flex flex-col",
-              head_row: "flex",
-              head_cell: "text-muted-foreground flex-1 flex items-center justify-center font-normal text-[0.8rem]",
-              row: "flex flex-1",
-              cell: "flex-1 flex items-center justify-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent/60",
-              day: "h-full w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-md",
-              day_range_end: "day-range-end",
-              day_selected: "bg-accent/60 text-accent-foreground hover:bg-accent/60 focus:bg-accent/60",
-              day_today: "bg-accent text-accent-foreground",
-              day_outside: "day-outside text-muted-foreground opacity-50",
-              day_disabled: "text-muted-foreground opacity-30",
-              day_hidden: "invisible",
-            }}
           />
         </div>
 
