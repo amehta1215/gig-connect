@@ -244,7 +244,7 @@ export default function ArtistCalendar() {
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
         {gigs.filter((g) => parseLocalDate(g.gig_date) >= new Date()).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
-            {gigs.filter((g) => parseLocalDate(g.gig_date) >= new Date()).map((gig) => {
+            {gigs.filter((g) => parseLocalDate(g.gig_date) >= new Date()).sort((a, b) => (b.is_confirmed ? 1 : 0) - (a.is_confirmed ? 1 : 0)).map((gig) => {
           const isManual = !gig.application_id && gig.manual_venue_name;
           const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
           const location = isManual ? gig.manual_location : gig.venue_listing?.location;
