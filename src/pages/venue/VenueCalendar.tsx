@@ -507,6 +507,7 @@ export default function VenueCalendar() {
                   {localHoldOrder.map((gig, index) => {
               const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
               const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+              const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
               return <div key={gig.id} draggable onDragStart={() => handleHoldDragStart(index)} onDragOver={e => handleHoldDragOver(e, index)} onDragEnd={handleHoldDragEnd} className={`bg-secondary p-4 flex items-center justify-between cursor-grab active:cursor-grabbing transition-opacity ${draggedHoldIndex === index ? 'opacity-50' : ''}`}>
                       <div className="flex items-center gap-3 flex-1">
                           <button onClick={() => {
@@ -520,7 +521,7 @@ export default function VenueCalendar() {
                               <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-primary text-primary text-[10px] font-bold mr-2 flex-shrink-0">{index + 1}</span>
                               <span className="font-display text-primary text-base">{artistName}</span>
                             </div>
-                            <p className="text-sm text-muted-foreground">{roomDisplay}</p>
+                            <p className="text-sm text-muted-foreground">{roomDisplay}{timeDisplay ? ` · ${timeDisplay}` : ''}</p>
                           </button>
                         </div>
                         <div className="flex gap-1 ml-6">
