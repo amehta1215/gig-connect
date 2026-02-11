@@ -427,7 +427,37 @@ export default function VenueCalendar() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Calendar */}
         <div className="bg-card border border-border p-4 flex items-stretch justify-center min-h-[400px]">
-          <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} modifiers={modifiers} modifiersStyles={modifiersStyles} disablePastDates={false} className="pointer-events-auto w-full h-full [&_.rdp]:h-full [&_.rdp-months]:h-full [&_.rdp-month]:h-full [&_.rdp-month]:flex [&_.rdp-month]:flex-col [&_.rdp-month]:w-full [&_.rdp-table]:w-full [&_.rdp-table]:flex-1 [&_.rdp-tbody]:h-full [&_.rdp-tbody]:flex [&_.rdp-tbody]:flex-col [&_.rdp-head_row]:flex [&_.rdp-head_cell]:flex-1 [&_.rdp-head_cell]:flex [&_.rdp-head_cell]:items-center [&_.rdp-head_cell]:justify-center [&_.rdp-row]:flex [&_.rdp-row]:flex-1 [&_.rdp-cell]:flex-1 [&_.rdp-cell]:flex [&_.rdp-cell]:items-center [&_.rdp-cell]:justify-center [&_.rdp-day]:w-full [&_.rdp-day]:h-full font-semibold" />
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            modifiers={modifiers}
+            modifiersStyles={modifiersStyles}
+            disablePastDates={false}
+            className="pointer-events-auto w-full h-full font-semibold"
+            classNames={{
+              months: "flex flex-col h-full w-full",
+              month: "flex flex-col h-full w-full space-y-2",
+              caption: "flex justify-center pt-1 relative items-center",
+              caption_label: "text-sm font-medium",
+              nav: "space-x-1 flex items-center",
+              nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input",
+              nav_button_previous: "absolute left-1",
+              nav_button_next: "absolute right-1",
+              table: "w-full flex-1 flex flex-col",
+              head_row: "flex",
+              head_cell: "text-muted-foreground flex-1 flex items-center justify-center font-normal text-[0.8rem]",
+              row: "flex flex-1",
+              cell: "flex-1 flex items-center justify-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent/60",
+              day: "h-full w-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-md",
+              day_range_end: "day-range-end",
+              day_selected: "bg-accent/60 text-accent-foreground hover:bg-accent/60 focus:bg-accent/60",
+              day_today: "bg-accent text-accent-foreground",
+              day_outside: "day-outside text-muted-foreground opacity-50",
+              day_disabled: "text-muted-foreground opacity-30",
+              day_hidden: "invisible",
+            }}
+          />
         </div>
 
         {/* Events on selected date */}
