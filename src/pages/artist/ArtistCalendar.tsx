@@ -59,7 +59,7 @@ export default function ArtistCalendar() {
     });
     if (gigsData) {
       // Fetch venue listing info for each gig
-      const enrichedGigs = await Promise.all(gigsData.map(async gig => {
+      const enrichedGigs = await Promise.all(gigsData.map(async (gig) => {
         const {
           data: venueListing
         } = await supabase.from('venue_listings').select('venue_name, room_name, location').eq('id', gig.venue_listing_id).maybeSingle();
@@ -135,10 +135,10 @@ export default function ArtistCalendar() {
       navigate(`/artist/calendar/${newGig.id}`);
     }
   };
-  const gigDates = gigs.map(g => parseLocalDate(g.gig_date));
-  const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
-  const confirmedGigs = gigsOnSelectedDate.filter(g => g.is_confirmed);
-  const holdGigs = gigsOnSelectedDate.filter(g => !g.is_confirmed).sort((a, b) => (a.hold_priority || 99) - (b.hold_priority || 99));
+  const gigDates = gigs.map((g) => parseLocalDate(g.gig_date));
+  const gigsOnSelectedDate = selectedDate ? gigs.filter((g) => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
+  const confirmedGigs = gigsOnSelectedDate.filter((g) => g.is_confirmed);
+  const holdGigs = gigsOnSelectedDate.filter((g) => !g.is_confirmed).sort((a, b) => (a.hold_priority || 99) - (b.hold_priority || 99));
   const today = startOfDay(new Date());
   const modifiers = {
     hasGig: gigDates,
@@ -168,15 +168,15 @@ export default function ArtistCalendar() {
         {/* Calendar */}
         <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch justify-center min-h-[400px]">
           <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            modifiers={modifiers}
-            modifiersStyles={modifiersStyles}
-            modifiersClassNames={modifiersClassNames}
-            disablePastDates={false}
-            className="pointer-events-auto w-full h-full font-semibold"
-          />
+          mode="single"
+          selected={selectedDate}
+          onSelect={setSelectedDate}
+          modifiers={modifiers}
+          modifiersStyles={modifiersStyles}
+          modifiersClassNames={modifiersClassNames}
+          disablePastDates={false}
+          className="pointer-events-auto w-full h-full font-semibold" />
+
         </div>
 
         {/* Events on selected date */}
@@ -197,12 +197,12 @@ export default function ArtistCalendar() {
                     <CheckCircle2 className="h-3 w-3" />
                     CONFIRMED
                   </p>
-                  {confirmedGigs.map(gig => {
+                  {confirmedGigs.map((gig) => {
               const isManual = !gig.application_id && gig.manual_venue_name;
               const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
               return <button key={gig.id} onClick={() => navigate(`/artist/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
-                        <p className="font-display text-lg text-accent">{venueName}</p>
+                        <p className="font-display text-primary text-base">{venueName}</p>
                         {location && <p className="text-sm text-muted-foreground">{location}</p>}
                       </button>;
             })}
@@ -214,7 +214,7 @@ export default function ArtistCalendar() {
                     <PauseCircle className="h-3 w-3" />
                     HOLDS
                   </p>
-                  {holdGigs.map(gig => {
+                  {holdGigs.map((gig) => {
               const isManual = !gig.application_id && gig.manual_venue_name;
               const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
@@ -240,8 +240,8 @@ export default function ArtistCalendar() {
       {/* Upcoming confirmed shows */}
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
-        {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
-            {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
+        {gigs.filter((g) => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
+            {gigs.filter((g) => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).map((gig) => {
           const isManual = !gig.application_id && gig.manual_venue_name;
           const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
           const location = isManual ? gig.manual_location : gig.venue_listing?.location;
@@ -283,7 +283,7 @@ export default function ArtistCalendar() {
             <div className="space-y-2">
               <label className="font-display text-xs text-primary tracking-widest">TIME OF SHOW</label>
               <div className="relative">
-                <Input type="time" value={eventTime} onChange={e => setEventTime(e.target.value)} className="pl-10" />
+                <Input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)} className="pl-10" />
                 <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
             </div>
@@ -293,7 +293,7 @@ export default function ArtistCalendar() {
               <label className="font-display text-xs text-primary tracking-widest">
                 VENUE NAME <span className="text-destructive">*</span>
               </label>
-              <Input value={eventVenueName} onChange={e => setEventVenueName(e.target.value)} placeholder="Enter venue name" />
+              <Input value={eventVenueName} onChange={(e) => setEventVenueName(e.target.value)} placeholder="Enter venue name" />
             </div>
 
             {/* Location */}
