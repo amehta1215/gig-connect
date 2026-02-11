@@ -430,7 +430,7 @@ export default function VenueCalendar() {
         </div>
 
         {/* Events on selected date */}
-        <div className="bg-card border border-border p-6">
+        <div className="bg-card border border-border p-6 max-h-[400px] overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
