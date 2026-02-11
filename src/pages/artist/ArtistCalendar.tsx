@@ -19,6 +19,7 @@ interface GigListing {
   application_id: string | null;
   manual_venue_name: string | null;
   manual_location: string | null;
+  show_time: string | null;
   is_confirmed: boolean;
   hold_priority: number | null;
   venue_listing?: {
@@ -201,9 +202,10 @@ export default function ArtistCalendar() {
               const isManual = !gig.application_id && gig.manual_venue_name;
               const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
+              const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
               return <button key={gig.id} onClick={() => navigate(`/artist/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
                         <p className="font-display text-primary text-base">{venueName}</p>
-                        {location && <p className="text-sm text-muted-foreground">{location}</p>}
+                        {(location || timeDisplay) && <p className="text-sm text-muted-foreground">{[location, timeDisplay].filter(Boolean).join(' · ')}</p>}
                       </button>;
             })}
                 </div>}
@@ -218,6 +220,7 @@ export default function ArtistCalendar() {
               const isManual = !gig.application_id && gig.manual_venue_name;
               const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
+              const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
               return <button key={gig.id} onClick={() => {
                 if (gig.application_id) {
                   navigate(`/artist/applications/${gig.application_id}`);
@@ -229,7 +232,7 @@ export default function ArtistCalendar() {
                           </span>
                           <p className="font-display text-lg text-primary">{venueName}</p>
                         </div>
-                        {location && <p className="text-sm text-muted-foreground">{location}</p>}
+                        {(location || timeDisplay) && <p className="text-sm text-muted-foreground">{[location, timeDisplay].filter(Boolean).join(' · ')}</p>}
                       </button>;
             })}
                 </div>}
@@ -245,10 +248,11 @@ export default function ArtistCalendar() {
           const isManual = !gig.application_id && gig.manual_venue_name;
           const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
           const location = isManual ? gig.manual_location : gig.venue_listing?.location;
+          const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
           return <button key={gig.id} onClick={() => navigate(`/artist/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                   <div>
                     <p className="font-display text-primary">{venueName}</p>
-                    {location && <p className="text-xs text-muted-foreground">{location}</p>}
+                    {(location || timeDisplay) && <p className="text-xs text-muted-foreground">{[location, timeDisplay].filter(Boolean).join(' · ')}</p>}
                   </div>
                   <span className="text-sm text-muted-foreground">
                     {format(parseLocalDate(gig.gig_date), 'MMM d, yyyy')}
