@@ -820,13 +820,11 @@ export default function VenueApplicationDetail() {
               </div>
             )}
 
-            {/* Time - only for single date */}
-            {dateMode === 'single' && (
-              <div className="space-y-2">
-                <label className="font-display text-xs text-muted-foreground tracking-widest block">TIME OF SHOW (OPTIONAL)</label>
-                <Input type="time" value={selectedGigTime} onChange={e => setSelectedGigTime(e.target.value)} className="bg-background border-border" />
-              </div>
-            )}
+            {/* Time of Show */}
+            <div className="space-y-2">
+              <label className="font-display text-xs text-muted-foreground tracking-widest block">TIME OF SHOW (OPTIONAL)</label>
+              <Input type="time" value={selectedGigTime} onChange={e => setSelectedGigTime(e.target.value)} className="bg-background border-border" />
+            </div>
 
             {/* Accept Type - only for single date */}
             {dateMode === 'single' && (
