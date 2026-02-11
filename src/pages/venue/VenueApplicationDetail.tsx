@@ -834,12 +834,12 @@ export default function VenueApplicationDetail() {
                 <label className="font-display text-xs text-muted-foreground tracking-widest block">ACCEPTANCE TYPE</label>
                 <RadioGroup value={acceptType} onValueChange={v => setAcceptType(v as 'confirmed' | 'hold')}>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="confirmed" id="confirmed" />
-                    <Label htmlFor="confirmed" className="cursor-pointer font-display text-sm">CONFIRMED</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
                     <RadioGroupItem value="hold" id="hold" />
                     <Label htmlFor="hold" className="cursor-pointer font-display text-sm">HOLD</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="confirmed" id="confirmed" />
+                    <Label htmlFor="confirmed" className="cursor-pointer font-display text-sm">CONFIRMED</Label>
                   </div>
                 </RadioGroup>
               </div>
