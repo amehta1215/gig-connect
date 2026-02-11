@@ -402,15 +402,22 @@ export default function VenueProfile() {
                   <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
                     {editingListing ? roomFormData.room_name || roomFormData.venue_name || 'ROOM' : 'NEW ROOM'}
                   </DialogTitle>
-                  {editingListing && <div className="flex gap-2">
-                      <Button variant={dialogMode === 'edit' ? 'default' : 'outline'} size="sm" onClick={() => setDialogMode('edit')} className="font-display tracking-widest">
-                        <Pencil className="h-4 w-4 mr-2" />
-                        EDIT
-                      </Button>
-                      <Button variant={dialogMode === 'preview' ? 'default' : 'outline'} size="sm" onClick={() => setDialogMode('preview')} className="font-display tracking-widest">
-                        <Eye className="h-4 w-4 mr-2" />
-                        PREVIEW
-                      </Button>
+                  {editingListing && <div className="flex items-center gap-2">
+                      <div className="flex gap-2">
+                        <Button variant={dialogMode === 'edit' ? 'default' : 'outline'} size="sm" onClick={() => setDialogMode('edit')} className="font-display tracking-widest">
+                          <Pencil className="h-4 w-4 mr-2" />
+                          EDIT
+                        </Button>
+                        <Button variant={dialogMode === 'preview' ? 'default' : 'outline'} size="sm" onClick={() => setDialogMode('preview')} className="font-display tracking-widest">
+                          <Eye className="h-4 w-4 mr-2" />
+                          PREVIEW
+                        </Button>
+                      </div>
+                      {!editingListing.is_published && (
+                        <Button size="sm" onClick={() => setShowPublishDialog(true)} className="font-display tracking-widest bg-primary hover:bg-primary/90">
+                          PUBLISH
+                        </Button>
+                      )}
                     </div>}
                 </div>
               </DialogHeader>
