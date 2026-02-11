@@ -435,9 +435,8 @@ export default function VenueCalendar() {
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
             </h2>
-            {canCreateEvent && <Button size="sm" onClick={handleCreateEventClick} className="bg-primary hover:bg-primary/90">
-                <Plus className="h-4 w-4 mr-1" />
-                CREATE EVENT
+            {canCreateEvent && <Button size="icon" onClick={handleCreateEventClick} className="bg-primary hover:bg-primary/90 h-8 w-8">
+                <Plus className="h-4 w-4" />
               </Button>}
           </div>
           
