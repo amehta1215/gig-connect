@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { parseLocalDate } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -145,7 +146,7 @@ export default function GigDetail() {
       
       const imgData = canvas.toDataURL('image/png');
       pdf.addImage(imgData, 'PNG', offsetX, offsetY, drawWidth, drawHeight);
-      pdf.save(`gig-poster-${format(new Date(gig.gig_date), 'yyyy-MM-dd')}.pdf`);
+      pdf.save(`gig-poster-${format(parseLocalDate(gig.gig_date), 'yyyy-MM-dd')}.pdf`);
       toast.success('Poster downloaded!');
     } catch (error) {
       toast.error('Failed to download poster');
@@ -179,7 +180,7 @@ export default function GigDetail() {
     setGig({ ...gigData, openers: parsedOpeners } as unknown as GigData);
     setOpeners(parsedOpeners);
     setNotes(gigData.notes || '');
-    setGigDate(new Date(gigData.gig_date));
+    setGigDate(parseLocalDate(gigData.gig_date));
 
     // Fetch venue listing
     const { data: venueData } = await supabase

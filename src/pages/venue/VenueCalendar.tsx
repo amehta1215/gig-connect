@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { parseLocalDate } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -234,7 +235,7 @@ export default function VenueCalendar() {
     } = await supabase.from('gig_listings').select('id, application_id').in('venue_listing_id', listingIds).eq('artist_id', artistId).eq('is_confirmed', false).neq('id', gigId);
     const artistName = artistProfile?.band_name || (artist ? `${artist.first_name} ${artist.last_name}` : 'Artist');
     const roomName = venueListing?.room_name || venueListing?.venue_name || 'Venue';
-    const formattedDate = format(new Date(gigDate), 'MMMM d, yyyy');
+    const formattedDate = format(parseLocalDate(gigDate), 'MMMM d, yyyy');
     setHoldToConfirm({
       gigId,
       gigDate,
@@ -261,7 +262,7 @@ export default function VenueCalendar() {
       artistOtherHoldIds,
       artistOtherApplicationIds
     } = holdToConfirm;
-    const formattedDate = format(new Date(gigDate), 'MMMM d, yyyy');
+    const formattedDate = format(parseLocalDate(gigDate), 'MMMM d, yyyy');
 
     // Confirm this gig
     const {
@@ -352,8 +353,8 @@ export default function VenueCalendar() {
     toast.success('All holds for this artist deleted');
     fetchGigs();
   };
-  const gigDates = gigs.map(g => new Date(g.gig_date));
-  const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
+  const gigDates = gigs.map(g => parseLocalDate(g.gig_date));
+  const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
   const confirmedGigs = gigsOnSelectedDate.filter(g => g.is_confirmed);
   const holdGigs = gigsOnSelectedDate.filter(g => !g.is_confirmed).sort((a, b) => (a.hold_priority || 99) - (b.hold_priority || 99));
 
@@ -533,8 +534,8 @@ export default function VenueCalendar() {
       {/* Upcoming confirmed shows */}
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
-        {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
-            {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
+        {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
+            {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
           const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
           const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
           return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
@@ -543,7 +544,7 @@ export default function VenueCalendar() {
                     <p className="text-xs text-muted-foreground">{roomDisplay}</p>
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    {format(new Date(gig.gig_date), 'MMM d, yyyy')}
+                    {format(parseLocalDate(gig.gig_date), 'MMM d, yyyy')}
                   </span>
                 </button>;
         })}
@@ -653,7 +654,7 @@ export default function VenueCalendar() {
           
           {holdToConfirm && <div className="space-y-6 py-4">
               <p className="text-primary">
-                Confirm <span className="font-medium text-primary">{holdToConfirm.artistName}</span> for {holdToConfirm.roomName} on {format(new Date(holdToConfirm.gigDate), 'MMMM d, yyyy')}?
+                Confirm <span className="font-medium text-primary">{holdToConfirm.artistName}</span> for {holdToConfirm.roomName} on {format(parseLocalDate(holdToConfirm.gigDate), 'MMMM d, yyyy')}?
               </p>
 
               {holdToConfirm.artistOtherHoldIds.length > 0 && <p className="text-sm text-muted-foreground">
