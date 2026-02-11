@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, MapPin, Users, Music, Calendar, Clock, CheckCircle2, Archive, Trash2, PauseCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { parseLocalDate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
@@ -262,11 +263,11 @@ export default function ApplicationDetail() {
             </p>
             {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && <p className="text-sm flex items-center gap-1 text-primary">
                 <Calendar className="h-3 w-3" />
-                {format(new Date(application.availability_start_date), 'MMM d')} - {format(new Date(application.availability_end_date), 'MMM d, yyyy')}
+                {format(parseLocalDate(application.availability_start_date), 'MMM d')} - {format(parseLocalDate(application.availability_end_date), 'MMM d, yyyy')}
               </p>}
             {application.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0 && <div className="flex flex-wrap gap-1 mt-1">
                 {application.availability_specific_dates.map((date, i) => <span key={i} className="text-xs bg-secondary px-2 py-0.5 rounded">
-                    {format(new Date(date), 'MMM d')}
+                    {format(parseLocalDate(date), 'MMM d')}
                   </span>)}
               </div>}
           </div>

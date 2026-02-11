@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { parseLocalDate } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -134,8 +135,8 @@ export default function ArtistCalendar() {
       navigate(`/artist/calendar/${newGig.id}`);
     }
   };
-  const gigDates = gigs.map(g => new Date(g.gig_date));
-  const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(new Date(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
+  const gigDates = gigs.map(g => parseLocalDate(g.gig_date));
+  const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
   const confirmedGigs = gigsOnSelectedDate.filter(g => g.is_confirmed);
   const holdGigs = gigsOnSelectedDate.filter(g => !g.is_confirmed).sort((a, b) => (a.hold_priority || 99) - (b.hold_priority || 99));
   const today = startOfDay(new Date());
@@ -230,8 +231,8 @@ export default function ArtistCalendar() {
       {/* Upcoming confirmed shows */}
       <div className="bg-card border border-border p-6">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
-        {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
-            {gigs.filter(g => new Date(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
+        {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
+            {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
           const isManual = !gig.application_id && gig.manual_venue_name;
           const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
           const location = isManual ? gig.manual_location : gig.venue_listing?.location;
@@ -241,7 +242,7 @@ export default function ArtistCalendar() {
                     {location && <p className="text-xs text-muted-foreground">{location}</p>}
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    {format(new Date(gig.gig_date), 'MMM d, yyyy')}
+                    {format(parseLocalDate(gig.gig_date), 'MMM d, yyyy')}
                   </span>
                 </button>;
         })}

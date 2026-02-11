@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon, PauseCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import { cn, parseLocalDate } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
 import HoldsOrderList from '@/components/HoldsOrderList';
 interface ArtistProfile {
@@ -316,20 +316,20 @@ export default function VenueApplicationDetail() {
     if (application?.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date) {
       setDateMode('range');
       setSelectedDateRange({
-        from: new Date(application.availability_start_date),
-        to: new Date(application.availability_end_date)
+        from: parseLocalDate(application.availability_start_date),
+        to: parseLocalDate(application.availability_end_date)
       });
       setAcceptType('hold');
     } else if (application?.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0) {
       setDateMode('specific');
-      setSelectedSpecificDates(application.availability_specific_dates.map(d => new Date(d)));
+      setSelectedSpecificDates(application.availability_specific_dates.map(d => parseLocalDate(d)));
       setAcceptType('hold');
     } else {
       setDateMode('single');
       if (application?.availability_start_date) {
-        initialDate = new Date(application.availability_start_date);
+        initialDate = parseLocalDate(application.availability_start_date);
       } else if (application?.availability_specific_dates && application.availability_specific_dates.length > 0) {
-        initialDate = new Date(application.availability_specific_dates[0]);
+        initialDate = parseLocalDate(application.availability_specific_dates[0]);
       }
       setAcceptType('confirmed');
     }
@@ -635,11 +635,11 @@ export default function VenueApplicationDetail() {
             </p>
             {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && <p className="text-sm flex items-center gap-1 text-primary">
                 <Calendar className="h-3 w-3" />
-                {format(new Date(application.availability_start_date), 'MMM d, yyyy')} - {format(new Date(application.availability_end_date), 'MMM d, yyyy')}
+                {format(parseLocalDate(application.availability_start_date), 'MMM d, yyyy')} - {format(parseLocalDate(application.availability_end_date), 'MMM d, yyyy')}
               </p>}
             {application.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0 && <div className="flex flex-wrap gap-1 mt-1">
                 {application.availability_specific_dates.map((date, i) => <span key={i} className="text-xs bg-secondary px-2 py-0.5">
-                    {format(new Date(date), 'MMM d, yyyy')}
+                    {format(parseLocalDate(date), 'MMM d, yyyy')}
                   </span>)}
               </div>}
           </div>
