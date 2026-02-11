@@ -89,8 +89,8 @@ export default function ArtistApplications() {
     in_progress: {
       icon: Clock,
       label: 'PENDING',
-      color: 'text-yellow-500',
-      bgColor: 'bg-yellow-500/10'
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10'
     },
     accepted: {
       icon: CheckCircle2,
