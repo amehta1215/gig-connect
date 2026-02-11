@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -62,6 +62,8 @@ export default function VenueCalendar() {
   const [draggedHoldIndex, setDraggedHoldIndex] = useState<number | null>(null);
   const [localHoldOrder, setLocalHoldOrder] = useState<GigListing[]>([]);
   const [confirmDropHighlight, setConfirmDropHighlight] = useState(false);
+  const [isDraggingHold, setIsDraggingHold] = useState(false);
+  const confirmDroppedRef = useRef(false);
 
   // Delete hold dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -361,6 +363,8 @@ export default function VenueCalendar() {
   }, [gigs, selectedDate]);
   const handleHoldDragStart = (index: number) => {
     setDraggedHoldIndex(index);
+    setIsDraggingHold(true);
+    confirmDroppedRef.current = false;
   };
   const handleHoldDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
@@ -374,6 +378,14 @@ export default function VenueCalendar() {
   };
   const handleHoldDragEnd = async () => {
     setDraggedHoldIndex(null);
+    setIsDraggingHold(false);
+    setConfirmDropHighlight(false);
+
+    // If the hold was dropped into the confirm zone, skip reorder save
+    if (confirmDroppedRef.current) {
+      confirmDroppedRef.current = false;
+      return;
+    }
 
     // Check if order actually changed
     const orderChanged = localHoldOrder.some((gig, index) => gig.hold_priority !== index + 1);
@@ -446,20 +458,32 @@ export default function VenueCalendar() {
                   </button>;
                 })}
                 <div
-                  onDragOver={e => { e.preventDefault(); setConfirmDropHighlight(true); }}
+                  onDragOver={e => { e.preventDefault(); e.stopPropagation(); setConfirmDropHighlight(true); }}
                   onDragLeave={() => setConfirmDropHighlight(false)}
                   onDrop={e => {
                     e.preventDefault();
+                    e.stopPropagation();
                     setConfirmDropHighlight(false);
                     if (draggedHoldIndex !== null) {
                       const gig = localHoldOrder[draggedHoldIndex];
-                      if (gig) { setDraggedHoldIndex(null); openConfirmDialog(gig.id, gig.gig_date, gig.venue_listing_id, gig.artist_id); }
+                      if (gig) {
+                        confirmDroppedRef.current = true;
+                        setDraggedHoldIndex(null);
+                        setIsDraggingHold(false);
+                        openConfirmDialog(gig.id, gig.gig_date, gig.venue_listing_id, gig.artist_id);
+                      }
                     }
                   }}
-                  className={`transition-all rounded-sm ${confirmDropHighlight ? 'min-h-[56px] bg-green-600/20 border-2 border-dashed border-green-600 py-4' : confirmedGigs.length === 0 ? 'min-h-[40px]' : 'min-h-0 h-2'}`}
+                  className={`transition-all rounded-sm ${confirmDropHighlight ? 'min-h-[72px] bg-green-600/20 border-2 border-dashed border-green-600 py-4 flex items-center justify-center' : isDraggingHold ? 'min-h-[56px] border-2 border-dashed border-green-600/40 py-3 flex items-center justify-center' : confirmedGigs.length === 0 ? 'min-h-[40px]' : 'min-h-0 h-2'}`}
                 >
-                  {confirmedGigs.length === 0 && !confirmDropHighlight && (
+                  {confirmedGigs.length === 0 && !confirmDropHighlight && !isDraggingHold && (
                     <p className="text-muted-foreground text-sm py-2 px-2">No Artists Confirmed Yet</p>
+                  )}
+                  {isDraggingHold && !confirmDropHighlight && (
+                    <p className="text-green-600/60 text-xs font-display tracking-widest">DROP HERE TO CONFIRM</p>
+                  )}
+                  {confirmDropHighlight && (
+                    <p className="text-green-600 text-xs font-display tracking-widest font-bold">RELEASE TO CONFIRM</p>
                   )}
                 </div>
               </div>
