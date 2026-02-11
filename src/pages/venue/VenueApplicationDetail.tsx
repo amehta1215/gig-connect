@@ -423,7 +423,7 @@ export default function VenueApplicationDetail() {
         venue_listing_id: application.venue_listing_id,
         artist_id: application.artist_id,
         gig_date: dateStr,
-        show_time: dateMode === 'single' && selectedGigTime ? selectedGigTime : null,
+        show_time: selectedGigTime || null,
         openers: [],
         notes: null,
         is_confirmed: !isHold,
