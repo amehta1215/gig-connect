@@ -307,14 +307,14 @@ export default function VenueApplications() {
     hold: {
       icon: PauseCircle,
       label: 'HOLD',
-      color: 'text-green-400',
-      bgColor: 'bg-green-400/10'
+      color: 'text-yellow-500',
+      bgColor: 'bg-yellow-500/10'
     },
     in_progress: {
       icon: Clock,
       label: 'PENDING',
-      color: 'text-yellow-500',
-      bgColor: 'bg-yellow-500/10'
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10'
     },
     archived: {
       icon: Archive,
