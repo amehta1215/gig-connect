@@ -23,6 +23,8 @@ interface ArtistProfile {
   youtube_link: string | null;
   facebook_link: string | null;
   tiktok_link: string | null;
+  instagram_link: string | null;
+  bandsintown_link: string | null;
   pictures: string[];
   featured_samples: string[];
   past_gigs: string[];
@@ -55,6 +57,8 @@ export default function ArtistProfile() {
     youtube_link: '',
     facebook_link: '',
     tiktok_link: '',
+    instagram_link: '',
+    bandsintown_link: '',
     past_gigs: '',
     press_links: ''
   });
@@ -85,6 +89,8 @@ export default function ArtistProfile() {
         youtube_link: data.youtube_link || '',
         facebook_link: data.facebook_link || '',
         tiktok_link: data.tiktok_link || '',
+        instagram_link: (data as any).instagram_link || '',
+        bandsintown_link: (data as any).bandsintown_link || '',
         past_gigs: (data.past_gigs || []).join('\n'),
         press_links: (data.press_links || []).join('\n')
       });
@@ -189,6 +195,8 @@ export default function ArtistProfile() {
       youtube_link: formData.youtube_link || null,
       facebook_link: formData.facebook_link || null,
       tiktok_link: formData.tiktok_link || null,
+      instagram_link: formData.instagram_link || null,
+      bandsintown_link: formData.bandsintown_link || null,
       pictures: pictures,
       featured_samples: featuredSamples,
       past_gigs: formData.past_gigs.split('\n').filter(Boolean),
@@ -312,6 +320,20 @@ export default function ArtistProfile() {
             ...formData,
             tiktok_link: e.target.value
           })} placeholder="https://tiktok.com/@..." />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="instagram">Instagram</Label>
+            <Input id="instagram" value={formData.instagram_link} onChange={e => setFormData({
+            ...formData,
+            instagram_link: e.target.value
+          })} placeholder="https://instagram.com/..." />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="bandsintown">BandsInTown</Label>
+            <Input id="bandsintown" value={formData.bandsintown_link} onChange={e => setFormData({
+            ...formData,
+            bandsintown_link: e.target.value
+          })} placeholder="https://bandsintown.com/artist/..." />
           </div>
         </div>
       </div>
