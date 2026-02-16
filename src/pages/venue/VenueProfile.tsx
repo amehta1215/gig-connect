@@ -402,7 +402,8 @@ export default function VenueProfile() {
                   <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
                     {editingListing ? roomFormData.room_name || roomFormData.venue_name || 'ROOM' : 'NEW ROOM'}
                   </DialogTitle>
-                  {editingListing && <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    {editingListing && <>
                       <div className="flex gap-2">
                         <Button variant={dialogMode === 'edit' ? 'default' : 'outline'} size="sm" onClick={() => setDialogMode('edit')} className="font-display tracking-widest">
                           <Pencil className="h-4 w-4 mr-2" />
@@ -418,7 +419,16 @@ export default function VenueProfile() {
                           PUBLISH
                         </Button>
                       )}
-                    </div>}
+                    </>}
+                    {dialogMode === 'edit' && (
+                      <Button size="sm" onClick={handleCreateRoomClick} disabled={savingRoom} className="font-display tracking-widest">
+                        {editingListing ? <>
+                            <Save className="h-4 w-4 mr-2" />
+                            {savingRoom ? '...' : 'SAVE CHANGES'}
+                          </> : savingRoom ? '...' : 'CREATE ROOM'}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </DialogHeader>
 
@@ -500,15 +510,6 @@ export default function VenueProfile() {
                   </div>
                 </div>) : (/* Edit Content */
             <div className="flex-1 overflow-y-auto">
-                  {/* Floating Save Button */}
-                  <div className="sticky top-0 z-10 px-6 pt-4 flex justify-end">
-                    <Button onClick={handleCreateRoomClick} disabled={savingRoom} className="font-display tracking-widest">
-                      {editingListing ? <>
-                          <Save className="h-4 w-4 mr-2" />
-                          {savingRoom ? '...' : 'SAVE CHANGES'}
-                        </> : savingRoom ? '...' : 'CREATE ROOM'}
-                    </Button>
-                  </div>
                   
                   <div className="px-6 py-6 space-y-6">
                   {/* Photo Upload */}
