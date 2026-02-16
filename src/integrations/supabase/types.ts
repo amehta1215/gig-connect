@@ -138,12 +138,14 @@ export type Database = {
         Row: {
           apple_music_link: string | null
           band_name: string | null
+          bandsintown_link: string | null
           bio: string | null
           created_at: string | null
           facebook_link: string | null
           featured_samples: string[] | null
           genre: string | null
           id: string
+          instagram_link: string | null
           location: string | null
           past_gigs: string[] | null
           pictures: string[] | null
@@ -158,12 +160,14 @@ export type Database = {
         Insert: {
           apple_music_link?: string | null
           band_name?: string | null
+          bandsintown_link?: string | null
           bio?: string | null
           created_at?: string | null
           facebook_link?: string | null
           featured_samples?: string[] | null
           genre?: string | null
           id?: string
+          instagram_link?: string | null
           location?: string | null
           past_gigs?: string[] | null
           pictures?: string[] | null
@@ -178,12 +182,14 @@ export type Database = {
         Update: {
           apple_music_link?: string | null
           band_name?: string | null
+          bandsintown_link?: string | null
           bio?: string | null
           created_at?: string | null
           facebook_link?: string | null
           featured_samples?: string[] | null
           genre?: string | null
           id?: string
+          instagram_link?: string | null
           location?: string | null
           past_gigs?: string[] | null
           pictures?: string[] | null
