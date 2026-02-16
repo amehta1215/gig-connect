@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Music, X, Upload, Star } from 'lucide-react';
+import { ArrowLeft, Music, X, Upload, Star } from 'lucide-react';
 interface ArtistProfile {
   id: string;
   user_id: string;
@@ -39,6 +39,9 @@ export default function ArtistProfile() {
   const showBackButton = location.state?.fromVenueListing === true;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialLoadRef = useRef(true);
   const [profile, setProfile] = useState<ArtistProfile | null>(null);
   const [pictures, setPictures] = useState<string[]>([]);
   const [featuredSamples, setFeaturedSamples] = useState<string[]>([]);
@@ -179,9 +182,9 @@ export default function ArtistProfile() {
   const removeSample = (index: number) => {
     setFeaturedSamples(prev => prev.filter((_, i) => i !== index));
   };
-  const handleSave = async () => {
+  const performSave = useCallback(async () => {
     if (!user || !profile) return;
-    setSaving(true);
+    setSaveStatus('saving');
     const {
       error
     } = await supabase.from('artist_profiles').update({
@@ -204,11 +207,28 @@ export default function ArtistProfile() {
     }).eq('id', profile.id);
     if (error) {
       toast.error('Failed to save profile');
+      setSaveStatus('idle');
     } else {
-      toast.success('Profile saved successfully');
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
     }
-    setSaving(false);
-  };
+  }, [user, profile, formData, pictures, featuredSamples]);
+
+  // Auto-save with debounce
+  useEffect(() => {
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false;
+      return;
+    }
+    if (!profile) return;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      performSave();
+    }, 1000);
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, [formData, pictures, featuredSamples, performSave]);
   if (loading) {
     return <div className="space-y-6 animate-fade-in">
         <div className="h-8 w-48 bg-card rounded animate-pulse" />
@@ -226,10 +246,11 @@ export default function ArtistProfile() {
             </Button>}
           <h1 className="font-display text-4xl font-black text-primary">ARTIST PROFILE</h1>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? 'Saving...' : 'Save Profile'}
-        </Button>
+        {saveStatus !== 'idle' && (
+          <span className="text-sm text-muted-foreground font-display tracking-wider">
+            {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
+          </span>
+        )}
       </div>
 
       {/* Profile Info Section */}
