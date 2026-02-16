@@ -90,7 +90,7 @@ export default function VenueListingDetail() {
   const [existingApplicationId, setExistingApplicationId] = useState<string | null>(null);
   const [isProfileComplete, setIsProfileComplete] = useState<boolean | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [availability, setAvailability] = useState<AvailabilityPreference>('flexible');
+  const [availability, setAvailability] = useState<AvailabilityPreference | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [specificDates, setSpecificDates] = useState<Date[]>([]);
   const [paymentPreferences, setPaymentPreferences] = useState<PaymentPreference[]>([]);
@@ -143,6 +143,10 @@ export default function VenueListingDetail() {
   };
   const handleApply = async () => {
     if (!user || !listing) return;
+    if (!availability) {
+      toast.error('Select an availability preference');
+      return;
+    }
     if (paymentPreferences.length === 0) {
       toast.error('Select at least one payment preference');
       return;
@@ -290,7 +294,7 @@ export default function VenueListingDetail() {
                   {/* Availability */}
                   <div className="space-y-3">
                     <h3 className="font-display text-sm text-primary tracking-widest">AVAILABILITY</h3>
-                    <RadioGroup value={availability} onValueChange={v => setAvailability(v as AvailabilityPreference)}>
+                    <RadioGroup value={availability || ''} onValueChange={v => setAvailability(v as AvailabilityPreference)}>
                       <div className="flex flex-col gap-2">
                         {availabilityOptions.map(option => <div key={option.id} className="flex items-center space-x-2">
                             <RadioGroupItem value={option.id} id={`avail-${option.id}`} />
