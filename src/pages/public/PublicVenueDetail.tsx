@@ -200,11 +200,6 @@ export default function PublicVenueDetail() {
                   </div>
                 </RadioGroup>
 
-                {/* Date picker placeholder */}
-                <Button variant="outline" className="w-full justify-start text-left font-normal text-muted-foreground pointer-events-none">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  <span>Select dates</span>
-                </Button>
               </div>
 
               {/* Payment Preference */}
