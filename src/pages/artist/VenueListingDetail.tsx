@@ -345,20 +345,19 @@ export default function VenueListingDetail() {
                     {availability === 'specific_dates' && <div className="mt-3">
                         <Popover>
                           <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal", specificDates.length === 0 && "text-muted-foreground")}>
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {specificDates.length > 0 ? <span>{specificDates.length} date{specificDates.length > 1 ? 's' : ''} selected</span> : <span>Select dates</span>}
+                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-auto min-h-10 py-2", specificDates.length === 0 && "text-muted-foreground")}>
+                              <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                              {specificDates.length > 0 ? <div className="flex flex-wrap gap-1">
+                                  {specificDates.sort((a, b) => a.getTime() - b.getTime()).map((date, index) => <span key={index} className="text-xs bg-secondary px-2 py-0.5 rounded">
+                                      {format(date, "MMM d")}
+                                    </span>)}
+                                </div> : <span>Select dates</span>}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar initialFocus mode="multiple" selected={specificDates} onSelect={dates => setSpecificDates(dates || [])} disabled={date => date < new Date()} className={cn("p-3 pointer-events-auto")} />
                           </PopoverContent>
                         </Popover>
-                        {specificDates.length > 0 && <div className="flex flex-wrap gap-2 mt-2">
-                            {specificDates.map((date, index) => <span key={index} className="text-xs bg-secondary px-2 py-1 rounded">
-                                {format(date, "MMM d")}
-                              </span>)}
-                          </div>}
                       </div>}
                   </div>
 
