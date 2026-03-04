@@ -187,9 +187,6 @@ export function UnifiedVenueSearch({
                     {v.room_name && (
                       <span className="text-muted-foreground"> · {v.room_name}</span>
                     )}
-                    {v.location && (
-                      <span className="text-muted-foreground text-xs ml-2">— {v.location}</span>
-                    )}
                   </div>
                 </button>
               ))}
