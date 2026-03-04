@@ -431,9 +431,16 @@ export default function VenueProfile() {
             <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 bg-card border-border">
               <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0 pr-12">
                 <div className="flex items-center justify-between">
-                  <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
-                    {editingListing ? roomFormData.room_name || roomFormData.venue_name || 'ROOM' : 'NEW ROOM'}
-                  </DialogTitle>
+                  <div className="flex items-center gap-3">
+                    <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
+                      {editingListing ? roomFormData.room_name || roomFormData.venue_name || 'ROOM' : 'NEW ROOM'}
+                    </DialogTitle>
+                    {editingListing && !editingListing.is_published && (
+                      <Button size="sm" onClick={() => setShowPublishDialog(true)} className="font-display tracking-widest bg-primary hover:bg-primary/90">
+                        PUBLISH
+                      </Button>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     {editingListing && <>
                       <div className="flex gap-2">
@@ -446,11 +453,6 @@ export default function VenueProfile() {
                           PREVIEW
                         </Button>
                       </div>
-                      {!editingListing.is_published && (
-                        <Button size="sm" onClick={() => setShowPublishDialog(true)} className="font-display tracking-widest bg-primary hover:bg-primary/90">
-                          PUBLISH
-                        </Button>
-                      )}
                     </>}
                     {dialogMode === 'edit' && !editingListing && (
                       <Button size="sm" onClick={handleCreateRoomClick} disabled={savingRoom} className="font-display tracking-widest">
