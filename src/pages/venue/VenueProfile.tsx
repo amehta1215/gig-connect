@@ -466,19 +466,39 @@ export default function VenueProfile() {
 
               {dialogMode === 'preview' && editingListing ? (/* Preview Content - Inline version of RoomPreviewSheet */
             <div className="flex-1 overflow-y-auto px-6 py-6">
-                  {/* Pictures Gallery */}
+                  {/* Pictures Gallery - horizontal carousel */}
                   <div className="mb-10">
                     {(() => {
                   const allPictures: string[] = [...pictures];
-                  return allPictures.length === 0 ? <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
+                  if (allPictures.length === 0) {
+                    return <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
                           <div className="w-full h-full flex items-center justify-center bg-heat">
                             <Music className="h-12 w-12 text-primary/30" />
                           </div>
-                        </div> : <div className="flex flex-wrap justify-center gap-2">
-                          {allPictures.map((pic, index) => <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+                        </div>;
+                  }
+                  const scroll = (dir: 'left' | 'right') => {
+                    if (!previewGalleryRef.current) return;
+                    const container = previewGalleryRef.current;
+                    const card = container.children[0] as HTMLElement;
+                    const cardWidth = card?.offsetWidth || 300;
+                    container.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
+                  };
+                  return <div className="relative group">
+                        <div ref={previewGalleryRef} className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth">
+                          {allPictures.map((pic, index) => <div key={index} className="flex-shrink-0 w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
                               <img src={pic} alt={`${roomFormData.venue_name} ${index + 1}`} className="w-full h-full object-cover" />
                             </div>)}
-                        </div>;
+                        </div>
+                        {allPictures.length > 3 && <>
+                          <button onClick={(e) => { e.stopPropagation(); scroll('left'); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <ChevronLeft className="h-5 w-5 text-foreground" />
+                          </button>
+                          <button onClick={(e) => { e.stopPropagation(); scroll('right'); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <ChevronRight className="h-5 w-5 text-foreground" />
+                          </button>
+                        </>}
+                      </div>;
                 })()}
                   </div>
 
