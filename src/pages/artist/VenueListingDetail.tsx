@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ArrowLeft, MapPin, Users, Music, CalendarIcon, Heart, CheckCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Users, Music, CalendarIcon, Heart, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -95,6 +95,7 @@ export default function VenueListingDetail() {
   const [specificDates, setSpecificDates] = useState<Date[]>([]);
   const [paymentPreferences, setPaymentPreferences] = useState<PaymentPreference[]>([]);
   const [lineup, setLineup] = useState<LineupPreference>('solo_performer');
+  const galleryScrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (id) {
       fetchListing();
@@ -206,7 +207,7 @@ export default function VenueListingDetail() {
           </Button>}
       </div>
 
-      {/* All Pictures Gallery - side by side */}
+      {/* Pictures Gallery - horizontal carousel */}
       <div className="mb-6">
         {(() => {
         const allPictures: string[] = listing.pictures || [];
@@ -217,10 +218,25 @@ export default function VenueListingDetail() {
                 </div>
               </div>;
         }
-        return <div className="flex flex-wrap justify-center gap-2">
-              {allPictures.map((pic, index) => <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
-                  <img src={pic} alt={`${listing.venue_name} ${index + 1}`} className="w-full h-full object-cover" />
-                </div>)}
+        const scroll = (dir: 'left' | 'right') => {
+          if (!galleryScrollRef.current) return;
+          const cardWidth = galleryScrollRef.current.querySelector('div')?.offsetWidth || 300;
+          galleryScrollRef.current.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
+        };
+        return <div className="relative group">
+              <div ref={galleryScrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth">
+                {allPictures.map((pic, index) => <div key={index} className="flex-shrink-0 w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+                    <img src={pic} alt={`${listing.venue_name} ${index + 1}`} className="w-full h-full object-cover" />
+                  </div>)}
+              </div>
+              {allPictures.length > 3 && <>
+                <button onClick={() => scroll('left')} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronLeft className="h-5 w-5 text-foreground" />
+                </button>
+                <button onClick={() => scroll('right')} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronRight className="h-5 w-5 text-foreground" />
+                </button>
+              </>}
             </div>;
       })()}
       </div>
