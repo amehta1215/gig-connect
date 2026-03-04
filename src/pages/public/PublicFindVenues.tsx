@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { UnifiedVenueSearch } from '@/components/UnifiedVenueSearch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import AuthDialog from '@/components/AuthDialog';
 interface VenueListing {
   id: string;
   venue_name: string;
@@ -252,21 +252,6 @@ export default function PublicFindVenues() {
             </div>)}
         </div>}
 
-      {/* Auth Required Dialog */}
-      <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
-        <DialogContent className="bg-card border-border max-w-sm text-center">
-          <DialogHeader>
-            <DialogTitle className="font-display text-2xl text-accent tracking-wide">
-              Login or sign up to save favorites
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Create an account or sign in to save venues to your favorites
-            </DialogDescription>
-          </DialogHeader>
-          <Button onClick={() => navigate('/auth')} className="w-full font-display tracking-widest text-lg h-12 mt-4">
-            LOGIN / SIGN UP
-          </Button>
-        </DialogContent>
-      </Dialog>
+      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} promptMessage="Login or sign up to save favorites" />
     </div>;
 }
