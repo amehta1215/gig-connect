@@ -312,7 +312,7 @@ export default function ArtistMessages() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <p className={`text-sm truncate flex-1 ${thread.hasUnread ? 'font-medium' : 'text-muted-foreground'}`}>
+                          <p className={`text-sm truncate flex-1 ${thread.hasUnread ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
                             {highlightText(getBaseSubject(thread))}
                           </p>
                           {messageCount > 1 && <span className="text-[10px] text-muted-foreground">({messageCount})</span>}
