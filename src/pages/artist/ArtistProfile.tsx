@@ -329,11 +329,11 @@ export default function ArtistProfile() {
           })} placeholder="https://youtube.com/..." />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="facebook">Facebook</Label>
-            <Input id="facebook" value={formData.facebook_link} onChange={e => setFormData({
+            <Label htmlFor="instagram">Instagram</Label>
+            <Input id="instagram" value={formData.instagram_link} onChange={e => setFormData({
             ...formData,
-            facebook_link: e.target.value
-          })} placeholder="https://facebook.com/..." />
+            instagram_link: e.target.value
+          })} placeholder="https://instagram.com/..." />
           </div>
           <div className="space-y-2">
             <Label htmlFor="tiktok">TikTok</Label>
@@ -343,11 +343,11 @@ export default function ArtistProfile() {
           })} placeholder="https://tiktok.com/@..." />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="instagram">Instagram</Label>
-            <Input id="instagram" value={formData.instagram_link} onChange={e => setFormData({
+            <Label htmlFor="facebook">Facebook</Label>
+            <Input id="facebook" value={formData.facebook_link} onChange={e => setFormData({
             ...formData,
-            instagram_link: e.target.value
-          })} placeholder="https://instagram.com/..." />
+            facebook_link: e.target.value
+          })} placeholder="https://facebook.com/..." />
           </div>
           <div className="space-y-2">
             <Label htmlFor="bandsintown">BandsInTown</Label>
