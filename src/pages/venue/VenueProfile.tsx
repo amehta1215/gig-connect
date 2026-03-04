@@ -83,6 +83,7 @@ export default function VenueProfile() {
   const [pictures, setPictures] = useState<string[]>([]);
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const pictureInputRef = useRef<HTMLInputElement>(null);
+  const previewGalleryRef = useRef<HTMLDivElement>(null);
   const [roomFormData, setRoomFormData] = useState({
     venue_name: '',
     room_name: '',
