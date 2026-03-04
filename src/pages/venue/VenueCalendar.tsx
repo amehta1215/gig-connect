@@ -629,35 +629,6 @@ export default function VenueCalendar() {
               <Input value={eventArtistName} onChange={e => setEventArtistName(e.target.value)} placeholder="Enter artist or event name" required />
             </div>
 
-            {/* Hold or Confirmed */}
-            <div className="space-y-2">
-              <label className="font-display text-xs text-primary tracking-widest">STATUS</label>
-              <div className="flex gap-2">
-                <Button type="button" variant={!eventIsHold ? 'default' : 'outline'} onClick={() => setEventIsHold(false)} className={!eventIsHold ? 'bg-green-600 hover:bg-green-700 flex-1' : 'flex-1'}>
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                  Confirmed
-                </Button>
-                <Button type="button" variant={eventIsHold ? 'default' : 'outline'} onClick={() => setEventIsHold(true)} className={eventIsHold ? 'bg-yellow-600 hover:bg-yellow-700 flex-1' : 'flex-1'}>
-                  <PauseCircle className="h-4 w-4 mr-2" />
-                  Hold
-                </Button>
-              </div>
-            </div>
-
-            {/* Hold Priority - only show if hold and existing holds exist */}
-            {eventIsHold && existingHoldsForDate.length > 0 && <div className="space-y-2">
-                <label className="font-display text-xs text-primary tracking-widest">HOLD PRIORITY</label>
-                <div className="flex gap-2 flex-wrap">
-                  {Array.from({
-                length: existingHoldsForDate.length + 1
-              }, (_, i) => i + 1).map(num => <Button key={num} type="button" size="sm" variant={eventHoldPriority === num ? 'default' : 'outline'} onClick={() => setEventHoldPriority(num)} className={eventHoldPriority === num ? 'bg-yellow-600 hover:bg-yellow-700' : ''}>
-                      #{num}
-                    </Button>)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {existingHoldsForDate.length} existing hold{existingHoldsForDate.length !== 1 ? 's' : ''} on this date
-                </p>
-              </div>}
           </div>
 
           <div className="flex gap-3 justify-end">
