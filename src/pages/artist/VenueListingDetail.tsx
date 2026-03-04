@@ -353,6 +353,11 @@ export default function VenueListingDetail() {
                                     </span>)}
                                 </div> : <span>Select dates</span>}
                             </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar initialFocus mode="multiple" selected={specificDates} onSelect={dates => setSpecificDates(dates || [])} disabled={date => date < new Date()} className={cn("p-3 pointer-events-auto")} />
+                          </PopoverContent>
+                        </Popover>
                       </div>}
                   </div>
 
