@@ -339,19 +339,21 @@ export default function ArtistMessages() {
                 </Button>
                 <div className="flex-1">
                   <h2 className="font-display text-lg tracking-wide">{getBaseSubject(selectedThread)}</h2>
-                  <p className="text-xs text-muted-foreground">
-                    To: {selectedThread.otherParty.venueName || selectedThread.otherParty.name}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      To: {selectedThread.otherParty.venueName || selectedThread.otherParty.name}
+                    </p>
+                    {(() => {
+                      const application = getApplicationForVenue(selectedThread.otherParty.id);
+                      if (application) {
+                        return <button onClick={() => handleViewApplication(application.id)} className="text-xs text-primary hover:underline transition-colors cursor-pointer">
+                          View Your Application
+                        </button>;
+                      }
+                      return null;
+                    })()}
+                  </div>
                 </div>
-                {(() => {
-              const application = getApplicationForVenue(selectedThread.otherParty.id);
-              if (application) {
-                return <button onClick={() => handleViewApplication(application.id)} className="text-xs text-primary hover:underline transition-colors cursor-pointer">
-                        View Your Application
-                      </button>;
-              }
-              return null;
-            })()}
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
