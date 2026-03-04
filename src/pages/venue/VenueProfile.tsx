@@ -93,6 +93,33 @@ export default function VenueProfile() {
     house_rules: ''
   });
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-save for draft rooms
+  const isDraftEditing = editingListing && !editingListing.is_published;
+  useEffect(() => {
+    if (!isDraftEditing || !profile || dialogMode !== 'edit') return;
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(async () => {
+      if (!roomFormData.venue_name) return;
+      const listingData = {
+        venue_profile_id: profile.id,
+        venue_name: roomFormData.venue_name,
+        room_name: roomFormData.room_name || null,
+        location: roomFormData.location || null,
+        capacity: roomFormData.capacity ? parseInt(roomFormData.capacity) : null,
+        genres: roomFormData.genres,
+        pictures: pictures,
+        backline_info: roomFormData.backline_info || null,
+        house_rules: roomFormData.house_rules || null,
+        is_published: false
+      };
+      await supabase.from('venue_listings').update(listingData).eq('id', editingListing.id);
+    }, 1000);
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [roomFormData, pictures, isDraftEditing, profile, dialogMode]);
   useEffect(() => {
     if (user) {
       fetchProfile();
