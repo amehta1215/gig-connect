@@ -417,7 +417,13 @@ export default function VenueProfile() {
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-xl text-primary">ROOMS <span className="text-destructive">*</span></h2>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open && profile) {
+                // Refresh listings when closing (picks up auto-saved draft changes)
+                fetchListings(profile.id);
+              }
+            }}>
             <DialogTrigger asChild>
               <Button onClick={() => openDialog(undefined, 'edit')} size="icon" variant="outline">
                 <Plus className="h-4 w-4" />
