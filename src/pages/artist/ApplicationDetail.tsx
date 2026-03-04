@@ -310,7 +310,7 @@ export default function ApplicationDetail() {
           </DialogHeader>
           <p className="text-muted-foreground">
             Are you sure you want to withdraw your application to {listing.venue_name}
-            {listing.room_name ? ` - ${listing.room_name}` : ''}? This action cannot be undone.
+            {listing.room_name ? `, ${listing.room_name}` : ''}? This action cannot be undone.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setWithdrawDialogOpen(false)}>
