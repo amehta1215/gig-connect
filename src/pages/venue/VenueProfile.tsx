@@ -452,12 +452,9 @@ export default function VenueProfile() {
                         </Button>
                       )}
                     </>}
-                    {dialogMode === 'edit' && !(editingListing && !editingListing.is_published) && (
+                    {dialogMode === 'edit' && !editingListing && (
                       <Button size="sm" onClick={handleCreateRoomClick} disabled={savingRoom} className="font-display tracking-widest">
-                        {editingListing ? <>
-                            <Save className="h-4 w-4 mr-2" />
-                            {savingRoom ? '...' : 'SAVE CHANGES'}
-                          </> : savingRoom ? '...' : 'CREATE ROOM'}
+                        {savingRoom ? '...' : 'CREATE ROOM'}
                       </Button>
                     )}
                   </div>
