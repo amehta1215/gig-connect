@@ -127,8 +127,10 @@ export default function PublicVenueDetail() {
         }
         const scroll = (dir: 'left' | 'right') => {
           if (!galleryScrollRef.current) return;
-          const cardWidth = galleryScrollRef.current.querySelector('div')?.offsetWidth || 300;
-          galleryScrollRef.current.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
+          const container = galleryScrollRef.current;
+          const card = container.children[0] as HTMLElement;
+          const cardWidth = card?.offsetWidth || 300;
+          container.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
         };
         return <div className="relative group">
               <div ref={galleryScrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth">
@@ -137,10 +139,10 @@ export default function PublicVenueDetail() {
                   </div>)}
               </div>
               {allPictures.length > 3 && <>
-                <button onClick={() => scroll('left')} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={(e) => { e.stopPropagation(); scroll('left'); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <ChevronLeft className="h-5 w-5 text-foreground" />
                 </button>
-                <button onClick={() => scroll('right')} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={(e) => { e.stopPropagation(); scroll('right'); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <ChevronRight className="h-5 w-5 text-foreground" />
                 </button>
               </>}
