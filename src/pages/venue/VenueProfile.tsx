@@ -95,10 +95,9 @@ export default function VenueProfile() {
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-save for draft rooms
-  const isDraftEditing = editingListing && !editingListing.is_published;
+  // Auto-save for all existing rooms (draft and published)
   useEffect(() => {
-    if (!isDraftEditing || !profile || dialogMode !== 'edit') return;
+    if (!editingListing || !profile || dialogMode !== 'edit') return;
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(async () => {
       if (!roomFormData.venue_name) return;
@@ -112,14 +111,14 @@ export default function VenueProfile() {
         pictures: pictures,
         backline_info: roomFormData.backline_info || null,
         house_rules: roomFormData.house_rules || null,
-        is_published: false
+        is_published: editingListing.is_published
       };
       await supabase.from('venue_listings').update(listingData).eq('id', editingListing.id);
     }, 1000);
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
-  }, [roomFormData, pictures, isDraftEditing, profile, dialogMode]);
+  }, [roomFormData, pictures, editingListing, profile, dialogMode]);
   useEffect(() => {
     if (user) {
       fetchProfile();
