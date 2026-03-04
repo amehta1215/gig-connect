@@ -447,7 +447,7 @@ export default function VenueProfile() {
                         </Button>
                       )}
                     </>}
-                    {dialogMode === 'edit' && (
+                    {dialogMode === 'edit' && !(editingListing && !editingListing.is_published) && (
                       <Button size="sm" onClick={handleCreateRoomClick} disabled={savingRoom} className="font-display tracking-widest">
                         {editingListing ? <>
                             <Save className="h-4 w-4 mr-2" />
