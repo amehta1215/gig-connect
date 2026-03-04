@@ -453,11 +453,6 @@ export default function VenueProfile() {
                           PREVIEW
                         </Button>
                       </div>
-                      {!editingListing.is_published && (
-                        <Button size="sm" onClick={() => setShowPublishDialog(true)} className="font-display tracking-widest bg-primary hover:bg-primary/90">
-                          PUBLISH
-                        </Button>
-                      )}
                     </>}
                     {dialogMode === 'edit' && !editingListing && (
                       <Button size="sm" onClick={handleCreateRoomClick} disabled={savingRoom} className="font-display tracking-widest">
