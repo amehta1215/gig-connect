@@ -224,7 +224,7 @@ export default function VenueListingDetail() {
           galleryScrollRef.current.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
         };
         return <div className="relative group">
-              <div ref={scrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth">
+              <div ref={galleryScrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth">
                 {allPictures.map((pic, index) => <div key={index} className="flex-shrink-0 w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
                     <img src={pic} alt={`${listing.venue_name} ${index + 1}`} className="w-full h-full object-cover" />
                   </div>)}
