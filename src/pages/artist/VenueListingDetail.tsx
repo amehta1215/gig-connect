@@ -412,11 +412,11 @@ export default function VenueListingDetail() {
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 mt-6">
-            <Button onClick={() => navigate('/artist/applications')} className="w-full font-display tracking-widest">
-              VIEW MY APPLICATIONS
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/artist')} className="w-full font-display tracking-widest">
+            <Button onClick={() => navigate('/artist')} className="w-full font-display tracking-widest">
               FIND MORE VENUES
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/artist/applications')} className="w-full font-display tracking-widest">
+              VIEW MY APPLICATIONS
             </Button>
           </div>
         </DialogContent>
