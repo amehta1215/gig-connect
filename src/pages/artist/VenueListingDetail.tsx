@@ -175,7 +175,8 @@ export default function VenueListingDetail() {
       availability_specific_dates: availability === 'specific_dates' && specificDates.length > 0 ? specificDates.map(d => format(d, 'yyyy-MM-dd')) : null
     });
     if (error) {
-      toast.error('Failed to apply');
+      console.error('Application error:', error);
+      toast.error(`Failed to apply: ${error.message}`);
       setApplying(false);
     } else {
       setShowSuccessDialog(true);
