@@ -93,6 +93,33 @@ export default function VenueProfile() {
     house_rules: ''
   });
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-save for draft rooms
+  const isDraftEditing = editingListing && !editingListing.is_published;
+  useEffect(() => {
+    if (!isDraftEditing || !profile || dialogMode !== 'edit') return;
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(async () => {
+      if (!roomFormData.venue_name) return;
+      const listingData = {
+        venue_profile_id: profile.id,
+        venue_name: roomFormData.venue_name,
+        room_name: roomFormData.room_name || null,
+        location: roomFormData.location || null,
+        capacity: roomFormData.capacity ? parseInt(roomFormData.capacity) : null,
+        genres: roomFormData.genres,
+        pictures: pictures,
+        backline_info: roomFormData.backline_info || null,
+        house_rules: roomFormData.house_rules || null,
+        is_published: false
+      };
+      await supabase.from('venue_listings').update(listingData).eq('id', editingListing.id);
+    }, 1000);
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [roomFormData, pictures, isDraftEditing, profile, dialogMode]);
   useEffect(() => {
     if (user) {
       fetchProfile();
@@ -390,7 +417,13 @@ export default function VenueProfile() {
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-xl text-primary">ROOMS <span className="text-destructive">*</span></h2>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open && profile) {
+                // Refresh listings when closing (picks up auto-saved draft changes)
+                fetchListings(profile.id);
+              }
+            }}>
             <DialogTrigger asChild>
               <Button onClick={() => openDialog(undefined, 'edit')} size="icon" variant="outline">
                 <Plus className="h-4 w-4" />
@@ -420,7 +453,7 @@ export default function VenueProfile() {
                         </Button>
                       )}
                     </>}
-                    {dialogMode === 'edit' && (
+                    {dialogMode === 'edit' && !(editingListing && !editingListing.is_published) && (
                       <Button size="sm" onClick={handleCreateRoomClick} disabled={savingRoom} className="font-display tracking-widest">
                         {editingListing ? <>
                             <Save className="h-4 w-4 mr-2" />
