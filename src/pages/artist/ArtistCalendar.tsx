@@ -8,7 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
 interface GigListing {
@@ -306,15 +308,32 @@ export default function ArtistCalendar() {
           <div className="space-y-6 py-4">
             
 
-            {/* Date (read-only) */}
+            {/* Date (editable) */}
             <div className="space-y-2">
-              <label className="font-display text-xs text-primary tracking-widest">DATE</label>
-              <div className="flex items-center gap-2 px-3 py-2 bg-secondary border border-border rounded-md">
-                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                <span className="text-foreground">
-                  {eventDate ? format(eventDate, 'MMMM do, yyyy') : 'No date selected'}
-                </span>
-              </div>
+              <label className="font-display text-xs text-primary tracking-widest">DATE <span className="text-destructive">*</span></label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !eventDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {eventDate ? format(eventDate, 'MMMM do, yyyy') : 'Pick a date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={eventDate}
+                    onSelect={setEventDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Time */}
