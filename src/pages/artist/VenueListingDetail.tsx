@@ -95,6 +95,7 @@ export default function VenueListingDetail() {
   const [specificDates, setSpecificDates] = useState<Date[]>([]);
   const [paymentPreferences, setPaymentPreferences] = useState<PaymentPreference[]>([]);
   const [lineup, setLineup] = useState<LineupPreference>('solo_performer');
+  const galleryScrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (id) {
       fetchListing();
