@@ -218,11 +218,10 @@ export default function VenueListingDetail() {
                 </div>
               </div>;
         }
-        const scrollRef = useRef<HTMLDivElement>(null);
         const scroll = (dir: 'left' | 'right') => {
-          if (!scrollRef.current) return;
-          const cardWidth = scrollRef.current.querySelector('div')?.offsetWidth || 300;
-          scrollRef.current.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
+          if (!galleryScrollRef.current) return;
+          const cardWidth = galleryScrollRef.current.querySelector('div')?.offsetWidth || 300;
+          galleryScrollRef.current.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
         };
         return <div className="relative group">
               <div ref={scrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth">
