@@ -25,7 +25,7 @@ export function LocationAutocomplete({
   const [inputValue, setInputValue] = useState(value || '');
   const [hasValidSelection, setHasValidSelection] = useState(!!value);
   const containerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Sync inputValue when external value changes
   useEffect(() => {

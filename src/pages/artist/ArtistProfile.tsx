@@ -40,7 +40,7 @@ export default function ArtistProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitialLoadRef = useRef(true);
   const [profile, setProfile] = useState<ArtistProfile | null>(null);
   const [pictures, setPictures] = useState<string[]>([]);

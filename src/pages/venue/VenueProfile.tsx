@@ -94,7 +94,7 @@ export default function VenueProfile() {
     house_rules: ''
   });
   const [showPublishDialog, setShowPublishDialog] = useState(false);
-  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-save for all existing rooms (draft and published)
   useEffect(() => {
@@ -588,13 +588,13 @@ export default function VenueProfile() {
                   <div className="space-y-4">
                     <h3 className="font-display text-sm text-primary tracking-widest">GENERAL</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="space-y-1">
+                      {editingListing && <div className="space-y-1">
                         <Label htmlFor="room_venue_name" className="text-xs uppercase tracking-wider text-muted-foreground">Venue *</Label>
                         <Input id="room_venue_name" value={roomFormData.venue_name} onChange={e => setRoomFormData({
                         ...roomFormData,
                         venue_name: e.target.value
                       })} className="bg-background border-border" />
-                      </div>
+                      </div>}
                       <div className="space-y-1">
                         <Label htmlFor="room_name" className="text-xs uppercase tracking-wider text-muted-foreground">Room</Label>
                         <Input id="room_name" value={roomFormData.room_name} onChange={e => setRoomFormData({
