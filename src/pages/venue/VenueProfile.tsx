@@ -588,14 +588,14 @@ export default function VenueProfile() {
                   <div className="space-y-4">
                     <h3 className="font-display text-sm text-primary tracking-widest">GENERAL</h3>
                     <div className="flex gap-3">
-                      <div className="space-y-1 flex-1">
+                      <div className="space-y-1 w-1/2">
                         <Label htmlFor="room_name" className="text-xs uppercase tracking-wider text-muted-foreground">Room</Label>
                         <Input id="room_name" value={roomFormData.room_name} onChange={e => setRoomFormData({
                         ...roomFormData,
                         room_name: e.target.value
                       })} className="bg-background border-border" />
                       </div>
-                      <div className="space-y-1 w-24">
+                      <div className="space-y-1 w-32">
                         <Label htmlFor="room_capacity" className="text-xs uppercase tracking-wider text-muted-foreground">Capacity</Label>
                         <Input id="room_capacity" type="number" value={roomFormData.capacity} onChange={e => setRoomFormData({
                         ...roomFormData,
