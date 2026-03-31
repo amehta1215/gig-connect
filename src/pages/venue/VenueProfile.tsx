@@ -598,13 +598,6 @@ export default function VenueProfile() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label htmlFor="room_location" className="text-xs uppercase tracking-wider text-muted-foreground">Location</Label>
-                        <LocationAutocomplete value={roomFormData.location} onChange={value => setRoomFormData({
-                        ...roomFormData,
-                        location: value
-                      })} placeholder="Search location..." className="bg-background" />
-                      </div>
-                      <div className="space-y-1">
                         <Label htmlFor="room_capacity" className="text-xs uppercase tracking-wider text-muted-foreground">Capacity</Label>
                         <Input id="room_capacity" type="number" value={roomFormData.capacity} onChange={e => setRoomFormData({
                         ...roomFormData,
