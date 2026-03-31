@@ -94,7 +94,7 @@ export default function VenueProfile() {
     house_rules: ''
   });
   const [showPublishDialog, setShowPublishDialog] = useState(false);
-  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-save for all existing rooms (draft and published)
   useEffect(() => {
