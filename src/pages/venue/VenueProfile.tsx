@@ -424,11 +424,11 @@ export default function VenueProfile() {
                 fetchListings(profile.id);
               }
             }}>
-            <DialogTrigger asChild>
+            {listings.length > 0 && <DialogTrigger asChild>
               <Button onClick={() => openDialog(undefined, 'edit')} size="icon" variant="outline">
                 <Plus className="h-4 w-4" />
               </Button>
-            </DialogTrigger>
+            </DialogTrigger>}
             <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 bg-card border-border">
               <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0 pr-12">
                 <div className="flex items-center justify-between">
@@ -667,7 +667,6 @@ export default function VenueProfile() {
 
         {/* Listings Grid */}
         {listings.length === 0 ? <div className="text-center py-8 border border-dashed border-border rounded-lg">
-            <h3 className="font-display text-lg text-muted-foreground mb-4">NO ROOMS</h3>
             <Button onClick={() => openDialog(undefined, 'edit')} className="font-display tracking-widest">
               <Plus className="h-4 w-4 mr-2" />
               ADD ROOM
