@@ -667,7 +667,6 @@ export default function VenueProfile() {
 
         {/* Listings Grid */}
         {listings.length === 0 ? <div className="text-center py-8 border border-dashed border-border rounded-lg">
-            <h3 className="font-display text-lg text-muted-foreground mb-4">NO ROOMS</h3>
             <Button onClick={() => openDialog(undefined, 'edit')} className="font-display tracking-widest">
               <Plus className="h-4 w-4 mr-2" />
               ADD ROOM
