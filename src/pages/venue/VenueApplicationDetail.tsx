@@ -583,18 +583,20 @@ export default function VenueApplicationDetail() {
           {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
               Unarchive
             </Button>}
-          <Button variant="ghost" size="icon" onClick={toggleFavorite} className="shrink-0 h-9 w-9">
-            <Heart className={`h-6 w-6 transition-colors ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
-          </Button>
         </div>
       </div>
 
       {/* Artist Header */}
       <div className="space-y-4">
         <div>
-          <h1 className="font-display text-4xl md:text-5xl tracking-wide text-primary font-semibold">
-            {bandName}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="font-display text-4xl md:text-5xl tracking-wide text-primary font-semibold">
+              {bandName}
+            </h1>
+            <Button variant="ghost" size="icon" onClick={toggleFavorite} className="shrink-0 h-9 w-9">
+              <Heart className={`h-6 w-6 transition-colors ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
+            </Button>
+          </div>
         {venueListing && <p className="text-lg mt-1 text-primary">
               Applied to: {venueListing.room_name || venueListing.venue_name}
             </p>}
