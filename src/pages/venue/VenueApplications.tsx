@@ -362,7 +362,7 @@ export default function VenueApplications() {
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  {!application.is_read && <div className="w-2 h-2 bg-primary" />}
+                  
                   <h3 className={`font-display text-xl text-foreground tracking-wide ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
                     {bandName}
                   </h3>
