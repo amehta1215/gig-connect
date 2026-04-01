@@ -670,7 +670,7 @@ export default function VenueProfile() {
                 {/* Content */}
                 <div className="p-3">
                   <h3 className="font-display text-lg text-foreground tracking-wide">
-                    ROOM NAME: {listing.room_name || listing.venue_name}
+                    {profile?.venue_name || listing.venue_name}: {listing.room_name || listing.venue_name}
                   </h3>
                   
                   <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
