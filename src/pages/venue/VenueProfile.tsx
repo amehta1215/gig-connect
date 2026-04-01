@@ -55,7 +55,7 @@ const eventTypeOptions = [{
   id: 'private_events',
   label: 'Private Events'
 }];
-const availableGenres = ['All', 'Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
+const availableGenres = ['All Genres', 'Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
 export default function VenueProfile() {
   const {
     user
