@@ -189,11 +189,11 @@ export default function PublicVenueDetail() {
               </div>}
             {listing.backline_info && <div className="bg-card border border-border rounded-lg p-4">
                 <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
-                <p className="text-sm text-primary">{listing.backline_info}</p>
+                <p className="text-sm text-primary whitespace-pre-line">{listing.backline_info}</p>
               </div>}
             {listing.house_rules && <div className="bg-card border border-border rounded-lg p-4">
                 <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
-                <p className="text-sm text-primary">{listing.house_rules}</p>
+                <p className="text-sm text-primary whitespace-pre-line">{listing.house_rules}</p>
               </div>}
           </div>
         </div>
