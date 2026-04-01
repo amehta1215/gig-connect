@@ -554,7 +554,7 @@ export default function VenueApplicationDetail() {
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       {/* Status Banner with Back, Status, Actions, and Favorite */}
       <div className={`flex items-center gap-2 px-2 py-2 ${config.bgColor} ${config.color}`}>
-        <Button variant="ghost" size="icon" onClick={() => navigate('/venue')} className="shrink-0">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/venue')} className="shrink-0 text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex items-center gap-2 font-display tracking-widest text-sm">
