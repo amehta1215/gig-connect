@@ -552,18 +552,11 @@ export default function VenueApplicationDetail() {
     value: artistProfile?.tiktok_link
   }].filter(link => link.value);
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
-      {/* Back Button & Favorite */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/venue')}>
+      {/* Status Banner with Back, Status, Actions, and Favorite */}
+      <div className={`flex items-center gap-2 px-2 py-2 ${config.bgColor} ${config.color}`}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/venue')} className="shrink-0">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <Button variant="ghost" size="icon" onClick={toggleFavorite} className="h-9 w-9">
-          <Heart className={`h-6 w-6 transition-colors ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
-        </Button>
-      </div>
-
-      {/* Status Banner */}
-      <div className={`flex items-center justify-between gap-2 px-4 py-2 ${config.bgColor} ${config.color}`}>
         <div className="flex items-center gap-2 font-display tracking-widest text-sm">
           <StatusIcon className="h-4 w-4" />
           {config.label}
@@ -571,7 +564,7 @@ export default function VenueApplicationDetail() {
             Submitted {format(new Date(application.created_at), 'MMM d, yyyy')}
           </span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-auto">
           <Button size="sm" onClick={handleMessageClick} className="bg-primary hover:bg-primary/90">
             <MessageSquare className="h-4 w-4 mr-1" />
             Message
@@ -590,6 +583,9 @@ export default function VenueApplicationDetail() {
           {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
               Unarchive
             </Button>}
+          <Button variant="ghost" size="icon" onClick={toggleFavorite} className="shrink-0 h-9 w-9">
+            <Heart className={`h-6 w-6 transition-colors ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
+          </Button>
         </div>
       </div>
 
