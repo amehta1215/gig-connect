@@ -554,7 +554,7 @@ export default function VenueApplicationDetail() {
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       {/* Status Banner with Back, Status, Actions, and Favorite */}
       <div className={`flex items-center gap-2 px-2 py-2 ${config.bgColor} ${config.color}`}>
-        <Button variant="ghost" size="icon" onClick={() => navigate('/venue')} className="shrink-0">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/venue')} className="shrink-0 text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex items-center gap-2 font-display tracking-widest text-sm">
@@ -583,18 +583,20 @@ export default function VenueApplicationDetail() {
           {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
               Unarchive
             </Button>}
-          <Button variant="ghost" size="icon" onClick={toggleFavorite} className="shrink-0 h-9 w-9">
-            <Heart className={`h-6 w-6 transition-colors ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
-          </Button>
         </div>
       </div>
 
       {/* Artist Header */}
       <div className="space-y-4">
         <div>
-          <h1 className="font-display text-4xl md:text-5xl tracking-wide text-primary font-semibold">
-            {bandName}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="font-display text-4xl md:text-5xl tracking-wide text-primary font-semibold">
+              {bandName}
+            </h1>
+            <Button variant="ghost" size="icon" onClick={toggleFavorite} className="shrink-0 h-9 w-9">
+              <Heart className={`h-6 w-6 transition-colors ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
+            </Button>
+          </div>
         {venueListing && <p className="text-lg mt-1 text-primary">
               Applied to: {venueListing.room_name || venueListing.venue_name}
             </p>}
