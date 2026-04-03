@@ -577,10 +577,10 @@ export default function VenueApplicationDetail() {
                 Archive
               </Button>
             </>}
-          {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
+          {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-primary hover:bg-primary/90">
               Rescind Acceptance
             </Button>}
-          {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} variant="outline">
+          {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-primary hover:bg-primary/90">
               Unarchive
             </Button>}
         </div>
