@@ -739,15 +739,6 @@ export default function VenueApplicationDetail() {
           </ul>
         </div>}
 
-      {/* Additional Photos */}
-      {artistProfile?.pictures && artistProfile.pictures.length > 1 && <div className="bg-card border border-border p-6">
-          <h2 className="font-display text-sm text-primary tracking-widest mb-3">ADDITIONAL PHOTOS</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {artistProfile.pictures.slice(1).map((pic, i) => <div key={i} className="aspect-square bg-secondary overflow-hidden">
-                <img src={pic} alt={`${bandName} photo ${i + 2}`} className="w-full h-full object-cover" />
-              </div>)}
-          </div>
-        </div>}
 
       {/* Accept Dialog with Date and Time Picker */}
       <Dialog open={acceptDialogOpen} onOpenChange={setAcceptDialogOpen}>
