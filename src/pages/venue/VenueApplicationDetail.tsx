@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon, PauseCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon, PauseCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn, parseLocalDate } from '@/lib/utils';
