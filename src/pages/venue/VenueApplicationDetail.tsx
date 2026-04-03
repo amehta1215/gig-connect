@@ -565,22 +565,22 @@ export default function VenueApplicationDetail() {
           </span>
         </div>
         <div className="flex gap-2 ml-auto">
-          <Button size="sm" variant="secondary" onClick={handleMessageClick}>
+          <Button size="sm" onClick={handleMessageClick} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
             <MessageSquare className="h-4 w-4 mr-1" />
             Message
           </Button>
           {application.status === 'in_progress' && <>
-              <Button size="sm" variant="secondary" onClick={handleAcceptClick}>
+              <Button size="sm" onClick={handleAcceptClick} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
                 Accept
               </Button>
-              <Button size="sm" variant="secondary" onClick={() => updateStatus('archived')}>
+              <Button size="sm" onClick={() => updateStatus('archived')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
                 Archive
               </Button>
             </>}
-          {application.status === 'accepted' && <Button size="sm" variant="secondary" onClick={() => updateStatus('in_progress')}>
+          {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
               Rescind Acceptance
             </Button>}
-          {application.status === 'archived' && <Button size="sm" variant="secondary" onClick={() => updateStatus('in_progress')}>
+          {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
               Unarchive
             </Button>}
         </div>
