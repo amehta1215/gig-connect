@@ -565,22 +565,22 @@ export default function VenueApplicationDetail() {
           </span>
         </div>
         <div className="flex gap-2 ml-auto">
-          <Button size="sm" variant="outline" onClick={handleMessageClick}>
+          <Button size="sm" variant="secondary" onClick={handleMessageClick}>
             <MessageSquare className="h-4 w-4 mr-1" />
             Message
           </Button>
           {application.status === 'in_progress' && <>
-              <Button size="sm" variant="outline" onClick={handleAcceptClick}>
+              <Button size="sm" variant="secondary" onClick={handleAcceptClick}>
                 Accept
               </Button>
-              <Button size="sm" variant="outline" onClick={() => updateStatus('archived')}>
+              <Button size="sm" variant="secondary" onClick={() => updateStatus('archived')}>
                 Archive
               </Button>
             </>}
-          {application.status === 'accepted' && <Button size="sm" variant="outline" onClick={() => updateStatus('in_progress')}>
+          {application.status === 'accepted' && <Button size="sm" variant="secondary" onClick={() => updateStatus('in_progress')}>
               Rescind Acceptance
             </Button>}
-          {application.status === 'archived' && <Button size="sm" variant="outline" onClick={() => updateStatus('in_progress')}>
+          {application.status === 'archived' && <Button size="sm" variant="secondary" onClick={() => updateStatus('in_progress')}>
               Unarchive
             </Button>}
         </div>
