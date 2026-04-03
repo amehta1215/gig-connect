@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon, PauseCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon, PauseCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn, parseLocalDate } from '@/lib/utils';
@@ -604,10 +604,36 @@ export default function VenueApplicationDetail() {
 
       </div>
 
-      {/* Main Artist Picture */}
-      {artistProfile?.pictures && artistProfile.pictures.length > 0 && <div className="flex justify-center">
-          <img src={artistProfile.pictures[0]} alt={`${bandName} main photo`} className="max-h-64 w-auto object-contain" />
-        </div>}
+      {/* Artist Pictures - Horizontal Scrollable Gallery */}
+      {artistProfile?.pictures && artistProfile.pictures.length > 0 && (() => {
+        const scrollRef = React.createRef<HTMLDivElement>();
+        const scroll = (dir: 'left' | 'right') => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollBy({ left: dir === 'left' ? -300 : 300, behavior: 'smooth' });
+          }
+        };
+        return (
+          <div className="relative group">
+            <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+              {artistProfile.pictures.map((pic, i) => (
+                <div key={i} className="flex-none w-64 aspect-[4/3] bg-secondary overflow-hidden snap-start">
+                  <img src={pic} alt={`${bandName} photo ${i + 1}`} className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+            {artistProfile.pictures.length > 3 && (
+              <>
+                <button onClick={() => scroll('left')} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button onClick={() => scroll('right')} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Application Details */}
       <div className="bg-card border border-border p-6 space-y-4">
@@ -713,15 +739,6 @@ export default function VenueApplicationDetail() {
           </ul>
         </div>}
 
-      {/* Additional Photos */}
-      {artistProfile?.pictures && artistProfile.pictures.length > 1 && <div className="bg-card border border-border p-6">
-          <h2 className="font-display text-sm text-primary tracking-widest mb-3">ADDITIONAL PHOTOS</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {artistProfile.pictures.slice(1).map((pic, i) => <div key={i} className="aspect-square bg-secondary overflow-hidden">
-                <img src={pic} alt={`${bandName} photo ${i + 2}`} className="w-full h-full object-cover" />
-              </div>)}
-          </div>
-        </div>}
 
       {/* Accept Dialog with Date and Time Picker */}
       <Dialog open={acceptDialogOpen} onOpenChange={setAcceptDialogOpen}>
