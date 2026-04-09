@@ -547,7 +547,9 @@ export default function VenueApplicationDetail() {
         </Button>
       </div>;
   }
-  const config = statusConfig[application.status];
+  // Determine effective display status: if accepted with hold gigs, show as "hold"
+  const displayStatus = application.status === 'accepted' && gigStatus === 'hold' ? 'hold' : application.status;
+  const config = statusConfig[displayStatus];
   const StatusIcon = config.icon;
   const bandName = artistProfile?.band_name || `${application.artist?.first_name} ${application.artist?.last_name}`;
   const socialLinks = [{
