@@ -208,6 +208,23 @@ export default function VenueApplicationDetail() {
       is_read: true
     }).eq('id', id);
 
+    // Check gig listing status (hold vs confirmed) for accepted applications
+    if (data.status === 'accepted') {
+      const { data: gigData } = await supabase
+        .from('gig_listings')
+        .select('is_confirmed, hold_priority')
+        .eq('application_id', data.id)
+        .order('hold_priority', { ascending: true })
+        .limit(1);
+      if (gigData && gigData.length > 0) {
+        setGigStatus(gigData[0].is_confirmed ? 'confirmed' : 'hold');
+      } else {
+        setGigStatus(null);
+      }
+    } else {
+      setGigStatus(null);
+    }
+
     // Check if this application is favorited
     if (user) {
       const { data: favData } = await supabase
