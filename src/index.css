@@ -212,31 +212,38 @@ input[type="number"] {
 
 /* Calendar full-height layout - override table display to flex */
 .calendar-stretch .rdp {
-  height: 100%;
-  width: 100%;
+  height: 100% !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .calendar-stretch .rdp-months {
-  height: 100%;
-  width: 100%;
+  height: 100% !important;
+  width: 100% !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .calendar-stretch .rdp-month {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  width: 100% !important;
+  flex: 1 !important;
 }
 
 .calendar-stretch .rdp-caption {
   width: 100%;
+  flex-shrink: 0;
 }
 
 .calendar-stretch .rdp-table {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  width: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  width: 100% !important;
 }
 
 .calendar-stretch .rdp-head {
@@ -255,14 +262,14 @@ input[type="number"] {
 }
 
 .calendar-stretch .rdp-tbody {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
 }
 
 .calendar-stretch .rdp-row {
-  display: flex;
-  flex: 1;
+  display: flex !important;
+  flex: 1 !important;
 }
 
 .calendar-stretch .rdp-cell {
@@ -273,8 +280,9 @@ input[type="number"] {
 }
 
 .calendar-stretch .rdp-day {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
