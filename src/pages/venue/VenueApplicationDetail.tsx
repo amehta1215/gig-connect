@@ -69,6 +69,12 @@ const statusConfig = {
     color: 'text-green-500',
     bgColor: 'bg-green-500/10'
   },
+  hold: {
+    icon: PauseCircle,
+    label: 'HOLD',
+    color: 'text-yellow-500',
+    bgColor: 'bg-yellow-500/10'
+  },
   archived: {
     icon: Archive,
     label: 'ARCHIVED',
