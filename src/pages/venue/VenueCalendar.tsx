@@ -427,7 +427,7 @@ export default function VenueCalendar() {
   return <div className="space-y-6 animate-fade-in">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch justify-center min-h-[400px]">
+        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px]">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -435,7 +435,7 @@ export default function VenueCalendar() {
             modifiers={modifiers}
             modifiersStyles={modifiersStyles}
             disablePastDates={false}
-            className="pointer-events-auto w-full h-full font-semibold"
+            className="pointer-events-auto w-full h-full font-semibold p-0"
           />
         </div>
 

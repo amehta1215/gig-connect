@@ -213,16 +213,22 @@ input[type="number"] {
 /* Calendar full-height layout - override table display to flex */
 .calendar-stretch .rdp {
   height: 100%;
+  width: 100%;
 }
 
 .calendar-stretch .rdp-months {
   height: 100%;
+  width: 100%;
 }
 
 .calendar-stretch .rdp-month {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
+}
+
+.calendar-stretch .rdp-caption {
   width: 100%;
 }
 
