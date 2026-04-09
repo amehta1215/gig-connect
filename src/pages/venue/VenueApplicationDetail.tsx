@@ -69,6 +69,12 @@ const statusConfig = {
     color: 'text-green-500',
     bgColor: 'bg-green-500/10'
   },
+  hold: {
+    icon: PauseCircle,
+    label: 'HOLD',
+    color: 'text-yellow-500',
+    bgColor: 'bg-yellow-500/10'
+  },
   archived: {
     icon: Archive,
     label: 'ARCHIVED',
@@ -108,6 +114,7 @@ export default function VenueApplicationDetail() {
   const [venueListing, setVenueListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [gigStatus, setGigStatus] = useState<'confirmed' | 'hold' | null>(null);
 
   // Accept dialog state
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
@@ -200,6 +207,23 @@ export default function VenueApplicationDetail() {
     await supabase.from('applications').update({
       is_read: true
     }).eq('id', id);
+
+    // Check gig listing status (hold vs confirmed) for accepted applications
+    if (data.status === 'accepted') {
+      const { data: gigData } = await supabase
+        .from('gig_listings')
+        .select('is_confirmed, hold_priority')
+        .eq('application_id', data.id)
+        .order('hold_priority', { ascending: true })
+        .limit(1);
+      if (gigData && gigData.length > 0) {
+        setGigStatus(gigData[0].is_confirmed ? 'confirmed' : 'hold');
+      } else {
+        setGigStatus(null);
+      }
+    } else {
+      setGigStatus(null);
+    }
 
     // Check if this application is favorited
     if (user) {
@@ -523,7 +547,9 @@ export default function VenueApplicationDetail() {
         </Button>
       </div>;
   }
-  const config = statusConfig[application.status];
+  // Determine effective display status: if accepted with hold gigs, show as "hold"
+  const displayStatus = application.status === 'accepted' && gigStatus === 'hold' ? 'hold' : application.status;
+  const config = statusConfig[displayStatus];
   const StatusIcon = config.icon;
   const bandName = artistProfile?.band_name || `${application.artist?.first_name} ${application.artist?.last_name}`;
   const socialLinks = [{
