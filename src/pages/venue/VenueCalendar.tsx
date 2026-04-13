@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical, ChevronDown } from 'lucide-react';
+import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical, ChevronDown, Pencil } from 'lucide-react';
 import { format, startOfDay, addDays, addMonths } from 'date-fns';
 import { toast } from 'sonner';
 interface GigListing {
@@ -70,6 +70,11 @@ export default function VenueCalendar() {
   // Event preview dialog state
   const [previewGig, setPreviewGig] = useState<GigListing | null>(null);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [previewEditing, setPreviewEditing] = useState(false);
+  const [previewEditDate, setPreviewEditDate] = useState<Date | undefined>(undefined);
+  const [previewEditTime, setPreviewEditTime] = useState('');
+  const [previewSaving, setPreviewSaving] = useState(false);
+  const [previewDatePickerOpen, setPreviewDatePickerOpen] = useState(false);
 
   // Delete hold dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -736,11 +741,22 @@ export default function VenueCalendar() {
       </Dialog>
 
       {/* Event Preview Dialog */}
-      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+      <Dialog open={previewDialogOpen} onOpenChange={(open) => { setPreviewDialogOpen(open); if (!open) setPreviewEditing(false); }}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-display text-2xl">
+          <DialogHeader className="pr-12">
+            <DialogTitle className="font-display text-2xl flex items-center justify-between">
               {previewGig?.is_confirmed ? 'CONFIRMED GIG' : 'HOLD'}
+              {!previewEditing && (
+                <Button size="icon" variant="ghost" onClick={() => {
+                  if (previewGig) {
+                    setPreviewEditDate(parseLocalDate(previewGig.gig_date));
+                    setPreviewEditTime(previewGig.show_time || '');
+                    setPreviewEditing(true);
+                  }
+                }} className="h-8 w-8">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
             </DialogTitle>
             <DialogDescription className="sr-only">Event details</DialogDescription>
           </DialogHeader>
@@ -763,21 +779,48 @@ export default function VenueCalendar() {
 
                 <div>
                   <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">DATE</p>
-                  <div className="flex items-center gap-2 text-primary">
-                    <CalendarIcon className="h-4 w-4" />
-                    <p className="text-sm">{pDateDisplay}</p>
-                  </div>
+                  {previewEditing ? (
+                    <Popover open={previewDatePickerOpen} onOpenChange={setPreviewDatePickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !previewEditDate && "text-muted-foreground")}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {previewEditDate ? format(previewEditDate, 'EEEE, MMMM d, yyyy') : 'Pick a date'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={previewEditDate}
+                          onSelect={(date) => { if (date) { setPreviewEditDate(date); setPreviewDatePickerOpen(false); } }}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <div className="flex items-center gap-2 text-primary">
+                      <CalendarIcon className="h-4 w-4" />
+                      <p className="text-sm">{pDateDisplay}</p>
+                    </div>
+                  )}
                 </div>
 
-                {pTimeDisplay && (
-                  <div>
-                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">TIME</p>
+                <div>
+                  <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">TIME</p>
+                  {previewEditing ? (
+                    <div className="relative">
+                      <Input type="time" value={previewEditTime} onChange={e => setPreviewEditTime(e.target.value)} className="pl-10" />
+                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    </div>
+                  ) : pTimeDisplay ? (
                     <div className="flex items-center gap-2 text-primary">
                       <Clock className="h-4 w-4" />
                       <p className="text-sm">{pTimeDisplay}</p>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Not set</p>
+                  )}
+                </div>
 
                 {pRoomDisplay && (
                   <div>
@@ -789,14 +832,38 @@ export default function VenueCalendar() {
             );
           })()}
           <DialogFooter className="flex gap-3 justify-end">
-            {previewGig?.application_id && (
-              <Button variant="outline" onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/applications/${previewGig.application_id}`); }}>
-                View Application
-              </Button>
+            {previewEditing ? (
+              <>
+                <Button variant="outline" onClick={() => setPreviewEditing(false)}>Cancel</Button>
+                <Button disabled={previewSaving} onClick={async () => {
+                  if (!previewGig || !previewEditDate) return;
+                  setPreviewSaving(true);
+                  const { error } = await supabase.from('gig_listings').update({
+                    gig_date: format(previewEditDate, 'yyyy-MM-dd'),
+                    show_time: previewEditTime || null,
+                  }).eq('id', previewGig.id);
+                  setPreviewSaving(false);
+                  if (error) { toast.error('Failed to save'); return; }
+                  toast.success('Event updated!');
+                  setPreviewEditing(false);
+                  setPreviewDialogOpen(false);
+                  fetchGigs();
+                }} className="bg-primary hover:bg-primary/90">
+                  {previewSaving ? 'Saving...' : 'Save'}
+                </Button>
+              </>
+            ) : (
+              <>
+                {previewGig?.application_id && (
+                  <Button variant="outline" onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/applications/${previewGig.application_id}`); }}>
+                    View Application
+                  </Button>
+                )}
+                <Button onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/calendar/${previewGig?.id}`); }} className="bg-primary hover:bg-primary/90">
+                  {previewGig?.is_confirmed ? 'View Full Details' : 'View Details'}
+                </Button>
+              </>
             )}
-            <Button onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/calendar/${previewGig?.id}`); }} className="bg-primary hover:bg-primary/90">
-              {previewGig?.is_confirmed ? 'View Full Details' : 'View Details'}
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
