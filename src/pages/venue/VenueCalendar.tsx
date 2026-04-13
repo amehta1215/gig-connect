@@ -734,5 +734,71 @@ export default function VenueCalendar() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Event Preview Dialog */}
+      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl">
+              {previewGig?.is_confirmed ? 'CONFIRMED GIG' : 'HOLD'}
+            </DialogTitle>
+            <DialogDescription className="sr-only">Event details</DialogDescription>
+          </DialogHeader>
+          {previewGig && (() => {
+            const pArtistName = previewGig.manual_artist_name || previewGig.artist_profile?.band_name || (previewGig.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : 'TBA');
+            const pRoomDisplay = previewGig.venue_listing?.room_name || previewGig.venue_listing?.venue_name || '';
+            const pTimeDisplay = previewGig.show_time ? new Date(`2000-01-01T${previewGig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : null;
+            const pDateDisplay = format(parseLocalDate(previewGig.gig_date), 'EEEE, MMMM d, yyyy');
+            return (
+              <div className="space-y-4 py-2">
+                <div className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-display tracking-widest rounded-sm ${previewGig.is_confirmed ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                  {previewGig.is_confirmed ? <CheckCircle2 className="h-3 w-3" /> : <PauseCircle className="h-3 w-3" />}
+                  {previewGig.is_confirmed ? 'CONFIRMED' : `HOLD #${previewGig.hold_priority || '?'}`}
+                </div>
+
+                <div>
+                  <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">ARTIST</p>
+                  <p className="font-display text-2xl text-accent font-bold">{pArtistName}</p>
+                </div>
+
+                <div>
+                  <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">DATE</p>
+                  <div className="flex items-center gap-2 text-primary">
+                    <CalendarIcon className="h-4 w-4" />
+                    <p className="text-sm">{pDateDisplay}</p>
+                  </div>
+                </div>
+
+                {pTimeDisplay && (
+                  <div>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">TIME</p>
+                    <div className="flex items-center gap-2 text-primary">
+                      <Clock className="h-4 w-4" />
+                      <p className="text-sm">{pTimeDisplay}</p>
+                    </div>
+                  </div>
+                )}
+
+                {pRoomDisplay && (
+                  <div>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">ROOM</p>
+                    <p className="text-sm text-primary">{pRoomDisplay}</p>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+          <DialogFooter className="flex gap-3 justify-end">
+            {previewGig?.application_id && (
+              <Button variant="outline" onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/applications/${previewGig.application_id}`); }}>
+                View Application
+              </Button>
+            )}
+            <Button onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/calendar/${previewGig?.id}`); }} className="bg-primary hover:bg-primary/90">
+              {previewGig?.is_confirmed ? 'View Full Details' : 'View Details'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>;
 }
