@@ -70,6 +70,11 @@ export default function VenueCalendar() {
   // Event preview dialog state
   const [previewGig, setPreviewGig] = useState<GigListing | null>(null);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [previewEditing, setPreviewEditing] = useState(false);
+  const [previewEditDate, setPreviewEditDate] = useState<Date | undefined>(undefined);
+  const [previewEditTime, setPreviewEditTime] = useState('');
+  const [previewSaving, setPreviewSaving] = useState(false);
+  const [previewDatePickerOpen, setPreviewDatePickerOpen] = useState(false);
 
   // Delete hold dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
