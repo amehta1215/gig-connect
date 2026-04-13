@@ -604,7 +604,7 @@ export default function VenueApplicationDetail() {
               </Button>
             </>}
           {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-              Rescind Acceptance
+              {gigStatus === 'hold' ? 'Rescind Hold' : 'Rescind Acceptance'}
             </Button>}
           {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
               Unarchive
