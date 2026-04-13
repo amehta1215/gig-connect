@@ -526,11 +526,8 @@ export default function VenueCalendar() {
               return <div key={gig.id} draggable onDragStart={() => handleHoldDragStart(index)} onDragOver={e => handleHoldDragOver(e, index)} onDragEnd={handleHoldDragEnd} className={`bg-secondary p-4 flex items-center justify-between cursor-grab active:cursor-grabbing transition-opacity ${draggedHoldIndex === index ? 'opacity-50' : ''}`}>
                       <div className="flex items-center gap-3 flex-1">
                           <button onClick={() => {
-                    if (gig.application_id) {
-                      navigate(`/venue/applications/${gig.application_id}`);
-                    } else {
-                      navigate(`/venue/calendar/${gig.id}`);
-                    }
+                    setPreviewGig(gig);
+                    setPreviewDialogOpen(true);
                   }} className="text-left flex-1 hover:opacity-80 transition-opacity">
                             <div className="flex items-center">
                               <span className="inline-flex items-center justify-center text-primary text-xs font-bold mr-1.5 flex-shrink-0 font-display">#{index + 1}</span>
