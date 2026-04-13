@@ -67,6 +67,10 @@ export default function VenueCalendar() {
   const [isDraggingHold, setIsDraggingHold] = useState(false);
   const confirmDroppedRef = useRef(false);
 
+  // Event preview dialog state
+  const [previewGig, setPreviewGig] = useState<GigListing | null>(null);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+
   // Delete hold dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [holdToDelete, setHoldToDelete] = useState<{ gigId: string; applicationId: string | null; artistId: string; artistName: string } | null>(null);
