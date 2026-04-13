@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical, ChevronDown } from 'lucide-react';
+import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical, ChevronDown, Pencil } from 'lucide-react';
 import { format, startOfDay, addDays, addMonths } from 'date-fns';
 import { toast } from 'sonner';
 interface GigListing {
