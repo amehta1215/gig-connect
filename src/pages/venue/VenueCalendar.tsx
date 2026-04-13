@@ -559,7 +559,7 @@ export default function VenueCalendar() {
             {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
           const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
           const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-          return <button key={gig.id} onClick={() => navigate(`/venue/calendar/${gig.id}`)} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
+          return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                   <div>
                     <p className="font-display text-primary">{artistName}</p>
                     <p className="text-xs text-muted-foreground">{roomDisplay}</p>
