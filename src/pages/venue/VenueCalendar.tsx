@@ -744,19 +744,8 @@ export default function VenueCalendar() {
       <Dialog open={previewDialogOpen} onOpenChange={(open) => { setPreviewDialogOpen(open); if (!open) setPreviewEditing(false); }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="pr-12">
-            <DialogTitle className="font-display text-2xl flex items-center justify-between">
-              {previewGig?.manual_artist_name || previewGig?.artist_profile?.band_name || (previewGig?.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : 'Event Details')}
-              {!previewEditing && (
-                <Button size="icon" variant="ghost" onClick={() => {
-                  if (previewGig) {
-                    setPreviewEditDate(parseLocalDate(previewGig.gig_date));
-                    setPreviewEditTime(previewGig.show_time || '');
-                    setPreviewEditing(true);
-                  }
-                }} className="h-8 w-8">
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              )}
+            <DialogTitle className="font-display text-2xl flex items-center justify-between sr-only">
+              Event Details
             </DialogTitle>
             <DialogDescription className="sr-only">Event details</DialogDescription>
           </DialogHeader>
@@ -767,14 +756,27 @@ export default function VenueCalendar() {
             const pDateDisplay = format(parseLocalDate(previewGig.gig_date), 'EEEE, MMMM d, yyyy');
             return (
               <div className="space-y-4 py-2">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">ARTIST</p>
+                    <p className="font-display text-2xl text-accent font-bold">{pArtistName}</p>
+                  </div>
+                  {!previewEditing && (
+                    <Button size="icon" variant="ghost" onClick={() => {
+                      if (previewGig) {
+                        setPreviewEditDate(parseLocalDate(previewGig.gig_date));
+                        setPreviewEditTime(previewGig.show_time || '');
+                        setPreviewEditing(true);
+                      }
+                    }} className="h-8 w-8 mt-4">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+
                 <div className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-display tracking-widest rounded-sm ${previewGig.is_confirmed ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
                   {previewGig.is_confirmed ? <CheckCircle2 className="h-3 w-3" /> : <PauseCircle className="h-3 w-3" />}
                   {previewGig.is_confirmed ? 'CONFIRMED' : `HOLD #${previewGig.hold_priority || '?'}`}
-                </div>
-
-                <div>
-                  <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">ARTIST</p>
-                  <p className="font-display text-2xl text-accent font-bold">{pArtistName}</p>
                 </div>
 
                 <div>
