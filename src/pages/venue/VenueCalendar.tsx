@@ -812,7 +812,7 @@ export default function VenueCalendar() {
                     <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">TIME</p>
                     {previewEditing ? (
                       <div className="relative">
-                        <Input type="time" value={previewEditTime} onChange={e => setPreviewEditTime(e.target.value)} className="pl-10" />
+                        <Input type="time" value={previewEditTime} onChange={e => setPreviewEditTime(e.target.value)} className="pl-10 [&::-webkit-calendar-picker-indicator]:hidden" />
                         <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       </div>
                     ) : (
