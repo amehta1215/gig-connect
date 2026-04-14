@@ -745,7 +745,7 @@ export default function VenueCalendar() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="pr-12">
             <DialogTitle className="font-display text-2xl flex items-center justify-between">
-              {previewGig?.is_confirmed ? 'CONFIRMED GIG' : 'HOLD'}
+              {previewGig?.manual_artist_name || 'Event Details'}
               {!previewEditing && (
                 <Button size="icon" variant="ghost" onClick={() => {
                   if (previewGig) {
