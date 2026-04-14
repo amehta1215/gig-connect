@@ -880,7 +880,7 @@ export default function VenueCalendar() {
                     </Button>
                   )}
                   <Button onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/calendar/${previewGig?.id}`); }} className="bg-primary hover:bg-primary/90">
-                    {previewGig?.is_confirmed ? 'View Full Details' : 'View Details'}
+                    {previewGig?.is_confirmed ? 'View Poster' : 'View Details'}
                   </Button>
                 </>
               )}
