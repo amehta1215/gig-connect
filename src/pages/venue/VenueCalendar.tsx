@@ -833,39 +833,58 @@ export default function VenueCalendar() {
               </div>
             );
           })()}
-          <DialogFooter className="flex gap-3 justify-end">
-            {previewEditing ? (
-              <>
-                <Button variant="outline" onClick={() => setPreviewEditing(false)}>Cancel</Button>
-                <Button disabled={previewSaving} onClick={async () => {
-                  if (!previewGig || !previewEditDate) return;
-                  setPreviewSaving(true);
-                  const { error } = await supabase.from('gig_listings').update({
-                    gig_date: format(previewEditDate, 'yyyy-MM-dd'),
-                    show_time: previewEditTime || null,
-                  }).eq('id', previewGig.id);
-                  setPreviewSaving(false);
-                  if (error) { toast.error('Failed to save'); return; }
-                  toast.success('Event updated!');
-                  setPreviewEditing(false);
-                  setPreviewDialogOpen(false);
-                  fetchGigs();
-                }} className="bg-primary hover:bg-primary/90">
-                  {previewSaving ? 'Saving...' : 'Save'}
-                </Button>
-              </>
-            ) : (
-              <>
-                {previewGig?.application_id && (
-                  <Button variant="outline" onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/applications/${previewGig.application_id}`); }}>
-                    View Application
+          <DialogFooter className="flex items-center justify-between w-full">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9"
+              onClick={async () => {
+                if (!previewGig) return;
+                const pArtistName = previewGig.manual_artist_name || previewGig.artist_profile?.band_name || (previewGig.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : 'this artist');
+                if (!confirm(`Are you sure you want to delete the ${previewGig.is_confirmed ? 'gig' : 'hold'} for ${pArtistName}?`)) return;
+                const { error } = await supabase.from('gig_listings').delete().eq('id', previewGig.id);
+                if (error) { toast.error('Failed to delete'); return; }
+                toast.success(`${previewGig.is_confirmed ? 'Gig' : 'Hold'} deleted`);
+                setPreviewDialogOpen(false);
+                fetchGigs();
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+            <div className="flex gap-3">
+              {previewEditing ? (
+                <>
+                  <Button variant="outline" onClick={() => setPreviewEditing(false)}>Cancel</Button>
+                  <Button disabled={previewSaving} onClick={async () => {
+                    if (!previewGig || !previewEditDate) return;
+                    setPreviewSaving(true);
+                    const { error } = await supabase.from('gig_listings').update({
+                      gig_date: format(previewEditDate, 'yyyy-MM-dd'),
+                      show_time: previewEditTime || null,
+                    }).eq('id', previewGig.id);
+                    setPreviewSaving(false);
+                    if (error) { toast.error('Failed to save'); return; }
+                    toast.success('Event updated!');
+                    setPreviewEditing(false);
+                    setPreviewDialogOpen(false);
+                    fetchGigs();
+                  }} className="bg-primary hover:bg-primary/90">
+                    {previewSaving ? 'Saving...' : 'Save'}
                   </Button>
-                )}
-                <Button onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/calendar/${previewGig?.id}`); }} className="bg-primary hover:bg-primary/90">
-                  {previewGig?.is_confirmed ? 'View Full Details' : 'View Details'}
-                </Button>
-              </>
-            )}
+                </>
+              ) : (
+                <>
+                  {previewGig?.application_id && (
+                    <Button variant="outline" onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/applications/${previewGig.application_id}`); }}>
+                      View Application
+                    </Button>
+                  )}
+                  <Button onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/calendar/${previewGig?.id}`); }} className="bg-primary hover:bg-primary/90">
+                    {previewGig?.is_confirmed ? 'View Full Details' : 'View Details'}
+                  </Button>
+                </>
+              )}
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
