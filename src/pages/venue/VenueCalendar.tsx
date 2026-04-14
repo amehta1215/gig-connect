@@ -745,7 +745,7 @@ export default function VenueCalendar() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="pr-12">
             <DialogTitle className="font-display text-2xl flex items-center justify-between">
-              {previewGig?.manual_artist_name || 'Event Details'}
+              {previewGig?.manual_artist_name || previewGig?.artist_profile?.band_name || (previewGig?.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : 'Event Details')}
               {!previewEditing && (
                 <Button size="icon" variant="ghost" onClick={() => {
                   if (previewGig) {
