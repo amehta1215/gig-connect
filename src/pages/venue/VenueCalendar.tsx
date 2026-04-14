@@ -807,22 +807,22 @@ export default function VenueCalendar() {
                   )}
                 </div>
 
-                <div>
-                  <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">TIME</p>
-                  {previewEditing ? (
-                    <div className="relative">
-                      <Input type="time" value={previewEditTime} onChange={e => setPreviewEditTime(e.target.value)} className="pl-10" />
-                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  ) : pTimeDisplay ? (
-                    <div className="flex items-center gap-2 text-primary">
-                      <Clock className="h-4 w-4" />
-                      <p className="text-sm">{pTimeDisplay}</p>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Not set</p>
-                  )}
-                </div>
+                {(previewEditing || pTimeDisplay) && (
+                  <div>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">TIME</p>
+                    {previewEditing ? (
+                      <div className="relative">
+                        <Input type="time" value={previewEditTime} onChange={e => setPreviewEditTime(e.target.value)} className="pl-10" />
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-primary">
+                        <Clock className="h-4 w-4" />
+                        <p className="text-sm">{pTimeDisplay}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {pRoomDisplay && (
                   <div>
