@@ -467,7 +467,7 @@ export default function VenueProfile() {
               {dialogMode === 'preview' && editingListing ? (/* Preview Content - Inline version of RoomPreviewSheet */
             <div className="flex-1 overflow-y-auto px-6 py-6">
                   {/* Pictures Gallery - horizontal carousel */}
-                  <div className="mb-10">
+                  <div className="mb-6">
                     {(() => {
                   const allPictures: string[] = [...pictures];
                   if (allPictures.length === 0) {
