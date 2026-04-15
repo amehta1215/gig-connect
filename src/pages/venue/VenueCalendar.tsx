@@ -768,6 +768,8 @@ export default function VenueCalendar() {
                       if (previewGig) {
                         setPreviewEditDate(parseLocalDate(previewGig.gig_date));
                         setPreviewEditTime(previewGig.show_time || '');
+                        setPreviewEditStatus(previewGig.is_confirmed ? 'confirmed' : 'hold');
+                        setPreviewEditHoldPriority(previewGig.hold_priority || 1);
                         setPreviewEditing(true);
                       }
                     }} className="h-8 w-8 mt-4">
