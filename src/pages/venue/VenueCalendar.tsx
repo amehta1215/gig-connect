@@ -73,6 +73,8 @@ export default function VenueCalendar() {
   const [previewEditing, setPreviewEditing] = useState(false);
   const [previewEditDate, setPreviewEditDate] = useState<Date | undefined>(undefined);
   const [previewEditTime, setPreviewEditTime] = useState('');
+  const [previewEditStatus, setPreviewEditStatus] = useState<'confirmed' | 'hold'>('confirmed');
+  const [previewEditHoldPriority, setPreviewEditHoldPriority] = useState(1);
   const [previewSaving, setPreviewSaving] = useState(false);
   const [previewDatePickerOpen, setPreviewDatePickerOpen] = useState(false);
 
@@ -766,6 +768,8 @@ export default function VenueCalendar() {
                       if (previewGig) {
                         setPreviewEditDate(parseLocalDate(previewGig.gig_date));
                         setPreviewEditTime(previewGig.show_time || '');
+                        setPreviewEditStatus(previewGig.is_confirmed ? 'confirmed' : 'hold');
+                        setPreviewEditHoldPriority(previewGig.hold_priority || 1);
                         setPreviewEditing(true);
                       }
                     }} className="h-8 w-8 mt-4">
@@ -774,13 +778,52 @@ export default function VenueCalendar() {
                   )}
                 </div>
 
+                {!previewEditing && (
                 <div className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-display tracking-widest rounded-sm ${previewGig.is_confirmed ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
                   {previewGig.is_confirmed ? <CheckCircle2 className="h-3 w-3" /> : <PauseCircle className="h-3 w-3" />}
                   {previewGig.is_confirmed ? 'CONFIRMED' : `HOLD #${previewGig.hold_priority || '?'}`}
                 </div>
+                )}
+
+                {previewEditing && (
+                  <div>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">STATUS</p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={previewEditStatus === 'confirmed' ? 'default' : 'outline'}
+                        className={previewEditStatus === 'confirmed' ? 'bg-green-500 hover:bg-green-600 text-white' : ''}
+                        onClick={() => setPreviewEditStatus('confirmed')}
+                      >
+                        <CheckCircle2 className="h-3 w-3 mr-1" /> Confirmed
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={previewEditStatus === 'hold' ? 'default' : 'outline'}
+                        className={previewEditStatus === 'hold' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : ''}
+                        onClick={() => setPreviewEditStatus('hold')}
+                      >
+                        <PauseCircle className="h-3 w-3 mr-1" /> Hold
+                      </Button>
+                    </div>
+                    {previewEditStatus === 'hold' && (
+                      <div className="mt-2">
+                        <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">HOLD PRIORITY</p>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={previewEditHoldPriority}
+                          onChange={e => setPreviewEditHoldPriority(parseInt(e.target.value) || 1)}
+                          className="w-24"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div>
-                  <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">DATE</p>
                   {previewEditing ? (
                     <Popover open={previewDatePickerOpen} onOpenChange={setPreviewDatePickerOpen}>
                       <PopoverTrigger asChild>
@@ -861,6 +904,8 @@ export default function VenueCalendar() {
                     const { error } = await supabase.from('gig_listings').update({
                       gig_date: format(previewEditDate, 'yyyy-MM-dd'),
                       show_time: previewEditTime || null,
+                      is_confirmed: previewEditStatus === 'confirmed',
+                      hold_priority: previewEditStatus === 'hold' ? previewEditHoldPriority : null,
                     }).eq('id', previewGig.id);
                     setPreviewSaving(false);
                     if (error) { toast.error('Failed to save'); return; }
