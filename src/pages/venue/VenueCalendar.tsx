@@ -73,6 +73,8 @@ export default function VenueCalendar() {
   const [previewEditing, setPreviewEditing] = useState(false);
   const [previewEditDate, setPreviewEditDate] = useState<Date | undefined>(undefined);
   const [previewEditTime, setPreviewEditTime] = useState('');
+  const [previewEditStatus, setPreviewEditStatus] = useState<'confirmed' | 'hold'>('confirmed');
+  const [previewEditHoldPriority, setPreviewEditHoldPriority] = useState(1);
   const [previewSaving, setPreviewSaving] = useState(false);
   const [previewDatePickerOpen, setPreviewDatePickerOpen] = useState(false);
 
