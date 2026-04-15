@@ -782,8 +782,45 @@ export default function VenueCalendar() {
                   {previewGig.is_confirmed ? <CheckCircle2 className="h-3 w-3" /> : <PauseCircle className="h-3 w-3" />}
                   {previewGig.is_confirmed ? 'CONFIRMED' : `HOLD #${previewGig.hold_priority || '?'}`}
                 </div>
+                )}
 
-                <div>
+                {previewEditing && (
+                  <div>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">STATUS</p>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={previewEditStatus === 'confirmed' ? 'default' : 'outline'}
+                        className={previewEditStatus === 'confirmed' ? 'bg-green-500 hover:bg-green-600 text-white' : ''}
+                        onClick={() => setPreviewEditStatus('confirmed')}
+                      >
+                        <CheckCircle2 className="h-3 w-3 mr-1" /> Confirmed
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={previewEditStatus === 'hold' ? 'default' : 'outline'}
+                        className={previewEditStatus === 'hold' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : ''}
+                        onClick={() => setPreviewEditStatus('hold')}
+                      >
+                        <PauseCircle className="h-3 w-3 mr-1" /> Hold
+                      </Button>
+                    </div>
+                    {previewEditStatus === 'hold' && (
+                      <div className="mt-2">
+                        <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">HOLD PRIORITY</p>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={previewEditHoldPriority}
+                          onChange={e => setPreviewEditHoldPriority(parseInt(e.target.value) || 1)}
+                          className="w-24"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
                   <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">DATE</p>
                   {previewEditing ? (
                     <Popover open={previewDatePickerOpen} onOpenChange={setPreviewDatePickerOpen}>
