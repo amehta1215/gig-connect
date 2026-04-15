@@ -438,7 +438,7 @@ export default function VenueCalendar() {
   return <div className="space-y-4 animate-fade-in">
       <div className="grid md:grid-cols-[1fr_1fr] gap-4 items-start">
         {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[380px]">
+        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[340px]">
           <Calendar
             mode="single"
             selected={selectedDate}
