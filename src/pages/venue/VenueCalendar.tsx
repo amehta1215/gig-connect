@@ -435,10 +435,10 @@ export default function VenueCalendar() {
         <div className="h-64 bg-card animate-pulse" />
       </div>;
   }
-  return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-2 gap-6">
+  return <div className="space-y-4 animate-fade-in">
+      <div className="grid md:grid-cols-[1fr_1fr] gap-4 items-start">
         {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px]">
+        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -461,7 +461,7 @@ export default function VenueCalendar() {
         </div>
 
         {/* Events on selected date */}
-        <div className="bg-card border border-border p-6 max-h-[400px] overflow-y-auto">
+        <div className="bg-card border border-border p-6 max-h-[380px] overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
