@@ -904,6 +904,8 @@ export default function VenueCalendar() {
                     const { error } = await supabase.from('gig_listings').update({
                       gig_date: format(previewEditDate, 'yyyy-MM-dd'),
                       show_time: previewEditTime || null,
+                      is_confirmed: previewEditStatus === 'confirmed',
+                      hold_priority: previewEditStatus === 'hold' ? previewEditHoldPriority : null,
                     }).eq('id', previewGig.id);
                     setPreviewSaving(false);
                     if (error) { toast.error('Failed to save'); return; }
