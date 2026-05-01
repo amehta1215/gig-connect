@@ -43,6 +43,7 @@ interface Application {
   message: string | null;
   is_read: boolean;
   created_at: string;
+  updated_at?: string;
   artist?: {
     first_name: string;
     last_name: string;
