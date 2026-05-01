@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
-import { ArrowLeft, Music, X, Upload, Star } from 'lucide-react';
+import { ArrowLeft, Music, X, Upload, GripVertical } from 'lucide-react';
 interface ArtistProfile {
   id: string;
   user_id: string;
@@ -49,6 +49,7 @@ export default function ArtistProfile() {
   const [uploadingSample, setUploadingSample] = useState(false);
   const pictureInputRef = useRef<HTMLInputElement>(null);
   const sampleInputRef = useRef<HTMLInputElement>(null);
+  const [draggedPictureIndex, setDraggedPictureIndex] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     band_name: '',
     genre: '',
@@ -169,15 +170,22 @@ export default function ArtistProfile() {
   const removePicture = (index: number) => {
     setPictures(prev => prev.filter((_, i) => i !== index));
   };
-  const setMainPicture = (index: number) => {
-    if (index === 0) return; // Already main
+  const handlePictureDragStart = (index: number) => {
+    setDraggedPictureIndex(index);
+  };
+  const handlePictureDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedPictureIndex === null || draggedPictureIndex === index) return;
     setPictures(prev => {
-      const newPictures = [...prev];
-      const [selected] = newPictures.splice(index, 1);
-      newPictures.unshift(selected);
-      return newPictures;
+      const next = [...prev];
+      const [moved] = next.splice(draggedPictureIndex, 1);
+      next.splice(index, 0, moved);
+      return next;
     });
-    toast.success('Main picture updated');
+    setDraggedPictureIndex(index);
+  };
+  const handlePictureDragEnd = () => {
+    setDraggedPictureIndex(null);
   };
   const removeSample = (index: number) => {
     setFeaturedSamples(prev => prev.filter((_, i) => i !== index));
@@ -367,15 +375,22 @@ export default function ArtistProfile() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {pictures.map((url, index) => <div key={index} className={`relative group aspect-square ${index === 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}>
+          {pictures.map((url, index) => <div
+              key={index}
+              draggable
+              onDragStart={() => handlePictureDragStart(index)}
+              onDragOver={(e) => handlePictureDragOver(e, index)}
+              onDragEnd={handlePictureDragEnd}
+              className={`relative group aspect-square cursor-grab active:cursor-grabbing ${index === 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${draggedPictureIndex === index ? 'opacity-50' : ''}`}
+            >
               <img src={url} alt={`Picture ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
               {index === 0 && <div className="absolute top-2 left-2 px-2 py-1 bg-primary text-primary-foreground text-xs font-display rounded">
                   MAIN
                 </div>}
+              <div className="absolute bottom-2 left-2 p-1 bg-background/70 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <GripVertical className="h-4 w-4 text-foreground" />
+              </div>
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                {index !== 0 && <button onClick={() => setMainPicture(index)} className="p-1 bg-accent rounded-full" title="Set as main picture">
-                    <Star className="h-4 w-4 text-accent-foreground" />
-                  </button>}
                 <button onClick={() => removePicture(index)} className="p-1 bg-destructive rounded-full">
                   <X className="h-4 w-4 text-destructive-foreground" />
                 </button>
