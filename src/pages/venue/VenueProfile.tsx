@@ -512,9 +512,9 @@ export default function VenueProfile() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-                      {roomFormData.location && <span className="flex items-center gap-2 text-primary">
+                      {formData.location && <span className="flex items-center gap-2 text-primary">
                           <MapPin className="h-4 w-4" />
-                          {roomFormData.location}
+                          {formData.location}
                         </span>}
                       {roomFormData.capacity && <span className="flex items-center gap-2 text-primary">
                           <Users className="h-4 w-4" />
