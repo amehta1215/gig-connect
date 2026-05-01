@@ -294,6 +294,18 @@ export default function VenueApplications() {
     }
     if (sortBy === 'oldest') {
       filtered.reverse();
+    } else if (activeTab === 'all') {
+      // On the "all" tab, surface recently-changed applications first,
+      // but keep archived applications at the bottom.
+      filtered.sort((a, b) => {
+        const aArchived = getDisplayStatus(a) === 'archived';
+        const bArchived = getDisplayStatus(b) === 'archived';
+        if (aArchived && !bArchived) return 1;
+        if (!aArchived && bArchived) return -1;
+        const aTime = new Date(a.updated_at || a.created_at).getTime();
+        const bTime = new Date(b.updated_at || b.created_at).getTime();
+        return bTime - aTime;
+      });
     }
     return filtered;
   };
