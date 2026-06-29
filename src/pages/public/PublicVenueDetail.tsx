@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ArrowLeft, MapPin, Users, Music, CalendarIcon, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import AuthDialog from '@/components/AuthDialog';
 interface VenueListing {
   id: string;
   venue_name: string;
@@ -258,21 +258,6 @@ export default function PublicVenueDetail() {
         </div>
       </div>
 
-      {/* Auth Required Dialog */}
-      <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
-        <DialogContent className="bg-card border-border max-w-sm text-center">
-          <DialogHeader>
-            <DialogTitle className="font-display text-2xl text-black tracking-wide">
-              Login or sign up to apply
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Create an account or sign in to submit your application
-            </DialogDescription>
-          </DialogHeader>
-          <Button onClick={() => navigate('/auth')} className="w-full font-display tracking-widest text-lg h-12 mt-4">
-            LOGIN / SIGN UP
-          </Button>
-        </DialogContent>
-      </Dialog>
+      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} promptMessage="Login or sign up to save favorites" />
     </div>;
 }
