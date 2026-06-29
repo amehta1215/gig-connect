@@ -173,7 +173,9 @@ export default function VenueMessages() {
   };
 
   const handleViewApplication = (applicationId: string) => {
-    navigate(`/venue/applications/${applicationId}`);
+    navigate(`/venue/applications/${applicationId}`, {
+      state: { fromThreadId: selectedThreadId }
+    });
   };
 
   // Group messages by thread

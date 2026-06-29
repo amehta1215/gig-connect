@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -106,6 +106,15 @@ export default function VenueApplicationDetail() {
     id: string;
   }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromThreadId = (location.state as { fromThreadId?: string } | null)?.fromThreadId;
+  const handleBack = () => {
+    if (fromThreadId) {
+      navigate(`/venue/messages?thread=${fromThreadId}`);
+    } else {
+      navigate('/venue');
+    }
+  };
   const {
     user
   } = useAuth();
@@ -580,7 +589,7 @@ export default function VenueApplicationDetail() {
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       {/* Status Banner with Back, Status, Actions, and Favorite */}
       <div className={`flex items-center gap-2 px-2 py-2 ${config.bgColor} ${config.color}`}>
-        <Button variant="ghost" size="icon" onClick={() => navigate('/venue')} className="shrink-0 text-foreground">
+        <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0 text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex items-center gap-2 font-display tracking-widest text-sm">
