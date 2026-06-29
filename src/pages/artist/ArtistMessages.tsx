@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -60,6 +60,7 @@ export default function ArtistMessages() {
     user
   } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,6 +84,13 @@ export default function ArtistMessages() {
       fetchArtistApplications();
     }
   }, [user]);
+  // Restore selected thread from navigation state (e.g. coming back from application detail)
+  useEffect(() => {
+    const state = location.state as { threadId?: string } | null;
+    if (state?.threadId) {
+      setSelectedThreadId(state.threadId);
+    }
+  }, [location.state]);
   const fetchMessages = async () => {
     if (!user) return;
     setLoading(true);
