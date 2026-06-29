@@ -131,7 +131,9 @@ export default function ArtistMessages() {
     return artistApplications.find(app => app.venue_user_id === venueUserId);
   };
   const handleViewApplication = (applicationId: string) => {
-    navigate(`/artist/applications/${applicationId}`);
+    navigate(`/artist/applications/${applicationId}`, {
+      state: { fromThreadId: selectedThreadId }
+    });
   };
 
   // Group messages by thread
