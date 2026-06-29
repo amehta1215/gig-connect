@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { ArrowLeft, MapPin, Users, Music, CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, MapPin, Users, Music, CalendarIcon, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 interface VenueListing {
   id: string;
   venue_name: string;
@@ -107,10 +107,13 @@ export default function PublicVenueDetail() {
       </div>;
   }
   return <div className="animate-fade-in max-w-6xl mx-auto">
-      {/* Back Button */}
+      {/* Back Button & Favorite */}
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={handleInteraction} className="h-9 w-9">
+          <Heart className="h-6 w-6 text-muted-foreground hover:text-[#E8556D] transition-colors" />
         </Button>
       </div>
 
