@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -91,6 +91,15 @@ export default function ApplicationDetail() {
     id: string;
   }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromThreadId = (location.state as { fromThreadId?: string } | null)?.fromThreadId;
+  const handleBack = () => {
+    if (fromThreadId) {
+      navigate('/artist/messages', { state: { threadId: fromThreadId } });
+    } else {
+      navigate('/artist/applications');
+    }
+  };
   const {
     user
   } = useAuth();
@@ -170,7 +179,7 @@ export default function ApplicationDetail() {
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       {/* Back Button */}
       <div className="flex items-center justify-between">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/artist/applications')}>
+        <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         {application.status === 'in_progress' && (
