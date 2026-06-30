@@ -4,12 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { parseLocalDate } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar } from '@/components/ui/calendar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle } from 'lucide-react';
+import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
@@ -48,6 +48,10 @@ export default function ArtistCalendar() {
   const [eventVenueName, setEventVenueName] = useState('');
   const [eventLocation, setEventLocation] = useState('');
   const [creating, setCreating] = useState(false);
+
+  // Event preview dialog state (read-only)
+  const [previewGig, setPreviewGig] = useState<GigListing | null>(null);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   useEffect(() => {
     if (user) {
       fetchGigs();
