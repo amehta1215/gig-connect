@@ -211,7 +211,7 @@ export default function ArtistCalendar() {
               const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
               const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
-              return <button key={gig.id} onClick={() => navigate(`/artist/calendar/${gig.id}`)} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
+              return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
                         <p className="font-display text-primary text-base">{venueName}</p>
                         {(location || timeDisplay) && <p className="text-sm text-muted-foreground">{[location, timeDisplay].filter(Boolean).join(' · ')}</p>}
                       </button>;
@@ -229,11 +229,7 @@ export default function ArtistCalendar() {
               const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
               const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
-              return <button key={gig.id} onClick={() => {
-                if (gig.application_id) {
-                  navigate(`/artist/applications/${gig.application_id}`);
-                }
-              }} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
+              return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
                         <div className="flex items-center gap-2">
                           <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
                             HOLD #{gig.hold_priority || '—'}
@@ -264,13 +260,7 @@ export default function ArtistCalendar() {
               const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
               const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
-              return <button key={gig.id} onClick={() => {
-                if (gig.is_confirmed) {
-                  navigate(`/artist/calendar/${gig.id}`);
-                } else if (gig.application_id) {
-                  navigate(`/artist/applications/${gig.application_id}`);
-                }
-              }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
+              return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                       <div className="flex items-center gap-2">
                         {gig.is_confirmed ? (
                           <span className="text-xs bg-green-500/20 text-green-500 px-1.5 py-0.5 font-display whitespace-nowrap">CONFIRMED</span>
