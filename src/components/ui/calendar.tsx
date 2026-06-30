@@ -10,9 +10,9 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   disablePastDates?: boolean;
 };
 
-function Calendar({ className, classNames, showOutsideDays = true, disabled, disablePastDates = true, ...props }: CalendarProps) {
+function Calendar({ className, classNames, showOutsideDays = true, disabled, disablePastDates = true, modifiers, modifiersClassNames, ...props }: CalendarProps) {
   const today = startOfDay(new Date());
-  
+
   // Combine any existing disabled matcher with past dates (only if disablePastDates is true)
   const disabledMatcher = React.useMemo(() => {
     if (!disablePastDates) return disabled;
@@ -22,10 +22,23 @@ function Calendar({ className, classNames, showOutsideDays = true, disabled, dis
     return [pastDateMatcher, disabled];
   }, [disabled, today, disablePastDates]);
 
+  // Always mark past dates so they can be styled distinctly; consumer modifiers can still override
+  const allModifiers = {
+    past: { before: today },
+    ...modifiers,
+  };
+
+  const allModifiersClassNames = {
+    past: 'day-past',
+    ...modifiersClassNames,
+  };
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       disabled={disabledMatcher}
+      modifiers={allModifiers}
+      modifiersClassNames={allModifiersClassNames}
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
@@ -50,8 +63,8 @@ function Calendar({ className, classNames, showOutsideDays = true, disabled, dis
           "bg-accent/60 text-accent-foreground hover:bg-accent/60 hover:text-accent-foreground focus:bg-accent/60 focus:text-accent-foreground [&.rdp-day_disabled]:bg-accent/30 [&.rdp-day_disabled]:text-accent-foreground/50",
         day_today: "bg-accent text-accent-foreground rounded-full",
         day_outside:
-          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-        day_disabled: "text-muted-foreground opacity-30 hover:bg-accent/50 hover:text-accent-foreground/50",
+          "day-outside aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+        day_disabled: "hover:bg-accent/50 hover:text-accent-foreground/50",
         day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
         ...classNames,
