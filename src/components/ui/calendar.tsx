@@ -38,6 +38,7 @@ function Calendar({ className, classNames, showOutsideDays = true, disabled, dis
       showOutsideDays={showOutsideDays}
       disabled={disabledMatcher}
       modifiers={allModifiers}
+      modifiersClassNames={allModifiersClassNames}
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
@@ -57,7 +58,6 @@ function Calendar({ className, classNames, showOutsideDays = true, disabled, dis
         row: "flex w-full mt-2",
         cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/30 [&:has([aria-selected])]:bg-accent/60 [&:has([aria-selected].rdp-day_disabled)]:bg-accent/30 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(buttonVariants({ variant: "ghost" }), "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground"),
-        day_past: "day-past",
         day_range_end: "day-range-end",
         day_selected:
           "bg-accent/60 text-accent-foreground hover:bg-accent/60 hover:text-accent-foreground focus:bg-accent/60 focus:text-accent-foreground [&.rdp-day_disabled]:bg-accent/30 [&.rdp-day_disabled]:text-accent-foreground/50",
