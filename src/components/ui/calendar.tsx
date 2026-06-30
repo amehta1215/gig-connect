@@ -10,7 +10,7 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   disablePastDates?: boolean;
 };
 
-function Calendar({ className, classNames, showOutsideDays = true, disabled, disablePastDates = true, modifiers, ...props }: CalendarProps) {
+function Calendar({ className, classNames, showOutsideDays = true, disabled, disablePastDates = true, modifiers, modifiersClassNames, ...props }: CalendarProps) {
   const today = startOfDay(new Date());
 
   // Combine any existing disabled matcher with past dates (only if disablePastDates is true)
@@ -26,6 +26,11 @@ function Calendar({ className, classNames, showOutsideDays = true, disabled, dis
   const allModifiers = {
     past: { before: today },
     ...modifiers,
+  };
+
+  const allModifiersClassNames = {
+    past: 'day-past',
+    ...modifiersClassNames,
   };
 
   return (
