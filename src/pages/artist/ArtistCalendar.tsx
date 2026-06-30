@@ -138,11 +138,6 @@ export default function ArtistCalendar() {
     toast.success('Event created!');
     setCreateDialogOpen(false);
     fetchGigs();
-
-    // Navigate to gig detail page
-    if (newGig) {
-      navigate(`/artist/calendar/${newGig.id}`);
-    }
   };
   const gigDates = gigs.map((g) => parseLocalDate(g.gig_date));
   const gigsOnSelectedDate = selectedDate ? gigs.filter((g) => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
