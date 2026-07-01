@@ -898,6 +898,7 @@ export default function VenueCalendar() {
                   </div>
                 )}
 
+                <div>
                   {previewEditing ? (
                     <Popover open={previewDatePickerOpen} onOpenChange={setPreviewDatePickerOpen}>
                       <PopoverTrigger asChild>
