@@ -467,6 +467,12 @@ export default function ArtistCalendar() {
             );
           })()}
           <DialogFooter>
+            {previewGig?.venue_user_id && (
+              <Button variant="outline" onClick={handleMessageVenue}>
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Message Venue
+              </Button>
+            )}
             {previewGig?.application_id && (
               <Button variant="outline" onClick={() => { setPreviewDialogOpen(false); navigate(`/artist/applications/${previewGig.application_id}`); }}>
                 View Application
