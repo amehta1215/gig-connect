@@ -488,7 +488,7 @@ export default function ArtistCalendar() {
           })()}
           <DialogFooter>
             {previewGig?.manual_venue_name && (
-              <Button variant="ghost" size="icon" onClick={handleDeleteEvent} className="text-muted-foreground hover:text-destructive h-8 w-8">
+              <Button variant="ghost" size="icon" onClick={openDeleteDialog} className="text-muted-foreground hover:text-destructive h-8 w-8">
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
