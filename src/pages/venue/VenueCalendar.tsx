@@ -25,6 +25,7 @@ interface GigListing {
   is_confirmed: boolean;
   hold_priority: number | null;
   notes: string | null;
+  openers: any[] | null;
   venue_listing?: {
     venue_name: string;
     room_name: string | null;
