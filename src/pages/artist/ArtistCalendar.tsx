@@ -506,5 +506,24 @@ export default function ArtistCalendar() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Delete Event?</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-sm">
+              This will permanently remove the event from your calendar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 justify-end pt-4">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteEvent} disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Delete Event'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 }
