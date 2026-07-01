@@ -201,15 +201,21 @@ export default function ArtistCalendar() {
 
   const handleDeleteEvent = async () => {
     if (!previewGig || !user) return;
-    if (!confirm('Are you sure you want to delete this event?')) return;
+    setDeleting(true);
     const { error } = await supabase.from('gig_listings').delete().eq('id', previewGig.id).eq('artist_id', user.id);
+    setDeleting(false);
     if (error) {
       toast.error('Failed to delete event');
       return;
     }
     toast.success('Event deleted');
+    setDeleteDialogOpen(false);
     setPreviewDialogOpen(false);
     fetchGigs();
+  };
+
+  const openDeleteDialog = () => {
+    setDeleteDialogOpen(true);
   };
 
   const gigDates = gigs.map((g) => parseLocalDate(g.gig_date));
