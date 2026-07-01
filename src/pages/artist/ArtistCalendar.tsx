@@ -308,12 +308,7 @@ export default function ArtistCalendar() {
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
               const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
               return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display">
-                            HOLD #{gig.hold_priority || '—'}
-                          </span>
-                          <p className="font-display text-primary text-base">{venueName}</p>
-                        </div>
+                        <p className="font-display text-primary text-base">{venueName}</p>
                         {(location || timeDisplay) && <p className="text-sm text-muted-foreground">{[location, timeDisplay].filter(Boolean).join(' · ')}</p>}
                       </button>;
             })}
