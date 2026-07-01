@@ -100,6 +100,7 @@ export default function ArtistCalendar() {
     setEventTime('');
     setEventVenueName('');
     setEventLocation('');
+    setEventIsConfirmed(true);
     setCreateDialogOpen(true);
   };
   const handleCreateEvent = async () => {
