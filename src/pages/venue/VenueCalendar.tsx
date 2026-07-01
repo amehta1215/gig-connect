@@ -935,12 +935,17 @@ export default function VenueCalendar() {
                   <Button disabled={previewSaving} onClick={async () => {
                     if (!previewGig || !previewEditDate) return;
                     setPreviewSaving(true);
-                    const { error } = await supabase.from('gig_listings').update({
+                    const updatePayload: any = {
                       gig_date: format(previewEditDate, 'yyyy-MM-dd'),
                       show_time: previewEditTime || null,
                       is_confirmed: previewEditStatus === 'confirmed',
                       hold_priority: previewEditStatus === 'hold' ? previewEditHoldPriority : null,
-                    }).eq('id', previewGig.id);
+                      notes: previewEditNotes.trim() || null,
+                    };
+                    if (!previewGig.application_id) {
+                      updatePayload.manual_artist_name = previewEditArtistName.trim() || null;
+                    }
+                    const { error } = await supabase.from('gig_listings').update(updatePayload).eq('id', previewGig.id);
                     setPreviewSaving(false);
                     if (error) { toast.error('Failed to save'); return; }
                     toast.success('Event updated!');
@@ -958,9 +963,6 @@ export default function VenueCalendar() {
                       View Application
                     </Button>
                   )}
-                  <Button onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/calendar/${previewGig?.id}`); }} className="bg-primary hover:bg-primary/90">
-                    {previewGig?.is_confirmed ? 'View Poster' : 'View Details'}
-                  </Button>
                 </>
               )}
             </div>
