@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin, MessageSquare } from 'lucide-react';
+import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin, MessageSquare, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
@@ -195,6 +195,19 @@ export default function ArtistCalendar() {
         threadId
       }
     });
+  };
+
+  const handleDeleteEvent = async () => {
+    if (!previewGig || !user) return;
+    if (!confirm('Are you sure you want to delete this event?')) return;
+    const { error } = await supabase.from('gig_listings').delete().eq('id', previewGig.id).eq('artist_id', user.id);
+    if (error) {
+      toast.error('Failed to delete event');
+      return;
+    }
+    toast.success('Event deleted');
+    setPreviewDialogOpen(false);
+    fetchGigs();
   };
 
   const gigDates = gigs.map((g) => parseLocalDate(g.gig_date));
@@ -466,6 +479,12 @@ export default function ArtistCalendar() {
             );
           })()}
           <DialogFooter>
+            {previewGig?.manual_venue_name && (
+              <Button variant="destructive" onClick={handleDeleteEvent}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Event
+              </Button>
+            )}
             {!previewGig?.manual_venue_name && previewGig?.venue_user_id && (
               <Button variant="outline" onClick={handleMessageVenue}>
                 <MessageSquare className="h-4 w-4 mr-2" />
