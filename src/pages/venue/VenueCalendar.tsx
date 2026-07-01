@@ -25,6 +25,7 @@ interface GigListing {
   is_confirmed: boolean;
   hold_priority: number | null;
   notes: string | null;
+  openers: string[] | null;
   venue_listing?: {
     venue_name: string;
     room_name: string | null;
@@ -78,6 +79,7 @@ export default function VenueCalendar() {
   const [previewEditHoldPriority, setPreviewEditHoldPriority] = useState(1);
   const [previewEditArtistName, setPreviewEditArtistName] = useState('');
   const [previewEditNotes, setPreviewEditNotes] = useState('');
+  const [previewEditOpeners, setPreviewEditOpeners] = useState<string[]>([]);
   const [previewSaving, setPreviewSaving] = useState(false);
   const [previewDatePickerOpen, setPreviewDatePickerOpen] = useState(false);
 
@@ -147,7 +149,7 @@ export default function VenueCalendar() {
           artist: artistRes.data
         };
       }));
-      setGigs(enrichedGigs);
+      setGigs(enrichedGigs as GigListing[]);
     }
     setLoading(false);
   };
@@ -182,7 +184,7 @@ export default function VenueCalendar() {
       } = await supabase.from('gig_listings').select('*').in('venue_listing_id', listingIds).eq('gig_date', format(selectedDate, 'yyyy-MM-dd')).eq('is_confirmed', false).order('hold_priority', {
         ascending: true
       });
-      setExistingHoldsForDate(holds || []);
+      setExistingHoldsForDate((holds || []) as GigListing[]);
       setEventHoldPriority((holds?.length || 0) + 1);
     } else {
       setExistingHoldsForDate([]);
@@ -788,6 +790,7 @@ export default function VenueCalendar() {
                             (previewGig.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : '')
                         );
                         setPreviewEditNotes(previewGig.notes || '');
+                        setPreviewEditOpeners((previewGig.openers || []) as string[]);
                         setPreviewEditing(true);
                       }
                     }} className="h-8 w-8 mt-4">
@@ -836,6 +839,60 @@ export default function VenueCalendar() {
                           onChange={e => setPreviewEditHoldPriority(parseInt(e.target.value) || 1)}
                           className="w-24"
                         />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Openers */}
+                {(previewEditing || (previewGig.openers && previewGig.openers.length > 0)) && (
+                  <div>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">OPENERS</p>
+                    {previewEditing ? (
+                      <div className="space-y-2">
+                        {previewEditOpeners.map((opener, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Input
+                              value={opener}
+                              onChange={e => {
+                                const newOpeners = [...previewEditOpeners];
+                                newOpeners[index] = e.target.value;
+                                setPreviewEditOpeners(newOpeners);
+                              }}
+                              placeholder={`Opener ${index + 1}`}
+                              className="text-sm"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-destructive hover:text-destructive h-8 w-8 shrink-0"
+                              onClick={() => {
+                                const newOpeners = [...previewEditOpeners];
+                                newOpeners.splice(index, 1);
+                                setPreviewEditOpeners(newOpeners);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPreviewEditOpeners([...previewEditOpeners, ''])}
+                          className="w-full"
+                        >
+                          <Plus className="h-4 w-4 mr-1" /> Add Opener
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {(previewGig.openers || []).map((opener, index) => (
+                          <span key={index} className="text-sm text-primary bg-secondary px-2 py-1 rounded">
+                            {opener}
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -912,9 +969,8 @@ export default function VenueCalendar() {
           })()}
           <DialogFooter className="flex items-center justify-between w-full">
             <Button
-              size="icon"
               variant="ghost"
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 px-3"
               onClick={async () => {
                 if (!previewGig) return;
                 const pArtistName = previewGig.manual_artist_name || previewGig.artist_profile?.band_name || (previewGig.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : 'this artist');
@@ -926,7 +982,8 @@ export default function VenueCalendar() {
                 fetchGigs();
               }}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Gig
             </Button>
             <div className="flex gap-3">
               {previewEditing ? (
@@ -941,6 +998,7 @@ export default function VenueCalendar() {
                       is_confirmed: previewEditStatus === 'confirmed',
                       hold_priority: previewEditStatus === 'hold' ? previewEditHoldPriority : null,
                       notes: previewEditNotes.trim() || null,
+                      openers: previewEditOpeners.map(o => o.trim()).filter(Boolean),
                     };
                     if (!previewGig.application_id) {
                       updatePayload.manual_artist_name = previewEditArtistName.trim() || null;
