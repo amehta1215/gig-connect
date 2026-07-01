@@ -336,9 +336,9 @@ export default function ArtistCalendar() {
               return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                       <div className="flex items-center gap-2">
                         {gig.is_confirmed ? (
-                          <span className="text-xs bg-green-500/20 text-green-500 px-1.5 py-0.5 font-display whitespace-nowrap">CONFIRMED</span>
+                          <span className="text-xs bg-green-500/20 text-green-500 px-1.5 py-0.5 font-display whitespace-nowrap inline-flex justify-center items-center min-w-[80px]">CONFIRMED</span>
                         ) : (
-                          <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display whitespace-nowrap">HOLD</span>
+                          <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display whitespace-nowrap inline-flex justify-center items-center min-w-[80px]">HOLD</span>
                         )}
                         <div>
                           <p className="font-display text-primary">{venueName}</p>
