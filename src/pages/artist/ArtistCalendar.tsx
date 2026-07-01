@@ -68,14 +68,24 @@ export default function ArtistCalendar() {
       ascending: true
     });
     if (gigsData) {
-      // Fetch venue listing info for each gig
+      // Fetch venue listing info and venue user id for each gig
       const enrichedGigs = await Promise.all(gigsData.map(async (gig) => {
         const {
           data: venueListing
-        } = await supabase.from('venue_listings').select('venue_name, room_name, location').eq('id', gig.venue_listing_id).maybeSingle();
+        } = await supabase.from('venue_listings').select(`
+            venue_name,
+            room_name,
+            location,
+            venue_profile:venue_profiles!venue_listings_venue_profile_id_fkey(user_id)
+          `).eq('id', gig.venue_listing_id).maybeSingle();
         return {
           ...gig,
-          venue_listing: venueListing
+          venue_listing: venueListing ? {
+            venue_name: venueListing.venue_name,
+            room_name: venueListing.room_name,
+            location: venueListing.location
+          } : undefined,
+          venue_user_id: (venueListing as any)?.venue_profile?.user_id || null
         };
       }));
       setGigs(enrichedGigs);
