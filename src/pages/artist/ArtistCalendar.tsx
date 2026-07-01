@@ -479,6 +479,12 @@ export default function ArtistCalendar() {
             );
           })()}
           <DialogFooter>
+            {previewGig?.manual_venue_name && (
+              <Button variant="destructive" onClick={handleDeleteEvent}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Event
+              </Button>
+            )}
             {!previewGig?.manual_venue_name && previewGig?.venue_user_id && (
               <Button variant="outline" onClick={handleMessageVenue}>
                 <MessageSquare className="h-4 w-4 mr-2" />
