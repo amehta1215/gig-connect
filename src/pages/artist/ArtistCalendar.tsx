@@ -272,9 +272,9 @@ export default function ArtistCalendar() {
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
             </h2>
-            {canCreateEvent && <Button size="icon" onClick={handleCreateEventClick} className="bg-primary hover:bg-primary/90 h-8 w-8">
-                <Plus className="h-4 w-4" />
-              </Button>}
+            {canCreateEvent && <button onClick={handleCreateEventClick} className="text-primary hover:text-primary/80 transition-colors">
+                <Plus className="h-5 w-5" />
+              </button>}
           </div>
           
           {gigsOnSelectedDate.length === 0 ? <p className="text-muted-foreground text-sm">No shows on this date</p> : <div className="space-y-4">
