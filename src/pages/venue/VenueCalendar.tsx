@@ -891,6 +891,22 @@ export default function VenueCalendar() {
                     <p className="text-sm text-primary">{pRoomDisplay}</p>
                   </div>
                 )}
+
+                {(previewEditing || previewGig.notes) && (
+                  <div>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">NOTES</p>
+                    {previewEditing ? (
+                      <Textarea
+                        value={previewEditNotes}
+                        onChange={e => setPreviewEditNotes(e.target.value)}
+                        placeholder="Add notes about this show..."
+                        className="min-h-[80px] text-sm"
+                      />
+                    ) : (
+                      <p className="text-sm text-primary whitespace-pre-wrap">{previewGig.notes}</p>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })()}
