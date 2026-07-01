@@ -466,7 +466,7 @@ export default function ArtistCalendar() {
             );
           })()}
           <DialogFooter>
-            {previewGig?.venue_user_id && (
+            {!isManual && previewGig?.venue_user_id && (
               <Button variant="outline" onClick={handleMessageVenue}>
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Message Venue
