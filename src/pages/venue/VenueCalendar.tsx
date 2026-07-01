@@ -24,6 +24,7 @@ interface GigListing {
   show_time: string | null;
   is_confirmed: boolean;
   hold_priority: number | null;
+  notes: string | null;
   venue_listing?: {
     venue_name: string;
     room_name: string | null;
@@ -75,6 +76,8 @@ export default function VenueCalendar() {
   const [previewEditTime, setPreviewEditTime] = useState('');
   const [previewEditStatus, setPreviewEditStatus] = useState<'confirmed' | 'hold'>('confirmed');
   const [previewEditHoldPriority, setPreviewEditHoldPriority] = useState(1);
+  const [previewEditArtistName, setPreviewEditArtistName] = useState('');
+  const [previewEditNotes, setPreviewEditNotes] = useState('');
   const [previewSaving, setPreviewSaving] = useState(false);
   const [previewDatePickerOpen, setPreviewDatePickerOpen] = useState(false);
 
@@ -759,9 +762,18 @@ export default function VenueCalendar() {
             return (
               <div className="space-y-4 py-2">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">ARTIST</p>
-                    <p className="font-display text-2xl text-accent font-bold">{pArtistName}</p>
+                  <div className="flex-1">
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">HEADLINER</p>
+                    {previewEditing && !previewGig.application_id ? (
+                      <Input
+                        value={previewEditArtistName}
+                        onChange={e => setPreviewEditArtistName(e.target.value)}
+                        placeholder="Artist or event name"
+                        className="font-display text-lg"
+                      />
+                    ) : (
+                      <p className="font-display text-2xl text-accent font-bold">{pArtistName}</p>
+                    )}
                   </div>
                   {!previewEditing && (
                     <Button size="icon" variant="ghost" onClick={() => {
@@ -770,6 +782,12 @@ export default function VenueCalendar() {
                         setPreviewEditTime(previewGig.show_time || '');
                         setPreviewEditStatus(previewGig.is_confirmed ? 'confirmed' : 'hold');
                         setPreviewEditHoldPriority(previewGig.hold_priority || 1);
+                        setPreviewEditArtistName(
+                          previewGig.manual_artist_name ||
+                            previewGig.artist_profile?.band_name ||
+                            (previewGig.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : '')
+                        );
+                        setPreviewEditNotes(previewGig.notes || '');
                         setPreviewEditing(true);
                       }
                     }} className="h-8 w-8 mt-4">
@@ -873,6 +891,22 @@ export default function VenueCalendar() {
                     <p className="text-sm text-primary">{pRoomDisplay}</p>
                   </div>
                 )}
+
+                {(previewEditing || previewGig.notes) && (
+                  <div>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">NOTES</p>
+                    {previewEditing ? (
+                      <Textarea
+                        value={previewEditNotes}
+                        onChange={e => setPreviewEditNotes(e.target.value)}
+                        placeholder="Add notes about this show..."
+                        className="min-h-[80px] text-sm"
+                      />
+                    ) : (
+                      <p className="text-sm text-primary whitespace-pre-wrap">{previewGig.notes}</p>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })()}
@@ -901,12 +935,17 @@ export default function VenueCalendar() {
                   <Button disabled={previewSaving} onClick={async () => {
                     if (!previewGig || !previewEditDate) return;
                     setPreviewSaving(true);
-                    const { error } = await supabase.from('gig_listings').update({
+                    const updatePayload: any = {
                       gig_date: format(previewEditDate, 'yyyy-MM-dd'),
                       show_time: previewEditTime || null,
                       is_confirmed: previewEditStatus === 'confirmed',
                       hold_priority: previewEditStatus === 'hold' ? previewEditHoldPriority : null,
-                    }).eq('id', previewGig.id);
+                      notes: previewEditNotes.trim() || null,
+                    };
+                    if (!previewGig.application_id) {
+                      updatePayload.manual_artist_name = previewEditArtistName.trim() || null;
+                    }
+                    const { error } = await supabase.from('gig_listings').update(updatePayload).eq('id', previewGig.id);
                     setPreviewSaving(false);
                     if (error) { toast.error('Failed to save'); return; }
                     toast.success('Event updated!');
@@ -924,9 +963,6 @@ export default function VenueCalendar() {
                       View Application
                     </Button>
                   )}
-                  <Button onClick={() => { setPreviewDialogOpen(false); navigate(`/venue/calendar/${previewGig?.id}`); }} className="bg-primary hover:bg-primary/90">
-                    {previewGig?.is_confirmed ? 'View Poster' : 'View Details'}
-                  </Button>
                 </>
               )}
             </div>
