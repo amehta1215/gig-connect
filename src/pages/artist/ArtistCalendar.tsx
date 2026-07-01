@@ -336,9 +336,9 @@ export default function ArtistCalendar() {
               return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                       <div className="flex items-center gap-2">
                         {gig.is_confirmed ? (
-                          <span className="text-xs bg-green-500/20 text-green-500 px-1.5 py-0.5 font-display whitespace-nowrap">CONFIRMED</span>
+                          <span className="text-xs bg-green-500/20 text-green-500 px-1.5 py-0.5 font-display whitespace-nowrap inline-flex justify-center items-center min-w-[80px]">CONFIRMED</span>
                         ) : (
-                          <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display whitespace-nowrap">HOLD</span>
+                          <span className="text-xs bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 font-display whitespace-nowrap inline-flex justify-center items-center min-w-[80px]">HOLD</span>
                         )}
                         <div>
                           <p className="font-display text-primary">{venueName}</p>
@@ -490,7 +490,7 @@ export default function ArtistCalendar() {
                   <p className="font-display text-2xl text-accent font-bold">{pVenueName}</p>
                 </div>
 
-                <div className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-display tracking-widest rounded-sm ${previewGig.is_confirmed ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                <div className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 text-xs font-display tracking-widest rounded-sm min-w-[110px] ${previewGig.is_confirmed ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
                   {previewGig.is_confirmed ? <CheckCircle2 className="h-3 w-3" /> : <PauseCircle className="h-3 w-3" />}
                   {previewGig.is_confirmed ? 'CONFIRMED' : 'HOLD'}
                 </div>
