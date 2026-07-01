@@ -53,6 +53,8 @@ export default function ArtistCalendar() {
   // Event preview dialog state (read-only)
   const [previewGig, setPreviewGig] = useState<GigListing | null>(null);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   useEffect(() => {
     if (user) {
       fetchGigs();
