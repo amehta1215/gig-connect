@@ -983,7 +983,7 @@ export default function VenueCalendar() {
               }}
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete Gig
+              Delete Event
             </Button>
             <div className="flex gap-3">
               {previewEditing ? (
