@@ -48,6 +48,7 @@ export default function ArtistCalendar() {
   const [eventTime, setEventTime] = useState('');
   const [eventVenueName, setEventVenueName] = useState('');
   const [eventLocation, setEventLocation] = useState('');
+  const [eventIsConfirmed, setEventIsConfirmed] = useState(true);
   const [creating, setCreating] = useState(false);
 
   // Event preview dialog state (read-only)
@@ -99,6 +100,7 @@ export default function ArtistCalendar() {
     setEventTime('');
     setEventVenueName('');
     setEventLocation('');
+    setEventIsConfirmed(true);
     setCreateDialogOpen(true);
   };
   const handleCreateEvent = async () => {
@@ -141,6 +143,8 @@ export default function ArtistCalendar() {
       show_time: eventTime || null,
       manual_venue_name: eventVenueName.trim(),
       manual_location: eventLocation.trim(),
+      is_confirmed: eventIsConfirmed,
+      hold_priority: eventIsConfirmed ? null : 1,
       openers: []
     }).select().single();
     setCreating(false);
@@ -427,6 +431,37 @@ export default function ArtistCalendar() {
                 LOCATION <span className="text-destructive">*</span>
               </label>
               <LocationAutocomplete value={eventLocation} onChange={setEventLocation} placeholder="Search for location" />
+            </div>
+
+            {/* Status */}
+            <div className="space-y-2">
+              <label className="font-display text-xs text-primary tracking-widest">STATUS</label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={eventIsConfirmed ? 'default' : 'outline'}
+                  onClick={() => setEventIsConfirmed(true)}
+                  className={cn(
+                    'flex-1 font-display text-xs tracking-widest',
+                    eventIsConfirmed ? 'bg-green-600 hover:bg-green-600/90 text-white' : 'text-muted-foreground'
+                  )}
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                  CONFIRMED
+                </Button>
+                <Button
+                  type="button"
+                  variant={!eventIsConfirmed ? 'default' : 'outline'}
+                  onClick={() => setEventIsConfirmed(false)}
+                  className={cn(
+                    'flex-1 font-display text-xs tracking-widest',
+                    !eventIsConfirmed ? 'bg-yellow-500 hover:bg-yellow-500/90 text-black' : 'text-muted-foreground'
+                  )}
+                >
+                  <PauseCircle className="h-3.5 w-3.5 mr-1.5" />
+                  HOLD
+                </Button>
+              </div>
             </div>
           </div>
 
