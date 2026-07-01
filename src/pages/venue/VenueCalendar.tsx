@@ -773,6 +773,12 @@ export default function VenueCalendar() {
                         setPreviewEditTime(previewGig.show_time || '');
                         setPreviewEditStatus(previewGig.is_confirmed ? 'confirmed' : 'hold');
                         setPreviewEditHoldPriority(previewGig.hold_priority || 1);
+                        setPreviewEditArtistName(
+                          previewGig.manual_artist_name ||
+                            previewGig.artist_profile?.band_name ||
+                            (previewGig.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : '')
+                        );
+                        setPreviewEditNotes(previewGig.notes || '');
                         setPreviewEditing(true);
                       }
                     }} className="h-8 w-8 mt-4">
