@@ -143,6 +143,8 @@ export default function ArtistCalendar() {
       show_time: eventTime || null,
       manual_venue_name: eventVenueName.trim(),
       manual_location: eventLocation.trim(),
+      is_confirmed: eventIsConfirmed,
+      hold_priority: eventIsConfirmed ? null : 1,
       openers: []
     }).select().single();
     setCreating(false);
