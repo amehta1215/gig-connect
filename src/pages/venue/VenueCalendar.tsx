@@ -762,9 +762,18 @@ export default function VenueCalendar() {
             return (
               <div className="space-y-4 py-2">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">ARTIST</p>
-                    <p className="font-display text-2xl text-accent font-bold">{pArtistName}</p>
+                  <div className="flex-1">
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">HEADLINER</p>
+                    {previewEditing && !previewGig.application_id ? (
+                      <Input
+                        value={previewEditArtistName}
+                        onChange={e => setPreviewEditArtistName(e.target.value)}
+                        placeholder="Artist or event name"
+                        className="font-display text-lg"
+                      />
+                    ) : (
+                      <p className="font-display text-2xl text-accent font-bold">{pArtistName}</p>
+                    )}
                   </div>
                   {!previewEditing && (
                     <Button size="icon" variant="ghost" onClick={() => {
