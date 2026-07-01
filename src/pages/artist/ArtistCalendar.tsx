@@ -490,7 +490,7 @@ export default function ArtistCalendar() {
                   <p className="font-display text-2xl text-accent font-bold">{pVenueName}</p>
                 </div>
 
-                <div className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-display tracking-widest rounded-sm ${previewGig.is_confirmed ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                <div className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 text-xs font-display tracking-widest rounded-sm min-w-[110px] ${previewGig.is_confirmed ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
                   {previewGig.is_confirmed ? <CheckCircle2 className="h-3 w-3" /> : <PauseCircle className="h-3 w-3" />}
                   {previewGig.is_confirmed ? 'CONFIRMED' : 'HOLD'}
                 </div>
