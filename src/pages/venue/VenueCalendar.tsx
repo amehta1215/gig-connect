@@ -24,6 +24,7 @@ interface GigListing {
   show_time: string | null;
   is_confirmed: boolean;
   hold_priority: number | null;
+  notes: string | null;
   venue_listing?: {
     venue_name: string;
     room_name: string | null;
@@ -75,6 +76,8 @@ export default function VenueCalendar() {
   const [previewEditTime, setPreviewEditTime] = useState('');
   const [previewEditStatus, setPreviewEditStatus] = useState<'confirmed' | 'hold'>('confirmed');
   const [previewEditHoldPriority, setPreviewEditHoldPriority] = useState(1);
+  const [previewEditArtistName, setPreviewEditArtistName] = useState('');
+  const [previewEditNotes, setPreviewEditNotes] = useState('');
   const [previewSaving, setPreviewSaving] = useState(false);
   const [previewDatePickerOpen, setPreviewDatePickerOpen] = useState(false);
 
