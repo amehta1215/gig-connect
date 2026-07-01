@@ -790,6 +790,7 @@ export default function VenueCalendar() {
                             (previewGig.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : '')
                         );
                         setPreviewEditNotes(previewGig.notes || '');
+                        setPreviewEditOpeners((previewGig.openers || []) as string[]);
                         setPreviewEditing(true);
                       }
                     }} className="h-8 w-8 mt-4">
