@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin } from 'lucide-react';
+import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
@@ -29,6 +29,7 @@ interface GigListing {
     room_name: string | null;
     location: string | null;
   };
+  venue_user_id?: string | null;
 }
 export default function ArtistCalendar() {
   const {
@@ -67,14 +68,24 @@ export default function ArtistCalendar() {
       ascending: true
     });
     if (gigsData) {
-      // Fetch venue listing info for each gig
+      // Fetch venue listing info and venue user id for each gig
       const enrichedGigs = await Promise.all(gigsData.map(async (gig) => {
         const {
           data: venueListing
-        } = await supabase.from('venue_listings').select('venue_name, room_name, location').eq('id', gig.venue_listing_id).maybeSingle();
+        } = await supabase.from('venue_listings').select(`
+            venue_name,
+            room_name,
+            location,
+            venue_profile:venue_profiles!venue_listings_venue_profile_id_fkey(user_id)
+          `).eq('id', gig.venue_listing_id).maybeSingle();
         return {
           ...gig,
-          venue_listing: venueListing
+          venue_listing: venueListing ? {
+            venue_name: venueListing.venue_name,
+            room_name: venueListing.room_name,
+            location: venueListing.location
+          } : undefined,
+          venue_user_id: (venueListing as any)?.venue_profile?.user_id || null
         };
       }));
       setGigs(enrichedGigs);
@@ -139,6 +150,53 @@ export default function ArtistCalendar() {
     setCreateDialogOpen(false);
     fetchGigs();
   };
+  const handleMessageVenue = async () => {
+    if (!previewGig?.venue_user_id || !user) return;
+    setPreviewDialogOpen(false);
+
+    // Find an existing thread between the artist and this venue user
+    const {
+      data: existingMessages
+    } = await supabase.from('messages').select('thread_id').or(`and(sender_id.eq.${user.id},receiver_id.eq.${previewGig.venue_user_id}),and(sender_id.eq.${previewGig.venue_user_id},receiver_id.eq.${user.id})`).order('created_at', {
+      ascending: true
+    }).limit(1);
+
+    if (existingMessages && existingMessages.length > 0) {
+      navigate('/artist/messages', {
+        state: {
+          threadId: existingMessages[0].thread_id
+        }
+      });
+      return;
+    }
+
+    // Otherwise create a new thread with an initial message
+    const threadId = crypto.randomUUID();
+    const gigDate = format(parseLocalDate(previewGig.gig_date), 'MMMM d, yyyy');
+    const venueName = previewGig.manual_venue_name || previewGig.venue_listing?.venue_name || 'the venue';
+    const {
+      error
+    } = await supabase.from('messages').insert({
+      thread_id: threadId,
+      sender_id: user.id,
+      receiver_id: previewGig.venue_user_id,
+      subject: `Gig on ${gigDate}`,
+      content: `Hi, I wanted to discuss the gig on ${gigDate} at ${venueName}.`,
+      attachments: '[]'
+    } as any);
+
+    if (error) {
+      toast.error('Failed to start conversation');
+      return;
+    }
+
+    navigate('/artist/messages', {
+      state: {
+        threadId
+      }
+    });
+  };
+
   const gigDates = gigs.map((g) => parseLocalDate(g.gig_date));
   const gigsOnSelectedDate = selectedDate ? gigs.filter((g) => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
   const confirmedGigs = gigsOnSelectedDate.filter((g) => g.is_confirmed);
@@ -409,6 +467,12 @@ export default function ArtistCalendar() {
             );
           })()}
           <DialogFooter>
+            {previewGig?.venue_user_id && (
+              <Button variant="outline" onClick={handleMessageVenue}>
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Message Venue
+              </Button>
+            )}
             {previewGig?.application_id && (
               <Button variant="outline" onClick={() => { setPreviewDialogOpen(false); navigate(`/artist/applications/${previewGig.application_id}`); }}>
                 View Application
