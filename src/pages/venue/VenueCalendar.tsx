@@ -998,6 +998,7 @@ export default function VenueCalendar() {
                       is_confirmed: previewEditStatus === 'confirmed',
                       hold_priority: previewEditStatus === 'hold' ? previewEditHoldPriority : null,
                       notes: previewEditNotes.trim() || null,
+                      openers: previewEditOpeners.map(o => o.trim()).filter(Boolean),
                     };
                     if (!previewGig.application_id) {
                       updatePayload.manual_artist_name = previewEditArtistName.trim() || null;
