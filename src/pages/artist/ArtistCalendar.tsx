@@ -150,6 +150,53 @@ export default function ArtistCalendar() {
     setCreateDialogOpen(false);
     fetchGigs();
   };
+  const handleMessageVenue = async () => {
+    if (!previewGig?.venue_user_id || !user) return;
+    setPreviewDialogOpen(false);
+
+    // Find an existing thread between the artist and this venue user
+    const {
+      data: existingMessages
+    } = await supabase.from('messages').select('thread_id').or(`and(sender_id.eq.${user.id},receiver_id.eq.${previewGig.venue_user_id}),and(sender_id.eq.${previewGig.venue_user_id},receiver_id.eq.${user.id})`).order('created_at', {
+      ascending: true
+    }).limit(1);
+
+    if (existingMessages && existingMessages.length > 0) {
+      navigate('/artist/messages', {
+        state: {
+          threadId: existingMessages[0].thread_id
+        }
+      });
+      return;
+    }
+
+    // Otherwise create a new thread with an initial message
+    const threadId = crypto.randomUUID();
+    const gigDate = format(parseLocalDate(previewGig.gig_date), 'MMMM d, yyyy');
+    const venueName = previewGig.manual_venue_name || previewGig.venue_listing?.venue_name || 'the venue';
+    const {
+      error
+    } = await supabase.from('messages').insert({
+      thread_id: threadId,
+      sender_id: user.id,
+      receiver_id: previewGig.venue_user_id,
+      subject: `Gig on ${gigDate}`,
+      content: `Hi, I wanted to discuss the gig on ${gigDate} at ${venueName}.`,
+      attachments: '[]'
+    } as any);
+
+    if (error) {
+      toast.error('Failed to start conversation');
+      return;
+    }
+
+    navigate('/artist/messages', {
+      state: {
+        threadId
+      }
+    });
+  };
+
   const gigDates = gigs.map((g) => parseLocalDate(g.gig_date));
   const gigsOnSelectedDate = selectedDate ? gigs.filter((g) => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
   const confirmedGigs = gigsOnSelectedDate.filter((g) => g.is_confirmed);
