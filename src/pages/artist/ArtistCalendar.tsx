@@ -53,6 +53,8 @@ export default function ArtistCalendar() {
   // Event preview dialog state (read-only)
   const [previewGig, setPreviewGig] = useState<GigListing | null>(null);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   useEffect(() => {
     if (user) {
       fetchGigs();
@@ -199,15 +201,21 @@ export default function ArtistCalendar() {
 
   const handleDeleteEvent = async () => {
     if (!previewGig || !user) return;
-    if (!confirm('Are you sure you want to delete this event?')) return;
+    setDeleting(true);
     const { error } = await supabase.from('gig_listings').delete().eq('id', previewGig.id).eq('artist_id', user.id);
+    setDeleting(false);
     if (error) {
       toast.error('Failed to delete event');
       return;
     }
     toast.success('Event deleted');
+    setDeleteDialogOpen(false);
     setPreviewDialogOpen(false);
     fetchGigs();
+  };
+
+  const openDeleteDialog = () => {
+    setDeleteDialogOpen(true);
   };
 
   const gigDates = gigs.map((g) => parseLocalDate(g.gig_date));
@@ -480,7 +488,7 @@ export default function ArtistCalendar() {
           })()}
           <DialogFooter>
             {previewGig?.manual_venue_name && (
-              <Button variant="ghost" size="icon" onClick={handleDeleteEvent} className="text-muted-foreground hover:text-destructive h-8 w-8">
+              <Button variant="ghost" size="icon" onClick={openDeleteDialog} className="text-muted-foreground hover:text-destructive h-8 w-8">
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
@@ -496,6 +504,25 @@ export default function ArtistCalendar() {
               </Button>
             )}
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Delete Event?</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-sm">
+              This will permanently remove the event from your calendar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 justify-end pt-4">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteEvent} disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Delete Event'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>;
