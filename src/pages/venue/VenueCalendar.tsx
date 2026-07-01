@@ -148,7 +148,7 @@ export default function VenueCalendar() {
           artist: artistRes.data
         };
       }));
-      setGigs(enrichedGigs);
+      setGigs(enrichedGigs as GigListing[]);
     }
     setLoading(false);
   };
