@@ -48,6 +48,7 @@ export default function ArtistCalendar() {
   const [eventTime, setEventTime] = useState('');
   const [eventVenueName, setEventVenueName] = useState('');
   const [eventLocation, setEventLocation] = useState('');
+  const [eventIsConfirmed, setEventIsConfirmed] = useState(true);
   const [creating, setCreating] = useState(false);
 
   // Event preview dialog state (read-only)
