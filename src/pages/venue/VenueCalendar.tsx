@@ -969,9 +969,8 @@ export default function VenueCalendar() {
           })()}
           <DialogFooter className="flex items-center justify-between w-full">
             <Button
-              size="icon"
               variant="ghost"
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 px-3"
               onClick={async () => {
                 if (!previewGig) return;
                 const pArtistName = previewGig.manual_artist_name || previewGig.artist_profile?.band_name || (previewGig.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : 'this artist');
@@ -983,7 +982,8 @@ export default function VenueCalendar() {
                 fetchGigs();
               }}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Gig
             </Button>
             <div className="flex gap-3">
               {previewEditing ? (
