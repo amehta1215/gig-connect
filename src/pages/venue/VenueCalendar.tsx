@@ -183,7 +183,7 @@ export default function VenueCalendar() {
       } = await supabase.from('gig_listings').select('*').in('venue_listing_id', listingIds).eq('gig_date', format(selectedDate, 'yyyy-MM-dd')).eq('is_confirmed', false).order('hold_priority', {
         ascending: true
       });
-      setExistingHoldsForDate(holds || []);
+      setExistingHoldsForDate((holds || []) as GigListing[]);
       setEventHoldPriority((holds?.length || 0) + 1);
     } else {
       setExistingHoldsForDate([]);
