@@ -844,7 +844,60 @@ export default function VenueCalendar() {
                   </div>
                 )}
 
-                <div>
+                {/* Openers */}
+                {(previewEditing || (previewGig.openers && previewGig.openers.length > 0)) && (
+                  <div>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">OPENERS</p>
+                    {previewEditing ? (
+                      <div className="space-y-2">
+                        {previewEditOpeners.map((opener, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Input
+                              value={opener}
+                              onChange={e => {
+                                const newOpeners = [...previewEditOpeners];
+                                newOpeners[index] = e.target.value;
+                                setPreviewEditOpeners(newOpeners);
+                              }}
+                              placeholder={`Opener ${index + 1}`}
+                              className="text-sm"
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-destructive hover:text-destructive h-8 w-8 shrink-0"
+                              onClick={() => {
+                                const newOpeners = [...previewEditOpeners];
+                                newOpeners.splice(index, 1);
+                                setPreviewEditOpeners(newOpeners);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPreviewEditOpeners([...previewEditOpeners, ''])}
+                          className="w-full"
+                        >
+                          <Plus className="h-4 w-4 mr-1" /> Add Opener
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {(previewGig.openers || []).map((opener, index) => (
+                          <span key={index} className="text-sm text-primary bg-secondary px-2 py-1 rounded">
+                            {opener}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                   {previewEditing ? (
                     <Popover open={previewDatePickerOpen} onOpenChange={setPreviewDatePickerOpen}>
                       <PopoverTrigger asChild>
