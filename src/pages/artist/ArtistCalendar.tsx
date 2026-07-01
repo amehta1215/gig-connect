@@ -436,7 +436,6 @@ export default function ArtistCalendar() {
             return (
               <div className="space-y-4 py-2">
                 <div>
-                  <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">VENUE</p>
                   <p className="font-display text-2xl text-accent font-bold">{pVenueName}</p>
                 </div>
 
