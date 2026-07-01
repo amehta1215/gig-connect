@@ -414,9 +414,6 @@ export default function ArtistCalendar() {
                 View Application
               </Button>
             )}
-            <Button onClick={() => setPreviewDialogOpen(false)} className="bg-primary hover:bg-primary/90">
-              Close
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
