@@ -29,6 +29,7 @@ interface GigListing {
     room_name: string | null;
     location: string | null;
   };
+  venue_user_id?: string | null;
 }
 export default function ArtistCalendar() {
   const {
