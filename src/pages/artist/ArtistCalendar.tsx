@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin } from 'lucide-react';
+import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
