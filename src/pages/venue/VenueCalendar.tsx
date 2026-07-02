@@ -267,11 +267,6 @@ export default function VenueCalendar() {
     toast.success('Event created!');
     setCreateDialogOpen(false);
     fetchGigs();
-
-    // Navigate to gig detail page
-    if (newGig) {
-      navigate(`/venue/calendar/${newGig.id}`);
-    }
   };
   const openConfirmDialog = async (gigId: string, gigDate: string, venueListingId: string, artistId: string) => {
     // Get artist info
