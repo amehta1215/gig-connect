@@ -91,7 +91,7 @@ export default function VenueCalendar() {
 
   // Delete hold dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [holdToDelete, setHoldToDelete] = useState<{ gigId: string; applicationId: string | null; artistId: string; artistName: string } | null>(null);
+  const [holdToDelete, setHoldToDelete] = useState<{ gigId: string; applicationId: string | null; artistId: string; artistName: string; gigDate: string; venueListingId: string } | null>(null);
   const [deletingHold, setDeletingHold] = useState(false);
 
   // Confirm hold dialog state
@@ -361,20 +361,39 @@ export default function VenueCalendar() {
     toast.success('Gig confirmed!');
     fetchGigs();
   };
+  const sendBookingDeletionMessage = async (artistId: string, gigDate: string, roomName: string, isConfirmed: boolean) => {
+    if (!user || artistId === user.id) return;
+    const formattedDate = format(parseLocalDate(gigDate), 'MMMM d, yyyy');
+    const bookingType = isConfirmed ? 'booking' : 'hold';
+    await supabase.from('messages').insert({
+      thread_id: crypto.randomUUID(),
+      sender_id: user.id,
+      receiver_id: artistId,
+      subject: `${isConfirmed ? 'Booking' : 'Hold'} Cancelled: ${roomName} on ${formattedDate}`,
+      content: `Your ${bookingType} at ${roomName} on ${formattedDate} has been cancelled.`,
+      is_read: false,
+      is_starred: false
+    });
+  };
+
   const openDeleteDialog = async (gig: GigListing) => {
     const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'Artist');
-    setHoldToDelete({ gigId: gig.id, applicationId: gig.application_id, artistId: gig.artist_id, artistName });
+    setHoldToDelete({ gigId: gig.id, applicationId: gig.application_id, artistId: gig.artist_id, artistName, gigDate: gig.gig_date, venueListingId: gig.venue_listing_id });
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteHoldThisDay = async () => {
     if (!holdToDelete) return;
     setDeletingHold(true);
+    const { data: gigData } = await supabase.from('gig_listings').select('is_confirmed, venue_listing_id').eq('id', holdToDelete.gigId).single();
+    const { data: venueListing } = await supabase.from('venue_listings').select('venue_name, room_name').eq('id', holdToDelete.venueListingId).single();
+    const roomName = venueListing?.room_name || venueListing?.venue_name || 'Venue';
     const { error } = await supabase.from('gig_listings').delete().eq('id', holdToDelete.gigId);
     if (error) { toast.error('Failed to delete hold'); setDeletingHold(false); return; }
     if (holdToDelete.applicationId) {
       await supabase.from('applications').update({ status: 'archived' }).eq('id', holdToDelete.applicationId);
     }
+    await sendBookingDeletionMessage(holdToDelete.artistId, holdToDelete.gigDate, roomName, gigData?.is_confirmed ?? false);
     setDeletingHold(false);
     setDeleteDialogOpen(false);
     setHoldToDelete(null);
@@ -389,7 +408,7 @@ export default function VenueCalendar() {
     // Get all holds for this artist across all venue listings
     const { data: allHolds } = await supabase
       .from('gig_listings')
-      .select('id, application_id')
+      .select('id, application_id, gig_date, venue_listing_id')
       .in('venue_listing_id', listingIds)
       .eq('artist_id', holdToDelete.artistId)
       .eq('is_confirmed', false);
@@ -399,6 +418,13 @@ export default function VenueCalendar() {
       await supabase.from('gig_listings').delete().in('id', holdIds);
       if (appIds.length > 0) {
         await supabase.from('applications').update({ status: 'archived' }).in('id', appIds);
+      }
+      // Send one consolidated cancellation message per room/date
+      const venueListingIds = [...new Set(allHolds.map(h => h.venue_listing_id))];
+      const { data: listings } = await supabase.from('venue_listings').select('id, venue_name, room_name').in('id', venueListingIds);
+      const listingMap = new Map((listings || []).map(l => [l.id, l.room_name || l.venue_name || 'Venue']));
+      for (const hold of allHolds) {
+        await sendBookingDeletionMessage(holdToDelete.artistId, hold.gig_date, listingMap.get(hold.venue_listing_id) || 'Venue', false);
       }
     }
     setDeletingHold(false);
@@ -1119,8 +1145,10 @@ export default function VenueCalendar() {
                 if (!previewGig) return;
                 setDeletingPreviewGig(true);
                 const { error } = await supabase.from('gig_listings').delete().eq('id', previewGig.id);
+                if (error) { setDeletingPreviewGig(false); toast.error('Failed to delete'); return; }
+                const roomName = previewGig.venue_listing?.room_name || previewGig.venue_listing?.venue_name || 'Venue';
+                await sendBookingDeletionMessage(previewGig.artist_id, previewGig.gig_date, roomName, previewGig.is_confirmed);
                 setDeletingPreviewGig(false);
-                if (error) { toast.error('Failed to delete'); return; }
                 toast.success(`${previewGig.is_confirmed ? 'Gig' : 'Hold'} deleted`);
                 setPreviewDeleteDialogOpen(false);
                 setPreviewDialogOpen(false);
