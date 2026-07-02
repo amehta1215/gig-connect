@@ -114,6 +114,39 @@ export default function VenueCalendar() {
       fetchVenueListings();
     }
   }, [user]);
+  // Debounced artist search for the create-event dialog
+  useEffect(() => {
+    if (!createDialogOpen) return;
+    const query = eventArtistName.trim();
+    if (query.length < 1 || selectedArtistUserId) {
+      setArtistSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      const { data: artistRows } = await supabase
+        .from('artist_profiles')
+        .select('user_id, band_name')
+        .ilike('band_name', `%${query}%`)
+        .not('band_name', 'is', null)
+        .limit(8);
+      const userIds = (artistRows || []).map(r => r.user_id);
+      let profilesMap: Record<string, { first_name: string | null; last_name: string | null }> = {};
+      if (userIds.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .in('id', userIds);
+        (profs || []).forEach(p => { profilesMap[p.id] = { first_name: p.first_name, last_name: p.last_name }; });
+      }
+      setArtistSuggestions((artistRows || []).map(r => ({
+        user_id: r.user_id,
+        band_name: r.band_name,
+        first_name: profilesMap[r.user_id]?.first_name ?? null,
+        last_name: profilesMap[r.user_id]?.last_name ?? null,
+      })));
+    }, 200);
+    return () => clearTimeout(handle);
+  }, [eventArtistName, createDialogOpen, selectedArtistUserId]);
   const fetchGigs = async () => {
     setLoading(true);
 
