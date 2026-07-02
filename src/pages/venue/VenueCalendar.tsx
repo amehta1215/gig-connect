@@ -1145,8 +1145,10 @@ export default function VenueCalendar() {
                 if (!previewGig) return;
                 setDeletingPreviewGig(true);
                 const { error } = await supabase.from('gig_listings').delete().eq('id', previewGig.id);
+                if (error) { setDeletingPreviewGig(false); toast.error('Failed to delete'); return; }
+                const roomName = previewGig.venue_listing?.room_name || previewGig.venue_listing?.venue_name || 'Venue';
+                await sendBookingDeletionMessage(previewGig.artist_id, previewGig.gig_date, roomName, previewGig.is_confirmed);
                 setDeletingPreviewGig(false);
-                if (error) { toast.error('Failed to delete'); return; }
                 toast.success(`${previewGig.is_confirmed ? 'Gig' : 'Hold'} deleted`);
                 setPreviewDeleteDialogOpen(false);
                 setPreviewDialogOpen(false);
