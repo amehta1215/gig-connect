@@ -1073,7 +1073,7 @@ export default function VenueCalendar() {
                       gig_date: format(previewEditDate, 'yyyy-MM-dd'),
                       show_time: previewEditTime || null,
                       is_confirmed: previewEditStatus === 'confirmed',
-                      hold_priority: previewEditStatus === 'hold' ? previewEditHoldPriority : null,
+                      hold_priority: previewEditStatus === 'hold' ? (previewEditHoldPriority === '' ? 1 : previewEditHoldPriority) : null,
                       notes: previewEditNotes.trim() || null,
                       openers: previewEditOpeners.map(o => o.trim()).filter(Boolean),
                     };
