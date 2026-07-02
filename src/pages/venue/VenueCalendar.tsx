@@ -59,6 +59,9 @@ export default function VenueCalendar() {
   const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
   const [eventTime, setEventTime] = useState('');
   const [eventArtistName, setEventArtistName] = useState('');
+  const [selectedArtistUserId, setSelectedArtistUserId] = useState<string | null>(null);
+  const [artistSuggestions, setArtistSuggestions] = useState<Array<{ user_id: string; band_name: string | null; first_name: string | null; last_name: string | null }>>([]);
+  const [artistSearchOpen, setArtistSearchOpen] = useState(false);
   const [eventIsHold, setEventIsHold] = useState(false);
   const [eventHoldPriority, setEventHoldPriority] = useState(1);
   const [existingHoldsForDate, setExistingHoldsForDate] = useState<GigListing[]>([]);
@@ -209,13 +212,13 @@ export default function VenueCalendar() {
       error
     } = await supabase.from('gig_listings').insert({
       venue_listing_id: selectedListingId,
-      artist_id: user!.id,
-      // Use venue user as placeholder for manual events
+      artist_id: selectedArtistUserId || user!.id,
+      // If a platform artist was picked, link them; otherwise use venue user as placeholder for manual events
       gig_date: format(eventDate, 'yyyy-MM-dd'),
       show_time: eventTime || null,
       notes: null,
       openers: [],
-      manual_artist_name: eventArtistName.trim() || null,
+      manual_artist_name: selectedArtistUserId ? null : (eventArtistName.trim() || null),
       is_confirmed: !eventIsHold,
       hold_priority: eventIsHold ? eventHoldPriority : null
     }).select().single();
