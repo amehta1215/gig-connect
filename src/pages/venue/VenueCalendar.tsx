@@ -363,7 +363,7 @@ export default function VenueCalendar() {
   };
   const openDeleteDialog = async (gig: GigListing) => {
     const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'Artist');
-    setHoldToDelete({ gigId: gig.id, applicationId: gig.application_id, artistId: gig.artist_id, artistName });
+    setHoldToDelete({ gigId: gig.id, applicationId: gig.application_id, artistId: gig.artist_id, artistName, gigDate: gig.gig_date, venueListingId: gig.venue_listing_id });
     setDeleteDialogOpen(true);
   };
 
