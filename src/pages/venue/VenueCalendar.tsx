@@ -209,6 +209,9 @@ export default function VenueCalendar() {
     setEventDate(selectedDate);
     setEventTime('');
     setEventArtistName('');
+    setSelectedArtistUserId(null);
+    setArtistSuggestions([]);
+    setArtistSearchOpen(false);
     setEventIsHold(false);
     setEventHoldPriority(1);
     setSelectedListingId(venueListings.length === 1 ? venueListings[0].id : '');
