@@ -686,7 +686,56 @@ export default function VenueCalendar() {
             {/* Artist Name */}
             <div className="space-y-2">
               <label className="font-display text-xs text-primary tracking-widest">ARTIST NAME <span className="text-destructive">*</span></label>
-              <Input value={eventArtistName} onChange={e => setEventArtistName(e.target.value)} placeholder="Enter artist or event name" required />
+              <Popover open={artistSearchOpen && artistSuggestions.length > 0} onOpenChange={setArtistSearchOpen}>
+                <PopoverTrigger asChild>
+                  <Input
+                    value={eventArtistName}
+                    onChange={e => {
+                      setEventArtistName(e.target.value);
+                      setSelectedArtistUserId(null);
+                      setArtistSearchOpen(true);
+                    }}
+                    onFocus={() => setArtistSearchOpen(true)}
+                    placeholder="Search artists or enter a name"
+                    required
+                  />
+                </PopoverTrigger>
+                <PopoverContent
+                  className="p-0 w-[--radix-popover-trigger-width]"
+                  align="start"
+                  onOpenAutoFocus={(e) => e.preventDefault()}
+                >
+                  <Command shouldFilter={false}>
+                    <CommandList>
+                      <CommandEmpty>No artists found.</CommandEmpty>
+                      <CommandGroup heading="Artists on Riff">
+                        {artistSuggestions.map(a => {
+                          const displayName = a.band_name || [a.first_name, a.last_name].filter(Boolean).join(' ');
+                          const subtitle = a.band_name && (a.first_name || a.last_name)
+                            ? [a.first_name, a.last_name].filter(Boolean).join(' ')
+                            : null;
+                          return (
+                            <CommandItem
+                              key={a.user_id}
+                              value={a.user_id}
+                              onSelect={() => {
+                                setEventArtistName(displayName);
+                                setSelectedArtistUserId(a.user_id);
+                                setArtistSearchOpen(false);
+                              }}
+                            >
+                              <div className="flex flex-col">
+                                <span>{displayName}</span>
+                                {subtitle && <span className="text-xs text-muted-foreground">{subtitle}</span>}
+                              </div>
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
           </div>
