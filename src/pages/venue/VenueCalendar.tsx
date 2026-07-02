@@ -91,7 +91,7 @@ export default function VenueCalendar() {
 
   // Delete hold dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [holdToDelete, setHoldToDelete] = useState<{ gigId: string; applicationId: string | null; artistId: string; artistName: string } | null>(null);
+  const [holdToDelete, setHoldToDelete] = useState<{ gigId: string; applicationId: string | null; artistId: string; artistName: string; gigDate: string; venueListingId: string } | null>(null);
   const [deletingHold, setDeletingHold] = useState(false);
 
   // Confirm hold dialog state
