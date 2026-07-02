@@ -370,11 +370,15 @@ export default function VenueCalendar() {
   const handleDeleteHoldThisDay = async () => {
     if (!holdToDelete) return;
     setDeletingHold(true);
+    const { data: gigData } = await supabase.from('gig_listings').select('is_confirmed, venue_listing_id').eq('id', holdToDelete.gigId).single();
+    const { data: venueListing } = await supabase.from('venue_listings').select('venue_name, room_name').eq('id', holdToDelete.venueListingId).single();
+    const roomName = venueListing?.room_name || venueListing?.venue_name || 'Venue';
     const { error } = await supabase.from('gig_listings').delete().eq('id', holdToDelete.gigId);
     if (error) { toast.error('Failed to delete hold'); setDeletingHold(false); return; }
     if (holdToDelete.applicationId) {
       await supabase.from('applications').update({ status: 'archived' }).eq('id', holdToDelete.applicationId);
     }
+    await sendBookingDeletionMessage(holdToDelete.artistId, holdToDelete.gigDate, roomName, gigData?.is_confirmed ?? false);
     setDeletingHold(false);
     setDeleteDialogOpen(false);
     setHoldToDelete(null);
