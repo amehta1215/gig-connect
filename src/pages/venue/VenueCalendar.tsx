@@ -1046,8 +1046,18 @@ export default function VenueCalendar() {
               </div>
             );
           })()}
-          <DialogFooter className="flex items-center justify-end w-full">
-            <div className="flex gap-3">
+          <DialogFooter className="flex items-center justify-between w-full">
+            {previewEditing && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9"
+                onClick={() => setPreviewDeleteDialogOpen(true)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+            <div className="flex gap-3 ml-auto">
               {previewEditing ? (
                 <>
                   <Button variant="outline" onClick={() => setPreviewEditing(false)}>Cancel</Button>
@@ -1086,6 +1096,41 @@ export default function VenueCalendar() {
                 </>
               )}
             </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Preview Gig Confirmation Dialog */}
+      <Dialog open={previewDeleteDialogOpen} onOpenChange={setPreviewDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl">Delete Event?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this event?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setPreviewDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!previewGig) return;
+                setDeletingPreviewGig(true);
+                const { error } = await supabase.from('gig_listings').delete().eq('id', previewGig.id);
+                setDeletingPreviewGig(false);
+                if (error) { toast.error('Failed to delete'); return; }
+                toast.success(`${previewGig.is_confirmed ? 'Gig' : 'Hold'} deleted`);
+                setPreviewDeleteDialogOpen(false);
+                setPreviewDialogOpen(false);
+                setPreviewEditing(false);
+                fetchGigs();
+              }}
+              disabled={deletingPreviewGig}
+            >
+              {deletingPreviewGig ? 'Deleting...' : 'Delete'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
