@@ -86,6 +86,8 @@ export default function VenueCalendar() {
   const [previewEditOpeners, setPreviewEditOpeners] = useState<string[]>([]);
   const [previewSaving, setPreviewSaving] = useState(false);
   const [previewDatePickerOpen, setPreviewDatePickerOpen] = useState(false);
+  const [previewDeleteDialogOpen, setPreviewDeleteDialogOpen] = useState(false);
+  const [deletingPreviewGig, setDeletingPreviewGig] = useState(false);
 
   // Delete hold dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
