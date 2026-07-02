@@ -1134,28 +1134,7 @@ export default function VenueCalendar() {
               {previewEditing ? (
                 <>
                   <Button variant="outline" onClick={() => setPreviewEditing(false)}>Cancel</Button>
-                  <Button disabled={previewSaving} onClick={async () => {
-                    if (!previewGig || !previewEditDate) return;
-                    setPreviewSaving(true);
-                    const updatePayload: any = {
-                      gig_date: format(previewEditDate, 'yyyy-MM-dd'),
-                      show_time: previewEditTime || null,
-                      is_confirmed: previewEditStatus === 'confirmed',
-                      hold_priority: previewEditStatus === 'hold' ? (previewEditHoldPriority === '' ? 1 : previewEditHoldPriority) : null,
-                      notes: previewEditNotes.trim() || null,
-                      openers: previewEditOpeners.map(o => o.trim()).filter(Boolean),
-                    };
-                    if (!previewGig.application_id) {
-                      updatePayload.manual_artist_name = previewEditArtistName.trim() || null;
-                    }
-                    const { error } = await supabase.from('gig_listings').update(updatePayload).eq('id', previewGig.id);
-                    setPreviewSaving(false);
-                    if (error) { toast.error('Failed to save'); return; }
-                    toast.success('Event updated!');
-                    setPreviewEditing(false);
-                    setPreviewDialogOpen(false);
-                    fetchGigs();
-                  }} className="bg-primary hover:bg-primary/90">
+                  <Button disabled={previewSaving} onClick={handlePreviewSave} className="bg-primary hover:bg-primary/90">
                     {previewSaving ? 'Saving...' : 'Save'}
                   </Button>
                 </>
