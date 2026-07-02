@@ -80,7 +80,7 @@ export default function VenueCalendar() {
   const [previewEditDate, setPreviewEditDate] = useState<Date | undefined>(undefined);
   const [previewEditTime, setPreviewEditTime] = useState('');
   const [previewEditStatus, setPreviewEditStatus] = useState<'confirmed' | 'hold'>('confirmed');
-  const [previewEditHoldPriority, setPreviewEditHoldPriority] = useState(1);
+  const [previewEditHoldPriority, setPreviewEditHoldPriority] = useState<number | ''>(1);
   const [previewEditArtistName, setPreviewEditArtistName] = useState('');
   const [previewEditNotes, setPreviewEditNotes] = useState('');
   const [previewEditOpeners, setPreviewEditOpeners] = useState<string[]>([]);
