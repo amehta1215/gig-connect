@@ -1044,24 +1044,7 @@ export default function VenueCalendar() {
               </div>
             );
           })()}
-          <DialogFooter className="flex items-center justify-between w-full">
-            <Button
-              variant="ghost"
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 px-3"
-              onClick={async () => {
-                if (!previewGig) return;
-                const pArtistName = previewGig.manual_artist_name || previewGig.artist_profile?.band_name || (previewGig.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : 'this artist');
-                if (!confirm(`Are you sure you want to delete the ${previewGig.is_confirmed ? 'gig' : 'hold'} for ${pArtistName}?`)) return;
-                const { error } = await supabase.from('gig_listings').delete().eq('id', previewGig.id);
-                if (error) { toast.error('Failed to delete'); return; }
-                toast.success(`${previewGig.is_confirmed ? 'Gig' : 'Hold'} deleted`);
-                setPreviewDialogOpen(false);
-                fetchGigs();
-              }}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Event
-            </Button>
+          <DialogFooter className="flex items-center justify-end w-full">
             <div className="flex gap-3">
               {previewEditing ? (
                 <>
