@@ -80,7 +80,7 @@ export default function VenueCalendar() {
   const [previewEditDate, setPreviewEditDate] = useState<Date | undefined>(undefined);
   const [previewEditTime, setPreviewEditTime] = useState('');
   const [previewEditStatus, setPreviewEditStatus] = useState<'confirmed' | 'hold'>('confirmed');
-  const [previewEditHoldPriority, setPreviewEditHoldPriority] = useState(1);
+  const [previewEditHoldPriority, setPreviewEditHoldPriority] = useState<number | ''>(1);
   const [previewEditArtistName, setPreviewEditArtistName] = useState('');
   const [previewEditNotes, setPreviewEditNotes] = useState('');
   const [previewEditOpeners, setPreviewEditOpeners] = useState<string[]>([]);
@@ -909,7 +909,11 @@ export default function VenueCalendar() {
                           type="number"
                           min={1}
                           value={previewEditHoldPriority}
-                          onChange={e => setPreviewEditHoldPriority(parseInt(e.target.value) || 1)}
+                          onChange={e => setPreviewEditHoldPriority(e.target.value === '' ? '' : parseInt(e.target.value))}
+                          onBlur={e => {
+                            const val = parseInt(e.target.value);
+                            setPreviewEditHoldPriority(isNaN(val) || val < 1 ? 1 : val);
+                          }}
                           className="w-24"
                         />
                       </div>
@@ -1069,7 +1073,7 @@ export default function VenueCalendar() {
                       gig_date: format(previewEditDate, 'yyyy-MM-dd'),
                       show_time: previewEditTime || null,
                       is_confirmed: previewEditStatus === 'confirmed',
-                      hold_priority: previewEditStatus === 'hold' ? previewEditHoldPriority : null,
+                      hold_priority: previewEditStatus === 'hold' ? (previewEditHoldPriority === '' ? 1 : previewEditHoldPriority) : null,
                       notes: previewEditNotes.trim() || null,
                       openers: previewEditOpeners.map(o => o.trim()).filter(Boolean),
                     };
