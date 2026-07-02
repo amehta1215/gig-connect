@@ -909,7 +909,11 @@ export default function VenueCalendar() {
                           type="number"
                           min={1}
                           value={previewEditHoldPriority}
-                          onChange={e => setPreviewEditHoldPriority(parseInt(e.target.value) || 1)}
+                          onChange={e => setPreviewEditHoldPriority(e.target.value === '' ? '' : parseInt(e.target.value))}
+                          onBlur={e => {
+                            const val = parseInt(e.target.value);
+                            setPreviewEditHoldPriority(isNaN(val) || val < 1 ? 1 : val);
+                          }}
                           className="w-24"
                         />
                       </div>
