@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical, ChevronDown, Pencil } from 'lucide-react';
 import { format, startOfDay, addDays, addMonths } from 'date-fns';
@@ -59,6 +60,9 @@ export default function VenueCalendar() {
   const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
   const [eventTime, setEventTime] = useState('');
   const [eventArtistName, setEventArtistName] = useState('');
+  const [selectedArtistUserId, setSelectedArtistUserId] = useState<string | null>(null);
+  const [artistSuggestions, setArtistSuggestions] = useState<Array<{ user_id: string; band_name: string | null; first_name: string | null; last_name: string | null }>>([]);
+  const [artistSearchOpen, setArtistSearchOpen] = useState(false);
   const [eventIsHold, setEventIsHold] = useState(false);
   const [eventHoldPriority, setEventHoldPriority] = useState(1);
   const [existingHoldsForDate, setExistingHoldsForDate] = useState<GigListing[]>([]);
@@ -110,6 +114,39 @@ export default function VenueCalendar() {
       fetchVenueListings();
     }
   }, [user]);
+  // Debounced artist search for the create-event dialog
+  useEffect(() => {
+    if (!createDialogOpen) return;
+    const query = eventArtistName.trim();
+    if (query.length < 1 || selectedArtistUserId) {
+      setArtistSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      const { data: artistRows } = await supabase
+        .from('artist_profiles')
+        .select('user_id, band_name')
+        .ilike('band_name', `%${query}%`)
+        .not('band_name', 'is', null)
+        .limit(8);
+      const userIds = (artistRows || []).map(r => r.user_id);
+      let profilesMap: Record<string, { first_name: string | null; last_name: string | null }> = {};
+      if (userIds.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .in('id', userIds);
+        (profs || []).forEach(p => { profilesMap[p.id] = { first_name: p.first_name, last_name: p.last_name }; });
+      }
+      setArtistSuggestions((artistRows || []).map(r => ({
+        user_id: r.user_id,
+        band_name: r.band_name,
+        first_name: profilesMap[r.user_id]?.first_name ?? null,
+        last_name: profilesMap[r.user_id]?.last_name ?? null,
+      })));
+    }, 200);
+    return () => clearTimeout(handle);
+  }, [eventArtistName, createDialogOpen, selectedArtistUserId]);
   const fetchGigs = async () => {
     setLoading(true);
 
@@ -172,6 +209,9 @@ export default function VenueCalendar() {
     setEventDate(selectedDate);
     setEventTime('');
     setEventArtistName('');
+    setSelectedArtistUserId(null);
+    setArtistSuggestions([]);
+    setArtistSearchOpen(false);
     setEventIsHold(false);
     setEventHoldPriority(1);
     setSelectedListingId(venueListings.length === 1 ? venueListings[0].id : '');
@@ -209,13 +249,13 @@ export default function VenueCalendar() {
       error
     } = await supabase.from('gig_listings').insert({
       venue_listing_id: selectedListingId,
-      artist_id: user!.id,
-      // Use venue user as placeholder for manual events
+      artist_id: selectedArtistUserId || user!.id,
+      // If a platform artist was picked, link them; otherwise use venue user as placeholder for manual events
       gig_date: format(eventDate, 'yyyy-MM-dd'),
       show_time: eventTime || null,
       notes: null,
       openers: [],
-      manual_artist_name: eventArtistName.trim() || null,
+      manual_artist_name: selectedArtistUserId ? null : (eventArtistName.trim() || null),
       is_confirmed: !eventIsHold,
       hold_priority: eventIsHold ? eventHoldPriority : null
     }).select().single();
@@ -649,7 +689,56 @@ export default function VenueCalendar() {
             {/* Artist Name */}
             <div className="space-y-2">
               <label className="font-display text-xs text-primary tracking-widest">ARTIST NAME <span className="text-destructive">*</span></label>
-              <Input value={eventArtistName} onChange={e => setEventArtistName(e.target.value)} placeholder="Enter artist or event name" required />
+              <Popover open={artistSearchOpen && artistSuggestions.length > 0} onOpenChange={setArtistSearchOpen}>
+                <PopoverTrigger asChild>
+                  <Input
+                    value={eventArtistName}
+                    onChange={e => {
+                      setEventArtistName(e.target.value);
+                      setSelectedArtistUserId(null);
+                      setArtistSearchOpen(true);
+                    }}
+                    onFocus={() => setArtistSearchOpen(true)}
+                    placeholder="Search artists or enter a name"
+                    required
+                  />
+                </PopoverTrigger>
+                <PopoverContent
+                  className="p-0 w-[--radix-popover-trigger-width]"
+                  align="start"
+                  onOpenAutoFocus={(e) => e.preventDefault()}
+                >
+                  <Command shouldFilter={false}>
+                    <CommandList>
+                      <CommandEmpty>No artists found.</CommandEmpty>
+                      <CommandGroup heading="Artists on Riff">
+                        {artistSuggestions.map(a => {
+                          const displayName = a.band_name || [a.first_name, a.last_name].filter(Boolean).join(' ');
+                          const subtitle = a.band_name && (a.first_name || a.last_name)
+                            ? [a.first_name, a.last_name].filter(Boolean).join(' ')
+                            : null;
+                          return (
+                            <CommandItem
+                              key={a.user_id}
+                              value={a.user_id}
+                              onSelect={() => {
+                                setEventArtistName(displayName);
+                                setSelectedArtistUserId(a.user_id);
+                                setArtistSearchOpen(false);
+                              }}
+                            >
+                              <div className="flex flex-col">
+                                <span>{displayName}</span>
+                                {subtitle && <span className="text-xs text-muted-foreground">{subtitle}</span>}
+                              </div>
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
           </div>
