@@ -705,9 +705,6 @@ export default function VenueCalendar() {
                 <div className="absolute z-50 left-0 right-0 top-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md max-h-64 overflow-y-auto">
                   {artistSuggestions.map(a => {
                     const displayName = a.band_name || [a.first_name, a.last_name].filter(Boolean).join(' ');
-                    const subtitle = a.band_name && (a.first_name || a.last_name)
-                      ? [a.first_name, a.last_name].filter(Boolean).join(' ')
-                      : null;
                     return (
                       <button
                         type="button"
@@ -721,7 +718,6 @@ export default function VenueCalendar() {
                         className="w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground flex flex-col"
                       >
                         <span className="text-sm">{displayName}</span>
-                        {subtitle && <span className="text-xs text-muted-foreground">{subtitle}</span>}
                       </button>
                     );
                   })}
