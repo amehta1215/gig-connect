@@ -833,7 +833,6 @@ export default function VenueCalendar() {
               <div className="space-y-4 py-2">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">HEADLINER</p>
                     {previewEditing && !previewGig.application_id ? (
                       <Input
                         value={previewEditArtistName}
