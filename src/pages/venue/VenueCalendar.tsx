@@ -192,6 +192,53 @@ export default function VenueCalendar() {
     }
     setLoading(false);
   };
+
+  const fetchSingleGig = async (gigId: string): Promise<GigListing | null> => {
+    const { data: gig } = await supabase.from('gig_listings').select('*').eq('id', gigId).single();
+    if (!gig) return null;
+    const [venueListingRes, artistProfileRes, artistRes] = await Promise.all([
+      supabase.from('venue_listings').select('venue_name, room_name').eq('id', gig.venue_listing_id).single(),
+      supabase.from('artist_profiles').select('band_name').eq('user_id', gig.artist_id).maybeSingle(),
+      supabase.from('profiles').select('first_name, last_name').eq('id', gig.artist_id).maybeSingle(),
+    ]);
+    return {
+      ...gig,
+      venue_listing: venueListingRes.data,
+      artist_profile: artistProfileRes.data,
+      artist: artistRes.data
+    } as GigListing;
+  };
+
+  const handlePreviewSave = async () => {
+    if (!previewGig || !previewEditDate) return;
+    setPreviewSaving(true);
+    const updatePayload: any = {
+      gig_date: format(previewEditDate, 'yyyy-MM-dd'),
+      show_time: previewEditTime || null,
+      is_confirmed: previewEditStatus === 'confirmed',
+      hold_priority: previewEditStatus === 'hold' ? (previewEditHoldPriority === '' ? 1 : previewEditHoldPriority) : null,
+      notes: previewEditNotes.trim() || null,
+      openers: previewEditOpeners.map(o => o.trim()).filter(Boolean),
+    };
+    if (!previewGig.application_id) {
+      updatePayload.manual_artist_name = previewEditArtistName.trim() || null;
+    }
+    const { error } = await supabase.from('gig_listings').update(updatePayload).eq('id', previewGig.id);
+    if (error) {
+      setPreviewSaving(false);
+      toast.error('Failed to save');
+      return;
+    }
+    const updatedGig = await fetchSingleGig(previewGig.id);
+    if (updatedGig) {
+      setPreviewGig(updatedGig);
+    }
+    setPreviewEditing(false);
+    setPreviewSaving(false);
+    toast.success('Event updated!');
+    fetchGigs();
+  };
+
   const fetchVenueListings = async () => {
     const {
       data: venueProfile
@@ -1087,28 +1134,7 @@ export default function VenueCalendar() {
               {previewEditing ? (
                 <>
                   <Button variant="outline" onClick={() => setPreviewEditing(false)}>Cancel</Button>
-                  <Button disabled={previewSaving} onClick={async () => {
-                    if (!previewGig || !previewEditDate) return;
-                    setPreviewSaving(true);
-                    const updatePayload: any = {
-                      gig_date: format(previewEditDate, 'yyyy-MM-dd'),
-                      show_time: previewEditTime || null,
-                      is_confirmed: previewEditStatus === 'confirmed',
-                      hold_priority: previewEditStatus === 'hold' ? (previewEditHoldPriority === '' ? 1 : previewEditHoldPriority) : null,
-                      notes: previewEditNotes.trim() || null,
-                      openers: previewEditOpeners.map(o => o.trim()).filter(Boolean),
-                    };
-                    if (!previewGig.application_id) {
-                      updatePayload.manual_artist_name = previewEditArtistName.trim() || null;
-                    }
-                    const { error } = await supabase.from('gig_listings').update(updatePayload).eq('id', previewGig.id);
-                    setPreviewSaving(false);
-                    if (error) { toast.error('Failed to save'); return; }
-                    toast.success('Event updated!');
-                    setPreviewEditing(false);
-                    setPreviewDialogOpen(false);
-                    fetchGigs();
-                  }} className="bg-primary hover:bg-primary/90">
+                  <Button disabled={previewSaving} onClick={handlePreviewSave} className="bg-primary hover:bg-primary/90">
                     {previewSaving ? 'Saving...' : 'Save'}
                   </Button>
                 </>
