@@ -407,7 +407,13 @@ export default function VenueCalendar() {
   };
   const gigDates = gigs.map(g => parseLocalDate(g.gig_date));
   const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
-  const confirmedGigs = gigsOnSelectedDate.filter(g => g.is_confirmed);
+  const confirmedGigs = gigsOnSelectedDate
+    .filter(g => g.is_confirmed)
+    .sort((a, b) => {
+      if (!a.show_time) return 1;
+      if (!b.show_time) return -1;
+      return a.show_time.localeCompare(b.show_time);
+    });
   const holdGigs = gigsOnSelectedDate.filter(g => !g.is_confirmed).sort((a, b) => (a.hold_priority || 99) - (b.hold_priority || 99));
 
   // Sync local hold order when holdGigs change
