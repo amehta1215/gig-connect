@@ -687,58 +687,46 @@ export default function VenueCalendar() {
             </div>
 
             {/* Artist Name */}
-            <div className="space-y-2">
+            <div className="space-y-2 relative">
               <label className="font-display text-xs text-primary tracking-widest">ARTIST NAME <span className="text-destructive">*</span></label>
-              <Popover open={artistSearchOpen && artistSuggestions.length > 0} onOpenChange={setArtistSearchOpen}>
-                <PopoverTrigger asChild>
-                  <Input
-                    value={eventArtistName}
-                    onChange={e => {
-                      setEventArtistName(e.target.value);
-                      setSelectedArtistUserId(null);
-                      setArtistSearchOpen(true);
-                    }}
-                    onFocus={() => setArtistSearchOpen(true)}
-                    placeholder="Search artists or enter a name"
-                    required
-                  />
-                </PopoverTrigger>
-                <PopoverContent
-                  className="p-0 w-[--radix-popover-trigger-width]"
-                  align="start"
-                  onOpenAutoFocus={(e) => e.preventDefault()}
-                >
-                  <Command shouldFilter={false}>
-                    <CommandList>
-                      <CommandEmpty>No artists found.</CommandEmpty>
-                      <CommandGroup heading="Artists on Riff">
-                        {artistSuggestions.map(a => {
-                          const displayName = a.band_name || [a.first_name, a.last_name].filter(Boolean).join(' ');
-                          const subtitle = a.band_name && (a.first_name || a.last_name)
-                            ? [a.first_name, a.last_name].filter(Boolean).join(' ')
-                            : null;
-                          return (
-                            <CommandItem
-                              key={a.user_id}
-                              value={a.user_id}
-                              onSelect={() => {
-                                setEventArtistName(displayName);
-                                setSelectedArtistUserId(a.user_id);
-                                setArtistSearchOpen(false);
-                              }}
-                            >
-                              <div className="flex flex-col">
-                                <span>{displayName}</span>
-                                {subtitle && <span className="text-xs text-muted-foreground">{subtitle}</span>}
-                              </div>
-                            </CommandItem>
-                          );
-                        })}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <Input
+                value={eventArtistName}
+                onChange={e => {
+                  setEventArtistName(e.target.value);
+                  setSelectedArtistUserId(null);
+                  setArtistSearchOpen(true);
+                }}
+                onFocus={() => setArtistSearchOpen(true)}
+                onBlur={() => setTimeout(() => setArtistSearchOpen(false), 150)}
+                placeholder="Search artists or enter a name"
+                required
+              />
+              {artistSearchOpen && artistSuggestions.length > 0 && (
+                <div className="absolute z-50 left-0 right-0 top-full mt-1 rounded-md border bg-popover text-popover-foreground shadow-md max-h-64 overflow-y-auto">
+                  {artistSuggestions.map(a => {
+                    const displayName = a.band_name || [a.first_name, a.last_name].filter(Boolean).join(' ');
+                    const subtitle = a.band_name && (a.first_name || a.last_name)
+                      ? [a.first_name, a.last_name].filter(Boolean).join(' ')
+                      : null;
+                    return (
+                      <button
+                        type="button"
+                        key={a.user_id}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setEventArtistName(displayName);
+                          setSelectedArtistUserId(a.user_id);
+                          setArtistSearchOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 hover:bg-accent hover:text-accent-foreground flex flex-col"
+                      >
+                        <span className="text-sm">{displayName}</span>
+                        {subtitle && <span className="text-xs text-muted-foreground">{subtitle}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
           </div>
