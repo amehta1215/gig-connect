@@ -408,7 +408,7 @@ export default function VenueCalendar() {
     // Get all holds for this artist across all venue listings
     const { data: allHolds } = await supabase
       .from('gig_listings')
-      .select('id, application_id')
+      .select('id, application_id, gig_date, venue_listing_id')
       .in('venue_listing_id', listingIds)
       .eq('artist_id', holdToDelete.artistId)
       .eq('is_confirmed', false);
@@ -418,6 +418,13 @@ export default function VenueCalendar() {
       await supabase.from('gig_listings').delete().in('id', holdIds);
       if (appIds.length > 0) {
         await supabase.from('applications').update({ status: 'archived' }).in('id', appIds);
+      }
+      // Send one consolidated cancellation message per room/date
+      const venueListingIds = [...new Set(allHolds.map(h => h.venue_listing_id))];
+      const { data: listings } = await supabase.from('venue_listings').select('id, venue_name, room_name').in('id', venueListingIds);
+      const listingMap = new Map((listings || []).map(l => [l.id, l.room_name || l.venue_name || 'Venue']));
+      for (const hold of allHolds) {
+        await sendBookingDeletionMessage(holdToDelete.artistId, hold.gig_date, listingMap.get(hold.venue_listing_id) || 'Venue', false);
       }
     }
     setDeletingHold(false);
