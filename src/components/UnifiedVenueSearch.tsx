@@ -14,11 +14,12 @@ interface VenueSuggestion {
   venue_name: string;
   room_name: string | null;
   location: string | null;
+  venue_profile_id?: string;
 }
 
 interface UnifiedVenueSearchProps {
   onLocationSelect: (location: string) => void;
-  onVenueSelect: (venueId: string) => void;
+  onVenueSelect: (venueProfileId: string) => void;
   onSearchChange: (term: string) => void;
   venues: VenueSuggestion[];
   className?: string;
@@ -71,10 +72,21 @@ export function UnifiedVenueSearch({
   const matchingVenues = useMemo(() => {
     if (query.length < 2) return [];
     const q = query.toLowerCase();
-    return venues.filter(v =>
+    const matched = venues.filter(v =>
       v.venue_name.toLowerCase().includes(q) ||
       v.room_name?.toLowerCase().includes(q)
-    ).slice(0, 5);
+    );
+    // Deduplicate by venue_profile_id so each venue appears once
+    const seen = new Set<string>();
+    const unique: VenueSuggestion[] = [];
+    for (const v of matched) {
+      const key = v.venue_profile_id || v.id;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      unique.push(v);
+      if (unique.length >= 5) break;
+    }
+    return unique;
   }, [query, venues]);
 
   const searchExternalLocations = async (q: string) => {
@@ -132,7 +144,7 @@ export function UnifiedVenueSearch({
 
   const handleVenueSelect = (venue: VenueSuggestion) => {
     setQuery('');
-    onVenueSelect(venue.id);
+    onVenueSelect(venue.venue_profile_id || venue.id);
     setIsOpen(false);
     setExternalLocations([]);
   };
@@ -176,7 +188,7 @@ export function UnifiedVenueSearch({
               </div>
               {matchingVenues.map((v) => (
                 <button
-                  key={v.id}
+                  key={v.venue_profile_id || v.id}
                   type="button"
                   onClick={() => handleVenueSelect(v)}
                   className="w-full px-3 py-2 text-left text-sm hover:bg-secondary transition-colors flex items-center gap-2"
@@ -184,9 +196,6 @@ export function UnifiedVenueSearch({
                   <Music className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                   <div className="truncate">
                     <span className="text-foreground">{v.venue_name}</span>
-                    {v.room_name && (
-                      <span className="text-muted-foreground"> · {v.room_name}</span>
-                    )}
                   </div>
                 </button>
               ))}
