@@ -15,6 +15,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical, ChevronDown, Pencil } from 'lucide-react';
 import { format, startOfDay, addDays, addMonths } from 'date-fns';
 import { toast } from 'sonner';
+import AutoMessageDialog from '@/components/AutoMessageDialog';
+import { sendVenueArtistMessage } from '@/lib/messaging';
 interface GigListing {
   id: string;
   gig_date: string;
@@ -115,6 +117,14 @@ export default function VenueCalendar() {
   } | null>(null);
   const [confirmMessage, setConfirmMessage] = useState('');
   const [sendConfirmMessage, setSendConfirmMessage] = useState(true);
+
+  // Notify-artist dialog for hold deletion flow
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [notifyDefault, setNotifyDefault] = useState('');
+  const [notifyRecipientName, setNotifyRecipientName] = useState('');
+  const [notifySubject, setNotifySubject] = useState('');
+  const [notifySending, setNotifySending] = useState(false);
+  const [pendingDeleteScope, setPendingDeleteScope] = useState<'single' | 'all' | null>(null);
   useEffect(() => {
     if (user) {
       fetchGigs();
@@ -389,7 +399,9 @@ export default function VenueCalendar() {
       artistOtherHoldIds: (artistOtherHolds || []).map(h => h.id),
       artistOtherApplicationIds: (artistOtherHolds || []).map(h => h.application_id)
     });
-    setConfirmMessage(`Great news! Your performance at ${roomName} on ${formattedDate} has been confirmed. This is no longer a hold - you're officially booked!\n\nWe're looking forward to having you perform.`);
+    const venueName = venueListing?.venue_name || 'the venue';
+    const roomSuffix = venueListing?.room_name ? ` – ${venueListing.room_name}` : '';
+    setConfirmMessage(`Your hold at ${venueName}${roomSuffix} on ${formattedDate} has been confirmed.`);
     setSendConfirmMessage(true);
     setConfirmShowTime('');
     setConfirmDialogOpen(true);
@@ -434,14 +446,11 @@ export default function VenueCalendar() {
 
     // Send confirmation message if enabled
     if (sendConfirmMessage && confirmMessage.trim()) {
-      await supabase.from('messages').insert({
-        thread_id: crypto.randomUUID(),
-        sender_id: user.id,
-        receiver_id: artistId,
+      await sendVenueArtistMessage({
+        senderId: user.id,
+        receiverId: artistId,
         subject: `Gig Confirmed: ${roomName} on ${formattedDate}`,
         content: confirmMessage,
-        is_read: false,
-        is_starred: false
       });
     }
     setConfirmingHold(false);
@@ -450,18 +459,16 @@ export default function VenueCalendar() {
     toast.success('Gig confirmed!');
     fetchGigs();
   };
-  const sendBookingDeletionMessage = async (artistId: string, gigDate: string, roomName: string, isConfirmed: boolean) => {
+  const sendBookingDeletionMessage = async (artistId: string, gigDate: string, roomName: string, isConfirmed: boolean, customContent?: string | null) => {
     if (!user || artistId === user.id) return;
     const formattedDate = format(parseLocalDate(gigDate), 'MMMM d, yyyy');
     const bookingType = isConfirmed ? 'booking' : 'hold';
-    await supabase.from('messages').insert({
-      thread_id: crypto.randomUUID(),
-      sender_id: user.id,
-      receiver_id: artistId,
+    const content = customContent ?? `Your ${bookingType} at ${roomName} on ${formattedDate} has been cancelled.`;
+    await sendVenueArtistMessage({
+      senderId: user.id,
+      receiverId: artistId,
       subject: `${isConfirmed ? 'Booking' : 'Hold'} Cancelled: ${roomName} on ${formattedDate}`,
-      content: `Your ${bookingType} at ${roomName} on ${formattedDate} has been cancelled.`,
-      is_read: false,
-      is_starred: false
+      content,
     });
   };
 
@@ -473,18 +480,38 @@ export default function VenueCalendar() {
 
   const handleDeleteHoldThisDay = async () => {
     if (!holdToDelete) return;
+    // Open notify dialog first; the actual delete runs after Send/Send-without-message.
+    const { data: venueListing } = await supabase.from('venue_listings').select('venue_name, room_name').eq('id', holdToDelete.venueListingId).single();
+    const venueName = venueListing?.venue_name || 'the venue';
+    const roomSuffix = venueListing?.room_name ? ` – ${venueListing.room_name}` : '';
+    const formattedDate = format(parseLocalDate(holdToDelete.gigDate), 'MMMM d, yyyy');
+    setNotifyDefault(`Your hold at ${venueName}${roomSuffix} on ${formattedDate} has been cancelled.`);
+    setNotifyRecipientName(holdToDelete.artistName);
+    setNotifySubject(`Hold Cancelled: ${venueName}${roomSuffix} on ${formattedDate}`);
+    setPendingDeleteScope('single');
+    setDeleteDialogOpen(false);
+    setNotifyOpen(true);
+  };
+
+  const performDeleteHoldThisDay = async (messageContent: string | null) => {
+    if (!holdToDelete) return;
     setDeletingHold(true);
+    setNotifySending(true);
     const { data: gigData } = await supabase.from('gig_listings').select('is_confirmed, venue_listing_id').eq('id', holdToDelete.gigId).single();
     const { data: venueListing } = await supabase.from('venue_listings').select('venue_name, room_name').eq('id', holdToDelete.venueListingId).single();
     const roomName = venueListing?.room_name || venueListing?.venue_name || 'Venue';
     const { error } = await supabase.from('gig_listings').delete().eq('id', holdToDelete.gigId);
-    if (error) { toast.error('Failed to delete hold'); setDeletingHold(false); return; }
+    if (error) { toast.error('Failed to delete hold'); setDeletingHold(false); setNotifySending(false); return; }
     if (holdToDelete.applicationId) {
       await supabase.from('applications').update({ status: 'archived' }).eq('id', holdToDelete.applicationId);
     }
-    await sendBookingDeletionMessage(holdToDelete.artistId, holdToDelete.gigDate, roomName, gigData?.is_confirmed ?? false);
+    if (messageContent) {
+      await sendBookingDeletionMessage(holdToDelete.artistId, holdToDelete.gigDate, roomName, gigData?.is_confirmed ?? false, messageContent);
+    }
     setDeletingHold(false);
-    setDeleteDialogOpen(false);
+    setNotifySending(false);
+    setNotifyOpen(false);
+    setPendingDeleteScope(null);
     setHoldToDelete(null);
     toast.success('Hold deleted');
     fetchGigs();
@@ -492,7 +519,21 @@ export default function VenueCalendar() {
 
   const handleDeleteAllHoldsForArtist = async () => {
     if (!holdToDelete) return;
+    const { data: venueListing } = await supabase.from('venue_listings').select('venue_name, room_name').eq('id', holdToDelete.venueListingId).single();
+    const venueName = venueListing?.venue_name || 'the venue';
+    const roomSuffix = venueListing?.room_name ? ` – ${venueListing.room_name}` : '';
+    setNotifyDefault(`Your holds at ${venueName}${roomSuffix} have been cancelled.`);
+    setNotifyRecipientName(holdToDelete.artistName);
+    setNotifySubject(`Holds Cancelled: ${venueName}${roomSuffix}`);
+    setPendingDeleteScope('all');
+    setDeleteDialogOpen(false);
+    setNotifyOpen(true);
+  };
+
+  const performDeleteAllHoldsForArtist = async (messageContent: string | null) => {
+    if (!holdToDelete || !user) return;
     setDeletingHold(true);
+    setNotifySending(true);
     const listingIds = venueListings.map(l => l.id);
     // Get all holds for this artist across all venue listings
     const { data: allHolds } = await supabase
@@ -508,16 +549,20 @@ export default function VenueCalendar() {
       if (appIds.length > 0) {
         await supabase.from('applications').update({ status: 'archived' }).in('id', appIds);
       }
-      // Send one consolidated cancellation message per room/date
-      const venueListingIds = [...new Set(allHolds.map(h => h.venue_listing_id))];
-      const { data: listings } = await supabase.from('venue_listings').select('id, venue_name, room_name').in('id', venueListingIds);
-      const listingMap = new Map((listings || []).map(l => [l.id, l.room_name || l.venue_name || 'Venue']));
-      for (const hold of allHolds) {
-        await sendBookingDeletionMessage(holdToDelete.artistId, hold.gig_date, listingMap.get(hold.venue_listing_id) || 'Venue', false);
+      // Send a single consolidated notification (if any message provided)
+      if (messageContent && holdToDelete.artistId !== user.id) {
+        await sendVenueArtistMessage({
+          senderId: user.id,
+          receiverId: holdToDelete.artistId,
+          subject: notifySubject || 'Holds Cancelled',
+          content: messageContent,
+        });
       }
     }
     setDeletingHold(false);
-    setDeleteDialogOpen(false);
+    setNotifySending(false);
+    setNotifyOpen(false);
+    setPendingDeleteScope(null);
     setHoldToDelete(null);
     toast.success('All holds for this artist deleted');
     fetchGigs();
@@ -1244,5 +1289,22 @@ export default function VenueCalendar() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AutoMessageDialog
+        open={notifyOpen}
+        onOpenChange={setNotifyOpen}
+        defaultMessage={notifyDefault}
+        recipientName={notifyRecipientName || 'Artist'}
+        sending={notifySending}
+        onSend={(msg) => {
+          if (pendingDeleteScope === 'single') return performDeleteHoldThisDay(msg);
+          if (pendingDeleteScope === 'all') return performDeleteAllHoldsForArtist(msg);
+        }}
+        onCancel={() => {
+          if (!notifySending) {
+            setPendingDeleteScope(null);
+          }
+        }}
+      />
     </div>;
 }

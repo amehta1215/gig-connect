@@ -14,6 +14,8 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import AutoMessageDialog from '@/components/AutoMessageDialog';
+import { sendVenueArtistMessage } from '@/lib/messaging';
 
 interface Opener {
   type: 'riff' | 'external';
@@ -79,6 +81,9 @@ export default function GigDetail() {
   const [externalOpenerName, setExternalOpenerName] = useState('');
   const [downloading, setDownloading] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [notifyDefault, setNotifyDefault] = useState('');
+  const [notifySending, setNotifySending] = useState(false);
 
   const handleDownloadPoster = async () => {
     if (!posterRef.current || !gig) return;
@@ -310,7 +315,21 @@ export default function GigDetail() {
 
   const handleCancelGig = async () => {
     if (!gig) return;
-    
+
+    // Build default notification text and open the AutoMessageDialog.
+    const venueName = venueListing?.venue_name || 'the venue';
+    const roomName = venueListing?.room_name ? ` – ${venueListing.room_name}` : '';
+    const formattedDate = format(parseLocalDate(gig.gig_date), 'MMMM d, yyyy');
+    setNotifyDefault(
+      `Your booking at ${venueName}${roomName} on ${formattedDate} has been cancelled.`
+    );
+    setCancelDialogOpen(false);
+    setNotifyOpen(true);
+  };
+
+  const performCancelGig = async (messageContent: string | null) => {
+    if (!gig || !user) return;
+    setNotifySending(true);
     setCancelling(true);
 
     // First get the application_id from the gig
@@ -334,13 +353,30 @@ export default function GigDetail() {
       .delete()
       .eq('id', gig.id);
 
-    setCancelling(false);
-
     if (error) {
+      setCancelling(false);
+      setNotifySending(false);
       toast.error('Failed to cancel gig');
       return;
     }
 
+    // Send notification if not a self-booked manual event
+    if (messageContent && gig.artist_id !== user.id) {
+      const venueName = venueListing?.venue_name || 'Venue';
+      const roomName = venueListing?.room_name;
+      const subjectLoc = roomName ? `${venueName} – ${roomName}` : venueName;
+      const formattedDate = format(parseLocalDate(gig.gig_date), 'MMMM d, yyyy');
+      await sendVenueArtistMessage({
+        senderId: user.id,
+        receiverId: gig.artist_id,
+        subject: `Booking Cancelled: ${subjectLoc} on ${formattedDate}`,
+        content: messageContent,
+      });
+    }
+
+    setCancelling(false);
+    setNotifySending(false);
+    setNotifyOpen(false);
     toast.success('Gig cancelled');
     navigate('/venue/calendar');
   };
@@ -620,6 +656,18 @@ export default function GigDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AutoMessageDialog
+        open={notifyOpen}
+        onOpenChange={setNotifyOpen}
+        defaultMessage={notifyDefault}
+        recipientName={artistName || 'Artist'}
+        sending={notifySending}
+        onSend={(msg) => performCancelGig(msg)}
+        onCancel={() => {
+          if (!notifySending) setNotifyOpen(false);
+        }}
+      />
     </div>
   );
 }
