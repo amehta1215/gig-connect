@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Send, Search, X, ChevronLeft, Paperclip, File, Image } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { getOrCreateThreadId } from '@/lib/messaging';
 
 interface Attachment {
   name: string;
@@ -195,7 +196,7 @@ export function ComposeMessagePanel({ onSuccess, onClose, initialArtist, initial
     if (!selectedArtist || (!content.trim() && attachments.length === 0) || !user) return;
 
     setSending(true);
-    const threadId = crypto.randomUUID();
+    const threadId = await getOrCreateThreadId(user.id, selectedArtist.id);
 
     const { error } = await supabase.from('messages').insert({
       thread_id: threadId,
