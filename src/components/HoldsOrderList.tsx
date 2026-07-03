@@ -10,7 +10,7 @@ interface HoldItem {
 interface HoldsOrderListProps {
   holds: HoldItem[];
   newArtistName: string;
-  onOrderChange: (newPriority: number) => void;
+  onOrderChange: (newPriority: number, orderedExistingIds: string[]) => void;
 }
 
 export default function HoldsOrderList({ holds, newArtistName, onOrderChange }: HoldsOrderListProps) {
@@ -33,7 +33,8 @@ export default function HoldsOrderList({ holds, newArtistName, onOrderChange }: 
     // Find the new artist's position and report it
     const newIndex = items.findIndex(item => item.isNew);
     if (newIndex !== -1) {
-      onOrderChange(newIndex + 1); // 1-based priority
+      const orderedExistingIds = items.filter(i => !i.isNew).map(i => i.id);
+      onOrderChange(newIndex + 1, orderedExistingIds); // 1-based priority
     }
   }, [items, onOrderChange]);
 
