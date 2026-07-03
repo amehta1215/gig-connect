@@ -1327,6 +1327,7 @@ export default function VenueCalendar() {
         onSend={(msg) => {
           if (pendingDeleteScope === 'single') return performDeleteHoldThisDay(msg);
           if (pendingDeleteScope === 'all') return performDeleteAllHoldsForArtist(msg);
+          if (pendingDeleteScope === 'preview') return performDeletePreviewGig(msg);
         }}
         onCancel={() => {
           if (!notifySending) {
