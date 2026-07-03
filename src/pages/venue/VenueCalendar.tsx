@@ -625,7 +625,7 @@ export default function VenueCalendar() {
 
         {/* Events on selected date */}
         <div className={cn("relative bg-card border border-border flex flex-col row-start-1 col-start-2", selectedDateBoxHeight > 400 ? "md:row-span-2" : "")} style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
-          <div className="flex-1 overflow-y-auto p-6 pb-2">
+          <div className="flex-1 overflow-y-auto overscroll-contain p-6 pb-2" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
