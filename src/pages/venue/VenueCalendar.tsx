@@ -624,7 +624,15 @@ export default function VenueCalendar() {
         </div>
 
         {/* Events on selected date */}
-        <div className="bg-card border border-border p-6 h-[400px] min-h-[400px] overflow-y-auto resize-y">
+        <div className="relative bg-card border border-border p-6 pb-8 overflow-y-auto" style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
+          <div className="absolute bottom-0 left-0 right-0 h-4 cursor-ns-resize flex items-center justify-center z-10 hover:bg-accent/20 transition-colors group"
+            onMouseDown={handleResizeStart}
+            onTouchStart={handleResizeStart}
+            role="button"
+            aria-label="Resize panel"
+            tabIndex={0}>
+            <div className="w-16 h-1 rounded-full bg-muted-foreground/30 group-hover:bg-muted-foreground/60 transition-colors" />
+          </div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
