@@ -113,9 +113,20 @@ export default function PublicFindVenues() {
     setSelectedLocation(location);
     setSearchTerm('');
   };
-  const handleVenueSelect = (venueId: string) => {
-    navigate(`/venues/${venueId}`);
+  const handleVenueSelect = (venueProfileId: string) => {
+    navigate(`/venues/${venueProfileId}`);
   };
+  // Deduplicate by venue_profile_id
+  const uniqueVenues = (() => {
+    const seen = new Set<string>();
+    const result: VenueListing[] = [];
+    for (const v of filteredVenues) {
+      if (seen.has(v.venue_profile_id)) continue;
+      seen.add(v.venue_profile_id);
+      result.push(v);
+    }
+    return result;
+  })();
   const clearAllFilters = () => {
     setSelectedGenres([]);
     setSelectedCapacities([]);
@@ -203,10 +214,10 @@ export default function PublicFindVenues() {
       {/* Results */}
       {loading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-card h-56 animate-pulse" />)}
-        </div> : filteredVenues.length === 0 ? <div className="text-center py-20">
+        </div> : uniqueVenues.length === 0 ? <div className="text-center py-20">
           <h3 className="font-display text-2xl text-muted-foreground">NO VENUES</h3>
         </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filteredVenues.map(venue => <div key={venue.id} onClick={() => navigate(`/venues/${venue.id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative">
+          {uniqueVenues.map(venue => <div key={venue.venue_profile_id} onClick={() => navigate(`/venues/${venue.venue_profile_id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative">
               {/* Favorite Heart Button */}
               <button onClick={e => {
           e.stopPropagation();
@@ -236,9 +247,6 @@ export default function PublicFindVenues() {
                 <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors tracking-wide font-bold">
                   {venue.venue_name}
                 </h3>
-                {venue.room_name && <p className="text-sm font-bold text-primary uppercase tracking-wide mt-0.5">
-                    {venue.room_name}
-                  </p>}
                 {venue.location && <p className="text-xs flex items-center gap-1 mt-1 text-primary">
                     <MapPin className="h-3 w-3" />
                     {venue.location}

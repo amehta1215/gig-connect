@@ -138,9 +138,20 @@ export default function FindVenues() {
     setSelectedLocation(location);
     setSearchTerm('');
   };
-  const handleVenueSelect = (venueId: string) => {
-    navigate(`/artist/venues/${venueId}`);
+  const handleVenueSelect = (venueProfileId: string) => {
+    navigate(`/artist/venue/${venueProfileId}`);
   };
+  // Deduplicate by venue_profile_id so each venue appears once
+  const uniqueVenues = (() => {
+    const seen = new Set<string>();
+    const result: VenueListing[] = [];
+    for (const v of filteredVenues) {
+      if (seen.has(v.venue_profile_id)) continue;
+      seen.add(v.venue_profile_id);
+      result.push(v);
+    }
+    return result;
+  })();
   const genreMultiSelect = (className?: string) => <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className={`bg-card border-border justify-start text-muted-foreground ${className || ''}`}>
@@ -225,10 +236,10 @@ export default function FindVenues() {
       {/* Results */}
       {loading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="bg-card h-56 animate-pulse" />)}
-        </div> : filteredVenues.length === 0 ? <div className="text-center py-20">
+        </div> : uniqueVenues.length === 0 ? <div className="text-center py-20">
           <h3 className="font-display text-2xl text-muted-foreground">NO VENUES</h3>
         </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filteredVenues.map(venue => <div key={venue.id} onClick={() => navigate(`/artist/venues/${venue.id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative">
+          {uniqueVenues.map(venue => <div key={venue.venue_profile_id} onClick={() => navigate(`/artist/venue/${venue.venue_profile_id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative">
               {/* Favorite Button */}
               <button onClick={e => handleToggleFavorite(e, venue.id)} className="absolute top-2 right-2 z-10 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors">
                 <Heart className={`h-5 w-5 transition-colors ${isFavorite(venue.id) ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
@@ -253,7 +264,7 @@ export default function FindVenues() {
               {/* Content */}
               <div className="p-3">
                 <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors tracking-wide font-semibold">
-                  {venue.venue_name}{venue.room_name && roomCountByVenueProfile[venue.venue_profile_id] > 1 && <span className="text-primary"> • {venue.room_name}</span>}
+                  {venue.venue_name}
                 </h3>
                 {venue.location && <p className="text-xs flex items-center gap-1 mt-1 text-primary">
                     <MapPin className="h-3 w-3" />

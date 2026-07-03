@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ChevronLeft, ChevronRight, MapPin, Music, Users, Heart } from 'lucide-react';
-import AuthDialog from '@/components/AuthDialog';
+import { ArrowLeft, MapPin, Music, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface VenueListing {
   id: string;
@@ -23,39 +22,33 @@ interface VenueProfile {
   id: string;
   picture: string | null;
 }
-export default function PublicVenueDetail() {
-  const { id } = useParams<{ id: string }>();
+
+export default function VenueDetail() {
+  const { venueProfileId } = useParams<{ venueProfileId: string }>();
   const navigate = useNavigate();
   const [listings, setListings] = useState<VenueListing[]>([]);
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const galleryScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (id) fetchData();
-  }, [id]);
+    if (venueProfileId) fetchData();
+  }, [venueProfileId]);
 
   const fetchData = async () => {
     setLoading(true);
     const { data: listingsData } = await supabase
       .from('venue_listings')
       .select('*')
-      .eq('venue_profile_id', id);
+      .eq('venue_profile_id', venueProfileId);
     if (listingsData) setListings(listingsData as VenueListing[]);
     const { data: profileData } = await supabase
       .from('venue_profiles')
       .select('id, picture')
-      .eq('id', id)
+      .eq('id', venueProfileId)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
     setLoading(false);
-  };
-
-  const handleAuthPrompt = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setAuthDialogOpen(true);
   };
 
   if (loading) {
@@ -74,6 +67,7 @@ export default function PublicVenueDetail() {
   }
 
   const shared = listings[0];
+  // Aggregate gallery pictures from all rooms (deduped)
   const galleryPictures = Array.from(new Set(listings.flatMap(l => l.pictures || [])));
 
   const scroll = (dir: 'left' | 'right') => {
@@ -89,11 +83,9 @@ export default function PublicVenueDetail() {
       <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
         <ArrowLeft className="h-5 w-5" />
       </Button>
-      <Button variant="ghost" size="icon" onClick={handleAuthPrompt} className="h-9 w-9">
-        <Heart className="h-6 w-6 text-muted-foreground hover:text-[#E8556D] transition-colors" />
-      </Button>
     </div>
 
+    {/* Gallery */}
     <div className="mb-6">
       {galleryPictures.length === 0 ? (
         <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
@@ -122,6 +114,7 @@ export default function PublicVenueDetail() {
       )}
     </div>
 
+    {/* Venue Info */}
     <div className="space-y-4 mb-8">
       <h1 className="font-display text-4xl md:text-5xl text-black font-bold tracking-wide">
         {shared.venue_name}
@@ -152,13 +145,14 @@ export default function PublicVenueDetail() {
       )}
     </div>
 
+    {/* Rooms */}
     <div>
       <h2 className="font-display text-2xl text-black font-bold tracking-wide mb-4">ROOMS</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {listings.map(room => (
           <div
             key={room.id}
-            onClick={() => navigate(`/rooms/${room.id}`)}
+            onClick={() => navigate(`/artist/venues/${room.id}`)}
             className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative"
           >
             <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
@@ -197,7 +191,5 @@ export default function PublicVenueDetail() {
         ))}
       </div>
     </div>
-
-    <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} promptMessage="Login or sign up to save favorites" />
   </div>;
 }
