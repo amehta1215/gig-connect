@@ -152,6 +152,17 @@ export default function FindVenues() {
     }
     return result;
   })();
+  // Capacity range per venue_profile_id (uses all listings, not just filtered)
+  const capacityRangeByVenue = venues.reduce((acc, v) => {
+    if (v.capacity == null) return acc;
+    const cur = acc[v.venue_profile_id];
+    if (!cur) acc[v.venue_profile_id] = { min: v.capacity, max: v.capacity };
+    else {
+      cur.min = Math.min(cur.min, v.capacity);
+      cur.max = Math.max(cur.max, v.capacity);
+    }
+    return acc;
+  }, {} as Record<string, { min: number; max: number }>);
   const genreMultiSelect = (className?: string) => <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className={`bg-card border-border justify-start text-muted-foreground ${className || ''}`}>
@@ -255,10 +266,15 @@ export default function FindVenues() {
                     </div>;
           })()}
                 {/* Capacity badge */}
-                {venue.capacity && <div className="absolute top-2 left-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
+                {(() => {
+                  const range = capacityRangeByVenue[venue.venue_profile_id];
+                  if (!range) return null;
+                  const label = range.min === range.max ? `${range.min}` : `${range.min}–${range.max}`;
+                  return <div className="absolute top-2 left-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
                     <Users className="h-3 w-3" />
-                    {venue.capacity}
-                  </div>}
+                    {label}
+                  </div>;
+                })()}
               </div>
 
               {/* Content */}
