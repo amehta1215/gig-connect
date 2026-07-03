@@ -52,6 +52,11 @@ export default function VenueCalendar() {
   const [gigs, setGigs] = useState<GigListing[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(true);
+  const [selectedDateBoxHeight, setSelectedDateBoxHeight] = useState(400);
+  const resizeStartYRef = useRef<number>(0);
+  const resizeStartHeightRef = useRef<number>(400);
+  const resizeDraggingRef = useRef(false);
+
 
   // Create event dialog state
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -192,6 +197,43 @@ export default function VenueCalendar() {
     }
     setLoading(false);
   };
+
+  const handleResizeStart = (e: React.MouseEvent | React.TouchEvent) => {
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    resizeStartYRef.current = clientY;
+    resizeStartHeightRef.current = selectedDateBoxHeight;
+    resizeDraggingRef.current = true;
+    document.body.style.cursor = 'ns-resize';
+    document.body.style.userSelect = 'none';
+  };
+
+  const handleResizeMove = (e: MouseEvent | TouchEvent) => {
+    if (!resizeDraggingRef.current) return;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const delta = clientY - resizeStartYRef.current;
+    const newHeight = Math.max(250, resizeStartHeightRef.current + delta);
+    setSelectedDateBoxHeight(newHeight);
+  };
+
+  const handleResizeEnd = () => {
+    resizeDraggingRef.current = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleResizeMove);
+    window.addEventListener('mouseup', handleResizeEnd);
+    window.addEventListener('touchmove', handleResizeMove);
+    window.addEventListener('touchend', handleResizeEnd);
+    return () => {
+      window.removeEventListener('mousemove', handleResizeMove);
+      window.removeEventListener('mouseup', handleResizeEnd);
+      window.removeEventListener('touchmove', handleResizeMove);
+      window.removeEventListener('touchend', handleResizeEnd);
+    };
+  }, []);
+
 
   const fetchSingleGig = async (gigId: string): Promise<GigListing | null> => {
     const { data: gig } = await supabase.from('gig_listings').select('*').eq('id', gigId).single();
@@ -582,7 +624,15 @@ export default function VenueCalendar() {
         </div>
 
         {/* Events on selected date */}
-        <div className="bg-card border border-border p-6 h-[400px] min-h-[400px] overflow-y-auto resize-y">
+        <div className="relative bg-card border border-border p-6 pb-8 overflow-y-auto" style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
+          <div className="absolute bottom-0 left-0 right-0 h-4 cursor-ns-resize flex items-center justify-center z-10 hover:bg-accent/20 transition-colors group"
+            onMouseDown={handleResizeStart}
+            onTouchStart={handleResizeStart}
+            role="button"
+            aria-label="Resize panel"
+            tabIndex={0}>
+            <div className="w-16 h-1 rounded-full bg-muted-foreground/30 group-hover:bg-muted-foreground/60 transition-colors" />
+          </div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
