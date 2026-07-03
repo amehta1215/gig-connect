@@ -658,7 +658,7 @@ export default function VenueCalendar() {
                     setPreviewDialogOpen(true);
                   }} className="text-left flex-1 hover:opacity-80 transition-opacity">
                             <div className="flex items-center">
-                              <span className="inline-flex items-center justify-center text-primary text-xs font-bold mr-1.5 flex-shrink-0 font-display">#{index + 1}</span>
+                              <span className="inline-flex items-center justify-center text-primary text-xs font-bold mr-1.5 flex-shrink-0 font-display">#{gig.hold_priority || index + 1}</span>
                               <span className="font-display text-primary text-base">{artistName}</span>
                             </div>
                             <p className="text-sm text-muted-foreground">{roomDisplay}{timeDisplay ? ` · ${timeDisplay}` : ''}</p>
