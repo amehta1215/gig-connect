@@ -625,7 +625,7 @@ export default function VenueCalendar() {
 
         {/* Events on selected date */}
         <div className={cn("relative bg-card border border-border p-6 pb-8 overflow-y-auto row-start-1 col-start-2", selectedDateBoxHeight > 400 ? "md:row-span-2" : "")} style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
-          <div className="absolute bottom-0 left-0 right-0 h-4 cursor-ns-resize flex items-center justify-center z-10 hover:bg-accent/20 transition-colors group"
+          <div className="absolute bottom-0 left-0 right-0 h-4 cursor-ns-resize flex items-center justify-center z-10 transition-colors group"
             onMouseDown={handleResizeStart}
             onTouchStart={handleResizeStart}
             role="button"
