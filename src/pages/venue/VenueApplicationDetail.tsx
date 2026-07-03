@@ -17,6 +17,8 @@ import { toast } from 'sonner';
 import { cn, parseLocalDate } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
 import HoldsOrderList from '@/components/HoldsOrderList';
+import AutoMessageDialog from '@/components/AutoMessageDialog';
+import { sendVenueArtistMessage } from '@/lib/messaging';
 interface ArtistProfile {
   band_name: string | null;
   genre: string | null;
@@ -143,6 +145,11 @@ export default function VenueApplicationDetail() {
   const [sendAcceptMessage, setSendAcceptMessage] = useState(true);
   const [acceptMessage, setAcceptMessage] = useState('');
 
+  // Archive-notification dialog
+  const [archiveNotifyOpen, setArchiveNotifyOpen] = useState(false);
+  const [archiveNotifyDefault, setArchiveNotifyDefault] = useState('');
+  const [archiveSending, setArchiveSending] = useState(false);
+
   // Dynamically update the draft message when dates/mode/acceptType change
   useEffect(() => {
     if (!acceptDialogOpen) return;
@@ -268,6 +275,17 @@ export default function VenueApplicationDetail() {
   const updateStatus = async (newStatus: 'accepted' | 'archived' | 'in_progress') => {
     if (!application) return;
 
+    // Archiving an in_progress application: prompt to notify the artist first.
+    if (newStatus === 'archived' && application.status === 'in_progress') {
+      const venueName = venueListing?.venue_name || 'the venue';
+      const roomSuffix = venueListing?.room_name ? ` – ${venueListing.room_name}` : '';
+      setArchiveNotifyDefault(
+        `Thank you for applying to ${venueName}${roomSuffix}. Unfortunately we won't be moving forward with your application at this time.`
+      );
+      setArchiveNotifyOpen(true);
+      return;
+    }
+
     // If rescinding acceptance, delete the associated gig listing first
     if (application.status === 'accepted' && newStatus === 'in_progress') {
       const {
@@ -292,6 +310,25 @@ export default function VenueApplicationDetail() {
     } else {
       navigate('/venue');
     }
+  };
+
+  const performArchive = async (messageContent: string | null) => {
+    if (!application || !user) return;
+    setArchiveSending(true);
+    await supabase.from('applications').update({ status: 'archived' }).eq('id', application.id);
+    if (messageContent) {
+      const venueName = venueListing?.venue_name || 'Venue';
+      const roomSuffix = venueListing?.room_name ? ` – ${venueListing.room_name}` : '';
+      await sendVenueArtistMessage({
+        senderId: user.id,
+        receiverId: application.artist_id,
+        subject: `Application Update: ${venueName}${roomSuffix}`,
+        content: messageContent,
+      });
+    }
+    setArchiveSending(false);
+    setArchiveNotifyOpen(false);
+    navigate('/venue');
   };
   const fetchExistingHolds = useCallback(async (date: Date) => {
     if (!application?.venue_listing_id) return;
@@ -960,5 +997,14 @@ export default function VenueApplicationDetail() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AutoMessageDialog
+        open={archiveNotifyOpen}
+        onOpenChange={setArchiveNotifyOpen}
+        defaultMessage={archiveNotifyDefault}
+        recipientName={bandName || 'Artist'}
+        sending={archiveSending}
+        onSend={(msg) => performArchive(msg)}
+      />
     </div>;
 }
