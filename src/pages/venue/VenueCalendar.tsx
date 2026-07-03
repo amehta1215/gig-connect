@@ -731,7 +731,7 @@ export default function VenueCalendar() {
       </div>
 
       {/* Upcoming confirmed shows */}
-      <div className="bg-card border border-border p-6">
+      <div className="bg-card border border-border p-6 md:w-[calc(50%-12px)]">
         <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
         {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
             {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
