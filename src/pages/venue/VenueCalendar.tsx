@@ -124,7 +124,7 @@ export default function VenueCalendar() {
   const [notifyRecipientName, setNotifyRecipientName] = useState('');
   const [notifySubject, setNotifySubject] = useState('');
   const [notifySending, setNotifySending] = useState(false);
-  const [pendingDeleteScope, setPendingDeleteScope] = useState<'single' | 'all' | null>(null);
+  const [pendingDeleteScope, setPendingDeleteScope] = useState<'single' | 'all' | 'preview' | null>(null);
   useEffect(() => {
     if (user) {
       fetchGigs();
