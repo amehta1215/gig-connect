@@ -399,7 +399,9 @@ export default function VenueCalendar() {
       artistOtherHoldIds: (artistOtherHolds || []).map(h => h.id),
       artistOtherApplicationIds: (artistOtherHolds || []).map(h => h.application_id)
     });
-    setConfirmMessage(`Great news! Your performance at ${roomName} on ${formattedDate} has been confirmed. This is no longer a hold - you're officially booked!\n\nWe're looking forward to having you perform.`);
+    const venueName = venueListing?.venue_name || 'the venue';
+    const roomSuffix = venueListing?.room_name ? ` – ${venueListing.room_name}` : '';
+    setConfirmMessage(`Your hold at ${venueName}${roomSuffix} on ${formattedDate} has been confirmed.`);
     setSendConfirmMessage(true);
     setConfirmShowTime('');
     setConfirmDialogOpen(true);
