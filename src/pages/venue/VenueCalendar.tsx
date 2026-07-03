@@ -1293,22 +1293,22 @@ export default function VenueCalendar() {
             </Button>
             <Button
               variant="destructive"
-              onClick={async () => {
+              onClick={() => {
                 if (!previewGig) return;
-                setDeletingPreviewGig(true);
-                const { error } = await supabase.from('gig_listings').delete().eq('id', previewGig.id);
-                if (error) { setDeletingPreviewGig(false); toast.error('Failed to delete'); return; }
-                if (previewGig.is_confirmed && previewGig.application_id) {
-                  await supabase.from('applications').update({ status: 'in_progress' }).eq('id', previewGig.application_id);
-                }
                 const roomName = previewGig.venue_listing?.room_name || previewGig.venue_listing?.venue_name || 'Venue';
-                await sendBookingDeletionMessage(previewGig.artist_id, previewGig.gig_date, roomName, previewGig.is_confirmed);
-                setDeletingPreviewGig(false);
-                toast.success(`${previewGig.is_confirmed ? 'Gig' : 'Hold'} deleted`);
+                const formattedDate = format(parseLocalDate(previewGig.gig_date), 'MMMM d, yyyy');
+                const bookingType = previewGig.is_confirmed ? 'booking' : 'hold';
+                const artistName = previewGig.manual_artist_name || previewGig.artist_profile?.band_name || (previewGig.artist ? `${previewGig.artist.first_name} ${previewGig.artist.last_name}` : 'Artist');
+                const hasArtist = !!previewGig.artist_id && previewGig.artist_id !== user?.id;
                 setPreviewDeleteDialogOpen(false);
-                setPreviewDialogOpen(false);
-                setPreviewEditing(false);
-                fetchGigs();
+                if (!hasArtist) {
+                  performDeletePreviewGig(null);
+                  return;
+                }
+                setNotifyRecipientName(artistName);
+                setNotifyDefault(`Your ${bookingType} at ${roomName} on ${formattedDate} has been cancelled.`);
+                setPendingDeleteScope('preview');
+                setNotifyOpen(true);
               }}
               disabled={deletingPreviewGig}
             >
