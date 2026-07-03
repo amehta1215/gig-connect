@@ -624,15 +624,8 @@ export default function VenueCalendar() {
         </div>
 
         {/* Events on selected date */}
-        <div className={cn("relative bg-card border border-border p-6 pb-8 overflow-y-auto row-start-1 col-start-2", selectedDateBoxHeight > 400 ? "md:row-span-2" : "")} style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
-          <div className="absolute bottom-0 left-0 right-0 h-4 cursor-ns-resize flex items-center justify-center z-10 transition-colors group"
-            onMouseDown={handleResizeStart}
-            onTouchStart={handleResizeStart}
-            role="button"
-            aria-label="Resize panel"
-            tabIndex={0}>
-            <div className="w-16 h-1 rounded-full bg-muted-foreground/30 group-hover:bg-muted-foreground/60 transition-colors" />
-          </div>
+        <div className={cn("relative bg-card border border-border flex flex-col row-start-1 col-start-2", selectedDateBoxHeight > 400 ? "md:row-span-2" : "")} style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
+          <div className="flex-1 overflow-y-auto p-6 pb-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
@@ -727,6 +720,15 @@ export default function VenueCalendar() {
             })}
                 </div>}
             </div>
+          </div>
+          <div className="h-4 cursor-ns-resize flex items-center justify-center z-10 transition-colors group flex-shrink-0"
+            onMouseDown={handleResizeStart}
+            onTouchStart={handleResizeStart}
+            role="button"
+            aria-label="Resize panel"
+            tabIndex={0}>
+            <div className="w-16 h-1 rounded-full bg-muted-foreground/30 group-hover:bg-muted-foreground/60 transition-colors" />
+          </div>
         </div>
 
         {/* Upcoming confirmed shows */}
