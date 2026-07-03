@@ -1041,5 +1041,14 @@ export default function VenueApplicationDetail() {
         sending={archiveSending}
         onSend={(msg) => performArchive(msg)}
       />
+
+      <AutoMessageDialog
+        open={rescindNotifyOpen}
+        onOpenChange={setRescindNotifyOpen}
+        defaultMessage={rescindNotifyDefault}
+        recipientName={bandName || 'Artist'}
+        sending={rescindSending}
+        onSend={(msg) => performRescind(msg)}
+      />
     </div>;
 }
