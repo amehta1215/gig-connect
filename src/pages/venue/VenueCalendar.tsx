@@ -599,9 +599,9 @@ export default function VenueCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-6 items-start">
         {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px]">
+        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px] h-[400px]">
           <Calendar
             mode="single"
             selected={selectedDate}
