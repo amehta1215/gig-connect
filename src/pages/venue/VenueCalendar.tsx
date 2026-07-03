@@ -599,7 +599,7 @@ export default function VenueCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-2 md:grid-rows-[auto_auto] gap-6 items-start">
+      <div className="grid md:grid-cols-2 md:grid-rows-[400px_auto] gap-6 items-start">
         {/* Calendar */}
         <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px] h-[400px] row-start-1 col-start-1">
           <Calendar
