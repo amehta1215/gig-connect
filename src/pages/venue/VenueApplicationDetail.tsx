@@ -419,14 +419,27 @@ export default function VenueApplicationDetail() {
 
     const isHold = dateMode !== 'single' || acceptType === 'hold';
 
-    // For single date with hold, handle priority shifting
+    // For single date with hold, re-assign priorities for existing holds
+    // based on the drag-and-drop order (excluding the new artist's slot).
     if (dateMode === 'single' && isHold && existingHolds.length > 0) {
-      for (const hold of existingHolds) {
-        if (hold.hold_priority >= holdPriority) {
-          await supabase.from('gig_listings').update({
-            hold_priority: hold.hold_priority + 1
-          }).eq('id', hold.id);
-        }
+      const existingOrder =
+        orderedExistingHoldIds.length === existingHolds.length
+          ? orderedExistingHoldIds
+          : [...existingHolds]
+              .sort((a, b) => a.hold_priority - b.hold_priority)
+              .map(h => h.id);
+
+      // Build final ordering with the new artist inserted at holdPriority (1-based).
+      const finalOrder: (string | 'new')[] = [...existingOrder];
+      const insertIndex = Math.min(Math.max(holdPriority - 1, 0), finalOrder.length);
+      finalOrder.splice(insertIndex, 0, 'new');
+
+      for (let i = 0; i < finalOrder.length; i++) {
+        const id = finalOrder[i];
+        if (id === 'new') continue;
+        await supabase.from('gig_listings').update({
+          hold_priority: i + 1,
+        }).eq('id', id);
       }
     }
 
