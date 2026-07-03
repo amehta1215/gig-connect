@@ -544,14 +544,11 @@ export default function VenueApplicationDetail() {
         messageToSend = `We're pleased to let you know that you have been put on hold for ${roomName} for the following dates: ${dateText}.\n\nWe'll be in touch with more details soon.`;
       }
 
-      await supabase.from('messages').insert({
-        thread_id: crypto.randomUUID(),
-        sender_id: user.id,
-        receiver_id: application.artist_id,
+      await sendVenueArtistMessage({
+        senderId: user.id,
+        receiverId: application.artist_id,
         subject: `Application Update: ${venueListing?.room_name || venueListing?.venue_name || 'Venue'}`,
         content: messageToSend,
-        is_read: false,
-        is_starred: false
       });
     }
 
