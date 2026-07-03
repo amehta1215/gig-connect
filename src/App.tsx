@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 // Public pages
 import PublicDashboard from "./pages/public/PublicDashboard";
 import PublicVenueDetail from "./pages/public/PublicVenueDetail";
+import PublicRoomDetail from "./pages/public/PublicRoomDetail";
 
 // Artist pages
 import ArtistDashboard from "./pages/artist/ArtistDashboard";
@@ -26,6 +27,7 @@ import ArtistGigDetail from "./pages/artist/ArtistGigDetail";
 import ArtistFavorites from "./pages/artist/ArtistFavorites";
 import FindVenues from "./pages/artist/FindVenues";
 import VenueListingDetail from "./pages/artist/VenueListingDetail";
+import VenueDetail from "./pages/artist/VenueDetail";
 import ApplicationDetail from "./pages/artist/ApplicationDetail";
 
 // Venue pages
@@ -51,6 +53,7 @@ const App = () => (
             {/* Public routes - accessible to everyone */}
             <Route path="/" element={<PublicDashboard />}>
               <Route path="venues/:id" element={<PublicVenueDetail />} />
+              <Route path="rooms/:id" element={<PublicRoomDetail />} />
             </Route>
             <Route path="/auth" element={<Login />} />
             <Route path="/login" element={<Login />} />
@@ -73,6 +76,7 @@ const App = () => (
               <Route path="calendar" element={<ArtistCalendar />} />
               <Route path="calendar/:id" element={<ArtistGigDetail />} />
               <Route path="venues/:id" element={<VenueListingDetail />} />
+              <Route path="venue/:venueProfileId" element={<VenueDetail />} />
             </Route>
             <Route
               path="/artist/profile"
