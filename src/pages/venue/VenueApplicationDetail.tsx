@@ -131,6 +131,7 @@ export default function VenueApplicationDetail() {
   const [selectedGigTime, setSelectedGigTime] = useState('');
   const [acceptType, setAcceptType] = useState<'confirmed' | 'hold'>('confirmed');
   const [holdPriority, setHoldPriority] = useState(1);
+  const [orderedExistingHoldIds, setOrderedExistingHoldIds] = useState<string[]>([]);
   const [existingHolds, setExistingHolds] = useState<{
     id: string;
     artist_name: string;
@@ -902,7 +903,14 @@ export default function VenueApplicationDetail() {
             {dateMode === 'single' && acceptType === 'hold' && existingHolds.length > 0 && (
               <div className="space-y-2">
                 <label className="font-display text-xs text-muted-foreground tracking-widest block">HOLD PRIORITY</label>
-                <HoldsOrderList holds={existingHolds} newArtistName={bandName} onOrderChange={setHoldPriority} />
+                <HoldsOrderList
+                  holds={existingHolds}
+                  newArtistName={bandName}
+                  onOrderChange={(p, ids) => {
+                    setHoldPriority(p);
+                    setOrderedExistingHoldIds(ids);
+                  }}
+                />
               </div>
             )}
 
