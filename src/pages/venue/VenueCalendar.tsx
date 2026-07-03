@@ -52,6 +52,11 @@ export default function VenueCalendar() {
   const [gigs, setGigs] = useState<GigListing[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(true);
+  const [selectedDateBoxHeight, setSelectedDateBoxHeight] = useState(400);
+  const resizeStartYRef = useRef<number>(0);
+  const resizeStartHeightRef = useRef<number>(400);
+  const resizeDraggingRef = useRef(false);
+
 
   // Create event dialog state
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
