@@ -599,9 +599,9 @@ export default function VenueCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-2 gap-6 items-start">
+      <div className="grid md:grid-cols-2 md:grid-rows-[400px_auto] gap-6 items-start">
         {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px] h-[400px]">
+        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px] h-[400px] row-start-1 col-start-1">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -624,7 +624,7 @@ export default function VenueCalendar() {
         </div>
 
         {/* Events on selected date */}
-        <div className="relative bg-card border border-border p-6 pb-8 overflow-y-auto" style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
+        <div className={cn("relative bg-card border border-border p-6 pb-8 overflow-y-auto row-start-1 col-start-2", selectedDateBoxHeight > 400 ? "md:row-span-2" : "")} style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
           <div className="absolute bottom-0 left-0 right-0 h-4 cursor-ns-resize flex items-center justify-center z-10 hover:bg-accent/20 transition-colors group"
             onMouseDown={handleResizeStart}
             onTouchStart={handleResizeStart}
@@ -728,27 +728,27 @@ export default function VenueCalendar() {
                 </div>}
             </div>
         </div>
-      </div>
 
-      {/* Upcoming confirmed shows */}
-      <div className={cn("bg-card border border-border p-6 transition-all", selectedDateBoxHeight > 400 ? "md:w-[calc(50%-12px)]" : "w-full")}>
+        {/* Upcoming confirmed shows */}
+        <div className={cn("bg-card border border-border p-6 transition-all row-start-2", selectedDateBoxHeight > 400 ? "col-start-1" : "col-span-2")}>
 
-        <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
-        {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
-            {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
-          const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
-          const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
-          return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
-                  <div>
-                    <p className="font-display text-primary">{artistName}</p>
-                    <p className="text-xs text-muted-foreground">{roomDisplay}</p>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {format(parseLocalDate(gig.gig_date), 'MMM d, yyyy')}
-                  </span>
-                </button>;
-        })}
-          </div>}
+          <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
+          {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
+              {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
+            const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+            const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
+            return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
+                    <div>
+                      <p className="font-display text-primary">{artistName}</p>
+                      <p className="text-xs text-muted-foreground">{roomDisplay}</p>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {format(parseLocalDate(gig.gig_date), 'MMM d, yyyy')}
+                    </span>
+                  </button>;
+          })}
+            </div>}
+        </div>
       </div>
 
       {/* Create Event Dialog */}
