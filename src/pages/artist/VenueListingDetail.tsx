@@ -87,7 +87,9 @@ export default function VenueListingDetail() {
   const [listing, setListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
-  const [existingApplicationId, setExistingApplicationId] = useState<string | null>(null);
+  const [inProgressApplicationId, setInProgressApplicationId] = useState<string | null>(null);
+  const [priorApplications, setPriorApplications] = useState<{ id: string; created_at: string }[]>([]);
+  const [priorDialogOpen, setPriorDialogOpen] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState<boolean | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [availability, setAvailability] = useState<AvailabilityPreference | null>(null);
@@ -130,10 +132,25 @@ export default function VenueListingDetail() {
   };
   const checkExistingApplication = async () => {
     if (!user || !id) return;
-    const {
+    const { data } = await supabase
+      .from('applications')
+      .select('id, status, created_at')
+      .eq('artist_id', user.id)
+      .eq('venue_listing_id', id)
+      .order('created_at', { ascending: false });
+    if (!data || data.length === 0) {
+      setInProgressApplicationId(null);
+      setPriorApplications([]);
+      return;
+    }
+    const inProgress = data.find(a => a.status === 'in_progress');
+    setInProgressApplicationId(inProgress?.id || null);
+    // Prior = archived/accepted (only shown when no in_progress exists)
+    setPriorApplications(
       data
-    } = await supabase.from('applications').select('id').eq('artist_id', user.id).eq('venue_listing_id', id).maybeSingle();
-    setExistingApplicationId(data?.id || null);
+        .filter(a => a.status !== 'in_progress')
+        .map(a => ({ id: a.id, created_at: a.created_at }))
+    );
   };
   const togglePayment = (payment: PaymentPreference) => {
     if (paymentPreferences.includes(payment)) {
@@ -295,9 +312,9 @@ export default function VenueListingDetail() {
             <div className="bg-card border border-border rounded-lg p-6 space-y-6">
               <h2 className="font-display text-2xl font-bold text-primary">APPLY</h2>
 
-              {existingApplicationId ? <div className="text-center">
+              {inProgressApplicationId ? <div className="text-center">
                   <p className="text-muted-foreground">You've already applied to this room</p>
-                  <Button variant="outline" onClick={() => navigate(`/artist/applications/${existingApplicationId}`)} className="mt-3 font-display tracking-widest">
+                  <Button variant="outline" onClick={() => navigate(`/artist/applications/${inProgressApplicationId}`)} className="mt-3 font-display tracking-widest">
                     VIEW APPLICATION
                   </Button>
                 </div> : isProfileComplete === false ? <div className="text-center py-4">
@@ -309,6 +326,24 @@ export default function VenueListingDetail() {
                     COMPLETE PROFILE BEFORE APPLYING
                   </button>
                 </div> : <div className="relative">
+                  {priorApplications.length > 0 && (
+                    <p className="text-xs text-muted-foreground mb-4">
+                      You've applied to this room before.{' '}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (priorApplications.length === 1) {
+                            navigate(`/artist/applications/${priorApplications[0].id}`);
+                          } else {
+                            setPriorDialogOpen(true);
+                          }
+                        }}
+                        className="underline hover:text-primary transition-colors"
+                      >
+                        View prior applications
+                      </button>
+                    </p>
+                  )}
 
                   {/* Availability */}
                   <div className="space-y-3">
@@ -418,6 +453,33 @@ export default function VenueListingDetail() {
             <Button variant="outline" onClick={() => navigate('/artist/applications')} className="w-full font-display tracking-widest">
               VIEW MY APPLICATIONS
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Prior Applications Dialog */}
+      <Dialog open={priorDialogOpen} onOpenChange={setPriorDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display tracking-wide">PRIOR APPLICATIONS</DialogTitle>
+            <DialogDescription>
+              Your previous applications to this room.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 mt-2">
+            {priorApplications.map(app => (
+              <button
+                key={app.id}
+                type="button"
+                onClick={() => {
+                  setPriorDialogOpen(false);
+                  navigate(`/artist/applications/${app.id}`);
+                }}
+                className="text-left px-3 py-2 border border-border rounded-md hover:border-primary hover:bg-secondary transition-colors text-sm"
+              >
+                Application on {format(new Date(app.created_at), 'MMM d, yyyy')}
+              </button>
+            ))}
           </div>
         </DialogContent>
       </Dialog>
