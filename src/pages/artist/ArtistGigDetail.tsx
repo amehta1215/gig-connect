@@ -154,7 +154,9 @@ export default function ArtistGigDetail() {
   };
 
   // Check if this is a manual event (artist-created without application)
-  const isManualEvent = gig && !gig.application_id;
+  // Artist-created manual events are identified by having manual_venue_name populated
+  // (venue-created manual events use manual_artist_name instead and should not be editable here)
+  const isManualEvent = gig && !gig.application_id && !!gig.manual_venue_name;
   useEffect(() => {
     if (id && user) {
       fetchGig();
