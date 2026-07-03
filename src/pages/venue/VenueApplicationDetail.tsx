@@ -150,6 +150,11 @@ export default function VenueApplicationDetail() {
   const [archiveNotifyDefault, setArchiveNotifyDefault] = useState('');
   const [archiveSending, setArchiveSending] = useState(false);
 
+  // Rescind-notification dialog (accepted/hold → in_progress)
+  const [rescindNotifyOpen, setRescindNotifyOpen] = useState(false);
+  const [rescindNotifyDefault, setRescindNotifyDefault] = useState('');
+  const [rescindSending, setRescindSending] = useState(false);
+
   // Dynamically update the draft message when dates/mode/acceptType change
   useEffect(() => {
     if (!acceptDialogOpen) return;
@@ -288,14 +293,16 @@ export default function VenueApplicationDetail() {
 
     // If rescinding acceptance, delete the associated gig listing first
     if (application.status === 'accepted' && newStatus === 'in_progress') {
-      const {
-        error: deleteError
-      } = await supabase.from('gig_listings').delete().eq('application_id', application.id);
-      if (deleteError) {
-        toast.error('Failed to remove gig listing');
-        return;
-      }
-      toast.success('Acceptance rescinded and gig removed from calendar');
+      const venueName = venueListing?.venue_name || 'the venue';
+      const roomSuffix = venueListing?.room_name ? ` – ${venueListing.room_name}` : '';
+      const wasHold = gigStatus === 'hold';
+      setRescindNotifyDefault(
+        wasHold
+          ? `We wanted to let you know that we're releasing your hold for ${venueName}${roomSuffix}. Thanks so much for your interest — we'll be in touch if anything else opens up.`
+          : `We wanted to let you know that we're rescinding the confirmed booking for ${venueName}${roomSuffix}. We're sorry for the inconvenience and appreciate your understanding.`
+      );
+      setRescindNotifyOpen(true);
+      return;
     }
     await supabase.from('applications').update({
       status: newStatus
@@ -330,6 +337,37 @@ export default function VenueApplicationDetail() {
     setArchiveNotifyOpen(false);
     navigate('/venue');
   };
+
+  const performRescind = async (messageContent: string | null) => {
+    if (!application || !user) return;
+    setRescindSending(true);
+    const { error: deleteError } = await supabase
+      .from('gig_listings')
+      .delete()
+      .eq('application_id', application.id);
+    if (deleteError) {
+      toast.error('Failed to remove gig listing');
+      setRescindSending(false);
+      return;
+    }
+    await supabase.from('applications').update({ status: 'in_progress' }).eq('id', application.id);
+    if (messageContent) {
+      const venueName = venueListing?.venue_name || 'Venue';
+      const roomSuffix = venueListing?.room_name ? ` – ${venueListing.room_name}` : '';
+      await sendVenueArtistMessage({
+        senderId: user.id,
+        receiverId: application.artist_id,
+        subject: `Application Update: ${venueName}${roomSuffix}`,
+        content: messageContent,
+      });
+    }
+    toast.success('Acceptance rescinded and gig removed from calendar');
+    setRescindSending(false);
+    setRescindNotifyOpen(false);
+    setApplication({ ...application, status: 'in_progress' });
+    setGigStatus(null);
+  };
+
   const fetchExistingHolds = useCallback(async (date: Date) => {
     if (!application?.venue_listing_id) return;
     const dateStr = format(date, 'yyyy-MM-dd');
