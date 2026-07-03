@@ -59,7 +59,7 @@ const lineupOptions = [{
   id: 'solo_performer',
   label: 'Solo'
 }];
-export default function PublicVenueDetail() {
+export default function PublicRoomDetail() {
   const {
     id
   } = useParams<{
