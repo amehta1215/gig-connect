@@ -1289,5 +1289,22 @@ export default function VenueCalendar() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AutoMessageDialog
+        open={notifyOpen}
+        onOpenChange={setNotifyOpen}
+        defaultMessage={notifyDefault}
+        recipientName={notifyRecipientName || 'Artist'}
+        sending={notifySending}
+        onSend={(msg) => {
+          if (pendingDeleteScope === 'single') return performDeleteHoldThisDay(msg);
+          if (pendingDeleteScope === 'all') return performDeleteAllHoldsForArtist(msg);
+        }}
+        onCancel={() => {
+          if (!notifySending) {
+            setPendingDeleteScope(null);
+          }
+        }}
+      />
     </div>;
 }
