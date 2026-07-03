@@ -198,6 +198,43 @@ export default function VenueCalendar() {
     setLoading(false);
   };
 
+  const handleResizeStart = (e: React.MouseEvent | React.TouchEvent) => {
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    resizeStartYRef.current = clientY;
+    resizeStartHeightRef.current = selectedDateBoxHeight;
+    resizeDraggingRef.current = true;
+    document.body.style.cursor = 'ns-resize';
+    document.body.style.userSelect = 'none';
+  };
+
+  const handleResizeMove = (e: MouseEvent | TouchEvent) => {
+    if (!resizeDraggingRef.current) return;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const delta = clientY - resizeStartYRef.current;
+    const newHeight = Math.max(250, resizeStartHeightRef.current + delta);
+    setSelectedDateBoxHeight(newHeight);
+  };
+
+  const handleResizeEnd = () => {
+    resizeDraggingRef.current = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleResizeMove);
+    window.addEventListener('mouseup', handleResizeEnd);
+    window.addEventListener('touchmove', handleResizeMove);
+    window.addEventListener('touchend', handleResizeEnd);
+    return () => {
+      window.removeEventListener('mousemove', handleResizeMove);
+      window.removeEventListener('mouseup', handleResizeEnd);
+      window.removeEventListener('touchmove', handleResizeMove);
+      window.removeEventListener('touchend', handleResizeEnd);
+    };
+  }, []);
+
+
   const fetchSingleGig = async (gigId: string): Promise<GigListing | null> => {
     const { data: gig } = await supabase.from('gig_listings').select('*').eq('id', gigId).single();
     if (!gig) return null;
