@@ -478,6 +478,34 @@ export default function VenueCalendar() {
     setDeleteDialogOpen(true);
   };
 
+  const performDeletePreviewGig = async (messageContent: string | null) => {
+    if (!previewGig) return;
+    setDeletingPreviewGig(true);
+    setNotifySending(true);
+    const { error } = await supabase.from('gig_listings').delete().eq('id', previewGig.id);
+    if (error) {
+      setDeletingPreviewGig(false);
+      setNotifySending(false);
+      toast.error('Failed to delete');
+      return;
+    }
+    if (previewGig.is_confirmed && previewGig.application_id) {
+      await supabase.from('applications').update({ status: 'in_progress' }).eq('id', previewGig.application_id);
+    }
+    const roomName = previewGig.venue_listing?.room_name || previewGig.venue_listing?.venue_name || 'Venue';
+    if (previewGig.artist_id && previewGig.artist_id !== user?.id) {
+      await sendBookingDeletionMessage(previewGig.artist_id, previewGig.gig_date, roomName, previewGig.is_confirmed, messageContent);
+    }
+    setDeletingPreviewGig(false);
+    setNotifySending(false);
+    toast.success(`${previewGig.is_confirmed ? 'Gig' : 'Hold'} deleted`);
+    setNotifyOpen(false);
+    setPendingDeleteScope(null);
+    setPreviewDialogOpen(false);
+    setPreviewEditing(false);
+    fetchGigs();
+  };
+
   const handleDeleteHoldThisDay = async () => {
     if (!holdToDelete) return;
     // Open notify dialog first; the actual delete runs after Send/Send-without-message.
