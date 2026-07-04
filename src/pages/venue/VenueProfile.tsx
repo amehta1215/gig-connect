@@ -21,6 +21,7 @@ interface VenueProfileData {
   location: string | null;
   bio: string | null;
   event_types: string[];
+  picture: string | null;
 }
 interface VenueListing {
   id: string;
@@ -71,7 +72,8 @@ export default function VenueProfile() {
     venue_name: '',
     location: '',
     bio: '',
-    event_types: [] as string[]
+    event_types: [] as string[],
+    picture: '' as string
   });
 
   // Room management state
@@ -83,6 +85,8 @@ export default function VenueProfile() {
   const [pictures, setPictures] = useState<string[]>([]);
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const pictureInputRef = useRef<HTMLInputElement>(null);
+  const venuePictureInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingVenuePicture, setUploadingVenuePicture] = useState(false);
   const previewGalleryRef = useRef<HTMLDivElement>(null);
   const [roomFormData, setRoomFormData] = useState({
     venue_name: '',
@@ -138,7 +142,8 @@ export default function VenueProfile() {
         venue_name: data.venue_name || '',
         location: data.location || '',
         bio: data.bio || '',
-        event_types: data.event_types || []
+        event_types: data.event_types || [],
+        picture: data.picture || ''
       });
       fetchListings(data.id);
       setInitialLoadDone(true);
