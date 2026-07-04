@@ -278,6 +278,29 @@ export default function VenueProfile() {
   const removeRoomPicture = (index: number) => {
     setPictures(prev => prev.filter((_, i) => i !== index));
   };
+  const handleVenuePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload JPG, PNG, WebP, or GIF images only. HEIC files are not supported by web browsers.');
+      if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
+      return;
+    }
+    setUploadingVenuePicture(true);
+    try {
+      const url = await uploadFile(file);
+      setFormData(prev => ({ ...prev, picture: url }));
+      toast.success('Photo uploaded');
+    } catch (err) {
+      toast.error('Upload failed');
+    }
+    setUploadingVenuePicture(false);
+    if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
+  };
+  const removeVenuePicture = () => {
+    setFormData(prev => ({ ...prev, picture: '' }));
+  };
   const handleCreateRoomClick = () => {
     if (!profile || !roomFormData.venue_name) {
       toast.error('Venue name required');
