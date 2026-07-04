@@ -21,6 +21,7 @@ interface VenueProfileData {
   location: string | null;
   bio: string | null;
   event_types: string[];
+  picture: string | null;
 }
 interface VenueListing {
   id: string;
@@ -71,7 +72,8 @@ export default function VenueProfile() {
     venue_name: '',
     location: '',
     bio: '',
-    event_types: [] as string[]
+    event_types: [] as string[],
+    picture: '' as string
   });
 
   // Room management state
@@ -83,6 +85,8 @@ export default function VenueProfile() {
   const [pictures, setPictures] = useState<string[]>([]);
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const pictureInputRef = useRef<HTMLInputElement>(null);
+  const venuePictureInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingVenuePicture, setUploadingVenuePicture] = useState(false);
   const previewGalleryRef = useRef<HTMLDivElement>(null);
   const [roomFormData, setRoomFormData] = useState({
     venue_name: '',
@@ -138,7 +142,8 @@ export default function VenueProfile() {
         venue_name: data.venue_name || '',
         location: data.location || '',
         bio: data.bio || '',
-        event_types: data.event_types || []
+        event_types: data.event_types || [],
+        picture: data.picture || ''
       });
       fetchListings(data.id);
       setInitialLoadDone(true);
@@ -168,7 +173,8 @@ export default function VenueProfile() {
       venue_name: formData.venue_name || null,
       location: formData.location || null,
       bio: formData.bio || null,
-      event_types: formData.event_types
+      event_types: formData.event_types,
+      picture: formData.picture || null
     }).eq('id', profile.id);
     if (error) {
       toast.error('Failed to save');
@@ -271,6 +277,29 @@ export default function VenueProfile() {
   };
   const removeRoomPicture = (index: number) => {
     setPictures(prev => prev.filter((_, i) => i !== index));
+  };
+  const handleVenuePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload JPG, PNG, WebP, or GIF images only. HEIC files are not supported by web browsers.');
+      if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
+      return;
+    }
+    setUploadingVenuePicture(true);
+    try {
+      const url = await uploadFile(file);
+      setFormData(prev => ({ ...prev, picture: url }));
+      toast.success('Photo uploaded');
+    } catch (err) {
+      toast.error('Upload failed');
+    }
+    setUploadingVenuePicture(false);
+    if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
+  };
+  const removeVenuePicture = () => {
+    setFormData(prev => ({ ...prev, picture: '' }));
   };
   const handleCreateRoomClick = () => {
     if (!profile || !roomFormData.venue_name) {
@@ -396,6 +425,25 @@ export default function VenueProfile() {
           ...formData,
           bio: e.target.value
         })} placeholder="Tell artists about your venue, its vibe, and what makes it special..." rows={4} />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Venue Photo</Label>
+          <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleVenuePictureUpload} className="hidden" />
+          {formData.picture ? (
+            <div className="relative w-full max-w-sm aspect-[4/3] bg-secondary rounded-lg overflow-hidden group">
+              <img src={formData.picture} alt="Venue" className="w-full h-full object-cover" />
+              <button type="button" onClick={removeVenuePicture} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <Button type="button" variant="outline" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="w-full max-w-sm">
+              <Upload className="h-4 w-4 mr-2" />
+              {uploadingVenuePicture ? 'Uploading...' : 'Upload venue photo'}
+            </Button>
+          )}
+          <p className="text-xs text-muted-foreground">This photo appears in venue search results.</p>
         </div>
       </div>
 

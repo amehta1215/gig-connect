@@ -241,7 +241,7 @@ export default function PublicFindVenues() {
               <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
                 {(() => {
             const venueProfile = venueProfiles[venue.venue_profile_id];
-            const displayPicture = venueProfile?.picture || (venue.pictures && venue.pictures.length > 0 ? venue.pictures[0] : null);
+            const displayPicture = venueProfile?.picture || null;
             return displayPicture ? <img src={displayPicture} alt={venue.venue_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="absolute inset-0 flex items-center justify-center bg-heat">
                       <Music className="h-12 w-12 text-primary/30" />
                     </div>;
