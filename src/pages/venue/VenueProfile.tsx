@@ -430,18 +430,17 @@ export default function VenueProfile() {
         <div className="space-y-2">
           <Label>Venue Photo</Label>
           <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleVenuePictureUpload} className="hidden" />
-          {formData.picture ? (
+          <Button type="button" variant="outline" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="w-full max-w-sm">
+            <Upload className="h-4 w-4 mr-2" />
+            {uploadingVenuePicture ? 'Uploading...' : formData.picture ? 'Replace venue photo' : 'Upload venue photo'}
+          </Button>
+          {formData.picture && (
             <div className="relative w-full max-w-sm aspect-[4/3] bg-secondary rounded-lg overflow-hidden group">
               <img src={formData.picture} alt="Venue" className="w-full h-full object-cover" />
               <button type="button" onClick={removeVenuePicture} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
-          ) : (
-            <Button type="button" variant="outline" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="w-full max-w-sm">
-              <Upload className="h-4 w-4 mr-2" />
-              {uploadingVenuePicture ? 'Uploading...' : 'Upload venue photo'}
-            </Button>
           )}
           <p className="text-xs text-muted-foreground">This photo appears in venue search results.</p>
         </div>
