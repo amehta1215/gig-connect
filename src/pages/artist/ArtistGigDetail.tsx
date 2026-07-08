@@ -471,12 +471,31 @@ export default function ArtistGigDetail() {
 
         {/* Venue Info */}
         <div className="text-center border-t-2 border-border pt-6">
-          <p className="font-display text-2xl text-foreground">
-            {displayVenueName}
-          </p>
-          {displayLocation && <p className="text-muted-foreground mt-2">
-              {displayLocation}
-            </p>}
+          {isManualEvent ? (
+            <div className="space-y-2 max-w-md mx-auto">
+              <Input
+                value={manualVenueName}
+                onChange={e => setManualVenueName(e.target.value)}
+                placeholder="Venue name"
+                className="font-display text-2xl text-center bg-background"
+              />
+              <Input
+                value={manualLocation}
+                onChange={e => setManualLocation(e.target.value)}
+                placeholder="Location"
+                className="text-center bg-background"
+              />
+            </div>
+          ) : (
+            <>
+              <p className="font-display text-2xl text-foreground">
+                {displayVenueName}
+              </p>
+              {displayLocation && <p className="text-muted-foreground mt-2">
+                  {displayLocation}
+                </p>}
+            </>
+          )}
         </div>
 
         {/* Notes - Editable for manual events, read-only for venue-created */}
