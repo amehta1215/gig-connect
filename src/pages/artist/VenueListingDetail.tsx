@@ -494,5 +494,7 @@ export default function VenueListingDetail() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>;
+      </div>
+    </DialogContent>
+  </Dialog>;
 }
