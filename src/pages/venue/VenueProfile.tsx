@@ -388,7 +388,7 @@ export default function VenueProfile() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {!fromDropdown && <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          {!fromDropdown && <Button variant="ghost" size="icon" onClick={() => navigate('/venue')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>}
           <h1 className="font-display text-4xl font-bold text-primary">VENUE PROFILE</h1>
