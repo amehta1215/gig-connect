@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin, MessageSquare, Trash2 } from 'lucide-react';
+import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin, MessageSquare, Trash2, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
@@ -518,9 +518,15 @@ export default function ArtistCalendar() {
           })()}
           <DialogFooter>
             {previewGig?.manual_venue_name && (
-              <Button variant="ghost" size="icon" onClick={openDeleteDialog} className="text-muted-foreground hover:text-destructive h-8 w-8">
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <>
+                <Button variant="ghost" size="icon" onClick={openDeleteDialog} className="text-muted-foreground hover:text-destructive h-8 w-8">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" onClick={() => { setPreviewDialogOpen(false); navigate(`/artist/calendar/${previewGig.id}`); }}>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit Event
+                </Button>
+              </>
             )}
             {!previewGig?.manual_venue_name && previewGig?.venue_user_id && (
               <Button variant="outline" onClick={handleMessageVenue}>
