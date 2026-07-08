@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowLeft, MapPin, Users, Music, CalendarIcon, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { MapPin, Users, Music, CalendarIcon, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import AuthDialog from '@/components/AuthDialog';
 interface VenueListing {
   id: string;
@@ -92,26 +93,34 @@ export default function PublicRoomDetail() {
     setAuthDialogOpen(true);
   };
   if (loading) {
-    return <div className="space-y-6 animate-fade-in">
-        <div className="h-64 bg-card animate-pulse rounded-lg" />
-        <div className="h-8 w-48 bg-card animate-pulse rounded" />
-        <div className="h-32 bg-card animate-pulse rounded-lg" />
-      </div>;
+    return (
+      <Dialog open onOpenChange={(o) => { if (!o) navigate(-1); }}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <div className="space-y-6 animate-fade-in">
+            <div className="h-64 bg-card animate-pulse rounded-lg" />
+            <div className="h-8 w-48 bg-card animate-pulse rounded" />
+            <div className="h-32 bg-card animate-pulse rounded-lg" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   }
   if (!listing) {
-    return <div className="text-center py-20">
-        <h3 className="font-display text-2xl text-muted-foreground">ROOM NOT FOUND</h3>
-        <Button onClick={() => navigate(-1)} variant="outline" className="mt-4">
-          Go Back
-        </Button>
-      </div>;
+    return (
+      <Dialog open onOpenChange={(o) => { if (!o) navigate(-1); }}>
+        <DialogContent className="max-w-md">
+          <div className="text-center py-8">
+            <h3 className="font-display text-2xl text-muted-foreground">ROOM NOT FOUND</h3>
+            <Button onClick={() => navigate(-1)} variant="outline" className="mt-4">Go Back</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   }
-  return <div className="animate-fade-in max-w-6xl mx-auto">
-      {/* Back Button & Favorite */}
-      <div className="flex items-center justify-between mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+  return <Dialog open onOpenChange={(o) => { if (!o) navigate(-1); }}>
+    <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <div className="animate-fade-in">
+      <div className="flex items-center justify-end mb-4">
         <Button variant="ghost" size="icon" onClick={handleInteraction} className="h-9 w-9">
           <Heart className="h-6 w-6 text-muted-foreground hover:text-[#E8556D] transition-colors" />
         </Button>
@@ -259,5 +268,7 @@ export default function PublicRoomDetail() {
       </div>
 
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} promptMessage="Login or sign up to save favorites" />
-    </div>;
+      </div>
+    </DialogContent>
+  </Dialog>;
 }
