@@ -268,5 +268,7 @@ export default function PublicRoomDetail() {
       </div>
 
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} promptMessage="Login or sign up to save favorites" />
-    </div>;
+      </div>
+    </DialogContent>
+  </Dialog>;
 }
