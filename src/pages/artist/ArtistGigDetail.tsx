@@ -69,6 +69,8 @@ export default function ArtistGigDetail() {
   const [openers, setOpeners] = useState<Opener[]>([]);
   const [notes, setNotes] = useState('');
   const [gigDate, setGigDate] = useState<Date | undefined>(undefined);
+  const [manualVenueName, setManualVenueName] = useState('');
+  const [manualLocation, setManualLocation] = useState('');
   const [showOpenerSearch, setShowOpenerSearch] = useState(false);
   const [openerSearchQuery, setOpenerSearchQuery] = useState('');
   const [artistSearchResults, setArtistSearchResults] = useState<ArtistSearchResult[]>([]);
@@ -180,6 +182,8 @@ export default function ArtistGigDetail() {
     setOpeners(parsedOpeners);
     setNotes(gigData.notes || '');
     setGigDate(parseLocalDate(gigData.gig_date));
+    setManualVenueName(gigData.manual_venue_name || '');
+    setManualLocation(gigData.manual_location || '');
 
     // Fetch venue listing
     const {
@@ -253,7 +257,11 @@ export default function ArtistGigDetail() {
     } = await supabase.from('gig_listings').update({
       openers: JSON.parse(JSON.stringify(openers)),
       notes: notes.trim() || null,
-      gig_date: format(gigDate, 'yyyy-MM-dd')
+      gig_date: format(gigDate, 'yyyy-MM-dd'),
+      ...(isManualEvent ? {
+        manual_venue_name: manualVenueName.trim() || null,
+        manual_location: manualLocation.trim() || null,
+      } : {})
     }).eq('id', gig.id);
     setSaving(false);
     if (error) {
@@ -463,12 +471,31 @@ export default function ArtistGigDetail() {
 
         {/* Venue Info */}
         <div className="text-center border-t-2 border-border pt-6">
-          <p className="font-display text-2xl text-foreground">
-            {displayVenueName}
-          </p>
-          {displayLocation && <p className="text-muted-foreground mt-2">
-              {displayLocation}
-            </p>}
+          {isManualEvent ? (
+            <div className="space-y-2 max-w-md mx-auto">
+              <Input
+                value={manualVenueName}
+                onChange={e => setManualVenueName(e.target.value)}
+                placeholder="Venue name"
+                className="font-display text-2xl text-center bg-background"
+              />
+              <Input
+                value={manualLocation}
+                onChange={e => setManualLocation(e.target.value)}
+                placeholder="Location"
+                className="text-center bg-background"
+              />
+            </div>
+          ) : (
+            <>
+              <p className="font-display text-2xl text-foreground">
+                {displayVenueName}
+              </p>
+              {displayLocation && <p className="text-muted-foreground mt-2">
+                  {displayLocation}
+                </p>}
+            </>
+          )}
         </div>
 
         {/* Notes - Editable for manual events, read-only for venue-created */}
