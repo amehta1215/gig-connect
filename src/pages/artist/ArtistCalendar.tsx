@@ -516,8 +516,8 @@ export default function ArtistCalendar() {
         </DialogContent>
       </Dialog>
 
-      {/* Event Preview Dialog (read-only) */}
-      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+      {/* Event Preview Dialog */}
+      <Dialog open={previewDialogOpen} onOpenChange={(open) => { setPreviewDialogOpen(open); if (!open) setPreviewEditing(false); }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="pr-12">
             <DialogTitle className="sr-only">Event Details</DialogTitle>
@@ -529,6 +529,61 @@ export default function ArtistCalendar() {
             const pLocation = isManual ? previewGig.manual_location : previewGig.venue_listing?.location;
             const pTimeDisplay = previewGig.show_time ? new Date(`2000-01-01T${previewGig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : null;
             const pDateDisplay = format(parseLocalDate(previewGig.gig_date), 'EEEE, MMMM d, yyyy');
+            if (previewEditing && isManual) {
+              return (
+                <div className="space-y-4 py-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-display tracking-widest text-primary">VENUE NAME</label>
+                    <Input value={editVenueName} onChange={e => setEditVenueName(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-display tracking-widest text-primary">LOCATION</label>
+                    <LocationAutocomplete value={editLocation} onChange={setEditLocation} placeholder="City, State" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-display tracking-widest text-primary">DATE</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn('w-full justify-start text-left font-normal', !editDate && 'text-muted-foreground')}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {editDate ? format(editDate, 'PPP') : 'Pick a date'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar mode="single" selected={editDate} onSelect={setEditDate} initialFocus className="pointer-events-auto" />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-display tracking-widest text-primary">TIME</label>
+                    <Input type="time" value={editTime} onChange={e => setEditTime(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-display tracking-widest text-primary">STATUS</label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant={editIsConfirmed ? 'default' : 'outline'}
+                        onClick={() => setEditIsConfirmed(true)}
+                        className={cn('flex-1 font-display text-xs tracking-widest', editIsConfirmed ? 'bg-green-500 hover:bg-green-500/90 text-white' : 'text-muted-foreground')}
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                        CONFIRMED
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={!editIsConfirmed ? 'default' : 'outline'}
+                        onClick={() => setEditIsConfirmed(false)}
+                        className={cn('flex-1 font-display text-xs tracking-widest', !editIsConfirmed ? 'bg-yellow-500 hover:bg-yellow-500/90 text-black' : 'text-muted-foreground')}
+                      >
+                        <PauseCircle className="h-3.5 w-3.5 mr-1.5" />
+                        HOLD
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
             return (
               <div className="space-y-4 py-2">
                 <div>
@@ -562,14 +617,23 @@ export default function ArtistCalendar() {
             );
           })()}
           <DialogFooter>
-            {previewGig?.manual_venue_name && (
+            {previewGig?.manual_venue_name && !previewEditing && (
               <>
                 <Button variant="ghost" size="icon" onClick={openDeleteDialog} className="text-muted-foreground hover:text-destructive h-8 w-8">
                   <Trash2 className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" onClick={() => { setPreviewDialogOpen(false); navigate(`/artist/calendar/${previewGig.id}`); }}>
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit Event
+                <Button variant="ghost" size="icon" onClick={startEditing} className="h-8 w-8" title="Edit event">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+            {previewEditing && (
+              <>
+                <Button variant="outline" onClick={() => setPreviewEditing(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveEdit} disabled={savingEdit} className="bg-primary hover:bg-primary/90">
+                  {savingEdit ? 'Saving...' : 'Save Changes'}
                 </Button>
               </>
             )}
