@@ -178,15 +178,10 @@ export default function ApplicationDetail() {
   const listing = application.venue_listing;
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       {/* Back Button */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <Button variant="ghost" size="icon" onClick={handleBack}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        {application.status === 'in_progress' && (
-          <Button variant="ghost" size="icon" onClick={() => setWithdrawDialogOpen(true)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
-            <Trash2 className="h-5 w-5" />
-          </Button>
-        )}
       </div>
 
       {/* Status Banner */}
