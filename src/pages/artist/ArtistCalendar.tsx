@@ -56,6 +56,51 @@ export default function ArtistCalendar() {
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Inline edit state for the preview dialog
+  const [previewEditing, setPreviewEditing] = useState(false);
+  const [editDate, setEditDate] = useState<Date | undefined>(undefined);
+  const [editTime, setEditTime] = useState('');
+  const [editVenueName, setEditVenueName] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [editIsConfirmed, setEditIsConfirmed] = useState(true);
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const startEditing = () => {
+    if (!previewGig) return;
+    setEditDate(parseLocalDate(previewGig.gig_date));
+    setEditTime(previewGig.show_time || '');
+    setEditVenueName(previewGig.manual_venue_name || '');
+    setEditLocation(previewGig.manual_location || '');
+    setEditIsConfirmed(previewGig.is_confirmed);
+    setPreviewEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!previewGig || !editDate) return;
+    if (!editVenueName.trim() || !editLocation.trim()) {
+      toast.error('Venue name and location are required');
+      return;
+    }
+    setSavingEdit(true);
+    const { error } = await supabase.from('gig_listings').update({
+      gig_date: format(editDate, 'yyyy-MM-dd'),
+      show_time: editTime || null,
+      manual_venue_name: editVenueName.trim(),
+      manual_location: editLocation.trim(),
+      is_confirmed: editIsConfirmed,
+      hold_priority: editIsConfirmed ? null : (previewGig.hold_priority || 1),
+    }).eq('id', previewGig.id);
+    setSavingEdit(false);
+    if (error) {
+      toast.error('Failed to save changes');
+      return;
+    }
+    toast.success('Event updated');
+    setPreviewEditing(false);
+    setPreviewDialogOpen(false);
+    fetchGigs();
+  };
   useEffect(() => {
     if (user) {
       fetchGigs();
