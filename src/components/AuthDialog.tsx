@@ -201,7 +201,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
       <DialogContent className="bg-card border-border max-w-md p-8 sm:p-10">
         <DialogHeader className="pr-8">
           <DialogTitle className="font-display text-3xl md:text-4xl tracking-wide text-foreground text-center">
-            {mode === 'login' ? 'LOGIN' : 'SIGN UP'}
+            {mode === 'login' ? 'LOGIN' : mode === 'signup' ? 'SIGN UP' : 'RESET PASSWORD'}
           </DialogTitle>
           {promptMessage && (
             <DialogDescription className="text-muted-foreground text-center mt-2">
@@ -210,7 +210,55 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
           )}
         </DialogHeader>
 
-        {mode === 'login' ? (
+        {mode === 'forgot' ? (
+          resetSent ? (
+            <div className="mt-6 text-center space-y-6">
+              <p className="text-muted-foreground font-display">
+                We sent a reset link to <span className="text-foreground font-medium">{email}</span>.
+              </p>
+              <button
+                type="button"
+                onClick={() => switchMode('login')}
+                className="text-accent hover:underline font-display text-sm uppercase tracking-widest"
+              >
+                Back to Login
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleForgot} className="space-y-6 mt-4">
+              <div>
+                <label className="font-display text-xs tracking-widest text-muted-foreground uppercase">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputClass}
+                />
+                {errors.email && <p className="text-accent text-xs mt-1 font-display">{errors.email}</p>}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full h-12 font-display uppercase tracking-widest text-lg text-accent-foreground transition-colors bg-accent hover:bg-accent/90"
+                disabled={isLoading}
+              >
+                {isLoading ? '...' : 'SEND RESET LINK'}
+              </button>
+
+              <p className="text-center text-sm text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={() => switchMode('login')}
+                  className="text-foreground hover:underline font-medium"
+                >
+                  Login
+                </button>
+              </p>
+            </form>
+          )
+        ) : mode === 'login' ? (
           <form onSubmit={handleLogin} className="space-y-6 mt-4">
             <div>
               <label className="font-display text-xs tracking-widest text-muted-foreground uppercase">
