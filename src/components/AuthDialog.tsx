@@ -4,9 +4,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
 
 type UserRole = 'artist' | 'venue' | 'both';
-type AuthMode = 'login' | 'signup';
+type AuthMode = 'login' | 'signup' | 'forgot';
 
 const emailSchema = z.string().email('Invalid email');
 const passwordSchema = z.string().min(6, 'Min 6 characters');
@@ -27,6 +28,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   const [lastName, setLastName] = useState('');
   const [role, setRole] = useState<UserRole | null>(null);
   const [emailSent, setEmailSent] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -39,6 +41,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
       setMode(defaultMode);
       setErrors({});
       setEmailSent(false);
+      setResetSent(false);
     }
   }, [open, defaultMode]);
 
@@ -207,13 +210,10 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
               {errors.password && <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>}
             </div>
 
-            <p className="text-right">
+    <p className="text-right">
               <button
                 type="button"
-                onClick={() => {
-                  onOpenChange(false);
-                  navigate('/forgot-password');
-                }}
+                onClick={() => switchMode('forgot')}
                 className="text-sm font-display text-muted-foreground hover:text-foreground transition-colors"
               >
                 Forgot your password?
