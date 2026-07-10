@@ -133,13 +133,41 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   const switchMode = (newMode: AuthMode) => {
     setMode(newMode);
     setErrors({});
-    setEmail('');
+    // keep email so it carries across login <-> forgot
+    if (newMode === 'signup') setEmail('');
     setPassword('');
     setConfirmPassword('');
     setFirstName('');
     setLastName('');
     setRole(null);
     setEmailSent(false);
+    setResetSent(false);
+  };
+
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    try { emailSchema.parse(email); } catch (err) {
+      if (err instanceof z.ZodError) newErrors.email = err.errors[0].message;
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length) return;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        toast.error(error.message);
+      } else {
+        setResetSent(true);
+        toast.success('Check your email for the reset link');
+      }
+    } catch {
+      toast.error('Something went wrong');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const inputClass = "w-full bg-transparent border-0 border-b border-muted-foreground/30 rounded-none px-0 py-3 font-display text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors";
