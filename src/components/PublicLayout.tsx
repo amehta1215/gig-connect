@@ -47,7 +47,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 sticky top-0 z-50">
+      <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="px-4 md:px-6">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
