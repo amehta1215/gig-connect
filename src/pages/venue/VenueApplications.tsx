@@ -455,9 +455,6 @@ export default function VenueApplications() {
           {!isProfileComplete && <Button onClick={() => navigate('/venue/profile')} className="flex-1 font-display tracking-widest">
               EDIT PROFILE
             </Button>}
-          {!hasRooms && <Button onClick={() => navigate('/venue/rooms')} variant={!isProfileComplete ? "outline" : "default"} className="flex-1 font-display tracking-widest">
-              GO TO ROOMS
-            </Button>}
         </div>
       </DialogContent>
     </Dialog>
