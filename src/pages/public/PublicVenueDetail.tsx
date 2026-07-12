@@ -5,6 +5,29 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronLeft, ChevronRight, MapPin, Music, Users, Heart } from 'lucide-react';
 import AuthDialog from '@/components/AuthDialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const availabilityOptions = [
+  { id: 'date_range', label: 'Date Range' },
+  { id: 'specific_dates', label: 'Specific Dates' },
+  { id: 'flexible', label: 'Flexible' },
+];
+const paymentOptions = [
+  { id: 'door_split', label: 'Door' },
+  { id: 'bar_split', label: 'Bar' },
+  { id: 'tip_based', label: 'Tips' },
+  { id: 'flat_fee', label: 'Flat' },
+  { id: 'rental', label: 'Rental' },
+  { id: 'no_preference', label: 'Flexible' },
+];
+const lineupOptions = [
+  { id: 'co_acts_needed', label: 'Co-acts Needed' },
+  { id: 'co_acts_confirmed', label: 'Co-acts Confirmed' },
+  { id: 'solo_performer', label: 'Solo' },
+];
 
 interface VenueListing {
   id: string;
