@@ -11,6 +11,7 @@ interface RoomPreviewData {
   location: string;
   capacity: string;
   genres: string[];
+  bio: string;
   backline_info: string;
   house_rules: string;
   pictures: string[];
@@ -129,6 +130,12 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
 
               {/* Details */}
               <div className="space-y-4">
+                {data.bio && (
+                  <div className="bg-background border border-border rounded-lg p-4">
+                    <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
+                    <p className="text-muted-foreground text-sm whitespace-pre-line">{data.bio}</p>
+                  </div>
+                )}
                 {data.backline_info && (
                   <div className="bg-background border border-border rounded-lg p-4">
                     <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
