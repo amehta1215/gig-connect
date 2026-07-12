@@ -23,7 +23,6 @@ interface VenueListing {
 interface VenueProfile {
   id: string;
   picture: string | null;
-  bio: string | null;
 }
 export default function PublicVenueDetail() {
   const { id } = useParams<{ id: string }>();
@@ -57,7 +56,7 @@ export default function PublicVenueDetail() {
     if (listingsData) setListings(listingsData as VenueListing[]);
     const { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, picture, bio')
+      .select('id, picture')
       .eq('id', id)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
@@ -144,10 +143,10 @@ export default function PublicVenueDetail() {
           {shared.location}
         </div>
       )}
-      {venueProfile?.bio && (
+      {shared.bio && (
         <div className="bg-card border border-border rounded-lg p-4">
           <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
-          <p className="text-sm text-primary whitespace-pre-line">{venueProfile.bio}</p>
+          <p className="text-sm text-primary whitespace-pre-line">{shared.bio}</p>
         </div>
       )}
       {shared.backline_info && (
