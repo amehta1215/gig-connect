@@ -94,6 +94,7 @@ export default function VenueProfile() {
     location: '',
     capacity: '',
     genres: [] as string[],
+    bio: '',
     backline_info: '',
     house_rules: ''
   });
@@ -114,6 +115,7 @@ export default function VenueProfile() {
         capacity: roomFormData.capacity ? parseInt(roomFormData.capacity) : null,
         genres: roomFormData.genres,
         pictures: pictures,
+        bio: roomFormData.bio || null,
         backline_info: roomFormData.backline_info || null,
         house_rules: roomFormData.house_rules || null,
         is_published: editingListing.is_published
@@ -212,6 +214,7 @@ export default function VenueProfile() {
       location: formData.location,
       capacity: '',
       genres: [],
+      bio: '',
       backline_info: '',
       house_rules: ''
     });
@@ -227,6 +230,7 @@ export default function VenueProfile() {
         location: listing.location || '',
         capacity: listing.capacity?.toString() || '',
         genres: listing.genres || [],
+        bio: listing.bio || '',
         backline_info: listing.backline_info || '',
         house_rules: listing.house_rules || ''
       });
@@ -329,6 +333,7 @@ export default function VenueProfile() {
       capacity: roomFormData.capacity ? parseInt(roomFormData.capacity) : null,
       genres: roomFormData.genres,
       pictures: pictures,
+      bio: roomFormData.bio || null,
       backline_info: roomFormData.backline_info || null,
       house_rules: roomFormData.house_rules || null,
       is_published: publish
@@ -582,9 +587,9 @@ export default function VenueProfile() {
                   <div className="flex flex-col lg:flex-row gap-8">
                     {/* Left Column - Venue Details */}
                     <div className="flex-1 space-y-4">
-                      {formData.bio && <div className="bg-card border border-border rounded-lg p-4">
+                      {roomFormData.bio && <div className="bg-card border border-border rounded-lg p-4">
                           <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
-                          <p className="text-sm text-primary">{formData.bio}</p>
+                          <p className="text-sm text-primary whitespace-pre-line">{roomFormData.bio}</p>
                         </div>}
                       {roomFormData.backline_info && <div className="bg-card border border-border rounded-lg p-4">
                           <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
@@ -663,6 +668,13 @@ export default function VenueProfile() {
                   {/* Additional Info */}
                   <div className="space-y-4">
                     <h3 className="font-display text-sm text-primary tracking-widest">DETAILS</h3>
+                    <div className="space-y-1">
+                      <Label htmlFor="bio" className="text-xs uppercase tracking-wider text-muted-foreground">About</Label>
+                      <Textarea id="bio" value={roomFormData.bio} onChange={e => setRoomFormData({
+                      ...roomFormData,
+                      bio: e.target.value
+                    })} className="bg-background border-border" rows={3} />
+                    </div>
                     <div className="space-y-1">
                       <Label htmlFor="backline_info" className="text-xs uppercase tracking-wider text-muted-foreground">Backline</Label>
                       <Textarea id="backline_info" value={roomFormData.backline_info} onChange={e => setRoomFormData({
