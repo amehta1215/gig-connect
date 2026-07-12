@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ChevronLeft, ChevronRight, MapPin, Music, Users, Heart } from 'lucide-react';
 import AuthDialog from '@/components/AuthDialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface VenueListing {
   id: string;
@@ -26,6 +27,7 @@ interface VenueProfile {
 export default function PublicVenueDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { profile, activeRole } = useAuth();
   const [listings, setListings] = useState<VenueListing[]>([]);
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +37,15 @@ export default function PublicVenueDetail() {
   useEffect(() => {
     if (id) fetchData();
   }, [id]);
+
+  // Route authenticated artists to the artist venue detail page so they can apply.
+  useEffect(() => {
+    if (!id || !profile) return;
+    const isArtist = profile.role === 'artist' || (profile.role === 'both' && activeRole === 'artist');
+    if (isArtist) {
+      navigate(`/artist/venue/${id}`, { replace: true });
+    }
+  }, [id, profile, activeRole, navigate]);
 
   const fetchData = async () => {
     setLoading(true);
