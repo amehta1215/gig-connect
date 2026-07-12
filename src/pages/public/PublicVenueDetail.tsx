@@ -128,6 +128,8 @@ export default function PublicVenueDetail() {
       </Button>
     </div>
 
+    <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex-1">
     <div className="mb-6">
       {galleryPictures.length === 0 ? (
         <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
@@ -229,6 +231,77 @@ export default function PublicVenueDetail() {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+      </div>
+
+      {/* Right column - Apply container (auth-gated) */}
+      <div className="lg:w-80 xl:w-96 order-first lg:order-last">
+        <div className="lg:sticky lg:top-4">
+          <div className="bg-card border border-border rounded-lg p-6 space-y-6" onClick={handleAuthPrompt}>
+            <h2 className="font-display text-2xl font-bold text-primary">APPLY</h2>
+
+            {listings.length > 1 && (
+              <div className="space-y-3">
+                <h3 className="font-display text-sm text-primary tracking-widest">ROOM</h3>
+                <Select onOpenChange={(o) => { if (o) setAuthDialogOpen(true); }}>
+                  <SelectTrigger onClick={handleAuthPrompt}>
+                    <SelectValue placeholder="Select a room" />
+                  </SelectTrigger>
+                  <SelectContent />
+                </Select>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <h3 className="font-display text-sm text-primary tracking-widest">AVAILABILITY</h3>
+              <RadioGroup value="" onValueChange={() => setAuthDialogOpen(true)}>
+                <div className="flex flex-col gap-2">
+                  {availabilityOptions.map(option => (
+                    <div key={option.id} className="flex items-center space-x-2">
+                      <RadioGroupItem value={option.id} id={`pub-avail-${option.id}`} />
+                      <Label htmlFor={`pub-avail-${option.id}`} className="cursor-pointer">{option.label}</Label>
+                    </div>
+                  ))}
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-3 mt-6">
+              <h3 className="font-display text-sm text-primary tracking-widest">PAYMENT</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {paymentOptions.map(option => (
+                  <div
+                    key={option.id}
+                    className="flex items-center gap-2 p-2 rounded-lg border border-border hover:border-primary/50 cursor-pointer transition-colors text-sm"
+                    onClick={handleAuthPrompt}
+                  >
+                    <Checkbox checked={false} onCheckedChange={() => setAuthDialogOpen(true)} className="h-4 w-4" />
+                    <Label className="cursor-pointer text-sm">{option.label}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3 mt-6">
+              <h3 className="font-display text-sm text-primary tracking-widest">LINEUP</h3>
+              <RadioGroup value="" onValueChange={() => setAuthDialogOpen(true)}>
+                <div className="flex flex-col gap-2">
+                  {lineupOptions.map(option => (
+                    <div key={option.id} className="flex items-center space-x-2">
+                      <RadioGroupItem value={option.id} id={`pub-lineup-${option.id}`} />
+                      <Label htmlFor={`pub-lineup-${option.id}`} className="cursor-pointer">{option.label}</Label>
+                    </div>
+                  ))}
+                </div>
+              </RadioGroup>
+            </div>
+
+            <Button onClick={handleAuthPrompt} className="w-full font-display tracking-widest text-lg py-6 mt-6">
+              APPLY
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
 
