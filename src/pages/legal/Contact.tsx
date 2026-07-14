@@ -1,3 +1,4 @@
+import BackButton from "@/components/BackButton";
 import PublicLayout from "@/components/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
@@ -6,6 +7,9 @@ export default function Contact() {
   return (
     <PublicLayout tabs={[]}>
       <div className="max-w-2xl mx-auto px-6 py-16 text-center">
+        <div className="text-left">
+          <BackButton />
+        </div>
         <h1 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black text-primary mb-6">
           Contact Us
         </h1>

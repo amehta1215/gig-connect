@@ -1,3 +1,4 @@
+import BackButton from "@/components/BackButton";
 import PublicLayout from "@/components/PublicLayout";
 import {
   Accordion,
@@ -25,6 +26,7 @@ export default function Legal() {
   return (
     <PublicLayout tabs={[]}>
       <div className="max-w-3xl mx-auto px-6 py-12">
+        <BackButton />
         <h1 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black text-primary mb-6">
           Privacy & Terms
         </h1>
