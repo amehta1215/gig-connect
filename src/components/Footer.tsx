@@ -7,7 +7,7 @@ export default function Footer() {
     "font-display uppercase tracking-wider text-sm text-foreground mb-4";
 
   return (
-    <footer className="w-full border-t border-border bg-muted/30">
+    <footer className="w-full bg-muted">
       <div className="max-w-3xl mx-auto px-6 py-12 text-center">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-16">
           <div>
@@ -28,11 +28,6 @@ export default function Footer() {
               Privacy & Terms
             </Link>
           </div>
-        </div>
-        <div className="mt-12 pt-6 border-t border-border">
-          <p className="text-xs text-muted-foreground">
-            © 2026 Riff · Made in NYC
-          </p>
         </div>
       </div>
     </footer>
