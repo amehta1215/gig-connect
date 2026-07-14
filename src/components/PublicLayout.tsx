@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ArrowLeftRight, User, LogIn } from 'lucide-react';
 import AuthDialog from '@/components/AuthDialog';
+import Footer from '@/components/Footer';
 
 interface Tab {
   label: string;
@@ -45,7 +46,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="px-4 md:px-6">
@@ -140,7 +141,9 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="px-4 md:px-6 py-6">{children}</main>
+      <main className="px-4 md:px-6 py-6 flex-1">{children}</main>
+
+      <Footer />
 
       {/* Auth Dialog */}
       <AuthDialog

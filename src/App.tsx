@@ -17,6 +17,12 @@ import PublicDashboard from "./pages/public/PublicDashboard";
 import PublicVenueDetail from "./pages/public/PublicVenueDetail";
 import PublicRoomDetail from "./pages/public/PublicRoomDetail";
 
+// Legal pages
+import FAQ from "./pages/legal/FAQ";
+import Contact from "./pages/legal/Contact";
+import About from "./pages/legal/About";
+import Legal from "./pages/legal/Legal";
+
 // Artist pages
 import ArtistDashboard from "./pages/artist/ArtistDashboard";
 import ArtistMessages from "./pages/artist/ArtistMessages";
@@ -59,6 +65,10 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/legal" element={<Legal />} />
 
             {/* Artist routes */}
             <Route
