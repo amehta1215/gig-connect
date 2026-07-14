@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { User, LogOut, ArrowLeftRight, Heart } from 'lucide-react';
+import Footer from '@/components/Footer';
 interface Tab {
   label: string;
   href: string;
@@ -35,7 +36,7 @@ export default function DashboardLayout({
   };
   const canSwitchRole = profile?.role === 'both';
   const editProfilePath = activeRole === 'artist' ? '/artist/profile' : '/venue/profile';
-  return <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="px-4 md:px-6">
@@ -104,8 +105,9 @@ export default function DashboardLayout({
       </header>
 
       {/* Main Content */}
-      <main className="px-4 md:px-6 py-6">
+      <main className="px-4 md:px-6 py-6 flex-1">
         {children}
       </main>
+      <Footer />
     </div>;
 }
