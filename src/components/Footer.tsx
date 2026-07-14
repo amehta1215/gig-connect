@@ -2,13 +2,13 @@ import { Link } from "react-router-dom";
 
 export default function Footer() {
   const linkClass =
-    "text-sm text-muted-foreground hover:text-foreground transition-colors block mb-2";
+    "text-xs text-muted-foreground hover:text-foreground transition-colors block mb-1.5";
   const headerClass =
-    "font-display uppercase tracking-wider text-sm text-foreground mb-4";
+    "font-display uppercase tracking-wider text-xs text-foreground mb-3";
 
   return (
     <footer className="w-full bg-muted">
-      <div className="max-w-3xl mx-auto px-6 py-12 text-center">
+      <div className="max-w-3xl mx-auto px-6 py-8 text-center">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-16">
           <div>
             <h3 className={headerClass}>Support</h3>
