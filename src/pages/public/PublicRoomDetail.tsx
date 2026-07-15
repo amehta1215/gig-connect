@@ -120,8 +120,8 @@ export default function PublicRoomDetail() {
       })()}
       </div>
 
-      {/* Two Column Layout */}
-      <div className="flex flex-col lg:flex-row gap-8">
+      {/* Venue Info */}
+      <div>
         {/* Left Column - Venue Info */}
         <div className="flex-1 space-y-6">
           {/* Venue Info */}

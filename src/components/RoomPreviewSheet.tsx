@@ -61,8 +61,8 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
             )}
           </div>
 
-          {/* Two Column Layout */}
-          <div className="flex flex-col lg:flex-row gap-8">
+          {/* Venue Info */}
+          <div>
             {/* Left Column - Venue Info */}
             <div className="flex-1 space-y-6">
               <div className="space-y-4">
