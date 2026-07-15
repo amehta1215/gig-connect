@@ -1,9 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import { MapPin, Users, Music, CalendarIcon } from 'lucide-react';
+import { MapPin, Users, Music } from 'lucide-react';
 
 interface RoomPreviewData {
   venue_name: string;
@@ -24,26 +20,6 @@ interface RoomPreviewSheetProps {
   data: RoomPreviewData;
 }
 
-const availabilityOptions = [
-  { id: 'date_range', label: 'Date Range' },
-  { id: 'specific_dates', label: 'Specific Dates' },
-  { id: 'flexible', label: 'Flexible' }
-];
-
-const paymentOptions = [
-  { id: 'door_split', label: 'Door' },
-  { id: 'bar_split', label: 'Bar' },
-  { id: 'tip_based', label: 'Tips' },
-  { id: 'flat_fee', label: 'Flat' },
-  { id: 'rental', label: 'Rental' },
-  { id: 'no_preference', label: 'Flexible' }
-];
-
-const lineupOptions = [
-  { id: 'co_acts_needed', label: 'Co-acts Needed' },
-  { id: 'co_acts_confirmed', label: 'Co-acts Confirmed' },
-  { id: 'solo_performer', label: 'Solo' }
-];
 
 export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetProps) {
   // Room pictures only
@@ -85,8 +61,8 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
             )}
           </div>
 
-          {/* Two Column Layout */}
-          <div className="flex flex-col lg:flex-row gap-8">
+          {/* Venue Info */}
+          <div>
             {/* Left Column - Venue Info */}
             <div className="flex-1 space-y-6">
               <div className="space-y-4">
@@ -151,73 +127,6 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
               </div>
             </div>
 
-            {/* Right Column - Apply Form Preview (Sticky) */}
-            <div className="lg:w-72">
-              <div className="lg:sticky lg:top-0 bg-background border border-border rounded-lg p-6 space-y-6">
-                <h2 className="font-display text-2xl text-accent font-bold">APPLY</h2>
-
-                {/* Availability */}
-                <div className="space-y-3">
-                  <h3 className="font-display text-sm text-primary tracking-widest">AVAILABILITY</h3>
-                  <RadioGroup defaultValue="flexible" disabled>
-                    <div className="flex flex-col gap-2">
-                      {availabilityOptions.map(option => (
-                        <div key={option.id} className="flex items-center space-x-2 opacity-70">
-                          <RadioGroupItem value={option.id} id={`preview-avail-${option.id}`} />
-                          <Label htmlFor={`preview-avail-${option.id}`} className="cursor-default text-sm">
-                            {option.label}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
-
-                  {/* Date picker placeholder */}
-                  <Button variant="outline" className="w-full justify-start text-left font-normal text-muted-foreground" disabled>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    <span>Select dates</span>
-                  </Button>
-                </div>
-
-                {/* Payment Preference */}
-                <div className="space-y-3">
-                  <h3 className="font-display text-sm text-primary tracking-widest">PAYMENT</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {paymentOptions.map(option => (
-                      <div 
-                        key={option.id} 
-                        className="flex items-center gap-2 p-2 rounded-lg border border-border text-sm opacity-70"
-                      >
-                        <Checkbox className="h-4 w-4" disabled />
-                        <Label className="cursor-default text-sm">{option.label}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Lineup */}
-                <div className="space-y-3">
-                  <h3 className="font-display text-sm text-primary tracking-widest">LINEUP</h3>
-                  <RadioGroup defaultValue="solo_performer" disabled>
-                    <div className="flex flex-col gap-2">
-                      {lineupOptions.map(option => (
-                        <div key={option.id} className="flex items-center space-x-2 opacity-70">
-                          <RadioGroupItem value={option.id} id={`preview-lineup-${option.id}`} />
-                          <Label htmlFor={`preview-lineup-${option.id}`} className="cursor-default text-sm">
-                            {option.label}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                {/* Submit Button */}
-                <Button disabled className="w-full font-display tracking-widest text-lg py-6">
-                  APPLY
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       </DialogContent>

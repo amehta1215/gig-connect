@@ -2,10 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { MapPin, Users, Music, CalendarIcon, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { MapPin, Users, Music, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import AuthDialog from '@/components/AuthDialog';
 interface VenueListing {
@@ -21,45 +18,6 @@ interface VenueListing {
   house_rules: string | null;
   venue_profile_id: string;
 }
-const availabilityOptions = [{
-  id: 'date_range',
-  label: 'Date Range'
-}, {
-  id: 'specific_dates',
-  label: 'Specific Dates'
-}, {
-  id: 'flexible',
-  label: 'Flexible'
-}];
-const paymentOptions = [{
-  id: 'door_split',
-  label: 'Door'
-}, {
-  id: 'bar_split',
-  label: 'Bar'
-}, {
-  id: 'tip_based',
-  label: 'Tips'
-}, {
-  id: 'flat_fee',
-  label: 'Flat'
-}, {
-  id: 'rental',
-  label: 'Rental'
-}, {
-  id: 'no_preference',
-  label: 'Flexible'
-}];
-const lineupOptions = [{
-  id: 'co_acts_needed',
-  label: 'Co-acts Needed'
-}, {
-  id: 'co_acts_confirmed',
-  label: 'Co-acts Confirmed'
-}, {
-  id: 'solo_performer',
-  label: 'Solo'
-}];
 export default function PublicRoomDetail() {
   const {
     id
@@ -162,8 +120,8 @@ export default function PublicRoomDetail() {
       })()}
       </div>
 
-      {/* Two Column Layout */}
-      <div className="flex flex-col lg:flex-row gap-8">
+      {/* Venue Info */}
+      <div>
         {/* Left Column - Venue Info */}
         <div className="flex-1 space-y-6">
           {/* Venue Info */}
@@ -210,61 +168,6 @@ export default function PublicRoomDetail() {
           </div>
         </div>
 
-        {/* Right Column - Apply Form (with auth intercept) */}
-        <div className="lg:w-80 xl:w-96">
-          <div className="lg:sticky lg:top-20">
-            <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-              <h2 className="font-display text-2xl text-black font-bold">APPLY</h2>
-
-              {/* Availability */}
-              <div className="space-y-3" onClick={handleInteraction}>
-                <h3 className="font-display text-sm text-primary tracking-widest">AVAILABILITY</h3>
-                <RadioGroup className="pointer-events-none">
-                  <div className="flex flex-col gap-2">
-                    {availabilityOptions.map(option => <div key={option.id} className="flex items-center space-x-2">
-                        <RadioGroupItem value={option.id} id={`public-avail-${option.id}`} />
-                        <Label htmlFor={`public-avail-${option.id}`} className="cursor-pointer">
-                          {option.label}
-                        </Label>
-                      </div>)}
-                  </div>
-                </RadioGroup>
-
-              </div>
-
-              {/* Payment Preference */}
-              <div className="space-y-3" onClick={handleInteraction}>
-                <h3 className="font-display text-sm text-primary tracking-widest">PAYMENT</h3>
-                <div className="grid grid-cols-2 gap-2 pointer-events-none">
-                  {paymentOptions.map(option => <div key={option.id} className="flex items-center gap-2 p-2 rounded-lg border border-border text-sm">
-                      <Checkbox className="h-4 w-4" />
-                      <Label className="cursor-pointer text-sm">{option.label}</Label>
-                    </div>)}
-                </div>
-              </div>
-
-              {/* Lineup */}
-              <div className="space-y-3" onClick={handleInteraction}>
-                <h3 className="font-display text-sm text-primary tracking-widest">LINEUP</h3>
-                <RadioGroup className="pointer-events-none">
-                  <div className="flex flex-col gap-2">
-                    {lineupOptions.map(option => <div key={option.id} className="flex items-center space-x-2">
-                        <RadioGroupItem value={option.id} id={`public-lineup-${option.id}`} />
-                        <Label htmlFor={`public-lineup-${option.id}`} className="cursor-pointer">
-                          {option.label}
-                        </Label>
-                      </div>)}
-                  </div>
-                </RadioGroup>
-              </div>
-
-              {/* Submit Button */}
-              <Button onClick={handleInteraction} className="w-full font-display tracking-widest text-lg py-6 bg-accent hover:bg-accent/90 text-accent-foreground">
-                APPLY
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} promptMessage="Login or sign up to save favorites" />
