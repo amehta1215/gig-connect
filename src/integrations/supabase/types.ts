@@ -460,6 +460,7 @@ export type Database = {
           id: string
           location: string | null
           picture: string | null
+          pictures: string[]
           updated_at: string | null
           user_id: string
           venue_name: string | null
@@ -471,6 +472,7 @@ export type Database = {
           id?: string
           location?: string | null
           picture?: string | null
+          pictures?: string[]
           updated_at?: string | null
           user_id: string
           venue_name?: string | null
@@ -482,6 +484,7 @@ export type Database = {
           id?: string
           location?: string | null
           picture?: string | null
+          pictures?: string[]
           updated_at?: string | null
           user_id?: string
           venue_name?: string | null
