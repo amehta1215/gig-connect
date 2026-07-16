@@ -460,23 +460,25 @@ export default function VenueProfile() {
         </div>
 
         <div className="space-y-2">
-          <Label className="block">Venue Photo</Label>
-          <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleVenuePictureUpload} className="hidden" />
-          <div>
-            <Button type="button" variant="outline" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="w-full max-w-sm">
-              <Upload className="h-4 w-4 mr-2" />
-              {uploadingVenuePicture ? 'Uploading...' : formData.picture ? 'Replace venue photo' : 'Upload venue photo'}
-            </Button>
-          </div>
-          {formData.picture && (
-            <div className="relative w-full max-w-sm aspect-[4/3] bg-secondary rounded-lg overflow-hidden group">
-              <img src={formData.picture} alt="Venue" className="w-full h-full object-cover" />
-              <button type="button" onClick={removeVenuePicture} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors">
-                <X className="h-4 w-4" />
+          <Label className="block">Venue Photos <span className="text-muted-foreground font-normal">({formData.pictures.length}/7)</span></Label>
+          <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleVenuePictureUpload} className="hidden" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {formData.pictures.map((url, index) => (
+              <div key={index} className="relative group aspect-square bg-secondary rounded-lg overflow-hidden">
+                <img src={url} alt={`Venue ${index + 1}`} className="w-full h-full object-cover" />
+                <button type="button" onClick={() => removeVenuePicture(index)} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors opacity-0 group-hover:opacity-100">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            {formData.pictures.length < 7 && (
+              <button type="button" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
+                <Upload className="h-5 w-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">{uploadingVenuePicture ? 'Uploading...' : 'Upload'}</span>
               </button>
-            </div>
-          )}
-          <p className="text-xs text-muted-foreground">This photo appears in venue search results.</p>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">Add up to 7 photos. The first photo appears in venue search results.</p>
         </div>
       </div>
 
