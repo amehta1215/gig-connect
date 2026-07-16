@@ -287,18 +287,38 @@ export default function VenueProfile() {
     setPictures(prev => prev.filter((_, i) => i !== index));
   };
   const handleVenuePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error('Please upload JPG, PNG, WebP, or GIF images only. HEIC files are not supported by web browsers.');
+    for (const file of Array.from(files)) {
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload JPG, PNG, WebP, or GIF images only. HEIC files are not supported by web browsers.');
+        if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
+        return;
+      }
+    }
+    const remaining = 7 - formData.pictures.length;
+    if (remaining <= 0) {
+      toast.error('You can upload up to 7 venue photos.');
       if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
       return;
     }
+    const toUpload = Array.from(files).slice(0, remaining);
+    if (files.length > remaining) {
+      toast.error(`Only ${remaining} more photo${remaining === 1 ? '' : 's'} allowed (max 7).`);
+    }
     setUploadingVenuePicture(true);
     try {
-      const url = await uploadFile(file);
-      setFormData(prev => ({ ...prev, picture: url }));
+      const newUrls: string[] = [];
+      for (const file of toUpload) {
+        const url = await uploadFile(file);
+        newUrls.push(url);
+      }
+      setFormData(prev => ({
+        ...prev,
+        pictures: [...prev.pictures, ...newUrls],
+        picture: prev.pictures[0] || newUrls[0] || prev.picture
+      }));
       toast.success('Photo uploaded');
     } catch (err) {
       toast.error('Upload failed');
@@ -306,8 +326,11 @@ export default function VenueProfile() {
     setUploadingVenuePicture(false);
     if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
   };
-  const removeVenuePicture = () => {
-    setFormData(prev => ({ ...prev, picture: '' }));
+  const removeVenuePicture = (index: number) => {
+    setFormData(prev => {
+      const next = prev.pictures.filter((_, i) => i !== index);
+      return { ...prev, pictures: next, picture: next[0] || '' };
+    });
   };
   const handleCreateRoomClick = () => {
     if (!profile || !roomFormData.venue_name) {
