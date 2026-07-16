@@ -74,7 +74,8 @@ export default function VenueProfile() {
     location: '',
     bio: '',
     event_types: [] as string[],
-    picture: '' as string
+    picture: '' as string,
+    pictures: [] as string[]
   });
 
   // Room management state
