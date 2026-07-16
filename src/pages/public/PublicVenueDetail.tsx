@@ -46,6 +46,7 @@ interface VenueListing {
 interface VenueProfile {
   id: string;
   picture: string | null;
+  pictures?: string[] | null;
 }
 export default function PublicVenueDetail() {
   const { id } = useParams<{ id: string }>();
@@ -79,7 +80,7 @@ export default function PublicVenueDetail() {
     if (listingsData) setListings(listingsData as VenueListing[]);
     const { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, picture')
+      .select('id, picture, pictures')
       .eq('id', id)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
@@ -108,7 +109,13 @@ export default function PublicVenueDetail() {
   }
 
   const shared = listings[0];
-  const galleryPictures = Array.from(new Set(listings.flatMap(l => l.pictures || [])));
+  const venuePics = (venueProfile?.pictures && venueProfile.pictures.length > 0)
+    ? venueProfile.pictures
+    : (venueProfile?.picture ? [venueProfile.picture] : []);
+  const galleryPictures = Array.from(new Set([
+    ...venuePics,
+    ...listings.flatMap(l => l.pictures || [])
+  ]));
 
   const scroll = (dir: 'left' | 'right') => {
     if (!galleryScrollRef.current) return;

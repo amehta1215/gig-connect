@@ -1,0 +1,2 @@
+ALTER TABLE public.venue_profiles ADD COLUMN IF NOT EXISTS pictures text[] NOT NULL DEFAULT '{}'::text[];
+UPDATE public.venue_profiles SET pictures = ARRAY[picture] WHERE picture IS NOT NULL AND picture <> '' AND (pictures IS NULL OR array_length(pictures,1) IS NULL);
