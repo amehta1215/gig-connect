@@ -22,6 +22,7 @@ interface VenueProfileData {
   bio: string | null;
   event_types: string[];
   picture: string | null;
+  pictures?: string[] | null;
 }
 interface VenueListing {
   id: string;
