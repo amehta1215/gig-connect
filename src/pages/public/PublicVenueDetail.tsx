@@ -190,7 +190,7 @@ export default function PublicVenueDetail() {
             </div>
           )}
         </div>
-        <div>
+        <div className="mt-10">
           <h2 className="font-display text-2xl text-black font-bold tracking-wide mb-4">ROOMS</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {listings.map(room => (
