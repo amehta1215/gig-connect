@@ -147,7 +147,8 @@ export default function VenueProfile() {
         location: data.location || '',
         bio: data.bio || '',
         event_types: data.event_types || [],
-        picture: data.picture || ''
+        picture: data.picture || '',
+        pictures: (data as any).pictures || (data.picture ? [data.picture] : [])
       });
       fetchListings(data.id);
       setInitialLoadDone(true);
