@@ -179,8 +179,9 @@ export default function VenueProfile() {
       location: formData.location || null,
       bio: formData.bio || null,
       event_types: formData.event_types,
-      picture: formData.picture || null
-    }).eq('id', profile.id);
+      picture: formData.pictures[0] || formData.picture || null,
+      pictures: formData.pictures
+    } as any).eq('id', profile.id);
     if (error) {
       toast.error('Failed to save');
     }
