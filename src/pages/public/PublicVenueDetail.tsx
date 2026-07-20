@@ -47,6 +47,7 @@ interface VenueProfile {
   id: string;
   picture: string | null;
   pictures?: string[] | null;
+  genres?: string[] | null;
 }
 export default function PublicVenueDetail() {
   const { id } = useParams<{ id: string }>();
@@ -80,7 +81,7 @@ export default function PublicVenueDetail() {
     if (listingsData) setListings(listingsData as VenueListing[]);
     const { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, picture, pictures')
+      .select('id, picture, pictures, genres')
       .eq('id', id)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
@@ -173,18 +174,15 @@ export default function PublicVenueDetail() {
           {shared.location}
         </div>
       )}
-      {(() => {
-        const allGenres = Array.from(new Set(listings.flatMap(l => l.genres || [])));
-        return allGenres.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {allGenres.map(genre => (
-              <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
-                {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
-              </span>
-            ))}
-          </div>
-        ) : null;
-      })()}
+      {venueProfile?.genres && venueProfile.genres.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {venueProfile.genres.map(genre => (
+            <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
+              {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
 
     <div className="flex flex-col lg:flex-row gap-8">

@@ -1,0 +1,1 @@
+ALTER TABLE public.venue_profiles ADD COLUMN IF NOT EXISTS genres text[] NOT NULL DEFAULT '{}';

@@ -23,6 +23,7 @@ interface VenueProfileData {
   event_types: string[];
   picture: string | null;
   pictures?: string[] | null;
+  genres?: string[] | null;
 }
 interface VenueListing {
   id: string;
@@ -75,7 +76,8 @@ export default function VenueProfile() {
     bio: '',
     event_types: [] as string[],
     picture: '' as string,
-    pictures: [] as string[]
+    pictures: [] as string[],
+    genres: [] as string[]
   });
 
   // Room management state
@@ -148,7 +150,8 @@ export default function VenueProfile() {
         bio: data.bio || '',
         event_types: data.event_types || [],
         picture: data.picture || '',
-        pictures: (data as any).pictures || (data.picture ? [data.picture] : [])
+        pictures: (data as any).pictures || (data.picture ? [data.picture] : []),
+        genres: (data as any).genres || []
       });
       fetchListings(data.id);
       setInitialLoadDone(true);
@@ -180,7 +183,8 @@ export default function VenueProfile() {
       bio: formData.bio || null,
       event_types: formData.event_types,
       picture: formData.pictures[0] || formData.picture || null,
-      pictures: formData.pictures
+      pictures: formData.pictures,
+      genres: formData.genres
     } as any).eq('id', profile.id);
     if (error) {
       toast.error('Failed to save');
@@ -408,6 +412,14 @@ export default function VenueProfile() {
       });
     }
   };
+  const toggleVenueGenre = (genre: string) => {
+    setFormData(prev => ({
+      ...prev,
+      genres: prev.genres.includes(genre)
+        ? prev.genres.filter(g => g !== genre)
+        : [...prev.genres, genre]
+    }));
+  };
   if (loading) {
     return <div className="space-y-6 animate-fade-in">
         <div className="h-8 w-48 bg-card rounded animate-pulse" />
@@ -479,6 +491,22 @@ export default function VenueProfile() {
             )}
           </div>
           <p className="text-xs text-muted-foreground">Add up to 7 photos. The first photo appears in venue search results.</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="block">Genres</Label>
+          <div className="flex flex-wrap gap-1">
+            {availableGenres.map(genre => (
+              <button
+                key={genre}
+                type="button"
+                onClick={() => toggleVenueGenre(genre)}
+                className={`px-3 py-1 text-xs font-display tracking-wider transition-colors ${formData.genres.includes(genre) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
+              >
+                {genre.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -682,14 +710,6 @@ export default function VenueProfile() {
                         ...roomFormData,
                         capacity: e.target.value
                       })} className="bg-background border-border" />
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">Genres</Label>
-                      <div className="flex flex-wrap gap-1">
-                        {availableGenres.map(genre => <button key={genre} type="button" onClick={() => toggleGenre(genre)} className={`px-3 py-1 text-xs font-display tracking-wider transition-colors ${roomFormData.genres.includes(genre) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>
-                            {genre.toUpperCase()}
-                          </button>)}
                       </div>
                     </div>
                   </div>

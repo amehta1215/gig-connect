@@ -34,6 +34,7 @@ interface VenueProfile {
   id: string;
   picture: string | null;
   pictures?: string[] | null;
+  genres?: string[] | null;
 }
 
 type AvailabilityPreference = 'date_range' | 'specific_dates' | 'flexible';
@@ -111,7 +112,7 @@ export default function VenueDetail() {
     }
     const { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, picture, pictures')
+      .select('id, picture, pictures, genres')
       .eq('id', venueProfileId)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
@@ -296,18 +297,15 @@ export default function VenueDetail() {
             {shared.location}
           </div>
         )}
-        {(() => {
-          const allGenres = Array.from(new Set(listings.flatMap(l => l.genres || [])));
-          return allGenres.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {allGenres.map(genre => (
-                <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
-                  {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
-                </span>
-              ))}
-            </div>
-          ) : null;
-        })()}
+        {venueProfile?.genres && venueProfile.genres.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {venueProfile.genres.map(genre => (
+              <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
+                {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* About/Backline/House Rules + Apply */}
