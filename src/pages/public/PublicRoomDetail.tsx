@@ -144,11 +144,6 @@ export default function PublicRoomDetail() {
                 </span>}
             </div>
 
-            {listing.genres && listing.genres.length > 0 && <div className="flex flex-wrap gap-2">
-                {listing.genres.map(genre => <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
-                    {genre}
-                  </span>)}
-              </div>}
           </div>
 
           {/* Details */}
