@@ -23,6 +23,7 @@ interface VenueProfileData {
   event_types: string[];
   picture: string | null;
   pictures?: string[] | null;
+  genres?: string[] | null;
 }
 interface VenueListing {
   id: string;
@@ -75,7 +76,8 @@ export default function VenueProfile() {
     bio: '',
     event_types: [] as string[],
     picture: '' as string,
-    pictures: [] as string[]
+    pictures: [] as string[],
+    genres: [] as string[]
   });
 
   // Room management state
@@ -148,7 +150,8 @@ export default function VenueProfile() {
         bio: data.bio || '',
         event_types: data.event_types || [],
         picture: data.picture || '',
-        pictures: (data as any).pictures || (data.picture ? [data.picture] : [])
+        pictures: (data as any).pictures || (data.picture ? [data.picture] : []),
+        genres: (data as any).genres || []
       });
       fetchListings(data.id);
       setInitialLoadDone(true);
@@ -180,7 +183,8 @@ export default function VenueProfile() {
       bio: formData.bio || null,
       event_types: formData.event_types,
       picture: formData.pictures[0] || formData.picture || null,
-      pictures: formData.pictures
+      pictures: formData.pictures,
+      genres: formData.genres
     } as any).eq('id', profile.id);
     if (error) {
       toast.error('Failed to save');
