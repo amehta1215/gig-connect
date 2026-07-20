@@ -47,6 +47,7 @@ interface VenueProfile {
   id: string;
   picture: string | null;
   pictures?: string[] | null;
+  genres?: string[] | null;
 }
 export default function PublicVenueDetail() {
   const { id } = useParams<{ id: string }>();
@@ -80,7 +81,7 @@ export default function PublicVenueDetail() {
     if (listingsData) setListings(listingsData as VenueListing[]);
     const { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, picture, pictures')
+      .select('id, picture, pictures, genres')
       .eq('id', id)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
