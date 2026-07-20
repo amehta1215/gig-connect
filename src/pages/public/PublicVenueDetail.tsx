@@ -173,6 +173,18 @@ export default function PublicVenueDetail() {
           {shared.location}
         </div>
       )}
+      {(() => {
+        const allGenres = Array.from(new Set(listings.flatMap(l => l.genres || [])));
+        return allGenres.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {allGenres.map(genre => (
+              <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
+                {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
+              </span>
+            ))}
+          </div>
+        ) : null;
+      })()}
     </div>
 
     <div className="flex flex-col lg:flex-row gap-8">

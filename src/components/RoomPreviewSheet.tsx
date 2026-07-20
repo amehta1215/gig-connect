@@ -90,18 +90,6 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
                   )}
                 </div>
 
-                {data.genres && data.genres.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {data.genres.map(genre => (
-                      <span 
-                        key={genre} 
-                        className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display"
-                      >
-                        {genre}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Details */}
