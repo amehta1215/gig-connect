@@ -483,14 +483,13 @@ export default function VenueProfile() {
                 </button>
               </div>
             ))}
-            {formData.pictures.length < 7 && (
+            {formData.pictures.length < 6 && (
               <button type="button" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
                 <Upload className="h-5 w-5 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">{uploadingVenuePicture ? 'Uploading...' : 'Upload'}</span>
               </button>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">Add up to 7 photos. The first photo appears in venue search results.</p>
         </div>
 
         <div className="space-y-2">
