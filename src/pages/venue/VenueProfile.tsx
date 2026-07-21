@@ -301,15 +301,15 @@ export default function VenueProfile() {
         return;
       }
     }
-    const remaining = 7 - formData.pictures.length;
+    const remaining = 6 - formData.pictures.length;
     if (remaining <= 0) {
-      toast.error('You can upload up to 7 venue photos.');
+      toast.error('You can upload up to 6 venue photos.');
       if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
       return;
     }
     const toUpload = Array.from(files).slice(0, remaining);
     if (files.length > remaining) {
-      toast.error(`Only ${remaining} more photo${remaining === 1 ? '' : 's'} allowed (max 7).`);
+      toast.error(`Only ${remaining} more photo${remaining === 1 ? '' : 's'} allowed (max 6).`);
     }
     setUploadingVenuePicture(true);
     try {
