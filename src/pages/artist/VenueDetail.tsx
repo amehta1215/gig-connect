@@ -35,6 +35,7 @@ interface VenueProfile {
   picture: string | null;
   pictures?: string[] | null;
   genres?: string[] | null;
+  bio?: string | null;
 }
 
 type AvailabilityPreference = 'date_range' | 'specific_dates' | 'flexible';
@@ -112,7 +113,7 @@ export default function VenueDetail() {
     }
     const { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, picture, pictures, genres')
+      .select('id, picture, pictures, genres, bio')
       .eq('id', venueProfileId)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
