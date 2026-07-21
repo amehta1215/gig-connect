@@ -472,7 +472,7 @@ export default function VenueProfile() {
         </div>
 
         <div className="space-y-2">
-          <Label className="block">Venue Photos <span className="text-muted-foreground font-normal">({formData.pictures.length}/7)</span></Label>
+          <Label className="block">Venue Photos <span className="text-muted-foreground font-normal">({formData.pictures.length}/6)</span></Label>
           <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleVenuePictureUpload} className="hidden" />
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {formData.pictures.map((url, index) => (
