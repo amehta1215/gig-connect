@@ -301,15 +301,15 @@ export default function VenueProfile() {
         return;
       }
     }
-    const remaining = 7 - formData.pictures.length;
+    const remaining = 6 - formData.pictures.length;
     if (remaining <= 0) {
-      toast.error('You can upload up to 7 venue photos.');
+      toast.error('You can upload up to 6 venue photos.');
       if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
       return;
     }
     const toUpload = Array.from(files).slice(0, remaining);
     if (files.length > remaining) {
-      toast.error(`Only ${remaining} more photo${remaining === 1 ? '' : 's'} allowed (max 7).`);
+      toast.error(`Only ${remaining} more photo${remaining === 1 ? '' : 's'} allowed (max 6).`);
     }
     setUploadingVenuePicture(true);
     try {
@@ -472,7 +472,7 @@ export default function VenueProfile() {
         </div>
 
         <div className="space-y-2">
-          <Label className="block">Venue Photos <span className="text-muted-foreground font-normal">({formData.pictures.length}/7)</span></Label>
+          <Label className="block">Venue Photos <span className="text-muted-foreground font-normal">({formData.pictures.length}/6)</span></Label>
           <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleVenuePictureUpload} className="hidden" />
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {formData.pictures.map((url, index) => (
