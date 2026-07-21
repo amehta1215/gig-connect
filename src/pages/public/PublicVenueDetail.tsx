@@ -165,7 +165,7 @@ export default function PublicVenueDetail() {
       )}
     </div>
 
-    <div className="space-y-4 mb-8">
+    <div className="space-y-4 mb-2">
       <h1 className="font-display text-4xl md:text-5xl text-black font-bold tracking-wide">
         {shared.venue_name}
       </h1>
@@ -175,16 +175,16 @@ export default function PublicVenueDetail() {
           {shared.location}
         </div>
       )}
-      {venueProfile?.genres && venueProfile.genres.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {venueProfile.genres.map(genre => (
-            <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
-              {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
-            </span>
-          ))}
-        </div>
-      )}
     </div>
+    {venueProfile?.genres && venueProfile.genres.length > 0 && (
+      <div className="flex flex-wrap gap-2 mb-8">
+        {venueProfile.genres.map(genre => (
+          <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
+            {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
+          </span>
+        ))}
+      </div>
+    )}
 
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 order-2 lg:order-1">
