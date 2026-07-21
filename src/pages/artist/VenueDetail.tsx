@@ -35,6 +35,7 @@ interface VenueProfile {
   picture: string | null;
   pictures?: string[] | null;
   genres?: string[] | null;
+  bio?: string | null;
 }
 
 type AvailabilityPreference = 'date_range' | 'specific_dates' | 'flexible';
@@ -112,7 +113,7 @@ export default function VenueDetail() {
     }
     const { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, picture, pictures, genres')
+      .select('id, picture, pictures, genres, bio')
       .eq('id', venueProfileId)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
@@ -312,10 +313,10 @@ export default function VenueDetail() {
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-1 order-2 lg:order-1">
           <div className="space-y-4">
-            {shared.bio && (
+            {venueProfile?.bio && (
               <div className="bg-card border border-border rounded-lg p-4">
                 <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
-                <p className="text-sm text-primary whitespace-pre-line">{shared.bio}</p>
+                <p className="text-sm text-primary whitespace-pre-line">{venueProfile.bio}</p>
               </div>
             )}
             {shared.backline_info && (
