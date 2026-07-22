@@ -293,7 +293,7 @@ export default function FindVenues() {
                   const g = venueProfiles[venue.venue_profile_id]?.genres || [];
                   if (g.length === 0) return null;
                   return <div className="flex flex-wrap gap-1 mt-2">
-                    {g.slice(0, 2).map(genre => <span key={genre} className="text-[10px] px-2 py-0.5 uppercase tracking-wider text-primary bg-gray-200">
+                    {g.map(genre => <span key={genre} className="text-[10px] px-2 py-0.5 uppercase tracking-wider text-primary bg-gray-200">
                       {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
                     </span>)}
                   </div>;
