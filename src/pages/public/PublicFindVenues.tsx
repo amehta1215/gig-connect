@@ -22,6 +22,7 @@ interface VenueListing {
 interface VenueProfile {
   id: string;
   picture: string | null;
+  genres?: string[] | null;
 }
 const genres = ['Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
 const capacityRanges = [{
@@ -71,7 +72,7 @@ export default function PublicFindVenues() {
       if (profileIds.length > 0) {
         const {
           data: profilesData
-        } = await supabase.from('venue_profiles').select('id, picture').in('id', profileIds);
+        } = await supabase.from('venue_profiles').select('id, picture, genres').in('id', profileIds);
         if (profilesData) {
           const profilesMap: Record<string, VenueProfile> = {};
           profilesData.forEach(p => {
@@ -86,7 +87,8 @@ export default function PublicFindVenues() {
   const filteredVenues = venues.filter(venue => {
     const q = searchTerm.toLowerCase();
     const matchesSearch = !searchTerm || venue.venue_name.toLowerCase().includes(q) || venue.room_name?.toLowerCase().includes(q) || venue.location?.toLowerCase().includes(q);
-    const matchesGenre = selectedGenres.length === 0 || selectedGenres.some(g => venue.genres?.includes(g));
+    const profileGenres = venueProfiles[venue.venue_profile_id]?.genres || [];
+    const matchesGenre = selectedGenres.length === 0 || selectedGenres.some(g => profileGenres.includes(g) || venue.genres?.includes(g));
     const matchesLocation = !selectedLocation || (() => {
       const venueLoc = venue.location?.toLowerCase() || '';
       const searchLoc = selectedLocation.toLowerCase();
@@ -268,11 +270,15 @@ export default function PublicFindVenues() {
                     <MapPin className="h-3 w-3" />
                     {venue.location}
                   </p>}
-                {venue.genres && venue.genres.length > 0 && <div className="flex flex-wrap gap-1 mt-2">
-                    {venue.genres.slice(0, 2).map(genre => <span key={genre} className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200 text-primary">
-                        {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
-                      </span>)}
-                  </div>}
+                {(() => {
+                  const g = venueProfiles[venue.venue_profile_id]?.genres || [];
+                  if (g.length === 0) return null;
+                  return <div className="flex flex-wrap gap-1 mt-2">
+                    {g.slice(0, 2).map(genre => <span key={genre} className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200 text-primary">
+                      {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
+                    </span>)}
+                  </div>;
+                })()}
               </div>
             </div>)}
         </div>}
