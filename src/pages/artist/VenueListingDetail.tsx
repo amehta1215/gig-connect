@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useFavorites } from '@/hooks/useFavorites';
 import { Button } from '@/components/ui/button';
-import { MapPin, Users, Music, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Users, Music, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface VenueListing {
@@ -23,7 +22,6 @@ interface VenueListing {
 export default function VenueListingDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toggleFavorite, isFavorite } = useFavorites();
   const [listing, setListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
   const galleryScrollRef = useRef<HTMLDivElement>(null);
@@ -86,15 +84,6 @@ export default function VenueListingDetail() {
     <Dialog open onOpenChange={(o) => { if (!o) navigate(-1); }}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <div className="animate-fade-in">
-          {/* Favorite */}
-          <div className="flex items-center justify-end mb-4">
-            {id && (
-              <Button variant="ghost" size="icon" onClick={() => toggleFavorite(id)} className="h-9 w-9">
-                <Heart className={`h-6 w-6 transition-colors ${isFavorite(id) ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
-              </Button>
-            )}
-          </div>
-
           {/* Pictures Gallery */}
           <div className="mb-6">
             {(() => {

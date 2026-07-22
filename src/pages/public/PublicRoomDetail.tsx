@@ -2,9 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { MapPin, Users, Music, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { MapPin, Users, Music, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import AuthDialog from '@/components/AuthDialog';
 interface VenueListing {
   id: string;
   venue_name: string;
@@ -27,7 +26,6 @@ export default function PublicRoomDetail() {
   const navigate = useNavigate();
   const [listing, setListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const galleryScrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (id) {
@@ -44,11 +42,6 @@ export default function PublicRoomDetail() {
       setListing(data as VenueListing);
     }
     setLoading(false);
-  };
-  const handleInteraction = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setAuthDialogOpen(true);
   };
   if (loading) {
     return (
@@ -78,12 +71,6 @@ export default function PublicRoomDetail() {
   return <Dialog open onOpenChange={(o) => { if (!o) navigate(-1); }}>
     <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
       <div className="animate-fade-in">
-      <div className="flex items-center justify-end mb-4">
-        <Button variant="ghost" size="icon" onClick={handleInteraction} className="h-9 w-9">
-          <Heart className="h-6 w-6 text-muted-foreground hover:text-[#E8556D] transition-colors" />
-        </Button>
-      </div>
-
       {/* Pictures Gallery - horizontal carousel */}
       <div className="mb-6">
         {(() => {
@@ -165,7 +152,6 @@ export default function PublicRoomDetail() {
 
       </div>
 
-      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} promptMessage="Login or sign up to save favorites" />
       </div>
     </DialogContent>
   </Dialog>;
