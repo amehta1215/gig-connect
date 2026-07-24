@@ -315,7 +315,7 @@ export default function VenueDetail() {
           <div className="space-y-4">
             {venueProfile?.bio && (
               <div className="bg-card border border-border rounded-lg p-4">
-                <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
+                <h3 className="font-display text-sm text-primary tracking-widest mb-2">BIO</h3>
                 <p className="text-sm text-primary whitespace-pre-line">{venueProfile.bio}</p>
               </div>
             )}
