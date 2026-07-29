@@ -5,12 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft, PenSquare } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, PenSquare, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 import { ComposeMessagePanel } from '@/components/ComposeMessagePanel';
 import { MessageAttachments } from '@/components/MessageAttachments';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Message {
   id: string;
@@ -162,7 +163,11 @@ export default function VenueMessages() {
       ascending: true
     });
     if (data && !error) {
-      setMessages(data as unknown as Message[]);
+      const filtered = (data as any[]).filter(m =>
+        !(m.sender_id === user.id && m.deleted_by_sender) &&
+        !(m.receiver_id === user.id && m.deleted_by_receiver)
+      );
+      setMessages(filtered as unknown as Message[]);
     }
     setLoading(false);
   };
@@ -271,6 +276,20 @@ export default function VenueMessages() {
     markThreadAsRead(thread.thread_id);
   };
   const unreadCount = threads.filter(t => t.hasUnread).length;
+
+  const handleDeleteThread = async (thread: Thread) => {
+    if (!user) return;
+    const sentIds = thread.messages.filter(m => m.sender_id === user.id).map(m => m.id);
+    const receivedIds = thread.messages.filter(m => m.receiver_id === user.id).map(m => m.id);
+    if (sentIds.length > 0) {
+      await supabase.from('messages').update({ deleted_by_sender: true } as any).in('id', sentIds);
+    }
+    if (receivedIds.length > 0) {
+      await supabase.from('messages').update({ deleted_by_receiver: true } as any).in('id', receivedIds);
+    }
+    setMessages(prev => prev.filter(m => m.thread_id !== thread.thread_id));
+    setSelectedThreadId(null);
+  };
   const getBaseSubject = (thread: Thread) => {
     const firstMessage = thread.messages[0];
     return firstMessage.subject?.replace(/^Re:\s*/i, '') || '(No subject)';
