@@ -5,11 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 import { MessageAttachments } from '@/components/MessageAttachments';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 interface Message {
   id: string;
   sender_id: string;
