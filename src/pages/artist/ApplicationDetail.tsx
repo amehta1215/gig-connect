@@ -3,11 +3,12 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, MapPin, Users, Music, Calendar, Clock, CheckCircle2, Archive, Trash2, PauseCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Users, Music, Calendar, Clock, CheckCircle2, Archive, Trash2, PauseCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { parseLocalDate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { useRef } from 'react';
 
 interface GigListing {
   id: string;
@@ -40,6 +41,23 @@ interface ApplicationData {
     venue_profile_id: string;
   };
   gig_listing?: GigListing | null;
+}
+
+interface VenueProfile {
+  id: string;
+  picture: string | null;
+  pictures: string[] | null;
+  genres: string[] | null;
+  bio: string | null;
+}
+
+interface RoomListing {
+  id: string;
+  venue_name: string;
+  room_name: string | null;
+  capacity: number | null;
+  genres: string[];
+  pictures: string[];
 }
 const statusConfig = {
   in_progress: {
@@ -107,6 +125,9 @@ export default function ApplicationDetail() {
   const [loading, setLoading] = useState(true);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
+  const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
+  const [rooms, setRooms] = useState<RoomListing[]>([]);
+  const galleryScrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (id && user) {
       fetchApplication();
@@ -138,6 +159,21 @@ export default function ApplicationDetail() {
       }
 
       setApplication(appData);
+
+      // Fetch venue profile (for bio, pictures, genres)
+      const { data: profileData } = await supabase
+        .from('venue_profiles')
+        .select('id, picture, pictures, genres, bio')
+        .eq('id', appData.venue_listing.venue_profile_id)
+        .maybeSingle();
+      if (profileData) setVenueProfile(profileData as VenueProfile);
+
+      // Fetch all rooms for this venue
+      const { data: roomsData } = await supabase
+        .from('venue_listings')
+        .select('id, venue_name, room_name, capacity, genres, pictures')
+        .eq('venue_profile_id', appData.venue_listing.venue_profile_id);
+      if (roomsData) setRooms(roomsData as RoomListing[]);
     }
     setLoading(false);
   };
@@ -176,6 +212,20 @@ export default function ApplicationDetail() {
   const StatusIcon = config.icon;
   const holdPriority = isHold ? application.gig_listing?.hold_priority : null;
   const listing = application.venue_listing;
+  const venuePics = (venueProfile?.pictures && venueProfile.pictures.length > 0)
+    ? venueProfile.pictures
+    : (venueProfile?.picture ? [venueProfile.picture] : []);
+  const galleryPictures = Array.from(new Set([
+    ...venuePics,
+    ...rooms.flatMap(r => r.pictures || []),
+  ]));
+  const scroll = (dir: 'left' | 'right') => {
+    if (!galleryScrollRef.current) return;
+    const container = galleryScrollRef.current;
+    const card = container.children[0] as HTMLElement;
+    const cardWidth = card?.offsetWidth || 300;
+    container.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
+  };
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       {/* Back Button */}
       <div className="flex items-center">
@@ -195,21 +245,33 @@ export default function ApplicationDetail() {
 
       {/* Pictures Gallery */}
       <div className="mb-6">
-        {(() => {
-        const allPictures: string[] = listing.pictures || [];
-        if (allPictures.length === 0) {
-          return <div className="aspect-[4/3] max-w-xs mx-auto bg-secondary rounded-lg overflow-hidden">
-                <div className="w-full h-full flex items-center justify-center bg-heat">
-                  <Music className="h-12 w-12 text-primary/30" />
+        {galleryPictures.length === 0 ? (
+          <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
+            <div className="w-full h-full flex items-center justify-center bg-heat">
+              <Music className="h-12 w-12 text-primary/30" />
+            </div>
+          </div>
+        ) : (
+          <div className="relative group">
+            <div ref={galleryScrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth">
+              {galleryPictures.map((pic, i) => (
+                <div key={i} className="flex-shrink-0 w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+                  <img src={pic} alt={`${listing.venue_name} ${i + 1}`} className="w-full h-full object-cover" />
                 </div>
-              </div>;
-        }
-        return <div className="flex flex-wrap justify-center gap-2">
-              {allPictures.map((pic, index) => <div key={index} className="w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
-                  <img src={pic} alt={`${listing.venue_name} ${index + 1}`} className="w-full h-full object-cover" />
-                </div>)}
-            </div>;
-      })()}
+              ))}
+            </div>
+            {galleryPictures.length > 3 && (
+              <>
+                <button onClick={(e) => { e.stopPropagation(); scroll('left'); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <ChevronLeft className="h-5 w-5 text-foreground" />
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); scroll('right'); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <ChevronRight className="h-5 w-5 text-foreground" />
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Venue Info */}
@@ -218,7 +280,6 @@ export default function ApplicationDetail() {
           <h1 className="font-display text-4xl md:text-5xl font-bold tracking-wide text-primary">
             {listing.venue_name}
           </h1>
-          {listing.room_name && <p className="text-lg mt-1 text-primary">{listing.room_name}</p>}
         </div>
 
         <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
@@ -226,35 +287,60 @@ export default function ApplicationDetail() {
               <MapPin className="h-4 w-4" />
               {listing.location}
             </span>}
-          {listing.capacity && <span className="flex items-center gap-2 text-primary">
-              <Users className="h-4 w-4" />
-              {listing.capacity} capacity
-            </span>}
         </div>
 
-        {listing.genres && listing.genres.length > 0 && <div className="flex flex-wrap gap-2">
-            {listing.genres.map(genre => <span key={genre} className="text-xs bg-secondary px-3 py-1 uppercase tracking-wider font-display">
-                {genre}
+        {venueProfile?.genres && venueProfile.genres.length > 0 && <div className="flex flex-wrap gap-2">
+            {venueProfile.genres.map(genre => <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
+                {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
               </span>)}
           </div>}
       </div>
 
-      {/* Venue Details */}
-      {listing.bio && <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
-          <p className="text-muted-foreground text-sm">{listing.bio}</p>
+      {/* Bio */}
+      {venueProfile?.bio && <div className="bg-card border border-border rounded-lg p-4">
+          <h3 className="font-display text-sm text-primary tracking-widest mb-2">BIO</h3>
+          <p className="text-sm text-primary whitespace-pre-line">{venueProfile.bio}</p>
         </div>}
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {listing.backline_info && <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
-            <p className="text-sm text-primary">{listing.backline_info}</p>
-          </div>}
-        {listing.house_rules && <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
-            <p className="text-sm text-primary">{listing.house_rules}</p>
-          </div>}
-      </div>
+      {/* Rooms */}
+      {rooms.length > 0 && (
+        <div className="mt-10">
+          <h2 className="font-display text-2xl text-black font-bold tracking-wide mb-4">ROOMS</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {rooms.map(room => (
+              <div
+                key={room.id}
+                onClick={() => navigate(`/artist/venues/${room.id}`)}
+                className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative"
+              >
+                <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
+                  {(() => {
+                    const pic = (room.pictures && room.pictures[0]) || venueProfile?.picture || null;
+                    return pic ? (
+                      <img src={pic} alt={room.room_name || room.venue_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-heat">
+                        <Music className="h-12 w-12 text-primary/30" />
+                      </div>
+                    );
+                  })()}
+                  {room.capacity && (
+                    <div className="absolute top-2 left-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {room.capacity}
+                    </div>
+                  )}
+                </div>
+                <div className="p-3">
+                  <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors tracking-wide font-semibold">
+                    {room.room_name || 'Main Room'}
+                  </h3>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Your Application */}
       <div className="bg-card border border-border rounded-lg p-6 space-y-4">
