@@ -106,7 +106,11 @@ export default function ArtistMessages() {
       ascending: true
     });
     if (data && !error) {
-      setMessages(data as unknown as Message[]);
+      const filtered = (data as any[]).filter(m =>
+        !(m.sender_id === user.id && m.deleted_by_sender) &&
+        !(m.receiver_id === user.id && m.deleted_by_receiver)
+      );
+      setMessages(filtered as unknown as Message[]);
     }
     setLoading(false);
   };
