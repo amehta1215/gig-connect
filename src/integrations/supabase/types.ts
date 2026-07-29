@@ -278,6 +278,8 @@ export type Database = {
           attachments: Json | null
           content: string
           created_at: string | null
+          deleted_by_receiver: boolean
+          deleted_by_sender: boolean
           id: string
           is_read: boolean | null
           is_starred: boolean | null
@@ -290,6 +292,8 @@ export type Database = {
           attachments?: Json | null
           content: string
           created_at?: string | null
+          deleted_by_receiver?: boolean
+          deleted_by_sender?: boolean
           id?: string
           is_read?: boolean | null
           is_starred?: boolean | null
@@ -302,6 +306,8 @@ export type Database = {
           attachments?: Json | null
           content?: string
           created_at?: string | null
+          deleted_by_receiver?: boolean
+          deleted_by_sender?: boolean
           id?: string
           is_read?: boolean | null
           is_starred?: boolean | null

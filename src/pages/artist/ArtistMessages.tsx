@@ -5,11 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 import { MessageAttachments } from '@/components/MessageAttachments';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 interface Message {
   id: string;
   sender_id: string;
@@ -105,7 +106,11 @@ export default function ArtistMessages() {
       ascending: true
     });
     if (data && !error) {
-      setMessages(data as unknown as Message[]);
+      const filtered = (data as any[]).filter(m =>
+        !(m.sender_id === user.id && m.deleted_by_sender) &&
+        !(m.receiver_id === user.id && m.deleted_by_receiver)
+      );
+      setMessages(filtered as unknown as Message[]);
     }
     setLoading(false);
   };
@@ -244,6 +249,20 @@ export default function ArtistMessages() {
   };
   const unreadCount = threads.filter(t => t.hasUnread).length;
 
+  const handleDeleteThread = async (thread: Thread) => {
+    if (!user) return;
+    const sentIds = thread.messages.filter(m => m.sender_id === user.id).map(m => m.id);
+    const receivedIds = thread.messages.filter(m => m.receiver_id === user.id).map(m => m.id);
+    if (sentIds.length > 0) {
+      await supabase.from('messages').update({ deleted_by_sender: true } as any).in('id', sentIds);
+    }
+    if (receivedIds.length > 0) {
+      await supabase.from('messages').update({ deleted_by_receiver: true } as any).in('id', receivedIds);
+    }
+    setMessages(prev => prev.filter(m => m.thread_id !== thread.thread_id));
+    setSelectedThreadId(null);
+  };
+
   // Highlight search term in text
   const highlightText = (text: string) => {
     if (!searchTerm.trim()) return text;
@@ -364,6 +383,25 @@ export default function ArtistMessages() {
                     })()}
                   </div>
                 </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" title="Delete conversation">
+                      <Trash2 className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will remove the entire conversation from your inbox. The other person will still see their copy.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteThread(selectedThread)}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
