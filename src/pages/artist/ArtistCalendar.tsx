@@ -274,19 +274,15 @@ export default function ArtistCalendar() {
   const today = startOfDay(new Date());
   const modifiers = {
     hasGig: gigDates,
+    today: today,
     past: {
       before: today
     }
   };
-  const modifiersStyles = {
-    hasGig: {
-      backgroundColor: 'hsl(14, 79%, 52%)',
-      color: 'white',
-      borderRadius: '0'
-    }
-  };
+  const modifiersStyles = {};
   const modifiersClassNames = {
-    past: 'day-past'
+    past: 'day-past',
+    hasGig: 'day-has-gig'
   };
   const canCreateEvent = selectedDate && selectedDate >= today;
   if (loading) {
@@ -296,7 +292,7 @@ export default function ArtistCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-3 gap-6">
         {/* Calendar */}
         <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch justify-center min-h-[400px]">
           <Calendar
@@ -307,12 +303,17 @@ export default function ArtistCalendar() {
           modifiersStyles={modifiersStyles}
           modifiersClassNames={modifiersClassNames}
           disablePastDates={false}
-          className="pointer-events-auto w-full h-full font-semibold" />
+          className="pointer-events-auto w-full h-full font-semibold"
+          classNames={{
+            caption_label: "text-2xl font-bold",
+            day: "relative h-10 w-10 hover:bg-orange-200/40 hover:rounded-full transition-all",
+            cell: "relative h-10 w-10",
+          }} />
 
         </div>
 
         {/* Events on selected date */}
-        <div className="bg-card border border-border p-6">
+        <div className="col-span-2 bg-card border border-border p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}

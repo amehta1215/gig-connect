@@ -610,6 +610,19 @@ export default function VenueCalendar() {
   useEffect(() => {
     setLocalHoldOrder(holdGigs);
   }, [gigs, selectedDate]);
+  const today = startOfDay(new Date());
+  const modifiers = {
+    hasGig: gigDates,
+    today: today,
+    past: {
+      before: today
+    }
+  };
+  const modifiersStyles = {};
+  const modifiersClassNames = {
+    past: 'day-past',
+    hasGig: 'day-has-gig'
+  };
   const handleHoldDragStart = (index: number) => {
     setDraggedHoldIndex(index);
     setIsDraggingHold(true);
@@ -655,14 +668,16 @@ export default function VenueCalendar() {
   };
   const today = startOfDay(new Date());
   const modifiers = {
+    hasGig: gigDates,
+    today: today,
     past: {
       before: today
     }
   };
-  const modifiersStyles = {
-    past: {
-      opacity: 0.3
-    }
+  const modifiersStyles = {};
+  const modifiersClassNames = {
+    past: 'day-past',
+    hasGig: 'day-has-gig'
   };
   const canCreateEvent = selectedDate && selectedDate >= today;
   if (loading) {
@@ -672,7 +687,7 @@ export default function VenueCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-2 md:grid-rows-[400px_auto] gap-6 items-start">
+      <div className="grid md:grid-cols-3 md:grid-rows-[400px_auto] gap-6 items-start">
         {/* Calendar */}
         <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px] h-[400px] row-start-1 col-start-1">
           <Calendar
@@ -681,23 +696,25 @@ export default function VenueCalendar() {
             onSelect={setSelectedDate}
             modifiers={modifiers}
             modifiersStyles={modifiersStyles}
+            modifiersClassNames={modifiersClassNames}
             disablePastDates={false}
             className="pointer-events-auto w-full h-full font-semibold p-0"
             classNames={{
               months: "flex flex-col h-full w-full flex-1",
               month: "flex flex-col h-full w-full flex-1",
+              caption_label: "text-2xl font-bold",
               table: "flex flex-col flex-1 w-full border-collapse",
               head_row: "flex w-full",
               head_cell: "flex-1 text-muted-foreground font-normal text-[0.8rem] text-center",
               row: "flex w-full flex-1",
               cell: "flex-1 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/30 [&:has([aria-selected])]:bg-accent/60 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-              day: "w-full h-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              day: "w-full h-full p-0 font-normal aria-selected:opacity-100 inline-flex items-center justify-center text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             }}
           />
         </div>
 
         {/* Events on selected date */}
-        <div className={cn("relative bg-card border border-border flex flex-col row-start-1 col-start-2", selectedDateBoxHeight > 400 ? "md:row-span-2" : "")} style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
+        <div className={cn("relative bg-card border border-border flex flex-col row-start-1 col-start-2 col-span-2", selectedDateBoxHeight > 400 ? "md:row-span-2" : "")} style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
           <div className="flex-1 overflow-y-auto p-6 pb-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
@@ -805,7 +822,7 @@ export default function VenueCalendar() {
         </div>
 
         {/* Upcoming confirmed shows */}
-        <div className={cn("bg-card border border-border p-6 transition-all row-start-2", selectedDateBoxHeight > 400 ? "col-start-1" : "col-span-2")}>
+        <div className={cn("bg-card border border-border p-6 transition-all row-start-2", selectedDateBoxHeight > 400 ? "col-start-1" : "col-span-3")}>
 
           <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
           {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">

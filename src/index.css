@@ -210,6 +210,46 @@ input[type="number"] {
   background-color: hsl(var(--accent) / 0.5) !important;
 }
 
+/* Calendar day styling - today with orange circle outline */
+.rdp-day_today {
+  border: 2px solid hsl(var(--accent)) !important;
+  background-color: transparent !important;
+  color: inherit !important;
+  border-radius: 50% !important;
+}
+
+/* Calendar day with gig indicator - orange dot in top-right corner */
+.day-has-gig {
+  position: relative;
+}
+
+.day-has-gig::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background-color: hsl(var(--accent));
+  border-radius: 50%;
+  z-index: 10;
+}
+
+/* Calendar day hover state - pale orange circle outline */
+.rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_today) {
+  border: 2px solid hsl(var(--accent) / 0.3) !important;
+  border-radius: 50% !important;
+  background-color: transparent !important;
+}
+
+/* Calendar day selected - filled orange circle */
+.rdp-day_selected {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+  border-radius: 50% !important;
+  border: none !important;
+}
+
 /* Calendar full-height layout - override table display to flex */
 .calendar-stretch .rdp {
   height: 100% !important;
