@@ -322,7 +322,16 @@ export default function ArtistMessages() {
               </div> : filteredThreads.map(thread => {
             const displayName = `${thread.otherParty.name}${thread.otherParty.venueName ? ` (${thread.otherParty.venueName})` : ''}`;
             const messageCount = thread.messages.length;
-            return <div key={thread.thread_id} onClick={() => handleSelectThread(thread)} className={`p-3 border-b border-border cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}>
+            return <SwipeableThreadRow
+              key={thread.thread_id}
+              onClick={() => handleSelectThread(thread)}
+              onDelete={() => {
+                setThreadToDelete(thread);
+                setDeleteDialogOpen(true);
+              }}
+              className="border-b border-border"
+              contentClassName={`p-3 cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}
+            >
                     <div className="flex items-start gap-2">
                       <button onClick={e => {
                   e.stopPropagation();
@@ -357,7 +366,7 @@ export default function ArtistMessages() {
                         {thread.isStarred ? <Star className="h-4 w-4 fill-[#FDDA0D] text-[#FDDA0D]" /> : <Star className="h-4 w-4 text-muted-foreground" />}
                       </button>
                     </div>
-                  </div>;
+                  </SwipeableThreadRow>;
           })}
           </div>
         </div>
