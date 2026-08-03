@@ -60,7 +60,7 @@ export function SwipeableThreadRow({
   };
 
   return (
-    <div className={cn('relative overflow-hidden', className)}>
+    <div className={cn('relative overflow-hidden bg-card', className)}>
       <div className="absolute inset-y-0 right-0 left-0 bg-destructive flex items-center justify-end pr-4 select-none">
         <Trash2 className="h-5 w-5 text-destructive-foreground" />
       </div>
