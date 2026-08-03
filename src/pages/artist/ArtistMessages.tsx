@@ -357,12 +357,14 @@ export default function ArtistMessages() {
               onClick={() => handleSelectThread(thread)}
               onDelete={() => {
                 if (thread.isDeleted) {
-                  handleRestoreThread(thread);
+                  setThreadToRestore(thread);
+                  setRestoreDialogOpen(true);
                 } else {
                   setThreadToDelete(thread);
                   setDeleteDialogOpen(true);
                 }
               }}
+              isDeleted={thread.isDeleted}
               className="border-b border-border"
               contentClassName={`p-3 cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-muted' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}
             >
