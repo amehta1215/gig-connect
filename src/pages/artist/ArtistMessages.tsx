@@ -75,6 +75,8 @@ export default function ArtistMessages() {
   const [artistApplications, setArtistApplications] = useState<ArtistApplication[]>([]);
   const [threadToDelete, setThreadToDelete] = useState<Thread | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [threadToRestore, setThreadToRestore] = useState<Thread | null>(null);
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when thread is selected
@@ -355,12 +357,14 @@ export default function ArtistMessages() {
               onClick={() => handleSelectThread(thread)}
               onDelete={() => {
                 if (thread.isDeleted) {
-                  handleRestoreThread(thread);
+                  setThreadToRestore(thread);
+                  setRestoreDialogOpen(true);
                 } else {
                   setThreadToDelete(thread);
                   setDeleteDialogOpen(true);
                 }
               }}
+              isDeleted={thread.isDeleted}
               className="border-b border-border"
               contentClassName={`p-3 cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-muted' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}
             >
@@ -474,6 +478,24 @@ export default function ArtistMessages() {
               if (threadToDelete) handleDeleteThread(threadToDelete);
               setThreadToDelete(null);
             }}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={restoreDialogOpen} onOpenChange={setRestoreDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore conversation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will return the conversation to your inbox.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setThreadToRestore(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (threadToRestore) handleRestoreThread(threadToRestore);
+              setThreadToRestore(null);
+            }}>Restore</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
