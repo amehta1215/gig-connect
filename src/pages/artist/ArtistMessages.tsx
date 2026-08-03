@@ -481,5 +481,23 @@ export default function ArtistMessages() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={restoreDialogOpen} onOpenChange={setRestoreDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore conversation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will return the conversation to your inbox.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setThreadToRestore(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (threadToRestore) handleRestoreThread(threadToRestore);
+              setThreadToRestore(null);
+            }}>Restore</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }
