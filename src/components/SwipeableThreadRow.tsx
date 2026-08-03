@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SwipeableThreadRowProps {
@@ -8,6 +8,7 @@ interface SwipeableThreadRowProps {
   onClick?: () => void;
   className?: string;
   contentClassName?: string;
+  isDeleted?: boolean;
 }
 
 export function SwipeableThreadRow({
@@ -16,6 +17,7 @@ export function SwipeableThreadRow({
   onClick,
   className = '',
   contentClassName = '',
+  isDeleted = false,
 }: SwipeableThreadRowProps) {
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -61,8 +63,15 @@ export function SwipeableThreadRow({
 
   return (
     <div className={cn('relative overflow-hidden', className)}>
-      <div className="absolute inset-y-0 right-0 left-0 bg-destructive flex items-center justify-end pr-4 select-none">
-        <Trash2 className="h-5 w-5 text-destructive-foreground" />
+      <div className={cn(
+        'absolute inset-y-0 right-0 left-0 flex items-center justify-end pr-4 select-none',
+        isDeleted ? 'bg-muted' : 'bg-destructive'
+      )}>
+        {isDeleted ? (
+          <Mail className="h-5 w-5 text-foreground" />
+        ) : (
+          <Trash2 className="h-5 w-5 text-destructive-foreground" />
+        )}
       </div>
       <div
         className={cn('relative bg-card transition-transform duration-200 ease-out', contentClassName)}
