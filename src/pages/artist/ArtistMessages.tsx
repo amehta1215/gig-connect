@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, RotateCcw } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
@@ -23,6 +23,8 @@ interface Message {
   is_starred: boolean;
   created_at: string;
   attachments?: any;
+  deleted_by_sender?: boolean;
+  deleted_by_receiver?: boolean;
   sender?: {
     first_name: string;
     last_name: string;
@@ -44,6 +46,7 @@ interface Thread {
   latestMessage: Message;
   hasUnread: boolean;
   isStarred: boolean;
+  isDeleted: boolean;
   otherParty: {
     id: string;
     name: string;
@@ -55,7 +58,7 @@ interface ArtistApplication {
   venue_listing_id: string;
   venue_user_id: string;
 }
-type FilterType = 'all' | 'unread' | 'starred';
+type FilterType = 'all' | 'unread' | 'starred' | 'deleted';
 type SortType = 'newest' | 'oldest';
 export default function ArtistMessages() {
   const {
@@ -109,14 +112,13 @@ export default function ArtistMessages() {
       ascending: true
     });
     if (data && !error) {
-      const filtered = (data as any[]).filter(m =>
-        !(m.sender_id === user.id && m.deleted_by_sender) &&
-        !(m.receiver_id === user.id && m.deleted_by_receiver)
-      );
-      setMessages(filtered as unknown as Message[]);
+      setMessages(data as unknown as Message[]);
     }
     setLoading(false);
   };
+  const isDeletedForMe = (m: Message) =>
+    (m.sender_id === user?.id && !!m.deleted_by_sender) ||
+    (m.receiver_id === user?.id && !!m.deleted_by_receiver);
   const fetchArtistApplications = async () => {
     if (!user) return;
 
@@ -183,6 +185,7 @@ export default function ArtistMessages() {
         latestMessage,
         hasUnread: sortedMessages.some(m => !m.is_read && m.receiver_id === user?.id),
         isStarred: sortedMessages.some(m => m.is_starred),
+        isDeleted: sortedMessages.every(m => isDeletedForMe(m)),
         otherParty
       });
     });
@@ -237,6 +240,8 @@ export default function ArtistMessages() {
     const matchesName = thread.otherParty.name.toLowerCase().includes(searchLower);
     const matchesVenueName = thread.otherParty.venueName?.toLowerCase().includes(searchLower);
     const matchesSearch = !searchTerm || matchesSubject || matchesContent || matchesName || matchesVenueName;
+    if (filter === 'deleted') return matchesSearch && thread.isDeleted;
+    if (thread.isDeleted) return false;
     if (filter === 'unread') return matchesSearch && thread.hasUnread;
     if (filter === 'starred') return matchesSearch && thread.isStarred;
     return matchesSearch;
@@ -250,7 +255,7 @@ export default function ArtistMessages() {
     setSelectedThreadId(thread.thread_id);
     markThreadAsRead(thread.thread_id);
   };
-  const unreadCount = threads.filter(t => t.hasUnread).length;
+  const unreadCount = threads.filter(t => t.hasUnread && !t.isDeleted).length;
 
   const handleDeleteThread = async (thread: Thread) => {
     if (!user) return;
@@ -262,8 +267,30 @@ export default function ArtistMessages() {
     if (receivedIds.length > 0) {
       await supabase.from('messages').update({ deleted_by_receiver: true } as any).in('id', receivedIds);
     }
-    setMessages(prev => prev.filter(m => m.thread_id !== thread.thread_id));
+    setMessages(prev => prev.map(m => m.thread_id === thread.thread_id ? {
+      ...m,
+      deleted_by_sender: m.sender_id === user.id ? true : m.deleted_by_sender,
+      deleted_by_receiver: m.receiver_id === user.id ? true : m.deleted_by_receiver,
+    } : m));
     setSelectedThreadId(null);
+  };
+
+  const handleRestoreThread = async (thread: Thread) => {
+    if (!user) return;
+    const sentIds = thread.messages.filter(m => m.sender_id === user.id).map(m => m.id);
+    const receivedIds = thread.messages.filter(m => m.receiver_id === user.id).map(m => m.id);
+    if (sentIds.length > 0) {
+      await supabase.from('messages').update({ deleted_by_sender: false } as any).in('id', sentIds);
+    }
+    if (receivedIds.length > 0) {
+      await supabase.from('messages').update({ deleted_by_receiver: false } as any).in('id', receivedIds);
+    }
+    setMessages(prev => prev.map(m => m.thread_id === thread.thread_id ? {
+      ...m,
+      deleted_by_sender: m.sender_id === user.id ? false : m.deleted_by_sender,
+      deleted_by_receiver: m.receiver_id === user.id ? false : m.deleted_by_receiver,
+    } : m));
+    setFilter('all');
   };
 
   // Highlight search term in text
@@ -299,6 +326,7 @@ export default function ArtistMessages() {
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="unread">Unread {unreadCount > 0 && `(${unreadCount})`}</SelectItem>
                   <SelectItem value="starred">Starred</SelectItem>
+                  <SelectItem value="deleted">Deleted</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={sortBy} onValueChange={v => setSortBy(v as SortType)}>
@@ -326,8 +354,12 @@ export default function ArtistMessages() {
               key={thread.thread_id}
               onClick={() => handleSelectThread(thread)}
               onDelete={() => {
-                setThreadToDelete(thread);
-                setDeleteDialogOpen(true);
+                if (thread.isDeleted) {
+                  handleRestoreThread(thread);
+                } else {
+                  setThreadToDelete(thread);
+                  setDeleteDialogOpen(true);
+                }
               }}
               className="border-b border-border"
               contentClassName={`p-3 cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}
@@ -395,6 +427,9 @@ export default function ArtistMessages() {
                     })()}
                   </div>
                 </div>
+                {selectedThread.isDeleted && <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => handleRestoreThread(selectedThread)}>
+                    <RotateCcw className="h-3 w-3" /> Restore
+                  </Button>}
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -418,7 +453,7 @@ export default function ArtistMessages() {
               </div>
 
               {/* Hide reply form for system messages (Riff Team) */}
-              {selectedThread.otherParty.id !== '00000000-0000-0000-0000-000000000000' && <MessageReplyForm threadId={selectedThread.thread_id} originalSubject={selectedThread.latestMessage.subject} senderId={user?.id || ''} receiverId={selectedThread.otherParty.id} onSuccess={fetchMessages} />}
+              {selectedThread.otherParty.id !== '00000000-0000-0000-0000-000000000000' && !selectedThread.isDeleted && <MessageReplyForm threadId={selectedThread.thread_id} originalSubject={selectedThread.latestMessage.subject} senderId={user?.id || ''} receiverId={selectedThread.otherParty.id} onSuccess={fetchMessages} />}
             </> : <div className="flex-1 flex items-center justify-center">
               <Mail className="h-12 w-12 text-muted-foreground/30" />
             </div>}
