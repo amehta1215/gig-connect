@@ -70,6 +70,8 @@ export default function ArtistMessages() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortType>('newest');
   const [artistApplications, setArtistApplications] = useState<ArtistApplication[]>([]);
+  const [threadToDelete, setThreadToDelete] = useState<Thread | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when thread is selected
