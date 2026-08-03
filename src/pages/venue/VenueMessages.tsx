@@ -5,13 +5,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft, PenSquare, Trash2 } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, PenSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 import { ComposeMessagePanel } from '@/components/ComposeMessagePanel';
 import { MessageAttachments } from '@/components/MessageAttachments';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { SwipeableThreadRow } from '@/components/SwipeableThreadRow';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface Message {
   id: string;
@@ -75,6 +76,8 @@ export default function VenueMessages() {
   const [composeArtist, setComposeArtist] = useState<{ id: string; name: string; bandName: string | null } | null>(null);
   const [composeSubject, setComposeSubject] = useState<string>('');
   const [artistApplications, setArtistApplications] = useState<ArtistApplication[]>([]);
+  const [threadToDelete, setThreadToDelete] = useState<Thread | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when thread is selected
@@ -343,7 +346,16 @@ export default function VenueMessages() {
               </div> : filteredThreads.map(thread => {
             const displayName = `${thread.otherParty.name}${thread.otherParty.bandName ? ` (${thread.otherParty.bandName})` : ''}`;
             const messageCount = thread.messages.length;
-            return <div key={thread.thread_id} onClick={() => handleSelectThread(thread)} className={`p-3 border-b border-border cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}>
+            return <SwipeableThreadRow
+              key={thread.thread_id}
+              onClick={() => handleSelectThread(thread)}
+              onDelete={() => {
+                setThreadToDelete(thread);
+                setDeleteDialogOpen(true);
+              }}
+              className="border-b border-border"
+              contentClassName={`p-3 cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}
+            >
                     <div className="flex items-start gap-2">
                       <button 
                         onClick={e => {
@@ -382,7 +394,7 @@ export default function VenueMessages() {
                         {thread.isStarred ? <Star className="h-4 w-4 fill-[#FDDA0D] text-[#FDDA0D]" /> : <Star className="h-4 w-4 text-muted-foreground" />}
                       </button>
                     </div>
-                  </div>;
+                  </SwipeableThreadRow>;
           })}
           </div>
         </div>
@@ -423,25 +435,6 @@ export default function VenueMessages() {
                     })()}
                   </div>
                 </div>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" title="Delete conversation">
-                      <Trash2 className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will remove the entire conversation from your inbox. The other person will still see their copy.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDeleteThread(selectedThread)}>Delete</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -479,5 +472,23 @@ export default function VenueMessages() {
             </div>}
         </div>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the entire conversation from your inbox. The other person will still see their copy.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setThreadToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (threadToDelete) handleDeleteThread(threadToDelete);
+              setThreadToDelete(null);
+            }}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }
