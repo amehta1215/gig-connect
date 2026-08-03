@@ -65,7 +65,7 @@ export function SwipeableThreadRow({
         <Trash2 className="h-5 w-5 text-destructive-foreground" />
       </div>
       <div
-        className={cn('relative transition-transform duration-200 ease-out', contentClassName)}
+        className={cn('relative bg-card transition-transform duration-200 ease-out', contentClassName)}
         style={{ transform: `translateX(${offset}px)` }}
         onTouchStart={(e) => handleStart(e.touches[0].clientX)}
         onTouchMove={(e) => handleMove(e.touches[0].clientX)}
