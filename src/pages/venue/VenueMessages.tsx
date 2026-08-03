@@ -81,6 +81,8 @@ export default function VenueMessages() {
   const [artistApplications, setArtistApplications] = useState<ArtistApplication[]>([]);
   const [threadToDelete, setThreadToDelete] = useState<Thread | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [threadToRestore, setThreadToRestore] = useState<Thread | null>(null);
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when thread is selected
