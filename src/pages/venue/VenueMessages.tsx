@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft, PenSquare } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft, PenSquare, RotateCcw } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
@@ -25,6 +25,8 @@ interface Message {
   is_starred: boolean;
   created_at: string;
   attachments?: any;
+  deleted_by_sender?: boolean;
+  deleted_by_receiver?: boolean;
   sender?: {
     first_name: string;
     last_name: string;
@@ -46,6 +48,7 @@ interface Thread {
   latestMessage: Message;
   hasUnread: boolean;
   isStarred: boolean;
+  isDeleted: boolean;
   otherParty: {
     id: string;
     name: string;
@@ -57,7 +60,7 @@ interface ArtistApplication {
   id: string;
   artist_id: string;
 }
-type FilterType = 'all' | 'unread' | 'starred';
+type FilterType = 'all' | 'unread' | 'starred' | 'deleted';
 type SortType = 'newest' | 'oldest';
 export default function VenueMessages() {
   const {
@@ -166,14 +169,14 @@ export default function VenueMessages() {
       ascending: true
     });
     if (data && !error) {
-      const filtered = (data as any[]).filter(m =>
-        !(m.sender_id === user.id && m.deleted_by_sender) &&
-        !(m.receiver_id === user.id && m.deleted_by_receiver)
-      );
-      setMessages(filtered as unknown as Message[]);
+      setMessages(data as unknown as Message[]);
     }
     setLoading(false);
   };
+
+  const isDeletedForMe = (m: Message) =>
+    (m.sender_id === user?.id && !!m.deleted_by_sender) ||
+    (m.receiver_id === user?.id && !!m.deleted_by_receiver);
 
   // Get application ID for an artist
   const getApplicationForArtist = (artistId: string) => {
@@ -217,6 +220,7 @@ export default function VenueMessages() {
         latestMessage,
         hasUnread: sortedMessages.some(m => !m.is_read && m.receiver_id === user?.id),
         isStarred: sortedMessages.some(m => m.is_starred),
+        isDeleted: sortedMessages.every(m => isDeletedForMe(m)),
         otherParty
       });
     });
@@ -265,6 +269,8 @@ export default function VenueMessages() {
   };
   const filteredThreads = threads.filter(thread => {
     const matchesSearch = thread.latestMessage.subject?.toLowerCase().includes(searchTerm.toLowerCase()) || thread.messages.some(m => m.content.toLowerCase().includes(searchTerm.toLowerCase())) || thread.otherParty.name.toLowerCase().includes(searchTerm.toLowerCase());
+    if (filter === 'deleted') return matchesSearch && thread.isDeleted;
+    if (thread.isDeleted) return false;
     if (filter === 'unread') return matchesSearch && thread.hasUnread;
     if (filter === 'starred') return matchesSearch && thread.isStarred;
     return matchesSearch;
@@ -278,7 +284,7 @@ export default function VenueMessages() {
     setSelectedThreadId(thread.thread_id);
     markThreadAsRead(thread.thread_id);
   };
-  const unreadCount = threads.filter(t => t.hasUnread).length;
+  const unreadCount = threads.filter(t => t.hasUnread && !t.isDeleted).length;
 
   const handleDeleteThread = async (thread: Thread) => {
     if (!user) return;
@@ -290,8 +296,30 @@ export default function VenueMessages() {
     if (receivedIds.length > 0) {
       await supabase.from('messages').update({ deleted_by_receiver: true } as any).in('id', receivedIds);
     }
-    setMessages(prev => prev.filter(m => m.thread_id !== thread.thread_id));
+    setMessages(prev => prev.map(m => m.thread_id === thread.thread_id ? {
+      ...m,
+      deleted_by_sender: m.sender_id === user.id ? true : m.deleted_by_sender,
+      deleted_by_receiver: m.receiver_id === user.id ? true : m.deleted_by_receiver,
+    } : m));
     setSelectedThreadId(null);
+  };
+
+  const handleRestoreThread = async (thread: Thread) => {
+    if (!user) return;
+    const sentIds = thread.messages.filter(m => m.sender_id === user.id).map(m => m.id);
+    const receivedIds = thread.messages.filter(m => m.receiver_id === user.id).map(m => m.id);
+    if (sentIds.length > 0) {
+      await supabase.from('messages').update({ deleted_by_sender: false } as any).in('id', sentIds);
+    }
+    if (receivedIds.length > 0) {
+      await supabase.from('messages').update({ deleted_by_receiver: false } as any).in('id', receivedIds);
+    }
+    setMessages(prev => prev.map(m => m.thread_id === thread.thread_id ? {
+      ...m,
+      deleted_by_sender: m.sender_id === user.id ? false : m.deleted_by_sender,
+      deleted_by_receiver: m.receiver_id === user.id ? false : m.deleted_by_receiver,
+    } : m));
+    setFilter('all');
   };
   const getBaseSubject = (thread: Thread) => {
     const firstMessage = thread.messages[0];
@@ -323,6 +351,7 @@ export default function VenueMessages() {
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="unread">Unread {unreadCount > 0 && `(${unreadCount})`}</SelectItem>
                   <SelectItem value="starred">Starred</SelectItem>
+                  <SelectItem value="deleted">Deleted</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={sortBy} onValueChange={v => setSortBy(v as SortType)}>
@@ -350,8 +379,12 @@ export default function VenueMessages() {
               key={thread.thread_id}
               onClick={() => handleSelectThread(thread)}
               onDelete={() => {
-                setThreadToDelete(thread);
-                setDeleteDialogOpen(true);
+                if (thread.isDeleted) {
+                  handleRestoreThread(thread);
+                } else {
+                  setThreadToDelete(thread);
+                  setDeleteDialogOpen(true);
+                }
               }}
               className="border-b border-border"
               contentClassName={`p-3 cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-primary/10' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}
@@ -435,6 +468,11 @@ export default function VenueMessages() {
                     })()}
                   </div>
                 </div>
+                {selectedThread.isDeleted && (
+                  <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => handleRestoreThread(selectedThread)}>
+                    <RotateCcw className="h-3 w-3" /> Restore
+                  </Button>
+                )}
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -458,7 +496,7 @@ export default function VenueMessages() {
               </div>
 
               {/* Hide reply form for system messages (Riff Team) */}
-              {selectedThread.otherParty.id !== '00000000-0000-0000-0000-000000000000' && (
+              {selectedThread.otherParty.id !== '00000000-0000-0000-0000-000000000000' && !selectedThread.isDeleted && (
                 <MessageReplyForm 
                   threadId={selectedThread.thread_id} 
                   originalSubject={selectedThread.latestMessage.subject} 
