@@ -70,7 +70,7 @@ export default function VenueCalendar() {
   const [selectedArtistUserId, setSelectedArtistUserId] = useState<string | null>(null);
   const [artistSuggestions, setArtistSuggestions] = useState<Array<{ user_id: string; band_name: string | null; first_name: string | null; last_name: string | null }>>([]);
   const [artistSearchOpen, setArtistSearchOpen] = useState(false);
-  const [eventIsHold, setEventIsHold] = useState(false);
+  const [eventStatus, setEventStatus] = useState<'confirmed' | 'hold'>('confirmed');
   const [eventHoldPriority, setEventHoldPriority] = useState(1);
   const [existingHoldsForDate, setExistingHoldsForDate] = useState<GigListing[]>([]);
   const [creating, setCreating] = useState(false);
