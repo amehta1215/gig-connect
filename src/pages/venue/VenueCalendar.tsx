@@ -313,7 +313,7 @@ export default function VenueCalendar() {
     setSelectedArtistUserId(null);
     setArtistSuggestions([]);
     setArtistSearchOpen(false);
-    setEventIsHold(false);
+    setEventStatus('confirmed');
     setEventHoldPriority(1);
     setSelectedListingId(venueListings.length === 1 ? venueListings[0].id : '');
 
