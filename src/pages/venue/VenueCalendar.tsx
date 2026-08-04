@@ -657,12 +657,14 @@ export default function VenueCalendar() {
   const modifiers = {
     past: {
       before: today
-    }
+    },
+    today: today,
+    hasGig: gigDates
   };
-  const modifiersStyles = {
-    past: {
-      opacity: 0.3
-    }
+  const modifiersStyles = {};
+  const modifiersClassNames = {
+    past: 'day-past',
+    hasGig: 'day-has-gig'
   };
   const canCreateEvent = selectedDate && selectedDate >= today;
   if (loading) {
