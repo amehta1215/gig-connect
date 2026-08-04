@@ -674,7 +674,7 @@ export default function VenueCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-2 md:grid-rows-[400px_auto] gap-6 items-start">
+      <div className="grid md:grid-cols-3 md:grid-rows-[400px_auto] gap-6 items-start">
         {/* Calendar */}
         <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px] h-[400px] row-start-1 col-start-1">
           <Calendar
@@ -683,6 +683,7 @@ export default function VenueCalendar() {
             onSelect={setSelectedDate}
             modifiers={modifiers}
             modifiersStyles={modifiersStyles}
+            modifiersClassNames={modifiersClassNames}
             disablePastDates={false}
             className="pointer-events-auto w-full h-full font-semibold p-0"
             classNames={{
@@ -699,7 +700,7 @@ export default function VenueCalendar() {
         </div>
 
         {/* Events on selected date */}
-        <div className={cn("relative bg-card border border-border flex flex-col row-start-1 col-start-2", selectedDateBoxHeight > 400 ? "md:row-span-2" : "")} style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
+        <div className={cn("relative bg-card border border-border flex flex-col row-start-1 col-start-2 md:col-span-2", selectedDateBoxHeight > 400 ? "md:row-span-2" : "")} style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
           <div className="flex-1 overflow-y-auto p-6 pb-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
