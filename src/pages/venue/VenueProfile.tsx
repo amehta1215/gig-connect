@@ -568,7 +568,7 @@ export default function VenueProfile() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
-                      {editingListing ? roomFormData.room_name || roomFormData.venue_name || 'ROOM' : 'NEW ROOM'}
+                      {editingListing ? roomFormData.room_name || 'ROOM' : 'NEW ROOM'}
                     </DialogTitle>
                     {editingListing && !editingListing.is_published && (
                       <Button size="sm" onClick={() => setShowPublishDialog(true)} className="font-display tracking-widest bg-primary hover:bg-primary/90">
