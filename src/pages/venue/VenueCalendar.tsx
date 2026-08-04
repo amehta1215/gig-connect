@@ -811,8 +811,12 @@ export default function VenueCalendar() {
         <div className={cn("bg-card border border-border p-6 transition-all row-start-2 col-span-3", selectedDateBoxHeight > 400 ? "col-start-1" : "")}>
 
           <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
-          {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
-              {gigs.filter(g => parseLocalDate(g.gig_date) >= new Date() && g.is_confirmed).map(gig => {
+          {(() => {
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0);
+            const upcomingGigs = gigs.filter(g => parseLocalDate(g.gig_date) >= startOfToday && g.is_confirmed);
+            return upcomingGigs.length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
+              {upcomingGigs.map(gig => {
             const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
             const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
             return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
