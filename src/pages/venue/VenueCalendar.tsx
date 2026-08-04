@@ -357,8 +357,8 @@ export default function VenueCalendar() {
       notes: null,
       openers: [],
       manual_artist_name: selectedArtistUserId ? null : (eventArtistName.trim() || null),
-      is_confirmed: !eventIsHold,
-      hold_priority: eventIsHold ? eventHoldPriority : null
+      is_confirmed: eventStatus === 'confirmed',
+      hold_priority: eventStatus === 'hold' ? eventHoldPriority : null
     }).select().single();
     setCreating(false);
     if (error) {
