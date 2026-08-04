@@ -567,9 +567,6 @@ export default function VenueProfile() {
               <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0 pr-12">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <DialogTitle className="font-display text-2xl tracking-wide text-accent font-bold">
-                      {editingListing ? roomFormData.room_name || 'ROOM' : 'NEW ROOM'}
-                    </DialogTitle>
                     {editingListing && !editingListing.is_published && (
                       <Button size="sm" onClick={() => setShowPublishDialog(true)} className="font-display tracking-widest bg-primary hover:bg-primary/90">
                         PUBLISH
