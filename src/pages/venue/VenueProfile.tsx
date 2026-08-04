@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
 import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
 interface VenueProfileData {
   id: string;
@@ -87,6 +87,7 @@ export default function VenueProfile() {
   const [editingListing, setEditingListing] = useState<VenueListing | null>(null);
   const [savingRoom, setSavingRoom] = useState(false);
   const [pictures, setPictures] = useState<string[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const pictureInputRef = useRef<HTMLInputElement>(null);
   const venuePictureInputRef = useRef<HTMLInputElement>(null);
@@ -336,6 +337,15 @@ export default function VenueProfile() {
       return { ...prev, pictures: next, picture: next[0] || '' };
     });
   };
+  const moveVenuePicture = (from: number, to: number) => {
+    if (from === to) return;
+    setFormData(prev => {
+      const next = [...prev.pictures];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return { ...prev, pictures: next, picture: next[0] || '' };
+    });
+  };
   const handleCreateRoomClick = () => {
     if (!profile || !roomFormData.venue_name) {
       toast.error('Venue name required');
@@ -489,11 +499,27 @@ export default function VenueProfile() {
 
         <div className="space-y-2">
           <Label className="block">Venue Photos</Label>
+          {formData.pictures.length > 1 && <p className="text-xs text-muted-foreground">Drag photos to reorder. The first photo appears in search results.</p>}
           <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleVenuePictureUpload} className="hidden" />
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {formData.pictures.map((url, index) => (
-              <div key={index} className="relative group aspect-square bg-secondary rounded-lg overflow-hidden">
-                <img src={url} alt={`Venue ${index + 1}`} className="w-full h-full object-cover" />
+              <div
+                key={url + index}
+                draggable
+                onDragStart={() => setDragIndex(index)}
+                onDragEnd={() => setDragIndex(null)}
+                onDragOver={e => e.preventDefault()}
+                onDrop={e => {
+                  e.preventDefault();
+                  if (dragIndex !== null) moveVenuePicture(dragIndex, index);
+                  setDragIndex(null);
+                }}
+                className={`relative group aspect-square bg-secondary rounded-lg overflow-hidden cursor-move transition-opacity ${dragIndex === index ? 'opacity-40' : ''}`}
+              >
+                <img src={url} alt={`Venue ${index + 1}`} className="w-full h-full object-cover pointer-events-none" />
+                <div className="absolute bottom-2 left-2 p-1 bg-background/80 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                  <GripVertical className="h-4 w-4 text-muted-foreground" />
+                </div>
                 <button type="button" onClick={() => removeVenuePicture(index)} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors opacity-0 group-hover:opacity-100">
                   <X className="h-4 w-4" />
                 </button>
