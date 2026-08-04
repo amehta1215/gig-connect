@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { MapPin, Users, Music, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface RoomPreviewData {
