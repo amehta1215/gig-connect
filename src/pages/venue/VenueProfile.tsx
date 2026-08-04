@@ -663,34 +663,20 @@ export default function VenueProfile() {
                       </div>}
                   </div>
 
-                  {/* Two Column Layout - Details & Apply */}
-                  <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Left Column - Venue Details */}
-                    <div className="flex-1 space-y-4">
-                      {roomFormData.bio && <div className="bg-card border border-border rounded-lg p-4">
-                          <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
-                          <p className="text-sm text-primary whitespace-pre-line">{roomFormData.bio}</p>
-                        </div>}
-                      {roomFormData.backline_info && <div className="bg-card border border-border rounded-lg p-4">
-                          <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
-                          <p className="text-sm text-primary whitespace-pre-line">{roomFormData.backline_info}</p>
-                        </div>}
-                      {roomFormData.house_rules && <div className="bg-card border border-border rounded-lg p-4">
-                          <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
-                          <p className="text-sm text-primary whitespace-pre-line">{roomFormData.house_rules}</p>
-                        </div>}
-                    </div>
-
-                    {/* Right Column - Apply Form Preview (Disabled) */}
-                    <div className="lg:w-80 xl:w-96 order-first lg:order-last">
-                      <div className="lg:sticky lg:top-0 bg-card border border-border rounded-lg p-6 space-y-6">
-                        <h2 className="font-display text-2xl font-bold text-primary">APPLY</h2>
-                        <p className="text-sm text-muted-foreground">This is a preview of how artists will see your listing.</p>
-                        <Button disabled className="w-full font-display tracking-widest text-lg py-6">
-                          APPLY
-                        </Button>
-                      </div>
-                    </div>
+                  {/* Room Details */}
+                  <div className="space-y-4">
+                    {roomFormData.bio && <div className="bg-card border border-border rounded-lg p-4">
+                        <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
+                        <p className="text-sm text-primary whitespace-pre-line">{roomFormData.bio}</p>
+                      </div>}
+                    {roomFormData.backline_info && <div className="bg-card border border-border rounded-lg p-4">
+                        <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
+                        <p className="text-sm text-primary whitespace-pre-line">{roomFormData.backline_info}</p>
+                      </div>}
+                    {roomFormData.house_rules && <div className="bg-card border border-border rounded-lg p-4">
+                        <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
+                        <p className="text-sm text-primary whitespace-pre-line">{roomFormData.house_rules}</p>
+                      </div>}
                   </div>
                 </div>) : (/* Edit Content */
             <div className="flex-1 overflow-y-auto">
