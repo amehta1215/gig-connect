@@ -291,24 +291,34 @@ export default function ArtistCalendar() {
         <div className="h-64 bg-card animate-pulse" />
       </div>;
   }
-  return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-3 gap-6">
+  return <div className="animate-fade-in">
+      <div className="grid md:grid-cols-3 gap-6 items-start">
         {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch justify-center min-h-[400px]">
+        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch h-[400px] row-start-1 col-start-1">
           <Calendar
-          mode="single"
-          selected={selectedDate}
-          onSelect={setSelectedDate}
-          modifiers={modifiers}
-          modifiersStyles={modifiersStyles}
-          modifiersClassNames={modifiersClassNames}
-          disablePastDates={false}
-          className="pointer-events-auto w-full h-full font-semibold" />
-
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            modifiers={modifiers}
+            modifiersStyles={modifiersStyles}
+            modifiersClassNames={modifiersClassNames}
+            disablePastDates={false}
+            className="pointer-events-auto w-full h-full font-semibold p-0"
+            classNames={{
+              months: "flex flex-col h-full w-full flex-1",
+              month: "flex flex-col h-full w-full flex-1",
+              table: "flex flex-col flex-1 w-full border-collapse",
+              head_row: "flex w-full",
+              head_cell: "flex-1 text-muted-foreground font-normal text-[0.8rem] text-center",
+              row: "flex w-full flex-1",
+              cell: "flex-1 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/30 [&:has([aria-selected])]:bg-accent/60 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+              day: "w-full h-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            }}
+          />
         </div>
 
         {/* Events on selected date */}
-        <div className="md:col-span-2 bg-card border border-border p-6">
+        <div className="md:col-span-2 bg-card border border-border p-6 row-start-1 col-start-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
@@ -356,17 +366,16 @@ export default function ArtistCalendar() {
                 </div>}
             </div>}
         </div>
-      </div>
 
-      {/* Upcoming confirmed shows */}
-      {(() => {
-        const upcomingGigs = gigs
-          .filter((g) => parseLocalDate(g.gig_date) >= new Date())
-          .sort((a, b) => (b.is_confirmed ? 1 : 0) - (a.is_confirmed ? 1 : 0));
-        const totalPages = Math.ceil(upcomingGigs.length / SHOWS_PER_PAGE);
-        const paginatedGigs = upcomingGigs.slice(0, showsPage * SHOWS_PER_PAGE);
-        return (
-          <div className="bg-card border border-border p-6">
+        {/* Upcoming confirmed shows */}
+        {(() => {
+          const upcomingGigs = gigs
+            .filter((g) => parseLocalDate(g.gig_date) >= new Date())
+            .sort((a, b) => (b.is_confirmed ? 1 : 0) - (a.is_confirmed ? 1 : 0));
+          const totalPages = Math.ceil(upcomingGigs.length / SHOWS_PER_PAGE);
+          const paginatedGigs = upcomingGigs.slice(0, showsPage * SHOWS_PER_PAGE);
+          return (
+            <div className="bg-card border border-border p-6 col-span-3 row-start-2">
             <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
             {upcomingGigs.length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
                 {paginatedGigs.map((gig) => {
@@ -405,6 +414,7 @@ export default function ArtistCalendar() {
           </div>
         );
       })()}
+    </div>
 
       {/* Create Event Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
