@@ -472,11 +472,6 @@ export default function VenueMessages() {
                     })()}
                   </div>
                 </div>
-                {selectedThread.isDeleted && (
-                  <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => handleRestoreThread(selectedThread)}>
-                    <RotateCcw className="h-3 w-3" /> Restore
-                  </Button>
-                )}
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
