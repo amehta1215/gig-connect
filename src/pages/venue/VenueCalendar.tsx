@@ -71,7 +71,7 @@ export default function VenueCalendar() {
   const [artistSuggestions, setArtistSuggestions] = useState<Array<{ user_id: string; band_name: string | null; first_name: string | null; last_name: string | null }>>([]);
   const [artistSearchOpen, setArtistSearchOpen] = useState(false);
   const [eventStatus, setEventStatus] = useState<'confirmed' | 'hold'>('confirmed');
-  const [eventHoldPriority, setEventHoldPriority] = useState(1);
+  const [eventHoldPriority, setEventHoldPriority] = useState<number | ''>(1);
   const [existingHoldsForDate, setExistingHoldsForDate] = useState<GigListing[]>([]);
   const [creating, setCreating] = useState(false);
   const [draggedHoldIndex, setDraggedHoldIndex] = useState<number | null>(null);
@@ -358,7 +358,7 @@ export default function VenueCalendar() {
       openers: [],
       manual_artist_name: selectedArtistUserId ? null : (eventArtistName.trim() || null),
       is_confirmed: eventStatus === 'confirmed',
-      hold_priority: eventStatus === 'hold' ? eventHoldPriority : null
+      hold_priority: eventStatus === 'hold' ? (eventHoldPriority === '' ? 1 : eventHoldPriority) : null
     }).select().single();
     setCreating(false);
     if (error) {
@@ -882,7 +882,11 @@ export default function VenueCalendar() {
                   type="number"
                   min={1}
                   value={eventHoldPriority}
-                  onChange={e => setEventHoldPriority(parseInt(e.target.value) || 1)}
+                  onChange={e => setEventHoldPriority(e.target.value === '' ? '' : parseInt(e.target.value))}
+                  onBlur={e => {
+                    const val = parseInt(e.target.value);
+                    setEventHoldPriority(isNaN(val) || val < 1 ? 1 : val);
+                  }}
                   className="w-24"
                 />
               </div>}
