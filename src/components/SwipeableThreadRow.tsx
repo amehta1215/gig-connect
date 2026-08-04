@@ -24,6 +24,13 @@ export function SwipeableThreadRow({
   const startXRef = useRef(0);
   const isSwipeRef = useRef(false);
 
+  const getTouchX = useCallback((touches: React.TouchList | TouchList) => {
+    if (touches.length >= 2) {
+      return (touches[0].clientX + touches[1].clientX) / 2;
+    }
+    return touches[0]?.clientX ?? 0;
+  }, []);
+
   const handleStart = useCallback((clientX: number) => {
     startXRef.current = clientX;
     setIsDragging(true);
