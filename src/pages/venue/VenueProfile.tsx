@@ -508,21 +508,6 @@ export default function VenueProfile() {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label className="block">Genres</Label>
-          <div className="flex flex-wrap gap-1">
-            {availableGenres.map(genre => (
-              <button
-                key={genre}
-                type="button"
-                onClick={() => toggleVenueGenre(genre)}
-                className={`px-3 py-1 text-xs font-display tracking-wider transition-colors ${formData.genres.includes(genre) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
-              >
-                {genre.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Event Types Section */}
