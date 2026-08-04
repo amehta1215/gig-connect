@@ -414,6 +414,7 @@ export default function ArtistCalendar() {
           </div>
         );
       })()}
+    </div>
 
       {/* Create Event Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
