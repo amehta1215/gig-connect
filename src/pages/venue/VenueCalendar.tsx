@@ -830,6 +830,7 @@ export default function VenueCalendar() {
                   </button>;
           })}
             </div>}
+          })()}
         </div>
       </div>
 
