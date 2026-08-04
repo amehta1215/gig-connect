@@ -116,13 +116,21 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
             </div>
           </div>
 
-          {/* About */}
-          {data.bio && (
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h3 className="font-display text-sm text-primary tracking-widest mb-2">ABOUT</h3>
-              <p className="text-sm text-primary whitespace-pre-line">{data.bio}</p>
-            </div>
-          )}
+          {/* Details */}
+          <div className="space-y-4">
+            {data.backline_info && (
+              <div className="bg-card border border-border rounded-lg p-4">
+                <h3 className="font-display text-sm text-primary tracking-widest mb-2">BACKLINE</h3>
+                <p className="text-sm text-primary whitespace-pre-line">{data.backline_info}</p>
+              </div>
+            )}
+            {data.house_rules && (
+              <div className="bg-card border border-border rounded-lg p-4">
+                <h3 className="font-display text-sm text-primary tracking-widest mb-2">HOUSE RULES</h3>
+                <p className="text-sm text-primary whitespace-pre-line">{data.house_rules}</p>
+              </div>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
