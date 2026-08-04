@@ -93,6 +93,7 @@ export default function VenueProfile() {
   const venuePictureInputRef = useRef<HTMLInputElement>(null);
   const [uploadingVenuePicture, setUploadingVenuePicture] = useState(false);
   const previewGalleryRef = useRef<HTMLDivElement>(null);
+  const [roomToDelete, setRoomToDelete] = useState<VenueListing | null>(null);
   const [roomFormData, setRoomFormData] = useState({
     venue_name: '',
     room_name: '',
@@ -397,17 +398,22 @@ export default function VenueProfile() {
     }
     setSavingRoom(false);
   };
-  const handleDeleteRoom = async (listingId: string) => {
-    if (!confirm('Delete this room?')) return;
+  const handleDeleteRoom = (listing: VenueListing) => {
+    setRoomToDelete(listing);
+  };
+  const confirmDeleteRoom = async () => {
+    if (!roomToDelete) return;
     const {
       error
-    } = await supabase.from('venue_listings').delete().eq('id', listingId);
+    } = await supabase.from('venue_listings').delete().eq('id', roomToDelete.id);
     if (error) {
       toast.error('Failed');
     } else {
       toast.success('Deleted');
-      setListings(listings.filter(l => l.id !== listingId));
+      setListings(listings.filter(l => l.id !== roomToDelete.id));
     }
+    setRoomToDelete(null);
+    setIsDialogOpen(false);
   };
   const toggleGenre = (genre: string) => {
     if (roomFormData.genres.includes(genre)) {
@@ -750,8 +756,7 @@ export default function VenueProfile() {
                   <div className="flex justify-between pt-4 border-t border-border">
                     <div className="flex gap-2">
                       {editingListing && <Button variant="outline" size="icon" onClick={() => {
-                      handleDeleteRoom(editingListing.id);
-                      setIsDialogOpen(false);
+                      handleDeleteRoom(editingListing);
                     }} className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border">
                           <Trash2 className="h-4 w-4" />
                         </Button>}
@@ -826,6 +831,26 @@ export default function VenueProfile() {
             </AlertDialogCancel>
             <AlertDialogAction onClick={() => handleSaveRoom(true)} className="font-display tracking-widest">
               Yes, publish!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Room Confirmation Dialog */}
+      <AlertDialog open={!!roomToDelete} onOpenChange={(open) => { if (!open) setRoomToDelete(null); }}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-xl text-destructive">DELETE ROOM?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {roomToDelete ? `Are you sure you want to delete "${roomToDelete.room_name || roomToDelete.venue_name}"? This cannot be undone.` : 'Are you sure you want to delete this room? This cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={() => setRoomToDelete(null)} className="font-display tracking-widest">
+              CANCEL
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteRoom} className="font-display tracking-widest bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+              DELETE
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
