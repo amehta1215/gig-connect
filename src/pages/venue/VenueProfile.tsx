@@ -835,5 +835,25 @@ export default function VenueProfile() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Delete Room Confirmation Dialog */}
+      <AlertDialog open={!!roomToDelete} onOpenChange={(open) => { if (!open) setRoomToDelete(null); }}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-xl text-destructive">DELETE ROOM?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {roomToDelete ? `Are you sure you want to delete "${roomToDelete.room_name || roomToDelete.venue_name}"? This cannot be undone.` : 'Are you sure you want to delete this room? This cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={() => setRoomToDelete(null)} className="font-display tracking-widest">
+              CANCEL
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteRoom} className="font-display tracking-widest bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+              DELETE
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }
