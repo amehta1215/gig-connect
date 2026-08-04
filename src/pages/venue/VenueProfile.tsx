@@ -87,6 +87,7 @@ export default function VenueProfile() {
   const [editingListing, setEditingListing] = useState<VenueListing | null>(null);
   const [savingRoom, setSavingRoom] = useState(false);
   const [pictures, setPictures] = useState<string[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const pictureInputRef = useRef<HTMLInputElement>(null);
   const venuePictureInputRef = useRef<HTMLInputElement>(null);
