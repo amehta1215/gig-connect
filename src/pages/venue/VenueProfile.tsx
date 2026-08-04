@@ -756,8 +756,7 @@ export default function VenueProfile() {
                   <div className="flex justify-between pt-4 border-t border-border">
                     <div className="flex gap-2">
                       {editingListing && <Button variant="outline" size="icon" onClick={() => {
-                      handleDeleteRoom(editingListing.id);
-                      setIsDialogOpen(false);
+                      handleDeleteRoom(editingListing);
                     }} className="text-destructive hover:bg-destructive hover:text-destructive-foreground border-border">
                           <Trash2 className="h-4 w-4" />
                         </Button>}
