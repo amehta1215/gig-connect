@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { MapPin, Users, Music, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface RoomPreviewData {
@@ -35,12 +35,6 @@ export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetP
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="px-0 pb-4 border-b border-border shrink-0">
-          <DialogTitle className="font-display text-sm text-primary tracking-widest">
-            ARTIST VIEW PREVIEW
-          </DialogTitle>
-        </DialogHeader>
-
         <div className="animate-fade-in pt-4">
           {/* Pictures Gallery - horizontal carousel */}
           <div className="mb-6">
