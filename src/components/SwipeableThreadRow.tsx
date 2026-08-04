@@ -83,8 +83,11 @@ export function SwipeableThreadRow({
       <div
         className={cn('relative bg-card transition-transform duration-200 ease-out', contentClassName)}
         style={{ transform: `translateX(${offset}px)` }}
-        onTouchStart={(e) => handleStart(e.touches[0].clientX)}
-        onTouchMove={(e) => handleMove(e.touches[0].clientX)}
+        onTouchStart={(e) => handleStart(getTouchX(e.touches))}
+        onTouchMove={(e) => {
+          if (e.touches.length >= 2) e.preventDefault();
+          handleMove(getTouchX(e.touches));
+        }}
         onTouchEnd={handleEnd}
         onMouseDown={(e) => handleStart(e.clientX)}
         onMouseMove={(e) => handleMove(e.clientX)}
