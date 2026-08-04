@@ -369,9 +369,15 @@ export default function ArtistCalendar() {
 
         {/* Upcoming confirmed shows */}
         {(() => {
+          const startOfToday = new Date();
+          startOfToday.setHours(0, 0, 0, 0);
           const upcomingGigs = gigs
-            .filter((g) => parseLocalDate(g.gig_date) >= new Date())
-            .sort((a, b) => (b.is_confirmed ? 1 : 0) - (a.is_confirmed ? 1 : 0));
+            .filter((g) => parseLocalDate(g.gig_date) >= startOfToday)
+            .sort((a, b) => {
+              const confirmDiff = (b.is_confirmed ? 1 : 0) - (a.is_confirmed ? 1 : 0);
+              if (confirmDiff !== 0) return confirmDiff;
+              return parseLocalDate(a.gig_date).getTime() - parseLocalDate(b.gig_date).getTime();
+            });
           const totalPages = Math.ceil(upcomingGigs.length / SHOWS_PER_PAGE);
           const paginatedGigs = upcomingGigs.slice(0, showsPage * SHOWS_PER_PAGE);
           return (
