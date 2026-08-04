@@ -24,6 +24,13 @@ export function SwipeableThreadRow({
   const startXRef = useRef(0);
   const isSwipeRef = useRef(false);
 
+  const getTouchX = useCallback((touches: React.TouchList | TouchList) => {
+    if (touches.length >= 2) {
+      return (touches[0].clientX + touches[1].clientX) / 2;
+    }
+    return touches[0]?.clientX ?? 0;
+  }, []);
+
   const handleStart = useCallback((clientX: number) => {
     startXRef.current = clientX;
     setIsDragging(true);
@@ -76,8 +83,11 @@ export function SwipeableThreadRow({
       <div
         className={cn('relative bg-card transition-transform duration-200 ease-out', contentClassName)}
         style={{ transform: `translateX(${offset}px)` }}
-        onTouchStart={(e) => handleStart(e.touches[0].clientX)}
-        onTouchMove={(e) => handleMove(e.touches[0].clientX)}
+        onTouchStart={(e) => handleStart(getTouchX(e.touches))}
+        onTouchMove={(e) => {
+          if (e.touches.length >= 2) e.preventDefault();
+          handleMove(getTouchX(e.touches));
+        }}
         onTouchEnd={handleEnd}
         onMouseDown={(e) => handleStart(e.clientX)}
         onMouseMove={(e) => handleMove(e.clientX)}
