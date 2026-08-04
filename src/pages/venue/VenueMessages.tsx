@@ -391,7 +391,7 @@ export default function VenueMessages() {
               }}
               isDeleted={thread.isDeleted}
               className="border-b border-border"
-              contentClassName={`p-3 cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-muted' : thread.hasUnread ? 'bg-secondary/50 hover:bg-secondary' : 'hover:bg-secondary'}`}
+              contentClassName={`p-3 cursor-pointer transition-colors ${selectedThreadId === thread.thread_id ? 'bg-muted' : thread.hasUnread ? 'bg-secondary hover:bg-secondary' : 'hover:bg-secondary'}`}
             >
                     <div className="flex items-start gap-2">
                       <button 
