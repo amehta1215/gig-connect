@@ -93,6 +93,7 @@ export default function VenueProfile() {
   const venuePictureInputRef = useRef<HTMLInputElement>(null);
   const [uploadingVenuePicture, setUploadingVenuePicture] = useState(false);
   const previewGalleryRef = useRef<HTMLDivElement>(null);
+  const [roomToDelete, setRoomToDelete] = useState<VenueListing | null>(null);
   const [roomFormData, setRoomFormData] = useState({
     venue_name: '',
     room_name: '',
