@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
-import { ArrowLeft, Music, X, Upload, GripVertical } from 'lucide-react';
+import { ArrowLeft, Music, X, Upload } from 'lucide-react';
 interface ArtistProfile {
   id: string;
   user_id: string;
@@ -387,9 +387,6 @@ export default function ArtistProfile() {
               {index === 0 && <div className="absolute top-2 left-2 px-2 py-1 bg-primary text-primary-foreground text-xs font-display rounded">
                   MAIN
                 </div>}
-              <div className="absolute bottom-2 left-2 p-1 bg-background/70 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                <GripVertical className="h-4 w-4 text-foreground" />
-              </div>
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button onClick={() => removePicture(index)} className="p-1 bg-destructive rounded-full">
                   <X className="h-4 w-4 text-destructive-foreground" />
