@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Star, Mail, MailOpen, ChevronLeft, RotateCcw } from 'lucide-react';
+import { Search, Star, Mail, MailOpen, ChevronLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { MessageReplyForm } from '@/components/MessageReplyForm';
 import { FormattedMessageContent } from '@/components/FormattedMessageContent';
@@ -431,9 +431,6 @@ export default function ArtistMessages() {
                     })()}
                   </div>
                 </div>
-                {selectedThread.isDeleted && <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => handleRestoreThread(selectedThread)}>
-                    <RotateCcw className="h-3 w-3" /> Restore
-                  </Button>}
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
