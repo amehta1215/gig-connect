@@ -22,7 +22,7 @@ interface RoomPreviewSheetProps {
 
 export function RoomPreviewSheet({ open, onOpenChange, data }: RoomPreviewSheetProps) {
   const galleryScrollRef = useRef<HTMLDivElement>(null);
- 01  const allPictures: string[] = data.pictures || [];
+  const allPictures: string[] = data.pictures || [];
 
   const scroll = (dir: 'left' | 'right') => {
     if (!galleryScrollRef.current) return;
