@@ -336,6 +336,15 @@ export default function VenueProfile() {
       return { ...prev, pictures: next, picture: next[0] || '' };
     });
   };
+  const moveVenuePicture = (from: number, to: number) => {
+    if (from === to) return;
+    setFormData(prev => {
+      const next = [...prev.pictures];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return { ...prev, pictures: next, picture: next[0] || '' };
+    });
+  };
   const handleCreateRoomClick = () => {
     if (!profile || !roomFormData.venue_name) {
       toast.error('Venue name required');
