@@ -70,7 +70,7 @@ export default function VenueCalendar() {
   const [selectedArtistUserId, setSelectedArtistUserId] = useState<string | null>(null);
   const [artistSuggestions, setArtistSuggestions] = useState<Array<{ user_id: string; band_name: string | null; first_name: string | null; last_name: string | null }>>([]);
   const [artistSearchOpen, setArtistSearchOpen] = useState(false);
-  const [eventIsHold, setEventIsHold] = useState(false);
+  const [eventStatus, setEventStatus] = useState<'confirmed' | 'hold'>('confirmed');
   const [eventHoldPriority, setEventHoldPriority] = useState(1);
   const [existingHoldsForDate, setExistingHoldsForDate] = useState<GigListing[]>([]);
   const [creating, setCreating] = useState(false);
@@ -313,7 +313,7 @@ export default function VenueCalendar() {
     setSelectedArtistUserId(null);
     setArtistSuggestions([]);
     setArtistSearchOpen(false);
-    setEventIsHold(false);
+    setEventStatus('confirmed');
     setEventHoldPriority(1);
     setSelectedListingId(venueListings.length === 1 ? venueListings[0].id : '');
 
@@ -357,8 +357,8 @@ export default function VenueCalendar() {
       notes: null,
       openers: [],
       manual_artist_name: selectedArtistUserId ? null : (eventArtistName.trim() || null),
-      is_confirmed: !eventIsHold,
-      hold_priority: eventIsHold ? eventHoldPriority : null
+      is_confirmed: eventStatus === 'confirmed',
+      hold_priority: eventStatus === 'hold' ? eventHoldPriority : null
     }).select().single();
     setCreating(false);
     if (error) {
@@ -852,6 +852,39 @@ export default function VenueCalendar() {
                       </SelectItem>)}
                   </SelectContent>
                 </Select>
+              </div>}
+
+            {/* Status Selection */}
+            <div className="space-y-2">
+              <label className="font-display text-xs text-primary tracking-widest">STATUS</label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEventStatus('confirmed')}
+                  className={`flex-1 px-3 py-2 text-sm font-display tracking-widest border transition-colors ${eventStatus === 'confirmed' ? 'bg-green-600 text-white border-green-600' : 'bg-background text-muted-foreground border-border hover:border-primary/50'}`}
+                >
+                  CONFIRMED
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEventStatus('hold')}
+                  className={`flex-1 px-3 py-2 text-sm font-display tracking-widest border transition-colors ${eventStatus === 'hold' ? 'bg-yellow-500 text-black border-yellow-500' : 'bg-background text-muted-foreground border-border hover:border-primary/50'}`}
+                >
+                  HOLD
+                </button>
+              </div>
+            </div>
+
+            {/* Hold Priority */}
+            {eventStatus === 'hold' && <div className="space-y-2">
+                <label className="font-display text-xs text-primary tracking-widest">HOLD PRIORITY</label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={eventHoldPriority}
+                  onChange={e => setEventHoldPriority(parseInt(e.target.value) || 1)}
+                  className="w-24"
+                />
               </div>}
 
             {/* Date (editable) */}
