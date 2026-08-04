@@ -398,17 +398,22 @@ export default function VenueProfile() {
     }
     setSavingRoom(false);
   };
-  const handleDeleteRoom = async (listingId: string) => {
-    if (!confirm('Delete this room?')) return;
+  const handleDeleteRoom = (listing: VenueListing) => {
+    setRoomToDelete(listing);
+  };
+  const confirmDeleteRoom = async () => {
+    if (!roomToDelete) return;
     const {
       error
-    } = await supabase.from('venue_listings').delete().eq('id', listingId);
+    } = await supabase.from('venue_listings').delete().eq('id', roomToDelete.id);
     if (error) {
       toast.error('Failed');
     } else {
       toast.success('Deleted');
-      setListings(listings.filter(l => l.id !== listingId));
+      setListings(listings.filter(l => l.id !== roomToDelete.id));
     }
+    setRoomToDelete(null);
+    setIsDialogOpen(false);
   };
   const toggleGenre = (genre: string) => {
     if (roomFormData.genres.includes(genre)) {
