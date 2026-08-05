@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin, MessageSquare, Trash2, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, startOfDay } from 'date-fns';
@@ -40,6 +42,7 @@ export default function ArtistCalendar() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(true);
   const [showsPage, setShowsPage] = useState(1);
+  const [showEventDots, setShowEventDots] = useState(true);
   const SHOWS_PER_PAGE = 5;
 
   // Create event dialog state
@@ -273,7 +276,7 @@ export default function ArtistCalendar() {
   const holdGigs = gigsOnSelectedDate.filter((g) => !g.is_confirmed).sort((a, b) => (a.hold_priority || 99) - (b.hold_priority || 99));
   const today = startOfDay(new Date());
   const modifiers = {
-    hasGig: gigDates,
+    hasGig: showEventDots ? gigDates : [],
     past: {
       before: today
     },
@@ -292,9 +295,10 @@ export default function ArtistCalendar() {
       </div>;
   }
   return <div className="animate-fade-in">
-      <div className="grid md:grid-cols-[520px_1fr] gap-6 items-start">
-        {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch h-[400px] w-full md:w-auto">
+      <div className="grid md:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
+        {/* Calendar column */}
+        <div className="flex flex-col gap-4 w-full md:w-[320px] md:flex-none">
+        <div className="calendar-stretch bg-card border border-border p-3 flex items-stretch h-[320px] w-full">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -309,12 +313,17 @@ export default function ArtistCalendar() {
               month: "flex flex-col h-full w-full flex-1",
               table: "flex flex-col flex-1 w-full border-collapse",
               head_row: "flex w-full",
-              head_cell: "flex-1 text-muted-foreground font-normal text-[0.8rem] text-center",
+              head_cell: "flex-1 text-muted-foreground font-normal text-[0.7rem] text-center",
               row: "flex w-full flex-1",
               cell: "flex-1 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-              day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-full text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative"
+              day: "h-8 w-8 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-full text-xs ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative"
             }}
           />
+        </div>
+        <div className="bg-card border border-border p-3 flex items-center justify-between">
+          <Label htmlFor="show-event-dots" className="font-display text-xs tracking-widest text-primary">SHOW EVENTS</Label>
+          <Switch id="show-event-dots" checked={showEventDots} onCheckedChange={setShowEventDots} />
+        </div>
         </div>
 
       {/* Right column */}
