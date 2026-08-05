@@ -292,9 +292,9 @@ export default function ArtistCalendar() {
       </div>;
   }
   return <div className="animate-fade-in">
-      <div className="grid md:grid-cols-3 gap-6 items-start">
+      <div className="grid md:grid-cols-12 gap-6 items-start">
         {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch h-[400px] row-start-1 col-start-1">
+        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch h-[400px] row-start-1 col-start-1 md:col-span-5">
           <Calendar
             mode="single"
             selected={selectedDate}
