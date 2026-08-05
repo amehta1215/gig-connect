@@ -318,7 +318,7 @@ export default function ArtistCalendar() {
         </div>
 
         {/* Events on selected date */}
-        <div className="md:col-span-2 bg-card border border-border p-6 row-start-1 col-start-2">
+        <div className="md:col-span-7 bg-card border border-border p-6 row-start-1 col-start-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
