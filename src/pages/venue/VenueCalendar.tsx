@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { CalendarIcon, Clock, Plus, CheckCircle2, Trash2, PauseCircle, GripVertical, ChevronDown, Pencil } from 'lucide-react';
@@ -659,7 +661,7 @@ export default function VenueCalendar() {
       before: today
     },
     today: today,
-    hasGig: gigDates
+    hasGig: showEventDots ? gigDates : []
   };
   const modifiersStyles = {};
   const modifiersClassNames = {
@@ -674,9 +676,10 @@ export default function VenueCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-[520px_1fr] gap-6 items-start">
-        {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px] h-[400px] w-full md:w-auto">
+      <div className="grid md:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
+        {/* Calendar column */}
+        <div className="flex flex-col gap-4 w-full md:w-[320px] md:flex-none">
+        <div className="calendar-stretch bg-card border border-border p-3 flex items-stretch min-h-[320px] h-[320px] w-full">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -691,12 +694,17 @@ export default function VenueCalendar() {
               month: "flex flex-col h-full w-full flex-1",
               table: "flex flex-col flex-1 w-full border-collapse",
               head_row: "flex w-full",
-              head_cell: "flex-1 text-muted-foreground font-normal text-[0.8rem] text-center",
+              head_cell: "flex-1 text-muted-foreground font-normal text-[0.7rem] text-center",
               row: "flex w-full flex-1",
               cell: "flex-1 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-              day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-full text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative",
+              day: "h-8 w-8 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-full text-xs ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative",
             }}
           />
+        </div>
+        <div className="bg-card border border-border p-3 flex items-center justify-between">
+          <Label htmlFor="venue-show-event-dots" className="font-display text-xs tracking-widest text-primary">SHOW EVENTS</Label>
+          <Switch id="venue-show-event-dots" checked={showEventDots} onCheckedChange={setShowEventDots} />
+        </div>
         </div>
 
       {/* Right column */}
