@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin, MessageSquare, Trash2, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, startOfDay } from 'date-fns';
@@ -40,6 +42,7 @@ export default function ArtistCalendar() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(true);
   const [showsPage, setShowsPage] = useState(1);
+  const [showEventDots, setShowEventDots] = useState(true);
   const SHOWS_PER_PAGE = 5;
 
   // Create event dialog state
