@@ -317,7 +317,6 @@ export default function ArtistCalendar() {
           />
         </div>
 
-        {/* Events on selected date */}
       {/* Right column */}
       <div className="flex flex-col gap-6">
         {/* Events on selected date */}
