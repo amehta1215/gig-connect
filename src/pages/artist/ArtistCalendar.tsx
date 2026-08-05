@@ -381,7 +381,7 @@ export default function ArtistCalendar() {
           const totalPages = Math.ceil(upcomingGigs.length / SHOWS_PER_PAGE);
           const paginatedGigs = upcomingGigs.slice(0, showsPage * SHOWS_PER_PAGE);
           return (
-            <div className="bg-card border border-border p-6 col-span-3 row-start-2">
+            <div className="bg-card border border-border p-6 col-span-12 row-start-2">
             <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
             {upcomingGigs.length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
                 {paginatedGigs.map((gig) => {
