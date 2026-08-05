@@ -63,7 +63,7 @@ function Calendar({ className, classNames, showOutsideDays = true, disabled, dis
           "bg-accent/60 text-accent-foreground hover:bg-accent/60 hover:text-accent-foreground focus:bg-accent/60 focus:text-accent-foreground [&.rdp-day_disabled]:bg-accent/30 [&.rdp-day_disabled]:text-accent-foreground/50",
         day_today: "is-today !bg-transparent border-2 !border-accent !text-accent rounded-full hover:!bg-transparent hover:!text-accent focus:!bg-transparent focus:!text-accent",
         day_outside:
-          "day-outside aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+          "day-outside text-muted-foreground",
         day_disabled: "hover:bg-accent/50 hover:text-accent-foreground/50",
         day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
