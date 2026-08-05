@@ -311,8 +311,8 @@ export default function ArtistCalendar() {
               head_row: "flex w-full",
               head_cell: "flex-1 text-muted-foreground font-normal text-[0.8rem] text-center",
               row: "flex w-full flex-1",
-              cell: "flex-1 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/30 [&:has([aria-selected])]:bg-accent/60 [&:has([aria-selected].is-today)]:bg-transparent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-              day: "w-full h-full p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              cell: "flex-1 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
+              day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-full text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative"
             }}
           />
         </div>

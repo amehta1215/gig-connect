@@ -331,9 +331,6 @@ input[type="number"] {
 }
 
 .calendar-stretch .rdp-day {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: none !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
