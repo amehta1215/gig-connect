@@ -674,9 +674,9 @@ export default function VenueCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-12 md:grid-rows-[400px_auto] gap-6 items-start">
+      <div className="grid md:grid-cols-[520px_1fr] gap-6 items-start">
         {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px] h-[400px] row-start-1 col-start-1 md:col-span-5">
+        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch min-h-[400px] h-[400px] w-full md:w-auto">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -700,7 +700,10 @@ export default function VenueCalendar() {
         </div>
 
         {/* Events on selected date */}
-        <div className={cn("relative bg-card border border-border flex flex-col row-start-1 col-start-6 md:col-span-7", selectedDateBoxHeight > 400 ? "md:row-span-2" : "")} style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
+      {/* Right column */}
+      <div className="flex flex-col gap-6">
+        {/* Events on selected date */}
+        <div className="relative bg-card border border-border flex flex-col" style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
           <div className="flex-1 overflow-y-auto p-6 pb-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
@@ -808,7 +811,7 @@ export default function VenueCalendar() {
         </div>
 
         {/* Upcoming confirmed shows */}
-        <div className={cn("bg-card border border-border p-6 transition-all row-start-2 col-span-12", selectedDateBoxHeight > 400 ? "md:col-span-5 md:col-start-1" : "")}>
+        <div className="bg-card border border-border p-6 transition-all">
 
           <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
           {gigs.filter(g => parseLocalDate(g.gig_date) >= startOfDay(new Date()) && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
@@ -827,6 +830,7 @@ export default function VenueCalendar() {
           })}
             </div>}
         </div>
+      </div>
       </div>
 
       {/* Create Event Dialog */}
