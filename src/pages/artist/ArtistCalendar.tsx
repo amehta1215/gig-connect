@@ -292,9 +292,9 @@ export default function ArtistCalendar() {
       </div>;
   }
   return <div className="animate-fade-in">
-      <div className="grid md:grid-cols-3 gap-6 items-start">
+      <div className="grid md:grid-cols-12 gap-6 items-start">
         {/* Calendar */}
-        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch h-[400px] row-start-1 col-start-1">
+        <div className="calendar-stretch bg-card border border-border p-4 flex items-stretch h-[400px] row-start-1 col-start-1 md:col-span-5">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -318,7 +318,7 @@ export default function ArtistCalendar() {
         </div>
 
         {/* Events on selected date */}
-        <div className="md:col-span-2 bg-card border border-border p-6 row-start-1 col-start-2">
+        <div className="md:col-span-7 bg-card border border-border p-6 row-start-1 col-start-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
@@ -381,7 +381,7 @@ export default function ArtistCalendar() {
           const totalPages = Math.ceil(upcomingGigs.length / SHOWS_PER_PAGE);
           const paginatedGigs = upcomingGigs.slice(0, showsPage * SHOWS_PER_PAGE);
           return (
-            <div className="bg-card border border-border p-6 col-span-3 row-start-2">
+            <div className="bg-card border border-border p-6 col-span-12 row-start-2">
             <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
             {upcomingGigs.length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
                 {paginatedGigs.map((gig) => {
