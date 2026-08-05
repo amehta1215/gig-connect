@@ -242,24 +242,32 @@ input[type="number"] {
 
 /* Hover state: pale orange circle outline */
 .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_today) {
-  border: 2px solid hsl(var(--accent) / 0.3) !important;
+  border: 2px solid hsl(var(--accent) / 0.22) !important;
   border-radius: 50% !important;
   background-color: transparent !important;
 }
 
-/* Selected day: filled orange circle */
+/* Selected day: filled darker orange circle */
 .rdp-day_selected {
-  background-color: hsl(var(--accent)) !important;
+  background-color: hsl(15 81% 42%) !important;
   border-radius: 50% !important;
   border: none !important;
   color: hsl(var(--accent-foreground)) !important;
 }
 
+/* Selected outside days should look the same as selected in-month days */
+.rdp-day_outside[aria-selected="true"] {
+  background-color: hsl(15 81% 42%) !important;
+  color: hsl(var(--accent-foreground)) !important;
+  opacity: 1 !important;
+  border-radius: 50% !important;
+}
+
 /* Today when also selected: keep outlined so it stays distinct from selected days */
 .rdp-day_selected.rdp-day_today {
   background-color: transparent !important;
-  border: 2px solid hsl(var(--accent)) !important;
-  color: hsl(var(--accent)) !important;
+  border: 2px solid hsl(15 81% 42%) !important;
+  color: hsl(15 81% 42%) !important;
 }
 
 /* Calendar full-height layout - override table display to flex */
