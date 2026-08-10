@@ -3,6 +3,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Send, X, Paperclip, File, Image } from 'lucide-react';
+import { validateAttachmentUpload, ATTACHMENT_ACCEPT, RATE_LIMIT_MESSAGE, isRateLimitError } from '@/lib/uploadLimits';
 interface Attachment {
   name: string;
   url: string;
@@ -35,9 +36,10 @@ export function MessageReplyForm({
     setUploading(true);
     const newAttachments: Attachment[] = [];
     for (const file of Array.from(files)) {
-      // Limit file size to 10MB
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(`${file.name} is too large (max 10MB)`);
+      // Validate type + size against the shared limits (mirrors the storage bucket config)
+      const validationError = validateAttachmentUpload(file);
+      if (validationError) {
+        toast.error(validationError);
         continue;
       }
       const fileExt = file.name.split('.').pop();
@@ -93,7 +95,7 @@ export function MessageReplyForm({
       attachments: attachments.length > 0 ? JSON.stringify(attachments) : '[]'
     } as any);
     if (error) {
-      toast.error('Failed to send message');
+      toast.error(isRateLimitError(error) ? RATE_LIMIT_MESSAGE : 'Failed to send message');
     } else {
       toast.success('Message sent');
       setContent('');
@@ -119,7 +121,7 @@ export function MessageReplyForm({
 
       <div className="flex justify-between items-center">
         <div>
-          <input ref={fileInputRef} type="file" multiple onChange={handleFileSelect} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt,.zip" />
+          <input ref={fileInputRef} type="file" multiple onChange={handleFileSelect} className="hidden" accept={ATTACHMENT_ACCEPT} />
           <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm">
             <Paperclip className="h-4 w-4" />
             {uploading ? 'Uploading...' : 'Attach'}
