@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { passwordSchema, emailSchema } from '@/lib/validation';
 import { PasswordChecklist } from '@/components/PasswordChecklist';
+import WelcomeDialog from '@/components/WelcomeDialog';
+import { Eye, EyeOff } from 'lucide-react';
 
 type UserRole = 'artist' | 'venue' | 'both';
 type AuthMode = 'login' | 'signup' | 'forgot';
@@ -34,6 +36,10 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   const [resetSent, setResetSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
 
   const { signIn, signUp, user, profile, loading, isNewUser, clearNewUserFlag } = useAuth();
   const navigate = useNavigate();
@@ -53,9 +59,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
     if (!loading && user && profile && open) {
       onOpenChange(false);
       if (isNewUser) {
-        const targetProfile = profile.role === 'venue' ? '/venue/profile' : '/artist/profile';
-        clearNewUserFlag();
-        navigate(targetProfile);
+        setWelcomeOpen(true);
       } else {
         const targetDashboard = profile.role === 'venue' ? '/venue' : '/artist';
         navigate(targetDashboard);
@@ -174,10 +178,21 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   };
 
   const inputClass = "w-full bg-transparent border-0 border-b border-muted-foreground/30 rounded-none px-0 py-3 font-display text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors";
+  const eyeButtonClass = "absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors";
+
+  const welcome = (
+    <WelcomeDialog
+      open={welcomeOpen}
+      onOpenChange={setWelcomeOpen}
+      role={profile?.role ?? 'artist'}
+      onDismiss={clearNewUserFlag}
+    />
+  );
 
   // Email confirmation view
   if (emailSent) {
     return (
+      <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="bg-card border-border max-w-md text-center p-8 sm:p-10">
           <DialogHeader>
@@ -196,10 +211,13 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
           </button>
         </DialogContent>
       </Dialog>
+      {welcome}
+      </>
     );
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border max-w-md p-8 sm:p-10">
         <DialogHeader className="pr-8">
@@ -280,12 +298,22 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
               <label className="font-display text-xs tracking-widest text-muted-foreground uppercase">
                 Password *
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={inputClass}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`${inputClass} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className={eyeButtonClass}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.password && <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>}
             </div>
 
@@ -384,12 +412,22 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
               <label className="font-display text-xs tracking-widest text-muted-foreground uppercase">
                 Password *
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={inputClass}
-              />
+              <div className="relative">
+                <input
+                  type={showSignupPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`${inputClass} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSignupPassword((v) => !v)}
+                  className={eyeButtonClass}
+                  aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showSignupPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.password && <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>}
               <PasswordChecklist value={password} />
             </div>
@@ -398,12 +436,22 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
               <label className="font-display text-xs tracking-widest text-muted-foreground uppercase">
                 Confirm Password *
               </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={inputClass}
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`${inputClass} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  className={eyeButtonClass}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.confirmPassword && <p className="text-accent text-xs mt-1 font-display">{errors.confirmPassword}</p>}
             </div>
 
@@ -429,5 +477,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
         )}
       </DialogContent>
     </Dialog>
+    {welcome}
+    </>
   );
 }
