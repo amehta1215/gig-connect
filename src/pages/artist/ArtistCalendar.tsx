@@ -241,7 +241,7 @@ export default function ArtistCalendar() {
     } as any);
 
     if (error) {
-      toast.error('Failed to start conversation');
+      toast.error(isRateLimitError(error) ? RATE_LIMIT_MESSAGE : 'Failed to start conversation');
       return;
     }
 
