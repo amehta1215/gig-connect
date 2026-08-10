@@ -60,7 +60,7 @@ function Calendar({ className, classNames, showOutsideDays = true, disabled, dis
         day: cn(buttonVariants({ variant: "ghost" }), "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/20 hover:text-foreground"),
         day_range_end: "day-range-end",
         day_selected:
-          "!bg-[hsl(15_81%_34%)] !text-accent-foreground hover:!bg-[hsl(15_81%_34%)] focus:!bg-[hsl(15_81%_34%)]",
+          "!bg-accent !text-accent-foreground hover:!bg-accent focus:!bg-accent",
         day_today: "is-today !bg-transparent border-2 !border-accent !text-accent rounded-full hover:!bg-transparent hover:!text-accent focus:!bg-transparent focus:!text-accent",
         day_outside:
           "day-outside text-muted-foreground",
