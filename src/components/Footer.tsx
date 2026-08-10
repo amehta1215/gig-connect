@@ -20,7 +20,7 @@ export default function Footer() {
             </Link>
           </div>
           <div>
-            <h3 className={headerClass}>Riff</h3>
+            <h3 className={headerClass}>Set Hound</h3>
             <Link to="/about" className={linkClass}>
               About
             </Link>

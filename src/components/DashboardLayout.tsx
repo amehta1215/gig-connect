@@ -43,7 +43,7 @@ export default function DashboardLayout({
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <Link to={activeRole === 'artist' ? '/artist' : '/venue'} className="flex items-center gap-3">
-              <span className="font-display tracking-tight text-orange-600 text-2xl">RIFR</span>
+              <span className="font-display tracking-tight text-orange-600 text-2xl">SET HOUND</span>
               <span className="text-[10px] text-muted-foreground uppercase tracking-[0.3em] hidden sm:block">
                 {activeRole}
               </span>

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { validatePassword } from '@/lib/validation';
 import { PasswordChecklist } from '@/components/PasswordChecklist';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 type State = 'checking' | 'ready' | 'invalid' | 'done';
 
@@ -13,6 +14,8 @@ export default function ResetPassword() {
   const [confirm, setConfirm] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,6 +49,8 @@ export default function ResetPassword() {
 
   const inputClass =
     'w-full bg-transparent border-0 border-b border-muted-foreground/30 rounded-none px-0 py-3 font-display text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors';
+  const eyeButtonClass =
+    'absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors';
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -64,7 +69,7 @@ export default function ResetPassword() {
               This reset link is invalid or has expired.
             </p>
             <Link
-              to="/forgot-password"
+              to="/?auth=forgot"
               className="inline-block text-accent hover:underline font-display text-sm uppercase tracking-widest"
             >
               Request a new link
@@ -78,7 +83,7 @@ export default function ResetPassword() {
               Your password has been updated.
             </p>
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/?auth=login')}
               className="text-accent hover:underline font-display text-sm uppercase tracking-widest"
             >
               Go to Login
@@ -92,12 +97,22 @@ export default function ResetPassword() {
               <label className="font-display text-xs tracking-widest text-muted-foreground uppercase">
                 New Password *
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={inputClass}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`${inputClass} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className={eyeButtonClass}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>
               )}
@@ -108,12 +123,22 @@ export default function ResetPassword() {
               <label className="font-display text-xs tracking-widest text-muted-foreground uppercase">
                 Confirm Password *
               </label>
-              <input
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                className={inputClass}
-              />
+              <div className="relative">
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  className={`${inputClass} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  className={eyeButtonClass}
+                  aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.confirm && (
                 <p className="text-accent text-xs mt-1 font-display">{errors.confirm}</p>
               )}

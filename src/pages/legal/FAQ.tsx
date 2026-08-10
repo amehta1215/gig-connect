@@ -9,8 +9,8 @@ import {
 
 const faqs = [
   {
-    q: "What is Riff?",
-    a: "Riff is a marketplace that connects live music venues with the artists who play them. Venues can post their rooms and browse applicants; artists can find venues and apply directly to play live events.",
+    q: "What is Set Hound?",
+    a: "Set Hound is a marketplace that connects live music venues with the artists who play them. Venues can post their rooms and browse applicants; artists can find venues and apply directly to play live events.",
   },
   {
     q: "How do I sign up as a venue?",
@@ -22,11 +22,11 @@ const faqs = [
   },
   {
     q: "How does the booking process work?",
-    a: "Artists apply to a specific room at a venue for a specific date. Venues review applications, place artists on hold for available dates, and confirm bookings once the details are finalized. You can message the other side directly through Riff at every step.",
+    a: "Artists apply to a specific room at a venue for a specific date. Venues review applications, place artists on hold for available dates, and confirm bookings once the details are finalized. You can message the other side directly through Set Hound at every step.",
   },
   {
     q: "What does it cost?",
-    a: "Riff is free for early users. If pricing changes down the road, we'll let you know well in advance.",
+    a: "Set Hound is free for early users. If pricing changes down the road, we'll let you know well in advance.",
   },
   {
     q: "Can I message a venue or artist directly?",

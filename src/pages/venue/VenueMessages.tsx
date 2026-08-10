@@ -494,7 +494,7 @@ export default function VenueMessages() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Hide reply form for system messages (Riff Team) */}
+              {/* Hide reply form for system messages (Set Hound Team) */}
               {selectedThread.otherParty.id !== '00000000-0000-0000-0000-000000000000' && !selectedThread.isDeleted && (
                 <MessageReplyForm 
                   threadId={selectedThread.thread_id} 

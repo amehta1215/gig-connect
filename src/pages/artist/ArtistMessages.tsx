@@ -453,7 +453,7 @@ export default function ArtistMessages() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Hide reply form for system messages (Riff Team) */}
+              {/* Hide reply form for system messages (Set Hound Team) */}
               {selectedThread.otherParty.id !== '00000000-0000-0000-0000-000000000000' && !selectedThread.isDeleted && <MessageReplyForm threadId={selectedThread.thread_id} originalSubject={selectedThread.latestMessage.subject} senderId={user?.id || ''} receiverId={selectedThread.otherParty.id} onSuccess={fetchMessages} />}
             </> : <div className="flex-1 flex items-center justify-center">
               <Mail className="h-12 w-12 text-muted-foreground/30" />

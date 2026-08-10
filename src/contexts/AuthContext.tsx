@@ -46,9 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!profileCreatedAt) return false;
     const createdAt = new Date(profileCreatedAt);
     const now = new Date();
-    // Consider user as "new" if profile was created within the last 2 minutes
-    const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
-    return createdAt > twoMinutesAgo;
+    // Consider user as "new" if profile was created within the last 30 minutes
+    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+    return createdAt > thirtyMinutesAgo;
   };
 
   const fetchProfile = async (userId: string, checkNew: boolean = false) => {

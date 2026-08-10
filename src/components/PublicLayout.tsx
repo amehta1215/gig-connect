@@ -1,5 +1,5 @@
-import { ReactNode, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ReactNode, useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ArrowLeftRight, User, LogIn } from 'lucide-react';
@@ -20,9 +20,23 @@ interface PublicLayoutProps {
 export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authDialogMessage, setAuthDialogMessage] = useState('');
-  const [authDialogMode, setAuthDialogMode] = useState<'login' | 'signup'>('login');
+  const [authDialogMode, setAuthDialogMode] = useState<'login' | 'signup' | 'forgot'>('login');
+
+  // Open the auth dialog from a ?auth=login|signup|forgot query param, then clean the URL
+  useEffect(() => {
+    const authParam = searchParams.get('auth');
+    if (authParam === 'login' || authParam === 'signup' || authParam === 'forgot') {
+      setAuthDialogMessage('');
+      setAuthDialogMode(authParam);
+      setAuthDialogOpen(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete('auth');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleTabClick = (e: React.MouseEvent, tab: Tab) => {
     if (tab.requiresAuth) {
@@ -53,7 +67,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <span className="font-display text-3xl tracking-tight text-accent">RIFF</span>
+              <span className="font-display text-3xl tracking-tight text-accent">SET HOUND</span>
             </Link>
 
             {/* Navigation Tabs */}

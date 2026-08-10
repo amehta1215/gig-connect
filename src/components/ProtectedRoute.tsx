@@ -33,7 +33,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-primary font-display text-4xl">RIFF</div>
+        <div className="animate-pulse text-primary font-display text-4xl">SET HOUND</div>
       </div>
     );
   }
