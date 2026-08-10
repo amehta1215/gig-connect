@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
+import { validateImageUpload, validateAudioUpload } from '@/lib/uploadLimits';
 import { ArrowLeft, Music, X, Upload } from 'lucide-react';
 interface ArtistProfile {
   id: string;
