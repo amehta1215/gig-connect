@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
+import { validateImageUpload } from '@/lib/uploadLimits';
 import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
 interface VenueProfileData {
@@ -266,10 +267,11 @@ export default function VenueProfile() {
   const handleRoomPictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    // Validate type + size against the shared upload limits (mirrors the storage bucket config)
     for (const file of Array.from(files)) {
-      if (!allowedTypes.includes(file.type)) {
-        toast.error('Please upload JPG, PNG, WebP, or GIF images only. HEIC files are not supported by web browsers.');
+      const error = validateImageUpload(file);
+      if (error) {
+        toast.error(error);
         if (pictureInputRef.current) pictureInputRef.current.value = '';
         return;
       }
@@ -295,10 +297,10 @@ export default function VenueProfile() {
   const handleVenuePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     for (const file of Array.from(files)) {
-      if (!allowedTypes.includes(file.type)) {
-        toast.error('Please upload JPG, PNG, WebP, or GIF images only. HEIC files are not supported by web browsers.');
+      const error = validateImageUpload(file);
+      if (error) {
+        toast.error(error);
         if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
         return;
       }
