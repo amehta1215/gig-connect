@@ -677,10 +677,10 @@ export default function VenueCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
-      <div className="grid md:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
+      <div className="grid md:grid-cols-[220px_minmax(0,1fr)] gap-6 items-start">
         {/* Calendar column */}
-        <div className="flex flex-col gap-4 w-full md:w-[320px] md:flex-none">
-        <div className="calendar-stretch bg-card border border-border p-3 flex items-stretch min-h-[320px] h-[320px] w-full">
+        <div className="flex flex-col gap-4 w-full md:w-[220px] md:flex-none">
+        <div className="calendar-stretch bg-card border border-border p-3 flex items-stretch min-h-[220px] h-[220px] w-full">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -698,7 +698,7 @@ export default function VenueCalendar() {
               head_cell: "flex-1 text-muted-foreground font-normal text-[0.7rem] text-center",
               row: "flex w-full flex-1",
               cell: "flex-1 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-              day: "h-8 w-8 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-full text-xs ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative",
+              day: "h-7 w-7 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-full text-xs ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative",
             }}
           />
         </div>
