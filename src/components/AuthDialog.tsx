@@ -391,6 +391,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
                 className={inputClass}
               />
               {errors.password && <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>}
+              <PasswordChecklist value={password} />
             </div>
 
             <div>
