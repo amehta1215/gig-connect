@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Send, Search, X, ChevronLeft, Paperclip, File, Image } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getOrCreateThreadId } from '@/lib/messaging';
+import { validateAttachmentUpload, ATTACHMENT_ACCEPT, RATE_LIMIT_MESSAGE, isRateLimitError } from '@/lib/uploadLimits';
 
 interface Attachment {
   name: string;
@@ -142,8 +143,10 @@ export function ComposeMessagePanel({ onSuccess, onClose, initialArtist, initial
     const newAttachments: Attachment[] = [];
 
     for (const file of Array.from(files)) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(`${file.name} is too large (max 10MB)`);
+      // Validate type + size against the shared limits (mirrors the storage bucket config)
+      const validationError = validateAttachmentUpload(file);
+      if (validationError) {
+        toast.error(validationError);
         continue;
       }
 
@@ -208,7 +211,7 @@ export function ComposeMessagePanel({ onSuccess, onClose, initialArtist, initial
     } as any);
 
     if (error) {
-      toast.error('Failed to send message');
+      toast.error(isRateLimitError(error) ? RATE_LIMIT_MESSAGE : 'Failed to send message');
     } else {
       toast.success('Message sent');
       setSelectedArtist(null);
@@ -362,7 +365,7 @@ export function ComposeMessagePanel({ onSuccess, onClose, initialArtist, initial
               multiple
               onChange={handleFileSelect}
               className="hidden"
-              accept="image/*,.pdf,.doc,.docx,.txt,.zip"
+              accept={ATTACHMENT_ACCEPT}
             />
             <Button
               type="button"
