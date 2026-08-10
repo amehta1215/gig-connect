@@ -244,12 +244,12 @@ input[type="number"] {
 .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_today) {
   border: 2px solid hsl(var(--accent) / 0.22) !important;
   border-radius: 50% !important;
-  background-color: transparent !important;
+  background-color: hsl(var(--accent) / 0.12) !important;
 }
 
 /* Selected day: filled darker orange circle */
 .rdp-day_selected {
-  background-color: hsl(15 81% 42%) !important;
+  background-color: hsl(15 81% 34%) !important;
   border-radius: 50% !important;
   border: none !important;
   color: hsl(var(--accent-foreground)) !important;
@@ -257,7 +257,7 @@ input[type="number"] {
 
 /* Selected outside days should look the same as selected in-month days */
 .rdp-day_outside[aria-selected="true"] {
-  background-color: hsl(15 81% 42%) !important;
+  background-color: hsl(15 81% 34%) !important;
   color: hsl(var(--accent-foreground)) !important;
   opacity: 1 !important;
   border-radius: 50% !important;
@@ -266,8 +266,8 @@ input[type="number"] {
 /* Today when also selected: keep outlined so it stays distinct from selected days */
 .rdp-day_selected.rdp-day_today {
   background-color: transparent !important;
-  border: 2px solid hsl(15 81% 42%) !important;
-  color: hsl(15 81% 42%) !important;
+  border: 2px solid hsl(15 81% 34%) !important;
+  color: hsl(15 81% 34%) !important;
 }
 
 /* Calendar full-height layout - override table display to flex */
