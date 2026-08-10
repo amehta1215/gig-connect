@@ -117,11 +117,11 @@ export default function ArtistProfile() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    // Validate file types
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    // Validate type + size against the shared upload limits (mirrors the storage bucket config)
     for (const file of Array.from(files)) {
-      if (!allowedTypes.includes(file.type)) {
-        toast.error('Please upload JPG, PNG, WebP, or GIF images only. HEIC files are not supported by web browsers.');
+      const error = validateImageUpload(file);
+      if (error) {
+        toast.error(error);
         if (pictureInputRef.current) pictureInputRef.current.value = '';
         return;
       }
@@ -148,6 +148,14 @@ export default function ArtistProfile() {
   const handleSampleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    for (const file of Array.from(files)) {
+      const error = validateAudioUpload(file);
+      if (error) {
+        toast.error(error);
+        if (sampleInputRef.current) sampleInputRef.current.value = '';
+        return;
+      }
+    }
     if (featuredSamples.length + files.length > 3) {
       toast.error('Maximum 3 samples allowed');
       return;
