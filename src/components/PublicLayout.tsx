@@ -53,7 +53,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <span className="font-display text-3xl tracking-tight text-accent">RIFF</span>
+              <span className="font-display text-3xl tracking-tight text-accent">SET HOUND</span>
             </Link>
 
             {/* Navigation Tabs */}

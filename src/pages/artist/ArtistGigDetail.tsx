@@ -418,7 +418,7 @@ export default function ArtistGigDetail() {
                 {openers.map((opener, index) => <div key={index} className="flex items-center justify-between bg-secondary px-4 py-2">
                     <div>
                       <p className="font-display text-lg text-accent">{opener.name}</p>
-                      {opener.type === 'riff' && <p className="text-xs text-primary">RIFF Artist</p>}
+                      {opener.type === 'riff' && <p className="text-xs text-primary">SET HOUND Artist</p>}
                     </div>
                     <Button size="icon" variant="ghost" onClick={() => removeOpener(index)} className="h-8 w-8">
                       <X className="h-4 w-4" />
@@ -428,7 +428,7 @@ export default function ArtistGigDetail() {
 
             {/* Opener Search/Add UI */}
             {showOpenerSearch && <div className="bg-secondary p-4 space-y-4">
-                <p className="font-display text-xs text-primary tracking-widest">SEARCH RIFF ARTISTS</p>
+                <p className="font-display text-xs text-primary tracking-widest">SEARCH SET HOUND ARTISTS</p>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input value={openerSearchQuery} onChange={e => {
