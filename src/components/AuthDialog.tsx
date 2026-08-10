@@ -5,12 +5,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
+import { passwordSchema, emailSchema } from '@/lib/validation';
+import { PasswordChecklist } from '@/components/PasswordChecklist';
 
 type UserRole = 'artist' | 'venue' | 'both';
 type AuthMode = 'login' | 'signup' | 'forgot';
 
-const emailSchema = z.string().email('Invalid email');
-const passwordSchema = z.string().min(6, 'Min 6 characters');
+// Login only requires a non-empty password (existing accounts may predate the
+// stricter policy); new passwords are validated with the shared passwordSchema.
+const loginPasswordSchema = z.string().min(1, 'Password is required');
 
 interface AuthDialogProps {
   open: boolean;
@@ -65,7 +68,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
     try { emailSchema.parse(email); } catch (e) {
       if (e instanceof z.ZodError) newErrors.email = e.errors[0].message;
     }
-    try { passwordSchema.parse(password); } catch (e) {
+    try { loginPasswordSchema.parse(password); } catch (e) {
       if (e instanceof z.ZodError) newErrors.password = e.errors[0].message;
     }
     setErrors(newErrors);
@@ -388,6 +391,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
                 className={inputClass}
               />
               {errors.password && <p className="text-accent text-xs mt-1 font-display">{errors.password}</p>}
+              <PasswordChecklist value={password} />
             </div>
 
             <div>

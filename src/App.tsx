@@ -8,6 +8,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Pages
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
+import AccountDeleted from "./pages/AccountDeleted";
 
 // Public pages
 import PublicDashboard from "./pages/public/PublicDashboard";
@@ -62,6 +64,8 @@ const App = () => (
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="/signup" element={<Navigate to="/" replace />} />
             <Route path="/forgot-password" element={<Navigate to="/" replace />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/account-deleted" element={<AccountDeleted />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />
