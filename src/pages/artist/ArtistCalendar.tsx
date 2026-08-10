@@ -43,6 +43,7 @@ export default function ArtistCalendar() {
   const [loading, setLoading] = useState(true);
   const [showsPage, setShowsPage] = useState(1);
   const [showEventDots, setShowEventDots] = useState(true);
+  const [showHoldDots, setShowHoldDots] = useState(true);
   const SHOWS_PER_PAGE = 5;
 
   // Create event dialog state

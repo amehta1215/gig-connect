@@ -57,6 +57,7 @@ export default function VenueCalendar() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(true);
   const [showEventDots, setShowEventDots] = useState(true);
+  const [showHoldDots, setShowHoldDots] = useState(true);
   const [selectedDateBoxHeight, setSelectedDateBoxHeight] = useState(400);
   const resizeStartYRef = useRef<number>(0);
   const resizeStartHeightRef = useRef<number>(400);
