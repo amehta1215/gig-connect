@@ -14,7 +14,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        navigate('/auth');
+        navigate('/');
       } else if (requiredRole && profile) {
         // Check if user has access to required role
         const hasAccess = 
