@@ -15,6 +15,22 @@ export const ATTACHMENT_MIME_TYPES = [
   'application/pdf',
 ] as const;
 
+export const AUDIO_MIME_TYPES = [
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/mp4',
+  'audio/x-m4a',
+  'audio/aac',
+  'audio/ogg',
+  'audio/flac',
+  'audio/webm',
+] as const;
+
+/** artist-media audio samples: 20 MB */
+export const AUDIO_MAX_BYTES = 20 * 1024 * 1024;
+
 /** artist-media & venue-media: images only, 5 MB */
 export const MEDIA_MAX_BYTES = 5 * 1024 * 1024;
 /** message-attachments: images + PDF, 10 MB */
@@ -25,6 +41,7 @@ export const ATTACHMENT_ACCEPT = '.jpg,.jpeg,.png,.webp,.gif,.pdf';
 
 const IMAGE_TYPE_MESSAGE = 'Only JPG, PNG, WebP, and GIF images are supported.';
 const ATTACHMENT_TYPE_MESSAGE = 'Only JPG, PNG, WebP, GIF, and PDF files are supported.';
+const AUDIO_TYPE_MESSAGE = 'Only MP3, WAV, M4A, AAC, OGG, and FLAC audio files are supported.';
 
 function formatMB(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -40,13 +57,15 @@ function formatLimit(bytes: number) {
  */
 export function validateUpload(
   file: File,
-  opts: { maxBytes: number; allowedTypes: readonly string[]; kind: 'image' | 'attachment' }
+  opts: { maxBytes: number; allowedTypes: readonly string[]; kind: 'image' | 'attachment' | 'audio' }
 ): string | null {
   const type = (file.type || '').toLowerCase();
   const isAllowed = opts.allowedTypes.includes(type);
 
   if (!isAllowed) {
-    return opts.kind === 'image' ? IMAGE_TYPE_MESSAGE : ATTACHMENT_TYPE_MESSAGE;
+    if (opts.kind === 'image') return IMAGE_TYPE_MESSAGE;
+    if (opts.kind === 'audio') return AUDIO_TYPE_MESSAGE;
+    return ATTACHMENT_TYPE_MESSAGE;
   }
 
   if (file.size > opts.maxBytes) {
@@ -71,6 +90,15 @@ export function validateAttachmentUpload(file: File): string | null {
     maxBytes: ATTACHMENT_MAX_BYTES,
     allowedTypes: ATTACHMENT_MIME_TYPES,
     kind: 'attachment',
+  });
+}
+
+/** Validate an audio sample destined for artist-media. */
+export function validateAudioUpload(file: File): string | null {
+  return validateUpload(file, {
+    maxBytes: AUDIO_MAX_BYTES,
+    allowedTypes: AUDIO_MIME_TYPES,
+    kind: 'audio',
   });
 }
 
