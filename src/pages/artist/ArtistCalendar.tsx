@@ -15,6 +15,7 @@ import { CalendarIcon, Clock, Plus, CheckCircle2, PauseCircle, MapPin, MessageSq
 import { cn } from '@/lib/utils';
 import { format, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
+import { RATE_LIMIT_MESSAGE, isRateLimitError } from '@/lib/uploadLimits';
 interface GigListing {
   id: string;
   gig_date: string;
