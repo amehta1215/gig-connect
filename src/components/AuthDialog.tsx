@@ -219,9 +219,9 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border max-w-md p-6 sm:p-8 max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-card border-border max-w-md p-6 sm:p-7">
         <DialogHeader className="pr-8">
-          <DialogTitle className="font-display text-3xl md:text-4xl tracking-wide text-foreground text-center">
+          <DialogTitle className="font-display text-3xl tracking-wide text-foreground text-center">
             {mode === 'login' ? 'LOGIN' : mode === 'signup' ? 'SIGN UP' : 'RESET PASSWORD'}
           </DialogTitle>
           {promptMessage && (
@@ -262,7 +262,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
 
               <button
                 type="submit"
-                className="w-full h-12 font-display uppercase tracking-widest text-lg text-accent-foreground transition-colors bg-accent hover:bg-accent/90"
+                className="w-full h-11 font-display uppercase tracking-widest text-base text-accent-foreground transition-colors bg-accent hover:bg-accent/90"
                 disabled={isLoading}
               >
                 {isLoading ? '...' : 'SEND RESET LINK'}
@@ -329,7 +329,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
 
             <button
               type="submit"
-              className="w-full h-12 font-display uppercase tracking-widest text-lg text-accent-foreground transition-colors bg-accent hover:bg-accent/90"
+              className="w-full h-11 font-display uppercase tracking-widest text-base text-accent-foreground transition-colors bg-accent hover:bg-accent/90"
               disabled={isLoading}
             >
               {isLoading ? '...' : 'LOGIN'}
@@ -347,7 +347,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
             </p>
           </form>
         ) : (
-          <form onSubmit={handleSignUp} className="space-y-4 mt-3">
+          <form onSubmit={handleSignUp} className="space-y-3 mt-2">
             {/* Role selection */}
             <div className="space-y-2">
               <div className="grid grid-cols-3 gap-2">
@@ -457,7 +457,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
 
             <button
               type="submit"
-              className="w-full h-12 font-display uppercase tracking-widest text-lg text-accent-foreground transition-colors bg-accent hover:bg-accent/90"
+              className="w-full h-11 font-display uppercase tracking-widest text-base text-accent-foreground transition-colors bg-accent hover:bg-accent/90"
               disabled={isLoading}
             >
               {isLoading ? '...' : 'SIGN UP'}
