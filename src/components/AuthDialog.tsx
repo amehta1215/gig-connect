@@ -219,7 +219,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border max-w-md p-8 sm:p-10">
+      <DialogContent className="bg-card border-border max-w-md p-6 sm:p-8 max-h-[85vh] overflow-y-auto">
         <DialogHeader className="pr-8">
           <DialogTitle className="font-display text-3xl md:text-4xl tracking-wide text-foreground text-center">
             {mode === 'login' ? 'LOGIN' : mode === 'signup' ? 'SIGN UP' : 'RESET PASSWORD'}
@@ -280,7 +280,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
             </form>
           )
         ) : mode === 'login' ? (
-          <form onSubmit={handleLogin} className="space-y-6 mt-4">
+          <form onSubmit={handleLogin} className="space-y-5 mt-3">
             <div>
               <label className="font-display text-xs tracking-widest text-muted-foreground uppercase">
                 Email *
@@ -347,7 +347,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
             </p>
           </form>
         ) : (
-          <form onSubmit={handleSignUp} className="space-y-5 mt-4">
+          <form onSubmit={handleSignUp} className="space-y-4 mt-3">
             {/* Role selection */}
             <div className="space-y-2">
               <div className="grid grid-cols-3 gap-2">
