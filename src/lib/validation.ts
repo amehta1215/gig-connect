@@ -8,8 +8,8 @@ export const passwordSchema = z
   .string()
   .min(8, 'Password must be at least 8 characters')
   .regex(
-    /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\/;']/,
-    'Password must include at least 1 special character'
+    /[0-9!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\/;']/,
+    'Password must include at least 1 number or special character'
   );
 
 export const emailSchema = z.string().email('Invalid email');
@@ -17,8 +17,8 @@ export const emailSchema = z.string().email('Invalid email');
 export const passwordRules = [
   { label: '8+ characters', test: (v: string) => v.length >= 8 },
   {
-    label: '1 special character',
-    test: (v: string) => /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\/;']/.test(v),
+    label: '1 number or special character',
+    test: (v: string) => /[0-9!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\/;']/.test(v),
   },
 ];
 
