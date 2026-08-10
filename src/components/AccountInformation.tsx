@@ -13,7 +13,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { validatePassword } from '@/lib/validation';
 import { PasswordChecklist } from '@/components/PasswordChecklist';
 
@@ -273,10 +273,9 @@ export function AccountInformation() {
       </div>
     </div>
 
-      {/* Danger zone */}
-      <div className="bg-card border-2 border-destructive/60 rounded-xl p-6 space-y-3">
-        <div className="flex items-center gap-2 text-destructive">
-          <AlertTriangle className="h-5 w-5" />
+      {/* Delete account */}
+      <div className="bg-card border border-border rounded-xl p-6 space-y-3">
+        <div className="flex items-center gap-2 text-foreground mb-4">
           <h2 className="font-display text-xl">DELETE ACCOUNT</h2>
         </div>
         <p className="text-sm text-muted-foreground">
