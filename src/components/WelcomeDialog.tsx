@@ -41,7 +41,7 @@ export default function WelcomeDialog({ open, onOpenChange, role, onDismiss }: W
         <button
           type="button"
           onClick={handleCreateProfile}
-          className="mt-6 w-full h-12 font-display uppercase tracking-widest text-lg text-accent-foreground bg-accent hover:bg-accent/90 transition-colors"
+          className="mt-6 w-full h-12 font-display uppercase tracking-widest text-lg text-accent-foreground bg-accent hover:bg-accent/90 transition-colors outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
         >
           Create Profile
         </button>
