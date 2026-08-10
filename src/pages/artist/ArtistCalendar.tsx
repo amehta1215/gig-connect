@@ -43,6 +43,7 @@ export default function ArtistCalendar() {
   const [loading, setLoading] = useState(true);
   const [showsPage, setShowsPage] = useState(1);
   const [showEventDots, setShowEventDots] = useState(true);
+  const [showHoldDots, setShowHoldDots] = useState(true);
   const SHOWS_PER_PAGE = 5;
 
   // Create event dialog state
@@ -270,13 +271,15 @@ export default function ArtistCalendar() {
     setDeleteDialogOpen(true);
   };
 
-  const gigDates = gigs.map((g) => parseLocalDate(g.gig_date));
+  const confirmedGigDates = gigs.filter((g) => g.is_confirmed).map((g) => parseLocalDate(g.gig_date));
+  const holdGigDates = gigs.filter((g) => !g.is_confirmed).map((g) => parseLocalDate(g.gig_date));
   const gigsOnSelectedDate = selectedDate ? gigs.filter((g) => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
   const confirmedGigs = gigsOnSelectedDate.filter((g) => g.is_confirmed);
   const holdGigs = gigsOnSelectedDate.filter((g) => !g.is_confirmed).sort((a, b) => (a.hold_priority || 99) - (b.hold_priority || 99));
   const today = startOfDay(new Date());
   const modifiers = {
-    hasGig: showEventDots ? gigDates : [],
+    hasGig: showEventDots ? confirmedGigDates : [],
+    hasHold: showHoldDots ? holdGigDates : [],
     past: {
       before: today
     },
@@ -285,7 +288,8 @@ export default function ArtistCalendar() {
   const modifiersStyles = {};
   const modifiersClassNames = {
     past: 'day-past',
-    hasGig: 'day-has-gig'
+    hasGig: 'day-has-gig',
+    hasHold: 'day-has-gig'
   };
   const canCreateEvent = selectedDate && selectedDate >= today;
   if (loading) {
@@ -295,10 +299,10 @@ export default function ArtistCalendar() {
       </div>;
   }
   return <div className="animate-fade-in">
-      <div className="grid md:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
+      <div className="grid md:grid-cols-[220px_minmax(0,1fr)] gap-6 items-start">
         {/* Calendar column */}
-        <div className="flex flex-col gap-4 w-full md:w-[320px] md:flex-none">
-        <div className="calendar-stretch bg-card border border-border p-3 flex items-stretch h-[320px] w-full">
+        <div className="flex flex-col gap-4 w-full md:w-[220px] md:flex-none">
+        <div className="calendar-stretch bg-card border border-border p-3 flex items-stretch h-[220px] w-full">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -316,13 +320,19 @@ export default function ArtistCalendar() {
               head_cell: "flex-1 text-muted-foreground font-normal text-[0.7rem] text-center",
               row: "flex w-full flex-1",
               cell: "flex-1 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-              day: "h-8 w-8 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-full text-xs ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative"
+              day: "h-7 w-7 p-0 font-normal aria-selected:opacity-100 hover:bg-accent/60 hover:text-accent-foreground inline-flex items-center justify-center rounded-full text-xs ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 relative"
             }}
           />
         </div>
-        <div className="bg-card border border-border p-3 flex items-center justify-between">
-          <Label htmlFor="show-event-dots" className="font-display text-xs tracking-widest text-primary">SHOW EVENTS</Label>
-          <Switch id="show-event-dots" checked={showEventDots} onCheckedChange={setShowEventDots} />
+        <div className="bg-card border border-border p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="show-event-dots" className="font-display text-xs tracking-widest text-primary">SHOW EVENTS</Label>
+            <Switch id="show-event-dots" checked={showEventDots} onCheckedChange={setShowEventDots} />
+          </div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="show-hold-dots" className="font-display text-xs tracking-widest text-primary">SHOW HOLDS</Label>
+            <Switch id="show-hold-dots" checked={showHoldDots} onCheckedChange={setShowHoldDots} />
+          </div>
         </div>
         </div>
 
