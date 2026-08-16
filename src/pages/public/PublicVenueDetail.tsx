@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import VenueProfilePreviewContent from '@/components/VenueProfilePreviewContent';
 
 const availabilityOptions = [
   { id: 'date_range', label: 'Date Range' },
@@ -127,124 +128,7 @@ export default function PublicVenueDetail() {
     container.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
   };
 
-  return <div className="animate-fade-in max-w-6xl mx-auto">
-    <div className="flex items-center justify-between mb-6">
-      <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
-      <Button variant="ghost" size="icon" onClick={handleAuthPrompt} className="h-9 w-9">
-        <Heart className="h-6 w-6 text-muted-foreground hover:text-[#E8556D] transition-colors" />
-      </Button>
-    </div>
-
-    <div className="mb-6">
-      {galleryPictures.length === 0 ? (
-        <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
-          <div className="w-full h-full flex items-center justify-center bg-heat">
-            <Music className="h-12 w-12 text-primary/30" />
-          </div>
-        </div>
-      ) : (
-        <div className="relative group">
-          <div ref={galleryScrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth">
-            {galleryPictures.map((pic, i) => (
-              <div key={i} className="flex-shrink-0 w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
-                <img src={pic} alt={`${shared.venue_name} ${i + 1}`} className="w-full h-full object-cover" />
-              </div>
-            ))}
-          </div>
-          {galleryPictures.length > 3 && <>
-            <button onClick={(e) => { e.stopPropagation(); scroll('left'); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-              <ChevronLeft className="h-5 w-5 text-foreground" />
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); scroll('right'); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-              <ChevronRight className="h-5 w-5 text-foreground" />
-            </button>
-          </>}
-        </div>
-      )}
-    </div>
-
-    <div className="space-y-4 mb-2">
-      <h1 className="font-display text-4xl md:text-5xl text-black font-bold tracking-wide">
-        {shared.venue_name}
-      </h1>
-      {shared.location && (
-        <div className="flex items-center gap-2 text-primary">
-          <MapPin className="h-4 w-4" />
-          {shared.location}
-        </div>
-      )}
-    </div>
-    {venueProfile?.genres && venueProfile.genres.length > 0 && (
-      <div className="flex flex-wrap gap-2 mb-8">
-        {venueProfile.genres.map(genre => (
-          <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
-            {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
-          </span>
-        ))}
-      </div>
-    )}
-
-    <div className="flex flex-col lg:flex-row gap-8">
-      <div className="flex-1 order-2 lg:order-1">
-        <div className="space-y-4">
-          {venueProfile?.bio && (
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h3 className="font-display text-sm text-primary tracking-widest mb-2">BIO</h3>
-              <p className="text-sm text-primary whitespace-pre-line">{venueProfile.bio}</p>
-            </div>
-          )}
-        </div>
-        <div className="mt-10">
-          <h2 className="font-display text-2xl text-black font-bold tracking-wide mb-4">ROOMS</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {listings.map(room => (
-              <div
-                key={room.id}
-                onClick={() => navigate(`/rooms/${room.id}`)}
-                className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative"
-              >
-                <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
-                  {(() => {
-                    const pic = (room.pictures && room.pictures[0]) || venueProfile?.picture || null;
-                    return pic ? (
-                      <img src={pic} alt={room.room_name || room.venue_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center bg-heat">
-                        <Music className="h-12 w-12 text-primary/30" />
-                      </div>
-                    );
-                  })()}
-                  {room.capacity && (
-                    <div className="absolute top-2 left-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
-                      <Users className="h-3 w-3" />
-                      {room.capacity}
-                    </div>
-                  )}
-                </div>
-                <div className="p-3">
-                  <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors tracking-wide font-semibold">
-                    {room.room_name || 'Main Room'}
-                  </h3>
-                  {room.genres && room.genres.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {room.genres.slice(0, 3).map(genre => (
-                        <span key={genre} className="text-[10px] px-2 py-0.5 uppercase tracking-wider text-primary bg-gray-200">
-                          {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="lg:w-80 xl:w-96 order-1 lg:order-2">
-        <div className="lg:sticky lg:top-4">
+  const applyPanel = (
           <div className="bg-card border border-border rounded-lg p-6 space-y-6" onClick={handleAuthPrompt}>
             <h2 className="font-display text-2xl font-bold text-primary">APPLY</h2>
 
@@ -308,9 +192,24 @@ export default function PublicVenueDetail() {
               APPLY
             </Button>
           </div>
-        </div>
-      </div>
+  );
+
+  return <div className="animate-fade-in max-w-6xl mx-auto">
+    <div className="flex items-center justify-between mb-6">
+      <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <ArrowLeft className="h-5 w-5" />
+      </Button>
+      <Button variant="ghost" size="icon" onClick={handleAuthPrompt} className="h-9 w-9">
+        <Heart className="h-6 w-6 text-muted-foreground hover:text-[#E8556D] transition-colors" />
+      </Button>
     </div>
+
+    <VenueProfilePreviewContent
+      venueProfile={venueProfile}
+      listings={listings}
+      sidebar={applyPanel}
+      onRoomClick={(room) => navigate(`/rooms/${room.id}`)}
+    />
 
     <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} promptMessage="Login or sign up to save favorites" />
   </div>;
