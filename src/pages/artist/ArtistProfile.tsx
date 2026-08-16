@@ -10,7 +10,9 @@ import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
 import { validateImageUpload, validateAudioUpload } from '@/lib/uploadLimits';
-import { ArrowLeft, Music, X, Upload } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import ArtistProfilePreviewContent from '@/components/ArtistProfilePreviewContent';
+import { ArrowLeft, Music, X, Upload, Eye } from 'lucide-react';
 interface ArtistProfile {
   id: string;
   user_id: string;
@@ -51,6 +53,7 @@ export default function ArtistProfile() {
   const pictureInputRef = useRef<HTMLInputElement>(null);
   const sampleInputRef = useRef<HTMLInputElement>(null);
   const [draggedPictureIndex, setDraggedPictureIndex] = useState<number | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [formData, setFormData] = useState({
     band_name: '',
     genre: '',
@@ -263,12 +266,31 @@ export default function ArtistProfile() {
             </Button>}
           <h1 className="font-display text-4xl font-black text-primary">ARTIST PROFILE</h1>
         </div>
-        {saveStatus !== 'idle' && (
-          <span className="text-sm text-muted-foreground font-display tracking-wider">
-            {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {saveStatus !== 'idle' && (
+            <span className="text-sm text-muted-foreground font-display tracking-wider">
+              {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
+            </span>
+          )}
+          <Button variant="outline" size="sm" disabled={loading} onClick={() => setPreviewOpen(true)} className="font-display tracking-wider">
+            <Eye className="h-4 w-4 mr-2" />
+            Preview Profile
+          </Button>
+        </div>
       </div>
+
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="bg-card border-border max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl tracking-wide">
+              PREVIEW: HOW VENUES SEE YOUR PROFILE
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <ArtistProfilePreviewContent artistProfile={profile} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Profile Info Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">

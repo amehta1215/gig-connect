@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { validateImageUpload } from '@/lib/uploadLimits';
 import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
+import VenueProfilePreviewContent from '@/components/VenueProfilePreviewContent';
 interface VenueProfileData {
   id: string;
   user_id: string;
@@ -106,6 +107,23 @@ export default function VenueProfile() {
     house_rules: ''
   });
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewData, setPreviewData] = useState<{ profile: any; listings: any[] } | null>(null);
+
+  const openPreview = async () => {
+    if (!user) return;
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    const { data: profileRow } = await supabase.from('venue_profiles').select('*').eq('user_id', user.id).maybeSingle();
+    let listingRows: any[] = [];
+    if (profileRow) {
+      const { data } = await supabase.from('venue_listings').select('*').eq('venue_profile_id', profileRow.id).order('created_at', { ascending: true });
+      listingRows = data || [];
+    }
+    setPreviewData({ profile: profileRow, listings: listingRows });
+    setPreviewLoading(false);
+  };
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-save for all existing rooms (draft and published)
@@ -455,8 +473,40 @@ export default function VenueProfile() {
             </Button>}
           <h1 className="font-display text-4xl font-bold text-primary">VENUE PROFILE</h1>
         </div>
-        {saving && <span className="text-sm text-muted-foreground">Saving...</span>}
+        <div className="flex items-center gap-3">
+          {saving && <span className="text-sm text-muted-foreground">Saving...</span>}
+          <Button variant="outline" size="sm" disabled={loading} onClick={openPreview} className="font-display tracking-wider">
+            <Eye className="h-4 w-4 mr-2" />
+            Preview Profile
+          </Button>
+        </div>
       </div>
+
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="bg-card border-border max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl tracking-wide">
+              PREVIEW: HOW ARTISTS SEE YOUR PROFILE
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {previewLoading ? (
+              <div className="space-y-4">
+                <div className="h-48 bg-muted animate-pulse rounded-lg" />
+                <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+              </div>
+            ) : !previewData?.listings?.length ? (
+              <div className="text-center py-16">
+                <h3 className="font-display text-xl text-muted-foreground tracking-wide">
+                  ADD AT LEAST ONE ROOM/LISTING TO PREVIEW YOUR PROFILE
+                </h3>
+              </div>
+            ) : (
+              <VenueProfilePreviewContent venueProfile={previewData.profile} listings={previewData.listings} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
 
       {/* Venue Info Section */}
