@@ -111,23 +111,6 @@ export default function PublicVenueDetail() {
     </div>;
   }
 
-  const shared = listings[0];
-  const venuePics = (venueProfile?.pictures && venueProfile.pictures.length > 0)
-    ? venueProfile.pictures
-    : (venueProfile?.picture ? [venueProfile.picture] : []);
-  const galleryPictures = Array.from(new Set([
-    ...venuePics,
-    ...listings.flatMap(l => l.pictures || [])
-  ]));
-
-  const scroll = (dir: 'left' | 'right') => {
-    if (!galleryScrollRef.current) return;
-    const container = galleryScrollRef.current;
-    const card = container.children[0] as HTMLElement;
-    const cardWidth = card?.offsetWidth || 300;
-    container.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
-  };
-
   const applyPanel = (
           <div className="bg-card border border-border rounded-lg p-6 space-y-6" onClick={handleAuthPrompt}>
             <h2 className="font-display text-2xl font-bold text-primary">APPLY</h2>
