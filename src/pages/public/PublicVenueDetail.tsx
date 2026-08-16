@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ChevronLeft, ChevronRight, MapPin, Music, Users, Heart } from 'lucide-react';
+import { ArrowLeft, Heart } from 'lucide-react';
 import AuthDialog from '@/components/AuthDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -59,7 +59,6 @@ export default function PublicVenueDetail() {
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const galleryScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (id) fetchData();
