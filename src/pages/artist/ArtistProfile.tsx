@@ -130,8 +130,8 @@ export default function ArtistProfile() {
         return;
       }
     }
-    if (pictures.length + files.length > 4) {
-      toast.error('Maximum 4 pictures allowed');
+    if (pictures.length + files.length > 6) {
+      toast.error('Maximum 6 pictures allowed');
       return;
     }
     setUploadingPicture(true);
