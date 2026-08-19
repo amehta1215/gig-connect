@@ -285,6 +285,11 @@ export default function VenueProfile() {
   const handleRoomPictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    if (pictures.length + files.length > 3) {
+      toast.error('Maximum 3 photos per room');
+      if (pictureInputRef.current) pictureInputRef.current.value = '';
+      return;
+    }
     // Validate type + size against the shared upload limits (mirrors the storage bucket config)
     for (const file of Array.from(files)) {
       const error = validateImageUpload(file);
@@ -747,12 +752,12 @@ export default function VenueProfile() {
                             <X className="h-4 w-4 text-destructive-foreground" />
                           </button>
                         </div>)}
-                      <button type="button" onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
+                      {pictures.length < 3 && <button type="button" onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
                         <Upload className="h-6 w-6 text-muted-foreground" />
                         <span className="text-xs text-muted-foreground">
                           {uploadingPicture ? 'Uploading...' : 'Add Photo'}
                         </span>
-                      </button>
+                      </button>}
                     </div>
                     <input ref={pictureInputRef} type="file" accept=".jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={handleRoomPictureUpload} />
                   </div>

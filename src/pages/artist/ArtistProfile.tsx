@@ -130,8 +130,8 @@ export default function ArtistProfile() {
         return;
       }
     }
-    if (pictures.length + files.length > 4) {
-      toast.error('Maximum 4 pictures allowed');
+    if (pictures.length + files.length > 6) {
+      toast.error('Maximum 6 pictures allowed');
       return;
     }
     setUploadingPicture(true);
@@ -424,7 +424,7 @@ export default function ArtistProfile() {
                 </button>
               </div>
             </div>)}
-          {pictures.length < 4 && <button onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
+          {pictures.length < 6 && <button onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
               <Upload className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
                 {uploadingPicture ? 'Uploading...' : 'Add Picture'}
