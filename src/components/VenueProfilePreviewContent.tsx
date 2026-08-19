@@ -55,75 +55,75 @@ export default function VenueProfilePreviewContent({
     if (!galleryScrollRef.current) return;
     const container = galleryScrollRef.current;
     const card = container.children[0] as HTMLElement;
-    const cardWidth = card?.offsetWidth || 300;
-    container.scrollBy({ left: dir === 'left' ? -cardWidth - 8 : cardWidth + 8, behavior: 'smooth' });
+    const cardWidth = card?.offsetWidth || 400;
+    container.scrollBy({ left: dir === 'left' ? -cardWidth - 16 : cardWidth + 16, behavior: 'smooth' });
   };
 
-  return <div>
+  return <div className="w-full max-w-none">
     {headerAction && <div className="flex items-center justify-end mb-6">{headerAction}</div>}
 
-    <div className="mb-6">
+    <div className="mb-8">
       {galleryPictures.length === 0 ? (
-        <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
+        <div className="aspect-[4/3] w-full max-w-xl bg-secondary rounded-lg overflow-hidden">
           <div className="w-full h-full flex items-center justify-center bg-heat">
-            <Music className="h-12 w-12 text-primary/30" />
+            <Music className="h-16 w-16 text-primary/30" />
           </div>
         </div>
       ) : (
         <div className="relative group">
-          <div ref={galleryScrollRef} className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth">
+          <div ref={galleryScrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth">
             {galleryPictures.map((pic, i) => (
-              <div key={i} className="flex-shrink-0 w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.375rem)] aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+              <div key={i} className="flex-shrink-0 w-[80vw] md:w-[60vw] lg:w-[45vw] max-w-3xl aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
                 <img src={pic} alt={`${venueName} ${i + 1}`} className="w-full h-full object-cover" />
               </div>
             ))}
           </div>
-          {galleryPictures.length > 3 && <>
-            <button onClick={(e) => { e.stopPropagation(); scroll('left'); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-              <ChevronLeft className="h-5 w-5 text-foreground" />
+          {galleryPictures.length > 1 && <>
+            <button onClick={(e) => { e.stopPropagation(); scroll('left'); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              <ChevronLeft className="h-6 w-6 text-foreground" />
             </button>
-            <button onClick={(e) => { e.stopPropagation(); scroll('right'); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-              <ChevronRight className="h-5 w-5 text-foreground" />
+            <button onClick={(e) => { e.stopPropagation(); scroll('right'); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              <ChevronRight className="h-6 w-6 text-foreground" />
             </button>
           </>}
         </div>
       )}
     </div>
 
-    <div className="space-y-4 mb-2">
-      <h1 className="font-display text-4xl md:text-5xl text-black font-bold tracking-wide">
+    <div className="space-y-4 mb-4">
+      <h1 className="font-display text-5xl md:text-6xl lg:text-7xl text-black font-bold tracking-wide">
         {venueName}
       </h1>
       {location && (
-        <div className="flex items-center gap-2 text-primary">
-          <MapPin className="h-4 w-4" />
+        <div className="flex items-center gap-2 text-primary text-lg">
+          <MapPin className="h-5 w-5" />
           {location}
         </div>
       )}
     </div>
     {venueProfile?.genres && venueProfile.genres.length > 0 && (
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-10">
         {venueProfile.genres.map(genre => (
-          <span key={genre} className="text-xs px-3 py-1 uppercase tracking-wider font-display bg-gray-200">
+          <span key={genre} className="text-sm px-4 py-1.5 uppercase tracking-wider font-display bg-gray-200">
             {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
           </span>
         ))}
       </div>
     )}
 
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div className="flex flex-col lg:flex-row gap-10">
       <div className="flex-1 order-2 lg:order-1">
         <div className="space-y-4">
           {venueProfile?.bio && (
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h3 className="font-display text-sm text-primary tracking-widest mb-2">BIO</h3>
-              <p className="text-sm text-primary whitespace-pre-line">{venueProfile.bio}</p>
+            <div className="bg-card border border-border rounded-lg p-6 md:p-8">
+              <h3 className="font-display text-sm text-primary tracking-widest mb-3">BIO</h3>
+              <p className="text-base text-primary whitespace-pre-line leading-relaxed">{venueProfile.bio}</p>
             </div>
           )}
         </div>
-        <div className="mt-10">
-          <h2 className="font-display text-2xl text-black font-bold tracking-wide mb-4">ROOMS</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="mt-12">
+          <h2 className="font-display text-3xl text-black font-bold tracking-wide mb-6">ROOMS</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {listings.map(room => (
               <div
                 key={room.id}
@@ -142,13 +142,13 @@ export default function VenueProfilePreviewContent({
                     );
                   })()}
                   {room.capacity && (
-                    <div className="absolute top-2 left-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
+                    <div className="absolute top-3 left-3 bg-background/90 px-2.5 py-1 text-xs font-display tracking-wider flex items-center gap-1">
                       <Users className="h-3 w-3" />
                       {room.capacity}
                     </div>
                   )}
                 </div>
-                <div className="p-3">
+                <div className="p-4">
                   <h3 className="font-display text-xl text-foreground group-hover:text-primary transition-colors tracking-wide font-semibold">
                     {room.room_name || 'Main Room'}
                   </h3>
