@@ -283,7 +283,30 @@ export default function VenueApplicationDetail() {
       return;
     }
     setIsBlocked(true);
-    toast.success('Artist blocked');
+
+    // Permanently remove this artist's applications to any of this venue's listings
+    const { data: venueProfiles } = await supabase
+      .from('venue_profiles')
+      .select('id')
+      .eq('user_id', user.id);
+    const profileIds = (venueProfiles ?? []).map(p => p.id);
+    if (profileIds.length > 0) {
+      const { data: listings } = await supabase
+        .from('venue_listings')
+        .select('id')
+        .in('venue_profile_id', profileIds);
+      const listingIds = (listings ?? []).map(l => l.id);
+      if (listingIds.length > 0) {
+        await supabase
+          .from('applications')
+          .delete()
+          .eq('artist_id', application.artist_id)
+          .in('venue_listing_id', listingIds);
+      }
+    }
+
+    toast.success('Artist blocked — their applications were removed');
+    navigate('/venue/applications');
   };
 
   const toggleFavorite = async () => {
