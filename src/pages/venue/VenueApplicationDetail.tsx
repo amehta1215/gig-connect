@@ -1086,5 +1086,22 @@ export default function VenueApplicationDetail() {
         sending={rescindSending}
         onSend={(msg) => performRescind(msg)}
       />
+
+      <AlertDialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-xl text-destructive">BLOCK ARTIST?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              This artist won't be able to apply to your listings or message you again. You can undo this from your profile.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="font-display tracking-widest">CANCEL</AlertDialogCancel>
+            <AlertDialogAction onClick={blockArtist} className="font-display tracking-widest bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+              BLOCK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }
