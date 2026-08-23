@@ -32,6 +32,7 @@ interface VenueListing {
 
 interface VenueProfile {
   id: string;
+  user_id?: string;
   picture: string | null;
   pictures?: string[] | null;
   genres?: string[] | null;
@@ -113,7 +114,7 @@ export default function VenueDetail() {
     }
     const { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, picture, pictures, genres, bio')
+      .select('id, user_id, picture, pictures, genres, bio')
       .eq('id', venueProfileId)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
@@ -192,6 +193,22 @@ export default function VenueDetail() {
     }
 
     setApplying(true);
+
+    // Blocked artists cannot apply to this venue
+    if (venueProfile?.user_id) {
+      const { data: blockData } = await supabase
+        .from('user_blocks')
+        .select('id')
+        .eq('blocker_id', venueProfile.user_id)
+        .eq('blocked_id', user.id)
+        .maybeSingle();
+      if (blockData) {
+        toast.error("You're unable to apply to this venue");
+        setApplying(false);
+        return;
+      }
+    }
+
     const { error } = await supabase.from('applications').insert({
       artist_id: user.id,
       venue_listing_id: selectedListing.id,
