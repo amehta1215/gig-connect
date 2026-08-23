@@ -217,7 +217,6 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
           </button>
         </DialogContent>
       </Dialog>
-      <LegalDialog open={legalOpen} onOpenChange={setLegalOpen} />
     {welcome}
       </>
     );
@@ -506,6 +505,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
         )}
       </DialogContent>
     </Dialog>
+    <LegalDialog open={legalOpen} onOpenChange={setLegalOpen} />
     {welcome}
     </>
   );
