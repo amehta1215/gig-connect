@@ -10,6 +10,7 @@ import { PasswordChecklist } from '@/components/PasswordChecklist';
 import WelcomeDialog from '@/components/WelcomeDialog';
 import { Eye, EyeOff } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import LegalDialog from '@/components/LegalDialog';
 
 type UserRole = 'artist' | 'venue' | 'both';
 type AuthMode = 'login' | 'signup' | 'forgot';
@@ -42,6 +43,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
 
   const { signIn, signUp, user, profile, loading, isNewUser, clearNewUserFlag } = useAuth();
   const navigate = useNavigate();
@@ -215,7 +217,8 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
           </button>
         </DialogContent>
       </Dialog>
-      {welcome}
+      <LegalDialog open={legalOpen} onOpenChange={setLegalOpen} />
+    {welcome}
       </>
     );
   }
@@ -469,14 +472,13 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
                 />
                 <label htmlFor="terms" className="text-sm text-muted-foreground leading-snug cursor-pointer">
                   I agree to the{' '}
-                  <a
-                    href="/legal"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); setLegalOpen(true); }}
                     className="text-accent hover:underline font-medium"
                   >
                     Terms of Service and Privacy Policy
-                  </a>
+                  </button>
                 </label>
               </div>
               {errors.terms && <p className="text-accent text-xs mt-1 font-display">{errors.terms}</p>}
