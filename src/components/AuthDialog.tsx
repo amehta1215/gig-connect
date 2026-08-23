@@ -9,6 +9,7 @@ import { passwordSchema, emailSchema } from '@/lib/validation';
 import { PasswordChecklist } from '@/components/PasswordChecklist';
 import WelcomeDialog from '@/components/WelcomeDialog';
 import { Eye, EyeOff } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type UserRole = 'artist' | 'venue' | 'both';
 type AuthMode = 'login' | 'signup' | 'forgot';
@@ -40,6 +41,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const { signIn, signUp, user, profile, loading, isNewUser, clearNewUserFlag } = useAuth();
   const navigate = useNavigate();
@@ -51,6 +53,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
       setErrors({});
       setEmailSent(false);
       setResetSent(false);
+      setTermsAccepted(false);
     }
   }, [open, defaultMode]);
 
@@ -91,6 +94,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
     if (!firstName.trim()) newErrors.firstName = 'Required';
     if (!lastName.trim()) newErrors.lastName = 'Required';
     if (!role) newErrors.role = 'Pick one';
+    if (!termsAccepted) newErrors.terms = 'You must agree to the Terms of Service and Privacy Policy';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -120,7 +124,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
     if (!validateSignUpForm()) return;
     setIsLoading(true);
     try {
-      const { error } = await signUp(email, password, firstName, lastName, role!);
+      const { error } = await signUp(email, password, firstName, lastName, role!, new Date().toISOString());
       if (error) {
         if (error.message.includes('already registered')) {
           toast.error('Email taken');
@@ -455,10 +459,33 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
               {errors.confirmPassword && <p className="text-accent text-xs mt-1 font-display">{errors.confirmPassword}</p>}
             </div>
 
+            <div>
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="terms"
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+                  className="mt-0.5"
+                />
+                <label htmlFor="terms" className="text-sm text-muted-foreground leading-snug cursor-pointer">
+                  I agree to the{' '}
+                  <a
+                    href="/legal"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline font-medium"
+                  >
+                    Terms of Service and Privacy Policy
+                  </a>
+                </label>
+              </div>
+              {errors.terms && <p className="text-accent text-xs mt-1 font-display">{errors.terms}</p>}
+            </div>
+
             <button
               type="submit"
-              className="w-full h-11 font-display uppercase tracking-widest text-base text-accent-foreground transition-colors bg-accent hover:bg-accent/90"
-              disabled={isLoading}
+              className="w-full h-11 font-display uppercase tracking-widest text-base text-accent-foreground transition-colors bg-accent hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !termsAccepted}
             >
               {isLoading ? '...' : 'SIGN UP'}
             </button>
