@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, Ban } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { DateRange } from 'react-day-picker';
 import HoldsOrderList from '@/components/HoldsOrderList';
 import AutoMessageDialog from '@/components/AutoMessageDialog';
 import { sendVenueArtistMessage } from '@/lib/messaging';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 interface ArtistProfile {
   band_name: string | null;
   genre: string | null;
@@ -125,6 +126,8 @@ export default function VenueApplicationDetail() {
   const [venueListing, setVenueListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [gigStatus, setGigStatus] = useState<'confirmed' | 'hold' | null>(null);
 
   // Accept dialog state
@@ -256,9 +259,31 @@ export default function VenueApplicationDetail() {
         .eq('application_id', data.id)
         .maybeSingle();
       setIsFavorited(!!favData);
+
+      const { data: blockData } = await supabase
+        .from('user_blocks')
+        .select('id')
+        .eq('blocker_id', user.id)
+        .eq('blocked_id', data.artist_id)
+        .maybeSingle();
+      setIsBlocked(!!blockData);
     }
 
     setLoading(false);
+  };
+
+  const blockArtist = async () => {
+    if (!user || !application) return;
+    const { error } = await supabase
+      .from('user_blocks')
+      .insert({ blocker_id: user.id, blocked_id: application.artist_id });
+    setBlockDialogOpen(false);
+    if (error) {
+      toast.error('Could not block this artist');
+      return;
+    }
+    setIsBlocked(true);
+    toast.success('Artist blocked');
   };
 
   const toggleFavorite = async () => {
@@ -717,6 +742,17 @@ export default function VenueApplicationDetail() {
             <Button variant="ghost" size="icon" onClick={toggleFavorite} className="shrink-0 h-9 w-9">
               <Heart className={`h-6 w-6 transition-colors ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setBlockDialogOpen(true)}
+              disabled={isBlocked}
+              title={isBlocked ? 'Artist blocked' : 'Block artist'}
+              aria-label={isBlocked ? 'Artist blocked' : 'Block artist'}
+              className="shrink-0 h-9 w-9"
+            >
+              <Ban className={`h-6 w-6 transition-colors ${isBlocked ? 'text-destructive' : 'text-muted-foreground hover:text-destructive'}`} />
+            </Button>
           </div>
         {venueListing && <p className="text-lg mt-1 text-primary">
               Applied to: {venueListing.room_name || venueListing.venue_name}
@@ -1050,5 +1086,22 @@ export default function VenueApplicationDetail() {
         sending={rescindSending}
         onSend={(msg) => performRescind(msg)}
       />
+
+      <AlertDialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-xl text-destructive">BLOCK ARTIST?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              This artist won't be able to apply to your listings or message you again. You can undo this from your profile.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="font-display tracking-widest">CANCEL</AlertDialogCancel>
+            <AlertDialogAction onClick={blockArtist} className="font-display tracking-widest bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+              BLOCK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }
