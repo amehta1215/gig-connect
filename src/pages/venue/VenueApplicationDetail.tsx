@@ -126,6 +126,8 @@ export default function VenueApplicationDetail() {
   const [venueListing, setVenueListing] = useState<VenueListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [gigStatus, setGigStatus] = useState<'confirmed' | 'hold' | null>(null);
 
   // Accept dialog state
