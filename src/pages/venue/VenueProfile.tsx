@@ -155,8 +155,43 @@ export default function VenueProfile() {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchBlockedArtists();
     }
   }, [user]);
+
+  const fetchBlockedArtists = async () => {
+    if (!user) return;
+    const { data: blocks } = await supabase
+      .from('user_blocks')
+      .select('id, blocked_id')
+      .eq('blocker_id', user.id)
+      .order('created_at', { ascending: false });
+    if (!blocks || blocks.length === 0) {
+      setBlockedArtists([]);
+      return;
+    }
+    const ids = blocks.map(b => b.blocked_id);
+    const [{ data: artistProfiles }, { data: profiles }] = await Promise.all([
+      supabase.from('artist_profiles').select('user_id, band_name').in('user_id', ids),
+      supabase.from('profiles').select('id, first_name, last_name').in('id', ids)
+    ]);
+    setBlockedArtists(blocks.map(b => {
+      const ap = artistProfiles?.find(a => a.user_id === b.blocked_id);
+      const pr = profiles?.find(p => p.id === b.blocked_id);
+      const name = ap?.band_name?.trim() || (pr ? `${pr.first_name} ${pr.last_name}`.trim() : '') || 'Artist';
+      return { id: b.id, blocked_id: b.blocked_id, name };
+    }));
+  };
+
+  const unblockArtist = async (blockId: string) => {
+    const { error } = await supabase.from('user_blocks').delete().eq('id', blockId);
+    if (error) {
+      toast.error('Could not unblock');
+      return;
+    }
+    setBlockedArtists(prev => prev.filter(b => b.id !== blockId));
+    toast.success('Artist unblocked');
+  };
   const fetchProfile = async () => {
     if (!user) return;
     setLoading(true);
