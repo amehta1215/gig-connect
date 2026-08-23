@@ -13,7 +13,7 @@ import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
 import { validateImageUpload } from '@/lib/uploadLimits';
-import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight, Ban } from 'lucide-react';
 import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
 import VenueProfilePreviewContent from '@/components/VenueProfilePreviewContent';
 interface VenueProfileData {
@@ -84,6 +84,7 @@ export default function VenueProfile() {
 
   // Room management state
   const [listings, setListings] = useState<VenueListing[]>([]);
+  const [blockedArtists, setBlockedArtists] = useState<{ id: string; blocked_id: string; name: string }[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'preview' | 'edit'>('preview');
   const [editingListing, setEditingListing] = useState<VenueListing | null>(null);
@@ -868,6 +869,28 @@ export default function VenueProfile() {
                 </div>
               </div>)}
           </div>}
+      </div>
+
+      {/* Blocked Artists Section */}
+      <div className="border border-border bg-card p-6">
+        <h2 className="font-display text-xl uppercase tracking-widest text-primary mb-4">Blocked Artists</h2>
+        {blockedArtists.length === 0 ? (
+          <p className="text-sm text-muted-foreground">You haven't blocked any artists.</p>
+        ) : (
+          <div className="divide-y divide-border">
+            {blockedArtists.map(b => (
+              <div key={b.id} className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Ban className="h-4 w-4 text-destructive shrink-0" />
+                  <span className="truncate text-sm">{b.name}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => unblockArtist(b.id)} className="font-display tracking-widest">
+                  UNBLOCK
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Account Information Section */}
