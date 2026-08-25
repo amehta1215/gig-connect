@@ -632,11 +632,13 @@ export default function VenueApplicationDetail() {
     const isHold = dateMode !== 'single' || acceptType === 'hold';
 
     if (!isHold && !override) {
-      const conflicts = await findConfirmedConflicts(
-        application.venue_listing_id,
-        dates.map(d => format(d, 'yyyy-MM-dd'))
+      const dateStrs = dates.map(d => format(d, 'yyyy-MM-dd'));
+      const conflicts = mergeConflicts(
+        await findConfirmedConflicts(application.venue_listing_id, dateStrs),
+        await findArtistDateConflicts(application.artist_id, dateStrs)
       );
       if (conflicts.length > 0) {
+        setConflictAction('accept');
         setConflictMessage(describeConflicts(conflicts));
         setConflictDialogOpen(true);
         return;
