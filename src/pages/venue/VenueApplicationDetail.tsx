@@ -844,6 +844,9 @@ export default function VenueApplicationDetail() {
                 Archive
               </Button>
             </>}
+          {application.status === 'accepted' && gigStatus === 'hold' && holdGigs.length > 0 && <Button size="sm" onClick={handleConfirmHoldClick} className="bg-primary text-primary-foreground hover:bg-primary/90">
+              Confirm Gig
+            </Button>}
           {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
               {gigStatus === 'hold' ? 'Rescind Hold' : 'Rescind Acceptance'}
             </Button>}
