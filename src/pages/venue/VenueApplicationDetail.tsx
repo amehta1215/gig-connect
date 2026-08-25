@@ -20,6 +20,7 @@ import HoldsOrderList from '@/components/HoldsOrderList';
 import AutoMessageDialog from '@/components/AutoMessageDialog';
 import { sendVenueArtistMessage } from '@/lib/messaging';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
+import { findConfirmedConflicts, describeConflicts } from '@/lib/bookingConflicts';
 interface ArtistProfile {
   band_name: string | null;
   genre: string | null;
@@ -510,7 +511,7 @@ export default function VenueApplicationDetail() {
       setHoldPriority(1);
     }
   };
-  const handleConfirmAccept = async () => {
+  const handleConfirmAccept = async (override = false) => {
     if (!application || !user) return;
 
     let dates: Date[] = [];
@@ -541,6 +542,18 @@ export default function VenueApplicationDetail() {
     }
 
     const isHold = dateMode !== 'single' || acceptType === 'hold';
+
+    if (!isHold && !override) {
+      const conflicts = await findConfirmedConflicts(
+        application.venue_listing_id,
+        dates.map(d => format(d, 'yyyy-MM-dd'))
+      );
+      if (conflicts.length > 0) {
+        setConflictMessage(describeConflicts(conflicts));
+        setConflictDialogOpen(true);
+        return;
+      }
+    }
 
     // For single date with hold, re-assign priorities for existing holds
     // based on the drag-and-drop order (excluding the new artist's slot).
