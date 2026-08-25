@@ -249,17 +249,24 @@ export default function VenueApplicationDetail() {
     if (data.status === 'accepted') {
       const { data: gigData } = await supabase
         .from('gig_listings')
-        .select('is_confirmed, hold_priority')
+        .select('id, gig_date, show_time, is_confirmed, hold_priority')
         .eq('application_id', data.id)
-        .order('hold_priority', { ascending: true })
-        .limit(1);
+        .order('gig_date', { ascending: true });
       if (gigData && gigData.length > 0) {
-        setGigStatus(gigData[0].is_confirmed ? 'confirmed' : 'hold');
+        const confirmed = gigData.some(g => g.is_confirmed);
+        setGigStatus(confirmed ? 'confirmed' : 'hold');
+        setHoldGigs(
+          gigData
+            .filter(g => !g.is_confirmed)
+            .map(g => ({ id: g.id, gig_date: g.gig_date, show_time: g.show_time }))
+        );
       } else {
         setGigStatus(null);
+        setHoldGigs([]);
       }
     } else {
       setGigStatus(null);
+      setHoldGigs([]);
     }
 
     // Check if this application is favorited
