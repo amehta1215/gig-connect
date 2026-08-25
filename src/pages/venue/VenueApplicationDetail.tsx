@@ -435,6 +435,14 @@ export default function VenueApplicationDetail() {
     setGigStatus(null);
   };
 
+  useEffect(() => {
+    if (!confirmHoldOpen) return;
+    const roomName = venueListing?.room_name || venueListing?.venue_name || 'our venue';
+    const gig = holdGigs.find(g => g.id === confirmHoldGigId);
+    const dateStr = gig ? format(parseLocalDate(gig.gig_date), 'MMM d, yyyy') : '';
+    setConfirmHoldMessage(`Great news — your hold for ${roomName}${dateStr ? ` on ${dateStr}` : ''} is now confirmed!\n\nWe'll be in touch with more details soon.`);
+  }, [confirmHoldOpen, confirmHoldGigId, holdGigs, venueListing]);
+
   const handleConfirmHoldClick = () => {
     if (holdGigs.length === 0) return;
     setConfirmHoldGigId(holdGigs[0].id);
