@@ -1090,7 +1090,7 @@ export default function VenueApplicationDetail() {
                 Cancel
               </Button>
               <Button
-                onClick={handleConfirmAccept}
+                onClick={() => handleConfirmAccept()}
                 disabled={
                   dateMode === 'single' ? !selectedGigDate
                     : dateMode === 'range' ? !(selectedDateRange?.from && selectedDateRange?.to)
