@@ -459,7 +459,10 @@ export default function VenueApplicationDetail() {
     }
 
     if (!override) {
-      const conflicts = await findConfirmedConflicts(application.venue_listing_id, [gig.gig_date]);
+      const conflicts = mergeConflicts(
+        await findConfirmedConflicts(application.venue_listing_id, [gig.gig_date], gig.id),
+        await findArtistDateConflicts(application.artist_id, [gig.gig_date], gig.id)
+      );
       if (conflicts.length > 0) {
         setConflictMessage(describeConflicts(conflicts));
         setConflictAction('confirm_hold');
