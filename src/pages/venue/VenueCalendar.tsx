@@ -426,8 +426,21 @@ export default function VenueCalendar() {
     setConfirmShowTime('');
     setConfirmDialogOpen(true);
   };
-  const handleConfirmHold = async () => {
+  const handleConfirmHold = async (override = false) => {
     if (!holdToConfirm || !user) return;
+    if (!override) {
+      const conflicts = await findConfirmedConflicts(
+        holdToConfirm.venueListingId,
+        [holdToConfirm.gigDate],
+        holdToConfirm.gigId
+      );
+      if (conflicts.length > 0) {
+        setConflictMessage(describeConflicts(conflicts));
+        setConflictAction(() => () => handleConfirmHold(true));
+        setConflictDialogOpen(true);
+        return;
+      }
+    }
     setConfirmingHold(true);
     const {
       gigId,
@@ -1060,7 +1073,7 @@ export default function VenueCalendar() {
             <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleConfirmHold} disabled={confirmingHold} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={() => handleConfirmHold()} disabled={confirmingHold} className="bg-green-600 hover:bg-green-700">
               <CheckCircle2 className="h-4 w-4 mr-1" />
               {confirmingHold ? 'Confirming...' : 'Confirm Gig'}
             </Button>
@@ -1413,5 +1426,28 @@ export default function VenueCalendar() {
           }
         }}
       />
+
+      <AlertDialog open={conflictDialogOpen} onOpenChange={setConflictDialogOpen}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-xl text-yellow-500">POSSIBLE DOUBLE BOOKING</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {conflictMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="font-display tracking-widest">CANCEL</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConflictDialogOpen(false);
+                conflictAction?.();
+              }}
+              className="font-display tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              CONFIRM ANYWAY
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }
