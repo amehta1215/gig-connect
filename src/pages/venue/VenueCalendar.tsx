@@ -20,7 +20,7 @@ import { toast } from 'sonner';
 import AutoMessageDialog from '@/components/AutoMessageDialog';
 import { sendVenueArtistMessage } from '@/lib/messaging';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
-import { findConfirmedConflicts, describeConflicts } from '@/lib/bookingConflicts';
+import { findConfirmedConflicts, findArtistDateConflicts, mergeConflicts, describeConflicts } from '@/lib/bookingConflicts';
 interface GigListing {
   id: string;
   gig_date: string;
@@ -429,10 +429,15 @@ export default function VenueCalendar() {
   const handleConfirmHold = async (override = false) => {
     if (!holdToConfirm || !user) return;
     if (!override) {
-      const conflicts = await findConfirmedConflicts(
-        holdToConfirm.venueListingId,
-        [holdToConfirm.gigDate],
-        holdToConfirm.gigId
+      const conflicts = mergeConflicts(
+        await findConfirmedConflicts(
+          holdToConfirm.venueListingId,
+          [holdToConfirm.gigDate],
+          holdToConfirm.gigId
+        ),
+        holdToConfirm.artistId
+          ? await findArtistDateConflicts(holdToConfirm.artistId, [holdToConfirm.gigDate], holdToConfirm.gigId)
+          : []
       );
       if (conflicts.length > 0) {
         setConflictMessage(describeConflicts(conflicts));
