@@ -20,7 +20,7 @@ import { toast } from 'sonner';
 import AutoMessageDialog from '@/components/AutoMessageDialog';
 import { sendVenueArtistMessage } from '@/lib/messaging';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
-import { findConfirmedConflicts, describeConflicts } from '@/lib/bookingConflicts';
+import { findConfirmedConflicts, findArtistDateConflicts, mergeConflicts, describeConflicts } from '@/lib/bookingConflicts';
 interface GigListing {
   id: string;
   gig_date: string;
