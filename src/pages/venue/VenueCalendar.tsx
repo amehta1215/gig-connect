@@ -19,6 +19,8 @@ import { format, startOfDay, addDays, addMonths } from 'date-fns';
 import { toast } from 'sonner';
 import AutoMessageDialog from '@/components/AutoMessageDialog';
 import { sendVenueArtistMessage } from '@/lib/messaging';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
+import { findConfirmedConflicts, describeConflicts } from '@/lib/bookingConflicts';
 interface GigListing {
   id: string;
   gig_date: string;
@@ -104,6 +106,11 @@ export default function VenueCalendar() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [holdToDelete, setHoldToDelete] = useState<{ gigId: string; applicationId: string | null; artistId: string; artistName: string; gigDate: string; venueListingId: string } | null>(null);
   const [deletingHold, setDeletingHold] = useState(false);
+
+  // Double-booking warning dialog state
+  const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
+  const [conflictMessage, setConflictMessage] = useState('');
+  const [conflictAction, setConflictAction] = useState<(() => void) | null>(null);
 
   // Confirm hold dialog state
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -336,7 +343,7 @@ export default function VenueCalendar() {
     }
     setCreateDialogOpen(true);
   };
-  const handleCreateEvent = async () => {
+  const handleCreateEvent = async (override = false) => {
     if (!eventDate || !selectedListingId) {
       toast.error('Please select a date and room');
       return;
@@ -344,6 +351,15 @@ export default function VenueCalendar() {
     if (!eventArtistName.trim()) {
       toast.error('Please enter an artist name');
       return;
+    }
+    if (eventStatus === 'confirmed' && !override) {
+      const conflicts = await findConfirmedConflicts(selectedListingId, [format(eventDate, 'yyyy-MM-dd')]);
+      if (conflicts.length > 0) {
+        setConflictMessage(describeConflicts(conflicts));
+        setConflictAction(() => () => handleCreateEvent(true));
+        setConflictDialogOpen(true);
+        return;
+      }
     }
     setCreating(true);
 
@@ -410,8 +426,21 @@ export default function VenueCalendar() {
     setConfirmShowTime('');
     setConfirmDialogOpen(true);
   };
-  const handleConfirmHold = async () => {
+  const handleConfirmHold = async (override = false) => {
     if (!holdToConfirm || !user) return;
+    if (!override) {
+      const conflicts = await findConfirmedConflicts(
+        holdToConfirm.venueListingId,
+        [holdToConfirm.gigDate],
+        holdToConfirm.gigId
+      );
+      if (conflicts.length > 0) {
+        setConflictMessage(describeConflicts(conflicts));
+        setConflictAction(() => () => handleConfirmHold(true));
+        setConflictDialogOpen(true);
+        return;
+      }
+    }
     setConfirmingHold(true);
     const {
       gigId,
@@ -995,7 +1024,7 @@ export default function VenueCalendar() {
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateEvent} disabled={creating || !eventDate || !selectedListingId || !eventArtistName.trim()} className="bg-primary hover:bg-primary/90">
+            <Button onClick={() => handleCreateEvent()} disabled={creating || !eventDate || !selectedListingId || !eventArtistName.trim()} className="bg-primary hover:bg-primary/90">
               {creating ? 'Creating...' : 'Create Event'}
             </Button>
           </div>
@@ -1044,7 +1073,7 @@ export default function VenueCalendar() {
             <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleConfirmHold} disabled={confirmingHold} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={() => handleConfirmHold()} disabled={confirmingHold} className="bg-green-600 hover:bg-green-700">
               <CheckCircle2 className="h-4 w-4 mr-1" />
               {confirmingHold ? 'Confirming...' : 'Confirm Gig'}
             </Button>
@@ -1397,5 +1426,28 @@ export default function VenueCalendar() {
           }
         }}
       />
+
+      <AlertDialog open={conflictDialogOpen} onOpenChange={setConflictDialogOpen}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-xl text-yellow-500">POSSIBLE DOUBLE BOOKING</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {conflictMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="font-display tracking-widest">CANCEL</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConflictDialogOpen(false);
+                conflictAction?.();
+              }}
+              className="font-display tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              CONFIRM ANYWAY
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }

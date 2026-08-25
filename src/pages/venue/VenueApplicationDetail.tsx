@@ -20,6 +20,7 @@ import HoldsOrderList from '@/components/HoldsOrderList';
 import AutoMessageDialog from '@/components/AutoMessageDialog';
 import { sendVenueArtistMessage } from '@/lib/messaging';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
+import { findConfirmedConflicts, describeConflicts } from '@/lib/bookingConflicts';
 interface ArtistProfile {
   band_name: string | null;
   genre: string | null;
@@ -128,6 +129,8 @@ export default function VenueApplicationDetail() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
+  const [conflictMessage, setConflictMessage] = useState('');
   const [gigStatus, setGigStatus] = useState<'confirmed' | 'hold' | null>(null);
 
   // Accept dialog state
@@ -510,7 +513,7 @@ export default function VenueApplicationDetail() {
       setHoldPriority(1);
     }
   };
-  const handleConfirmAccept = async () => {
+  const handleConfirmAccept = async (override = false) => {
     if (!application || !user) return;
 
     let dates: Date[] = [];
@@ -541,6 +544,18 @@ export default function VenueApplicationDetail() {
     }
 
     const isHold = dateMode !== 'single' || acceptType === 'hold';
+
+    if (!isHold && !override) {
+      const conflicts = await findConfirmedConflicts(
+        application.venue_listing_id,
+        dates.map(d => format(d, 'yyyy-MM-dd'))
+      );
+      if (conflicts.length > 0) {
+        setConflictMessage(describeConflicts(conflicts));
+        setConflictDialogOpen(true);
+        return;
+      }
+    }
 
     // For single date with hold, re-assign priorities for existing holds
     // based on the drag-and-drop order (excluding the new artist's slot).
@@ -1075,7 +1090,7 @@ export default function VenueApplicationDetail() {
                 Cancel
               </Button>
               <Button
-                onClick={handleConfirmAccept}
+                onClick={() => handleConfirmAccept()}
                 disabled={
                   dateMode === 'single' ? !selectedGigDate
                     : dateMode === 'range' ? !(selectedDateRange?.from && selectedDateRange?.to)
@@ -1122,6 +1137,29 @@ export default function VenueApplicationDetail() {
             <AlertDialogCancel className="font-display tracking-widest">CANCEL</AlertDialogCancel>
             <AlertDialogAction onClick={blockArtist} className="font-display tracking-widest bg-destructive hover:bg-destructive/90 text-destructive-foreground">
               BLOCK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={conflictDialogOpen} onOpenChange={setConflictDialogOpen}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-xl text-yellow-500">POSSIBLE DOUBLE BOOKING</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {conflictMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="font-display tracking-widest">CANCEL</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConflictDialogOpen(false);
+                handleConfirmAccept(true);
+              }}
+              className="font-display tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              CONFIRM ANYWAY
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
