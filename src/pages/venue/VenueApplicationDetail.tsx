@@ -131,7 +131,16 @@ export default function VenueApplicationDetail() {
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
   const [conflictMessage, setConflictMessage] = useState('');
+  const [conflictAction, setConflictAction] = useState<'accept' | 'confirm_hold'>('accept');
   const [gigStatus, setGigStatus] = useState<'confirmed' | 'hold' | null>(null);
+
+  // Promote hold → confirmed
+  const [holdGigs, setHoldGigs] = useState<{ id: string; gig_date: string; show_time: string | null }[]>([]);
+  const [confirmHoldOpen, setConfirmHoldOpen] = useState(false);
+  const [confirmHoldGigId, setConfirmHoldGigId] = useState<string>('');
+  const [confirmHoldSending, setConfirmHoldSending] = useState(false);
+  const [confirmHoldSendMessage, setConfirmHoldSendMessage] = useState(true);
+  const [confirmHoldMessage, setConfirmHoldMessage] = useState('');
 
   // Accept dialog state
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
@@ -240,17 +249,24 @@ export default function VenueApplicationDetail() {
     if (data.status === 'accepted') {
       const { data: gigData } = await supabase
         .from('gig_listings')
-        .select('is_confirmed, hold_priority')
+        .select('id, gig_date, show_time, is_confirmed, hold_priority')
         .eq('application_id', data.id)
-        .order('hold_priority', { ascending: true })
-        .limit(1);
+        .order('gig_date', { ascending: true });
       if (gigData && gigData.length > 0) {
-        setGigStatus(gigData[0].is_confirmed ? 'confirmed' : 'hold');
+        const confirmed = gigData.some(g => g.is_confirmed);
+        setGigStatus(confirmed ? 'confirmed' : 'hold');
+        setHoldGigs(
+          gigData
+            .filter(g => !g.is_confirmed)
+            .map(g => ({ id: g.id, gig_date: g.gig_date, show_time: g.show_time }))
+        );
       } else {
         setGigStatus(null);
+        setHoldGigs([]);
       }
     } else {
       setGigStatus(null);
+      setHoldGigs([]);
     }
 
     // Check if this application is favorited
@@ -417,6 +433,73 @@ export default function VenueApplicationDetail() {
     setRescindNotifyOpen(false);
     setApplication({ ...application, status: 'in_progress' });
     setGigStatus(null);
+  };
+
+  useEffect(() => {
+    if (!confirmHoldOpen) return;
+    const roomName = venueListing?.room_name || venueListing?.venue_name || 'our venue';
+    const gig = holdGigs.find(g => g.id === confirmHoldGigId);
+    const dateStr = gig ? format(parseLocalDate(gig.gig_date), 'MMM d, yyyy') : '';
+    setConfirmHoldMessage(`Great news — your hold for ${roomName}${dateStr ? ` on ${dateStr}` : ''} is now confirmed!\n\nWe'll be in touch with more details soon.`);
+  }, [confirmHoldOpen, confirmHoldGigId, holdGigs, venueListing]);
+
+  const handleConfirmHoldClick = () => {
+    if (holdGigs.length === 0) return;
+    setConfirmHoldGigId(holdGigs[0].id);
+    setConfirmHoldSendMessage(true);
+    setConfirmHoldOpen(true);
+  };
+
+  const performConfirmHold = async (override = false) => {
+    if (!application || !user) return;
+    const gig = holdGigs.find(g => g.id === confirmHoldGigId);
+    if (!gig) {
+      toast.error('Please select a date to confirm');
+      return;
+    }
+
+    if (!override) {
+      const conflicts = await findConfirmedConflicts(application.venue_listing_id, [gig.gig_date]);
+      if (conflicts.length > 0) {
+        setConflictMessage(describeConflicts(conflicts));
+        setConflictAction('confirm_hold');
+        setConflictDialogOpen(true);
+        return;
+      }
+    }
+
+    setConfirmHoldSending(true);
+
+    const { error } = await supabase
+      .from('gig_listings')
+      .update({ is_confirmed: true, hold_priority: null })
+      .eq('id', gig.id);
+    if (error) {
+      toast.error('Failed to confirm gig');
+      setConfirmHoldSending(false);
+      return;
+    }
+
+    // Remove this application's other hold dates
+    const otherIds = holdGigs.filter(g => g.id !== gig.id).map(g => g.id);
+    if (otherIds.length > 0) {
+      await supabase.from('gig_listings').delete().in('id', otherIds);
+    }
+
+    if (confirmHoldSendMessage && confirmHoldMessage.trim()) {
+      await sendVenueArtistMessage({
+        senderId: user.id,
+        receiverId: application.artist_id,
+        subject: `Booking Confirmed: ${venueListing?.room_name || venueListing?.venue_name || 'Venue'}`,
+        content: confirmHoldMessage,
+      });
+    }
+
+    setConfirmHoldSending(false);
+    setConfirmHoldOpen(false);
+    setGigStatus('confirmed');
+    setHoldGigs([]);
+    toast.success(`Gig confirmed for ${format(parseLocalDate(gig.gig_date), 'MMM d, yyyy')}`);
   };
 
   const fetchExistingHolds = useCallback(async (date: Date) => {
@@ -761,6 +844,9 @@ export default function VenueApplicationDetail() {
                 Archive
               </Button>
             </>}
+          {application.status === 'accepted' && gigStatus === 'hold' && holdGigs.length > 0 && <Button size="sm" onClick={handleConfirmHoldClick} className="bg-primary text-primary-foreground hover:bg-primary/90">
+              Confirm Gig
+            </Button>}
           {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
               {gigStatus === 'hold' ? 'Rescind Hold' : 'Rescind Acceptance'}
             </Button>}
@@ -1155,7 +1241,11 @@ export default function VenueApplicationDetail() {
             <AlertDialogAction
               onClick={() => {
                 setConflictDialogOpen(false);
-                handleConfirmAccept(true);
+                if (conflictAction === 'confirm_hold') {
+                  performConfirmHold(true);
+                } else {
+                  handleConfirmAccept(true);
+                }
               }}
               className="font-display tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground"
             >
@@ -1164,5 +1254,53 @@ export default function VenueApplicationDetail() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Confirm hold → gig */}
+      <Dialog open={confirmHoldOpen} onOpenChange={setConfirmHoldOpen}>
+        <DialogContent className="bg-card border-border sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl tracking-wide">
+              CONFIRM GIG FOR {bandName?.toUpperCase()}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <label className="font-display text-xs text-muted-foreground tracking-widest block">DATE TO CONFIRM</label>
+              <RadioGroup value={confirmHoldGigId} onValueChange={setConfirmHoldGigId}>
+                {holdGigs.map(g => (
+                  <div key={g.id} className="flex items-center space-x-2">
+                    <RadioGroupItem value={g.id} id={`hold-${g.id}`} />
+                    <Label htmlFor={`hold-${g.id}`} className="cursor-pointer text-sm">
+                      {format(parseLocalDate(g.gig_date), 'EEE, MMM d, yyyy')}
+                      {g.show_time ? ` · ${g.show_time}` : ''}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+              {holdGigs.length > 1 && (
+                <p className="text-xs text-muted-foreground">The other held dates will be released.</p>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="font-display text-xs text-muted-foreground tracking-widest">MESSAGE TO ARTIST</label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={confirmHoldSendMessage} onChange={e => setConfirmHoldSendMessage(e.target.checked)} className="rounded border-border" />
+                  Send message
+                </label>
+              </div>
+              <Textarea value={confirmHoldMessage} onChange={e => setConfirmHoldMessage(e.target.value)} disabled={!confirmHoldSendMessage} className="min-h-[100px] text-sm" />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setConfirmHoldOpen(false)}>Cancel</Button>
+              <Button onClick={() => performConfirmHold()} disabled={!confirmHoldGigId || confirmHoldSending} className="bg-primary hover:bg-primary/90">
+                {confirmHoldSending ? 'Confirming...' : 'Confirm Gig'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 }
