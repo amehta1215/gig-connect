@@ -435,6 +435,65 @@ export default function VenueApplicationDetail() {
     setGigStatus(null);
   };
 
+  const handleConfirmHoldClick = () => {
+    if (holdGigs.length === 0) return;
+    setConfirmHoldGigId(holdGigs[0].id);
+    setConfirmHoldSendMessage(true);
+    setConfirmHoldOpen(true);
+  };
+
+  const performConfirmHold = async (override = false) => {
+    if (!application || !user) return;
+    const gig = holdGigs.find(g => g.id === confirmHoldGigId);
+    if (!gig) {
+      toast.error('Please select a date to confirm');
+      return;
+    }
+
+    if (!override) {
+      const conflicts = await findConfirmedConflicts(application.venue_listing_id, [gig.gig_date]);
+      if (conflicts.length > 0) {
+        setConflictMessage(describeConflicts(conflicts));
+        setConflictAction('confirm_hold');
+        setConflictDialogOpen(true);
+        return;
+      }
+    }
+
+    setConfirmHoldSending(true);
+
+    const { error } = await supabase
+      .from('gig_listings')
+      .update({ is_confirmed: true, hold_priority: null })
+      .eq('id', gig.id);
+    if (error) {
+      toast.error('Failed to confirm gig');
+      setConfirmHoldSending(false);
+      return;
+    }
+
+    // Remove this application's other hold dates
+    const otherIds = holdGigs.filter(g => g.id !== gig.id).map(g => g.id);
+    if (otherIds.length > 0) {
+      await supabase.from('gig_listings').delete().in('id', otherIds);
+    }
+
+    if (confirmHoldSendMessage && confirmHoldMessage.trim()) {
+      await sendVenueArtistMessage({
+        senderId: user.id,
+        receiverId: application.artist_id,
+        subject: `Booking Confirmed: ${venueListing?.room_name || venueListing?.venue_name || 'Venue'}`,
+        content: confirmHoldMessage,
+      });
+    }
+
+    setConfirmHoldSending(false);
+    setConfirmHoldOpen(false);
+    setGigStatus('confirmed');
+    setHoldGigs([]);
+    toast.success(`Gig confirmed for ${format(parseLocalDate(gig.gig_date), 'MMM d, yyyy')}`);
+  };
+
   const fetchExistingHolds = useCallback(async (date: Date) => {
     if (!application?.venue_listing_id) return;
     const dateStr = format(date, 'yyyy-MM-dd');
