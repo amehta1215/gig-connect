@@ -438,6 +438,11 @@ export default function VenueCalendar() {
           [holdToConfirm.gigDate],
           holdToConfirm.gigId
         ),
+        await findVenueDateConflicts(
+          holdToConfirm.venueListingId,
+          [holdToConfirm.gigDate],
+          holdToConfirm.gigId
+        ),
         holdToConfirm.artistId
           ? await findArtistDateConflicts(holdToConfirm.artistId, [holdToConfirm.gigDate], holdToConfirm.gigId)
           : []
