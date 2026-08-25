@@ -1141,5 +1141,28 @@ export default function VenueApplicationDetail() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={conflictDialogOpen} onOpenChange={setConflictDialogOpen}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-xl text-yellow-500">POSSIBLE DOUBLE BOOKING</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {conflictMessage}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="font-display tracking-widest">CANCEL</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConflictDialogOpen(false);
+                handleConfirmAccept(true);
+              }}
+              className="font-display tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              CONFIRM ANYWAY
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }
