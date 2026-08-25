@@ -429,10 +429,15 @@ export default function VenueCalendar() {
   const handleConfirmHold = async (override = false) => {
     if (!holdToConfirm || !user) return;
     if (!override) {
-      const conflicts = await findConfirmedConflicts(
-        holdToConfirm.venueListingId,
-        [holdToConfirm.gigDate],
-        holdToConfirm.gigId
+      const conflicts = mergeConflicts(
+        await findConfirmedConflicts(
+          holdToConfirm.venueListingId,
+          [holdToConfirm.gigDate],
+          holdToConfirm.gigId
+        ),
+        holdToConfirm.artistId
+          ? await findArtistDateConflicts(holdToConfirm.artistId, [holdToConfirm.gigDate], holdToConfirm.gigId)
+          : []
       );
       if (conflicts.length > 0) {
         setConflictMessage(describeConflicts(conflicts));
