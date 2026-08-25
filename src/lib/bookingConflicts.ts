@@ -142,3 +142,64 @@ export function describeConflicts(conflicts: BookingConflict[]): string {
   if (conflicts.length === 0) return '';
   return `You already have ${conflicts.map(describeConflict).join('; ')}. Confirm this booking anyway?`;
 }
+
+/**
+ * Finds confirmed gigs across EVERY room of the same venue on the given dates.
+ * Warns venues when they already booked someone that night, even in another room.
+ */
+export async function findVenueDateConflicts(
+  venueListingId: string,
+  dateStrs: string[],
+  excludeGigId?: string
+): Promise<BookingConflict[]> {
+  if (!venueListingId || dateStrs.length === 0) return [];
+
+  const { data: listing } = await supabase
+    .from('venue_listings')
+    .select('venue_profile_id')
+    .eq('id', venueListingId)
+    .maybeSingle();
+  if (!listing?.venue_profile_id) return [];
+
+  const { data: siblings } = await supabase
+    .from('venue_listings')
+    .select('id, venue_name, room_name')
+    .eq('venue_profile_id', listing.venue_profile_id);
+  if (!siblings || siblings.length === 0) return [];
+
+  const roomById = new Map(
+    siblings.map(l => [l.id, l.room_name || l.venue_name || 'another room'])
+  );
+
+  let query = supabase
+    .from('gig_listings')
+    .select('id, gig_date, show_time, artist_id, manual_artist_name, venue_listing_id')
+    .in('venue_listing_id', siblings.map(l => l.id))
+    .eq('is_confirmed', true)
+    .in('gig_date', dateStrs);
+  if (excludeGigId) query = query.neq('id', excludeGigId);
+
+  const { data: rows } = await query;
+  if (!rows || rows.length === 0) return [];
+
+  const artistIds = Array.from(
+    new Set(rows.filter(r => !r.manual_artist_name).map(r => r.artist_id))
+  );
+  const nameById = new Map<string, string>();
+  if (artistIds.length > 0) {
+    const [{ data: artistProfiles }, { data: profiles }] = await Promise.all([
+      supabase.from('artist_profiles').select('user_id, band_name').in('user_id', artistIds),
+      supabase.from('profiles').select('id, first_name, last_name').in('id', artistIds),
+    ]);
+    for (const p of profiles || []) nameById.set(p.id, `${p.first_name} ${p.last_name}`.trim());
+    for (const a of artistProfiles || []) if (a.band_name) nameById.set(a.user_id, a.band_name);
+  }
+
+  return rows.map(r => ({
+    id: r.id,
+    gigDate: r.gig_date,
+    showTime: r.show_time,
+    artistName: r.manual_artist_name || nameById.get(r.artist_id) || 'another artist',
+    roomName: roomById.get(r.venue_listing_id) || 'another room',
+  }));
+}
