@@ -1024,7 +1024,7 @@ export default function VenueCalendar() {
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateEvent} disabled={creating || !eventDate || !selectedListingId || !eventArtistName.trim()} className="bg-primary hover:bg-primary/90">
+            <Button onClick={() => handleCreateEvent()} disabled={creating || !eventDate || !selectedListingId || !eventArtistName.trim()} className="bg-primary hover:bg-primary/90">
               {creating ? 'Creating...' : 'Create Event'}
             </Button>
           </div>
