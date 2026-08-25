@@ -20,7 +20,7 @@ import HoldsOrderList from '@/components/HoldsOrderList';
 import AutoMessageDialog from '@/components/AutoMessageDialog';
 import { sendVenueArtistMessage } from '@/lib/messaging';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
-import { findConfirmedConflicts, findArtistDateConflicts, mergeConflicts, describeConflicts } from '@/lib/bookingConflicts';
+import { findConfirmedConflicts, findArtistDateConflicts, findVenueDateConflicts, mergeConflicts, describeConflicts } from '@/lib/bookingConflicts';
 interface ArtistProfile {
   band_name: string | null;
   genre: string | null;
@@ -461,6 +461,7 @@ export default function VenueApplicationDetail() {
     if (!override) {
       const conflicts = mergeConflicts(
         await findConfirmedConflicts(application.venue_listing_id, [gig.gig_date], gig.id),
+        await findVenueDateConflicts(application.venue_listing_id, [gig.gig_date], gig.id),
         await findArtistDateConflicts(application.artist_id, [gig.gig_date], gig.id)
       );
       if (conflicts.length > 0) {
@@ -631,10 +632,11 @@ export default function VenueApplicationDetail() {
 
     const isHold = dateMode !== 'single' || acceptType === 'hold';
 
-    if (!isHold && !override) {
+    if (!override) {
       const dateStrs = dates.map(d => format(d, 'yyyy-MM-dd'));
       const conflicts = mergeConflicts(
         await findConfirmedConflicts(application.venue_listing_id, dateStrs),
+        await findVenueDateConflicts(application.venue_listing_id, dateStrs),
         await findArtistDateConflicts(application.artist_id, dateStrs)
       );
       if (conflicts.length > 0) {
