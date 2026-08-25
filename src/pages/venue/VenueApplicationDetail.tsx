@@ -1241,7 +1241,11 @@ export default function VenueApplicationDetail() {
             <AlertDialogAction
               onClick={() => {
                 setConflictDialogOpen(false);
-                handleConfirmAccept(true);
+                if (conflictAction === 'confirm_hold') {
+                  performConfirmHold(true);
+                } else {
+                  handleConfirmAccept(true);
+                }
               }}
               className="font-display tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground"
             >
@@ -1250,5 +1254,53 @@ export default function VenueApplicationDetail() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Confirm hold → gig */}
+      <Dialog open={confirmHoldOpen} onOpenChange={setConfirmHoldOpen}>
+        <DialogContent className="bg-card border-border sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl tracking-wide">
+              CONFIRM GIG FOR {bandName?.toUpperCase()}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <label className="font-display text-xs text-muted-foreground tracking-widest block">DATE TO CONFIRM</label>
+              <RadioGroup value={confirmHoldGigId} onValueChange={setConfirmHoldGigId}>
+                {holdGigs.map(g => (
+                  <div key={g.id} className="flex items-center space-x-2">
+                    <RadioGroupItem value={g.id} id={`hold-${g.id}`} />
+                    <Label htmlFor={`hold-${g.id}`} className="cursor-pointer text-sm">
+                      {format(parseLocalDate(g.gig_date), 'EEE, MMM d, yyyy')}
+                      {g.show_time ? ` · ${g.show_time}` : ''}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+              {holdGigs.length > 1 && (
+                <p className="text-xs text-muted-foreground">The other held dates will be released.</p>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="font-display text-xs text-muted-foreground tracking-widest">MESSAGE TO ARTIST</label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={confirmHoldSendMessage} onChange={e => setConfirmHoldSendMessage(e.target.checked)} className="rounded border-border" />
+                  Send message
+                </label>
+              </div>
+              <Textarea value={confirmHoldMessage} onChange={e => setConfirmHoldMessage(e.target.value)} disabled={!confirmHoldSendMessage} className="min-h-[100px] text-sm" />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setConfirmHoldOpen(false)}>Cancel</Button>
+              <Button onClick={() => performConfirmHold()} disabled={!confirmHoldGigId || confirmHoldSending} className="bg-primary hover:bg-primary/90">
+                {confirmHoldSending ? 'Confirming...' : 'Confirm Gig'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 }
