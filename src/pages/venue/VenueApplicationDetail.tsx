@@ -129,6 +129,8 @@ export default function VenueApplicationDetail() {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
+  const [conflictMessage, setConflictMessage] = useState('');
   const [gigStatus, setGigStatus] = useState<'confirmed' | 'hold' | null>(null);
 
   // Accept dialog state
