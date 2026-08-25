@@ -131,7 +131,16 @@ export default function VenueApplicationDetail() {
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
   const [conflictMessage, setConflictMessage] = useState('');
+  const [conflictAction, setConflictAction] = useState<'accept' | 'confirm_hold'>('accept');
   const [gigStatus, setGigStatus] = useState<'confirmed' | 'hold' | null>(null);
+
+  // Promote hold → confirmed
+  const [holdGigs, setHoldGigs] = useState<{ id: string; gig_date: string; show_time: string | null }[]>([]);
+  const [confirmHoldOpen, setConfirmHoldOpen] = useState(false);
+  const [confirmHoldGigId, setConfirmHoldGigId] = useState<string>('');
+  const [confirmHoldSending, setConfirmHoldSending] = useState(false);
+  const [confirmHoldSendMessage, setConfirmHoldSendMessage] = useState(true);
+  const [confirmHoldMessage, setConfirmHoldMessage] = useState('');
 
   // Accept dialog state
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
