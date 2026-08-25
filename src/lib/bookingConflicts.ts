@@ -67,6 +67,71 @@ export async function findConfirmedConflicts(
   }));
 }
 
+/**
+ * Finds confirmed gigs for the SAME artist on the given dates (any room),
+ * so venues get warned about confirming the same act twice on one night.
+ */
+export async function findArtistDateConflicts(
+  artistId: string,
+  dateStrs: string[],
+  excludeGigId?: string
+): Promise<BookingConflict[]> {
+  if (!artistId || dateStrs.length === 0) return [];
+
+  let query = supabase
+    .from('gig_listings')
+    .select('id, gig_date, show_time, venue_listing_id')
+    .eq('artist_id', artistId)
+    .eq('is_confirmed', true)
+    .in('gig_date', dateStrs);
+
+  if (excludeGigId) query = query.neq('id', excludeGigId);
+
+  const { data: rows } = await query;
+  if (!rows || rows.length === 0) return [];
+
+  const listingIds = Array.from(new Set(rows.map(r => r.venue_listing_id)));
+  const { data: listings } = await supabase
+    .from('venue_listings')
+    .select('id, venue_name, room_name')
+    .in('id', listingIds);
+  const roomById = new Map(
+    (listings || []).map(l => [l.id, l.room_name || l.venue_name || 'another room'])
+  );
+
+  let artistName = 'this artist';
+  const { data: ap } = await supabase
+    .from('artist_profiles')
+    .select('band_name')
+    .eq('user_id', artistId)
+    .maybeSingle();
+  if (ap?.band_name) {
+    artistName = ap.band_name;
+  } else {
+    const { data: p } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('id', artistId)
+      .maybeSingle();
+    if (p) artistName = `${p.first_name} ${p.last_name}`.trim();
+  }
+
+  return rows.map(r => ({
+    id: r.id,
+    gigDate: r.gig_date,
+    showTime: r.show_time,
+    artistName,
+    roomName: roomById.get(r.venue_listing_id) || 'another room',
+  }));
+}
+
+/** Merges conflict lists, removing duplicate gig rows. */
+export function mergeConflicts(...lists: BookingConflict[][]): BookingConflict[] {
+  const byId = new Map<string, BookingConflict>();
+  for (const list of lists) for (const c of list) byId.set(c.id, c);
+  return Array.from(byId.values());
+}
+
 export function describeConflict(c: BookingConflict): string {
   const dateText = format(parseLocalDate(c.gigDate), 'MMMM d, yyyy');
   const timeText = c.showTime ? ` at ${c.showTime.slice(0, 5)}` : '';
