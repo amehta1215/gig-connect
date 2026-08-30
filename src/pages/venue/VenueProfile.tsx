@@ -595,7 +595,43 @@ export default function VenueProfile() {
           </div>
         </div>
 
+        {/* Shareable Link */}
+        <div className="space-y-2 pt-2 border-t border-border">
+          <Label className="block">Shareable Link</Label>
+          {!editingSlug ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <code className="text-sm bg-secondary px-3 py-2 rounded break-all">{shareUrl}</code>
+              <Button type="button" variant="outline" size="sm" onClick={copyShareLink} className="font-display tracking-widest">
+                <Copy className="h-4 w-4 mr-1" /> COPY LINK
+              </Button>
+              <Button type="button" variant="ghost" size="sm" onClick={() => { setSlugDraft(slug || ''); setSlugError(null); setEditingSlug(true); }}>
+                <Pencil className="h-4 w-4 mr-1" /> Edit
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-muted-foreground">{origin}/venues/</span>
+                <Input
+                  value={slugDraft}
+                  onChange={e => { setSlugDraft(sanitizeSlug(e.target.value)); setSlugError(null); }}
+                  placeholder="your-venue"
+                  className="max-w-xs"
+                />
+                <Button type="button" size="sm" onClick={saveSlug} disabled={savingSlug} className="font-display tracking-widest">
+                  {savingSlug ? 'SAVING...' : 'SAVE'}
+                </Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => { setEditingSlug(false); setSlugError(null); }}>
+                  Cancel
+                </Button>
+              </div>
+              {slugError && <p className="text-sm text-destructive">{slugError}</p>}
+            </div>
+          )}
+        </div>
+
       </div>
+
 
       {/* Event Types Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
