@@ -194,21 +194,6 @@ export default function VenueDetail() {
 
     setApplying(true);
 
-    // Blocked artists cannot apply to this venue
-    if (venueProfile?.user_id) {
-      const { data: blockData } = await supabase
-        .from('user_blocks')
-        .select('id')
-        .eq('blocker_id', venueProfile.user_id)
-        .eq('blocked_id', user.id)
-        .maybeSingle();
-      if (blockData) {
-        toast.error("You're unable to apply to this venue");
-        setApplying(false);
-        return;
-      }
-    }
-
     const { error } = await supabase.from('applications').insert({
       artist_id: user.id,
       venue_listing_id: selectedListing.id,
