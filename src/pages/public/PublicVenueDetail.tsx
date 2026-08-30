@@ -66,12 +66,13 @@ export default function PublicVenueDetail() {
 
   // Route authenticated artists to the artist venue detail page so they can apply.
   useEffect(() => {
-    if (!id || !profile) return;
+    if (!venueProfile?.id || !profile) return;
     const isArtist = profile.role === 'artist' || (profile.role === 'both' && activeRole === 'artist');
     if (isArtist) {
-      navigate(`/artist/venue/${id}`, { replace: true });
+      navigate(`/artist/venue/${venueProfile.id}`, { replace: true });
     }
-  }, [id, profile, activeRole, navigate]);
+  }, [venueProfile?.id, profile, activeRole, navigate]);
+
 
   const fetchData = async () => {
     setLoading(true);
