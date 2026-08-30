@@ -13,7 +13,7 @@ import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
 import { validateImageUpload } from '@/lib/uploadLimits';
-import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight, Copy } from 'lucide-react';
 import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
 import VenueProfilePreviewContent from '@/components/VenueProfilePreviewContent';
 interface VenueProfileData {
@@ -219,6 +219,7 @@ export default function VenueProfile() {
     } = await supabase.from('venue_profiles').select('*').eq('user_id', user.id).single();
     if (data && !error) {
       setProfile(data as VenueProfileData);
+      setSlug((data as any).slug || '');
       setFormData({
         venue_name: data.venue_name || '',
         location: data.location || '',
