@@ -13,7 +13,7 @@ import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
 import { validateImageUpload } from '@/lib/uploadLimits';
-import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight, Copy } from 'lucide-react';
 import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
 import VenueProfilePreviewContent from '@/components/VenueProfilePreviewContent';
 interface VenueProfileData {
@@ -111,6 +111,59 @@ export default function VenueProfile() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewData, setPreviewData] = useState<{ profile: any; listings: any[] } | null>(null);
 
+  // Shareable link (slug)
+  const [slug, setSlug] = useState<string>('');
+  const [editingSlug, setEditingSlug] = useState(false);
+  const [slugDraft, setSlugDraft] = useState('');
+  const [slugError, setSlugError] = useState<string | null>(null);
+  const [savingSlug, setSavingSlug] = useState(false);
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const shareUrl = `${origin}/venues/${slug}`;
+
+  const sanitizeSlug = (value: string) =>
+    value.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-');
+
+  const copyShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success('Link copied to clipboard');
+    } catch {
+      toast.error('Could not copy link');
+    }
+  };
+
+  const saveSlug = async () => {
+    if (!profile) return;
+    const value = sanitizeSlug(slugDraft).replace(/^-+|-+$/g, '');
+    if (value.length < 3) {
+      setSlugError('Link must be at least 3 characters');
+      return;
+    }
+    setSavingSlug(true);
+    setSlugError(null);
+    const { data: existing } = await supabase
+      .from('venue_profiles')
+      .select('id')
+      .eq('slug', value)
+      .neq('id', profile.id)
+      .maybeSingle();
+    if (existing) {
+      setSlugError('That link is already taken — try another');
+      setSavingSlug(false);
+      return;
+    }
+    const { error } = await supabase.from('venue_profiles').update({ slug: value } as any).eq('id', profile.id);
+    if (error) {
+      setSlugError('Could not save link. Try another.');
+    } else {
+      setSlug(value);
+      setEditingSlug(false);
+      toast.success('Shareable link updated');
+    }
+    setSavingSlug(false);
+  };
+
+
   const openPreview = async () => {
     if (!user) return;
     setPreviewOpen(true);
@@ -166,6 +219,7 @@ export default function VenueProfile() {
     } = await supabase.from('venue_profiles').select('*').eq('user_id', user.id).single();
     if (data && !error) {
       setProfile(data as VenueProfileData);
+      setSlug((data as any).slug || '');
       setFormData({
         venue_name: data.venue_name || '',
         location: data.location || '',
@@ -595,7 +649,43 @@ export default function VenueProfile() {
           </div>
         </div>
 
+        {/* Shareable Link */}
+        <div className="space-y-2 pt-2 border-t border-border">
+          <Label className="block">Shareable Link</Label>
+          {!editingSlug ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <code className="text-sm bg-secondary px-3 py-2 rounded break-all">{shareUrl}</code>
+              <Button type="button" variant="outline" size="sm" onClick={copyShareLink} className="font-display tracking-widest">
+                <Copy className="h-4 w-4 mr-1" /> COPY LINK
+              </Button>
+              <Button type="button" variant="ghost" size="sm" onClick={() => { setSlugDraft(slug || ''); setSlugError(null); setEditingSlug(true); }}>
+                <Pencil className="h-4 w-4 mr-1" /> Edit
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-muted-foreground">{origin}/venues/</span>
+                <Input
+                  value={slugDraft}
+                  onChange={e => { setSlugDraft(sanitizeSlug(e.target.value)); setSlugError(null); }}
+                  placeholder="your-venue"
+                  className="max-w-xs"
+                />
+                <Button type="button" size="sm" onClick={saveSlug} disabled={savingSlug} className="font-display tracking-widest">
+                  {savingSlug ? 'SAVING...' : 'SAVE'}
+                </Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => { setEditingSlug(false); setSlugError(null); }}>
+                  Cancel
+                </Button>
+              </div>
+              {slugError && <p className="text-sm text-destructive">{slugError}</p>}
+            </div>
+          )}
+        </div>
+
       </div>
+
 
       {/* Event Types Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">

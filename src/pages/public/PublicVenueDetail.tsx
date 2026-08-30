@@ -66,28 +66,44 @@ export default function PublicVenueDetail() {
 
   // Route authenticated artists to the artist venue detail page so they can apply.
   useEffect(() => {
-    if (!id || !profile) return;
+    if (!venueProfile?.id || !profile) return;
     const isArtist = profile.role === 'artist' || (profile.role === 'both' && activeRole === 'artist');
     if (isArtist) {
-      navigate(`/artist/venue/${id}`, { replace: true });
+      navigate(`/artist/venue/${venueProfile.id}`, { replace: true });
     }
-  }, [id, profile, activeRole, navigate]);
+  }, [venueProfile?.id, profile, activeRole, navigate]);
+
 
   const fetchData = async () => {
     setLoading(true);
-    const { data: listingsData } = await supabase
-      .from('venue_listings')
-      .select('*')
-      .eq('venue_profile_id', id);
-    if (listingsData) setListings(listingsData as VenueListing[]);
-    const { data: profileData } = await supabase
+    // Resolve by slug first, then fall back to raw id (legacy UUID links).
+    let { data: profileData } = await supabase
       .from('venue_profiles')
       .select('id, picture, pictures, genres, bio')
-      .eq('id', id)
+      .eq('slug', id!)
       .maybeSingle();
-    if (profileData) setVenueProfile(profileData as VenueProfile);
+    if (!profileData) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
+      if (isUuid) {
+        const fallback = await supabase
+          .from('venue_profiles')
+          .select('id, picture, pictures, genres, bio')
+          .eq('id', id!)
+          .maybeSingle();
+        profileData = fallback.data;
+      }
+    }
+    if (profileData) {
+      setVenueProfile(profileData as VenueProfile);
+      const { data: listingsData } = await supabase
+        .from('venue_listings')
+        .select('*')
+        .eq('venue_profile_id', profileData.id);
+      if (listingsData) setListings(listingsData as VenueListing[]);
+    }
     setLoading(false);
   };
+
 
   const handleAuthPrompt = (e: React.MouseEvent) => {
     e.preventDefault();
