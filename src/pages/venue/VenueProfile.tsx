@@ -13,7 +13,7 @@ import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
 import { validateImageUpload } from '@/lib/uploadLimits';
-import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight, Ban } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
 import VenueProfilePreviewContent from '@/components/VenueProfilePreviewContent';
 interface VenueProfileData {
