@@ -507,6 +507,7 @@ export type Database = {
           location: string | null
           picture: string | null
           pictures: string[]
+          slug: string | null
           updated_at: string | null
           user_id: string
           venue_name: string | null
@@ -520,6 +521,7 @@ export type Database = {
           location?: string | null
           picture?: string | null
           pictures?: string[]
+          slug?: string | null
           updated_at?: string | null
           user_id: string
           venue_name?: string | null
@@ -533,6 +535,7 @@ export type Database = {
           location?: string | null
           picture?: string | null
           pictures?: string[]
+          slug?: string | null
           updated_at?: string | null
           user_id?: string
           venue_name?: string | null
@@ -552,6 +555,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_venue_slug: {
+        Args: { _id: string; _name: string }
+        Returns: string
+      }
       send_welcome_message: {
         Args: {
           p_role: Database["public"]["Enums"]["user_role"]
