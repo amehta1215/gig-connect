@@ -111,6 +111,59 @@ export default function VenueProfile() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewData, setPreviewData] = useState<{ profile: any; listings: any[] } | null>(null);
 
+  // Shareable link (slug)
+  const [slug, setSlug] = useState<string>('');
+  const [editingSlug, setEditingSlug] = useState(false);
+  const [slugDraft, setSlugDraft] = useState('');
+  const [slugError, setSlugError] = useState<string | null>(null);
+  const [savingSlug, setSavingSlug] = useState(false);
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const shareUrl = `${origin}/venues/${slug}`;
+
+  const sanitizeSlug = (value: string) =>
+    value.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-');
+
+  const copyShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success('Link copied to clipboard');
+    } catch {
+      toast.error('Could not copy link');
+    }
+  };
+
+  const saveSlug = async () => {
+    if (!profile) return;
+    const value = sanitizeSlug(slugDraft).replace(/^-+|-+$/g, '');
+    if (value.length < 3) {
+      setSlugError('Link must be at least 3 characters');
+      return;
+    }
+    setSavingSlug(true);
+    setSlugError(null);
+    const { data: existing } = await supabase
+      .from('venue_profiles')
+      .select('id')
+      .eq('slug', value)
+      .neq('id', profile.id)
+      .maybeSingle();
+    if (existing) {
+      setSlugError('That link is already taken — try another');
+      setSavingSlug(false);
+      return;
+    }
+    const { error } = await supabase.from('venue_profiles').update({ slug: value } as any).eq('id', profile.id);
+    if (error) {
+      setSlugError('Could not save link. Try another.');
+    } else {
+      setSlug(value);
+      setEditingSlug(false);
+      toast.success('Shareable link updated');
+    }
+    setSavingSlug(false);
+  };
+
+
   const openPreview = async () => {
     if (!user) return;
     setPreviewOpen(true);
