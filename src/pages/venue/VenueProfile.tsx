@@ -615,40 +615,6 @@ export default function VenueProfile() {
         })} placeholder="Tell artists about your venue, its vibe, and what makes it special..." rows={4} />
         </div>
 
-        <div className="space-y-2">
-          <Label className="block">Venue Photos</Label>
-          {formData.pictures.length > 1 && <p className="text-xs text-muted-foreground">Drag photos to reorder. The first photo appears in search results.</p>}
-          <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleVenuePictureUpload} className="hidden" />
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {formData.pictures.map((url, index) => (
-              <div
-                key={url + index}
-                draggable
-                onDragStart={() => setDragIndex(index)}
-                onDragEnd={() => setDragIndex(null)}
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => {
-                  e.preventDefault();
-                  if (dragIndex !== null) moveVenuePicture(dragIndex, index);
-                  setDragIndex(null);
-                }}
-                className={`relative group aspect-square bg-secondary rounded-lg overflow-hidden cursor-move transition-opacity ${dragIndex === index ? 'opacity-40' : ''}`}
-              >
-                <img src={url} alt={`Venue ${index + 1}`} className="w-full h-full object-cover pointer-events-none" />
-                <button type="button" onClick={() => removeVenuePicture(index)} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors opacity-0 group-hover:opacity-100">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-            {formData.pictures.length < 6 && (
-              <button type="button" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
-                <Upload className="h-5 w-5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{uploadingVenuePicture ? 'Uploading...' : 'Upload'}</span>
-              </button>
-            )}
-          </div>
-        </div>
-
         {/* Shareable Link */}
         <div className="space-y-2 pt-3 border-t border-border">
           <Label className="block font-display text-base tracking-wide">SHAREABLE LINK</Label>
@@ -683,6 +649,42 @@ export default function VenueProfile() {
             </div>
           )}
         </div>
+
+        <div className="space-y-2">
+          <Label className="block">Venue Photos</Label>
+          {formData.pictures.length > 1 && <p className="text-xs text-muted-foreground">Drag photos to reorder. The first photo appears in search results.</p>}
+          <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleVenuePictureUpload} className="hidden" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {formData.pictures.map((url, index) => (
+              <div
+                key={url + index}
+                draggable
+                onDragStart={() => setDragIndex(index)}
+                onDragEnd={() => setDragIndex(null)}
+                onDragOver={e => e.preventDefault()}
+                onDrop={e => {
+                  e.preventDefault();
+                  if (dragIndex !== null) moveVenuePicture(dragIndex, index);
+                  setDragIndex(null);
+                }}
+                className={`relative group aspect-square bg-secondary rounded-lg overflow-hidden cursor-move transition-opacity ${dragIndex === index ? 'opacity-40' : ''}`}
+              >
+                <img src={url} alt={`Venue ${index + 1}`} className="w-full h-full object-cover pointer-events-none" />
+                <button type="button" onClick={() => removeVenuePicture(index)} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors opacity-0 group-hover:opacity-100">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            {formData.pictures.length < 6 && (
+              <button type="button" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
+                <Upload className="h-5 w-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">{uploadingVenuePicture ? 'Uploading...' : 'Upload'}</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+      
 
       </div>
 
