@@ -117,8 +117,8 @@ export default function VenueProfile() {
   const [slugDraft, setSlugDraft] = useState('');
   const [slugError, setSlugError] = useState<string | null>(null);
   const [savingSlug, setSavingSlug] = useState(false);
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const shareUrl = `${origin}/venues/${slug}`;
+  const publicOrigin = 'https://www.sethound.com';
+  const shareUrl = `${publicOrigin}/venues/${slug}`;
 
   const sanitizeSlug = (value: string) =>
     value.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-');
@@ -650,36 +650,36 @@ export default function VenueProfile() {
         </div>
 
         {/* Shareable Link */}
-        <div className="space-y-2 pt-2 border-t border-border">
-          <Label className="block">Shareable Link</Label>
+        <div className="space-y-2 pt-3 border-t border-border">
+          <Label className="block font-display text-base tracking-wide">SHAREABLE LINK</Label>
           {!editingSlug ? (
             <div className="flex items-center gap-2 flex-wrap">
-              <code className="text-sm bg-secondary px-3 py-2 rounded break-all">{shareUrl}</code>
-              <Button type="button" variant="outline" size="sm" onClick={copyShareLink} className="font-display tracking-widest">
-                <Copy className="h-4 w-4 mr-1" /> COPY LINK
+              <code className="text-xs bg-secondary px-2 py-1.5 rounded break-all">{shareUrl}</code>
+              <Button type="button" variant="outline" size="sm" onClick={copyShareLink} className="h-7 px-2 text-xs font-display tracking-widest">
+                <Copy className="h-3 w-3 mr-1" /> COPY LINK
               </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => { setSlugDraft(slug || ''); setSlugError(null); setEditingSlug(true); }}>
-                <Pencil className="h-4 w-4 mr-1" /> Edit
+              <Button type="button" variant="ghost" size="sm" onClick={() => { setSlugDraft(slug || ''); setSlugError(null); setEditingSlug(true); }} className="h-7 px-2 text-xs">
+                <Pencil className="h-3 w-3 mr-1" /> Edit
               </Button>
             </div>
           ) : (
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm text-muted-foreground">{origin}/venues/</span>
+                <span className="text-xs text-muted-foreground">{publicOrigin}/venues/</span>
                 <Input
                   value={slugDraft}
                   onChange={e => { setSlugDraft(sanitizeSlug(e.target.value)); setSlugError(null); }}
                   placeholder="your-venue"
-                  className="max-w-xs"
+                  className="max-w-xs h-7 text-xs py-0"
                 />
-                <Button type="button" size="sm" onClick={saveSlug} disabled={savingSlug} className="font-display tracking-widest">
+                <Button type="button" size="sm" onClick={saveSlug} disabled={savingSlug} className="h-7 px-2 text-xs font-display tracking-widest">
                   {savingSlug ? 'SAVING...' : 'SAVE'}
                 </Button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => { setEditingSlug(false); setSlugError(null); }}>
+                <Button type="button" size="sm" variant="ghost" onClick={() => { setEditingSlug(false); setSlugError(null); }} className="h-7 px-2 text-xs">
                   Cancel
                 </Button>
               </div>
-              {slugError && <p className="text-sm text-destructive">{slugError}</p>}
+              {slugError && <p className="text-xs text-destructive">{slugError}</p>}
             </div>
           )}
         </div>
