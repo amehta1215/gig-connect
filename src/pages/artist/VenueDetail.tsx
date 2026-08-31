@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
+import VenueShareLink from '@/components/VenueShareLink';
 
 interface VenueListing {
   id: string;
@@ -32,6 +33,7 @@ interface VenueListing {
 
 interface VenueProfile {
   id: string;
+  slug?: string | null;
   user_id?: string;
   picture: string | null;
   pictures?: string[] | null;
@@ -114,7 +116,7 @@ export default function VenueDetail() {
     }
     const { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, user_id, picture, pictures, genres, bio')
+      .select('id, user_id, slug, picture, pictures, genres, bio')
       .eq('id', venueProfileId)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
@@ -319,6 +321,9 @@ export default function VenueDetail() {
               <div className="bg-card border border-border rounded-lg p-4">
                 <h3 className="font-display text-sm text-primary tracking-widest mb-2">BIO</h3>
                 <p className="text-sm text-primary whitespace-pre-line">{venueProfile.bio}</p>
+                <div className="mt-4">
+                  <VenueShareLink slug={venueProfile.slug} />
+                </div>
               </div>
             )}
           </div>

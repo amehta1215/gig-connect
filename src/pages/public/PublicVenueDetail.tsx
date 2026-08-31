@@ -46,6 +46,7 @@ interface VenueListing {
 
 interface VenueProfile {
   id: string;
+  slug?: string | null;
   picture: string | null;
   pictures?: string[] | null;
   genres?: string[] | null;
@@ -79,7 +80,7 @@ export default function PublicVenueDetail() {
     // Resolve by slug first, then fall back to raw id (legacy UUID links).
     let { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, picture, pictures, genres, bio')
+      .select('id, slug, picture, pictures, genres, bio')
       .eq('slug', id!)
       .maybeSingle();
     if (!profileData) {
@@ -87,7 +88,7 @@ export default function PublicVenueDetail() {
       if (isUuid) {
         const fallback = await supabase
           .from('venue_profiles')
-          .select('id, picture, pictures, genres, bio')
+          .select('id, slug, picture, pictures, genres, bio')
           .eq('id', id!)
           .maybeSingle();
         profileData = fallback.data;

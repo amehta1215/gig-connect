@@ -1,11 +1,13 @@
 import { ReactNode, useRef } from 'react';
 import { ChevronLeft, ChevronRight, MapPin, Music, Users } from 'lucide-react';
+import VenueShareLink from '@/components/VenueShareLink';
 
 export interface PreviewVenueListing {
   id: string;
   venue_name: string;
   room_name: string | null;
   location?: string | null;
+  slug?: string | null;
   capacity: number | null;
   genres?: string[] | null;
   pictures?: string[] | null;
@@ -118,6 +120,9 @@ export default function VenueProfilePreviewContent({
             <div className="bg-card border border-border rounded-lg p-6 md:p-8">
               <h3 className="font-display text-sm text-primary tracking-widest mb-3">BIO</h3>
               <p className="text-base text-primary whitespace-pre-line leading-relaxed">{venueProfile.bio}</p>
+              <div className="mt-5">
+                <VenueShareLink slug={venueProfile.slug} />
+              </div>
             </div>
           )}
         </div>
