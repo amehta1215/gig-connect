@@ -7,7 +7,6 @@ export interface PreviewVenueListing {
   venue_name: string;
   room_name: string | null;
   location?: string | null;
-  slug?: string | null;
   capacity: number | null;
   genres?: string[] | null;
   pictures?: string[] | null;
@@ -21,6 +20,7 @@ export interface PreviewVenueProfile {
   bio?: string | null;
   venue_name?: string | null;
   location?: string | null;
+  slug?: string | null;
 }
 
 interface Props {
