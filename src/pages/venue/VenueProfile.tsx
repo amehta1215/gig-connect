@@ -615,6 +615,41 @@ export default function VenueProfile() {
         })} placeholder="Tell artists about your venue, its vibe, and what makes it special..." rows={4} />
         </div>
 
+        {/* Shareable Link */}
+        <div className="space-y-2 pt-3 border-t border-border">
+          <Label className="block font-display text-base tracking-wide">SHAREABLE LINK</Label>
+          {!editingSlug ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <code className="text-xs bg-secondary px-2 py-1.5 rounded break-all">{shareUrl}</code>
+              <Button type="button" variant="outline" size="sm" onClick={copyShareLink} className="h-7 px-2 text-xs font-display tracking-widest">
+                <Copy className="h-3 w-3 mr-1" /> COPY LINK
+              </Button>
+              <Button type="button" variant="ghost" size="sm" onClick={() => { setSlugDraft(slug || ''); setSlugError(null); setEditingSlug(true); }} className="h-7 px-2 text-xs">
+                <Pencil className="h-3 w-3 mr-1" /> Edit
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-muted-foreground">{publicOrigin}/venues/</span>
+                <Input
+                  value={slugDraft}
+                  onChange={e => { setSlugDraft(sanitizeSlug(e.target.value)); setSlugError(null); }}
+                  placeholder="your-venue"
+                  className="max-w-xs h-7 text-xs py-0"
+                />
+                <Button type="button" size="sm" onClick={saveSlug} disabled={savingSlug} className="h-7 px-2 text-xs font-display tracking-widest">
+                  {savingSlug ? 'SAVING...' : 'SAVE'}
+                </Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => { setEditingSlug(false); setSlugError(null); }} className="h-7 px-2 text-xs">
+                  Cancel
+                </Button>
+              </div>
+              {slugError && <p className="text-xs text-destructive">{slugError}</p>}
+            </div>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label className="block">Venue Photos</Label>
           {formData.pictures.length > 1 && <p className="text-xs text-muted-foreground">Drag photos to reorder. The first photo appears in search results.</p>}
