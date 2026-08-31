@@ -117,8 +117,8 @@ export default function VenueProfile() {
   const [slugDraft, setSlugDraft] = useState('');
   const [slugError, setSlugError] = useState<string | null>(null);
   const [savingSlug, setSavingSlug] = useState(false);
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const shareUrl = `${origin}/venues/${slug}`;
+  const publicOrigin = 'https://www.sethound.com';
+  const shareUrl = `${publicOrigin}/venues/${slug}`;
 
   const sanitizeSlug = (value: string) =>
     value.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-');
