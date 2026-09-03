@@ -26,10 +26,12 @@ export interface PreviewVenueProfile {
 interface Props {
   venueProfile: PreviewVenueProfile | null;
   listings: PreviewVenueListing[];
-  /** Optional apply panel etc. rendered in the right column (omitted in read-only previews) */
+  /** Optional apply panel etc. rendered in right column (omitted in read-only previews) */
   sidebar?: ReactNode;
   onRoomClick?: (room: PreviewVenueListing) => void;
   headerAction?: ReactNode;
+  /** Only show the shareable link on actual venue profile pages, not search/listing cards */
+  showShareableLink?: boolean;
 }
 
 export default function VenueProfilePreviewContent({
@@ -38,6 +40,7 @@ export default function VenueProfilePreviewContent({
   sidebar,
   onRoomClick,
   headerAction,
+  showShareableLink = false,
 }: Props) {
   const galleryScrollRef = useRef<HTMLDivElement>(null);
 
@@ -120,9 +123,11 @@ export default function VenueProfilePreviewContent({
             <div className="bg-card border border-border rounded-lg p-6 md:p-8">
               <h3 className="font-display text-sm text-primary tracking-widest mb-3">BIO</h3>
               <p className="text-base text-primary whitespace-pre-line leading-relaxed">{venueProfile.bio}</p>
-              <div className="mt-5">
-                <VenueShareLink slug={venueProfile.slug} />
-              </div>
+              {showShareableLink && (
+                <div className="mt-5">
+                  <VenueShareLink slug={venueProfile.slug} />
+                </div>
+              )}
             </div>
           )}
         </div>
