@@ -562,7 +562,7 @@ export default function VenueProfile() {
                 </h3>
               </div>
             ) : (
-              <VenueProfilePreviewContent venueProfile={previewData.profile} listings={previewData.listings} showShareableLink />
+              <VenueProfilePreviewContent venueProfile={previewData.profile} listings={previewData.listings} />
             )}
           </div>
         </DialogContent>

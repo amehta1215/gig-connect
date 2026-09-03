@@ -208,7 +208,6 @@ export default function PublicVenueDetail() {
       listings={listings}
       sidebar={applyPanel}
       onRoomClick={(room) => navigate(`/rooms/${room.id}`)}
-      showShareableLink
     />
 
     <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} promptMessage="Login or sign up to save favorites" />
