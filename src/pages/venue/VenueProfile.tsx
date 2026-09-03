@@ -543,27 +543,29 @@ export default function VenueProfile() {
       </div>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !w-screen !h-screen !max-w-none !max-h-none !rounded-none !p-0 !grid-cols-1 !gap-0 bg-card border-border overflow-y-auto">
-          <DialogHeader className="sticky top-0 z-10 bg-card border-b border-border px-6 py-4 shrink-0">
+        <DialogContent className="!fixed !inset-0 !left-0 !top-0 !z-[60] !translate-x-0 !translate-y-0 !flex !h-screen !w-screen !max-h-none !max-w-none !flex-col !gap-0 !rounded-none !p-0 bg-card border-border overflow-hidden">
+          <DialogHeader className="z-10 shrink-0 bg-card border-b border-border px-6 py-4">
             <DialogTitle className="font-display text-xl tracking-wide">
               PREVIEW: HOW ARTISTS SEE YOUR PROFILE
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 p-6 md:p-10">
-            {previewLoading ? (
-              <div className="space-y-4">
-                <div className="h-48 bg-muted animate-pulse rounded-lg" />
-                <div className="h-8 w-48 bg-muted animate-pulse rounded" />
-              </div>
-            ) : !previewData?.listings?.length ? (
-              <div className="text-center py-16">
-                <h3 className="font-display text-xl text-muted-foreground tracking-wide">
-                  ADD AT LEAST ONE ROOM/LISTING TO PREVIEW YOUR PROFILE
-                </h3>
-              </div>
-            ) : (
-              <VenueProfilePreviewContent venueProfile={previewData.profile} listings={previewData.listings} />
-            )}
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:py-10 lg:px-10">
+            <div className="mx-auto w-full max-w-6xl">
+              {previewLoading ? (
+                <div className="space-y-4">
+                  <div className="h-48 bg-muted animate-pulse rounded-lg" />
+                  <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+                </div>
+              ) : !previewData?.listings?.length ? (
+                <div className="text-center py-16">
+                  <h3 className="font-display text-xl text-muted-foreground tracking-wide">
+                    ADD AT LEAST ONE ROOM/LISTING TO PREVIEW YOUR PROFILE
+                  </h3>
+                </div>
+              ) : (
+                <VenueProfilePreviewContent venueProfile={previewData.profile} listings={previewData.listings} />
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
