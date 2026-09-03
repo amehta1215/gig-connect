@@ -115,7 +115,7 @@ export default function VenueDetail() {
     }
     const { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, user_id, slug, picture, pictures, genres, bio')
+      .select('id, user_id, picture, pictures, genres, bio')
       .eq('id', venueProfileId)
       .maybeSingle();
     if (profileData) setVenueProfile(profileData as VenueProfile);
