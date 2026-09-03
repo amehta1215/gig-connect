@@ -543,14 +543,14 @@ export default function VenueProfile() {
       </div>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="!fixed !inset-0 !left-0 !top-0 !translate-x-0 !translate-y-0 !flex !h-screen !w-screen !max-h-none !max-w-none !flex-col !gap-0 !rounded-none !p-0 bg-card border-border overflow-hidden">
+        <DialogContent className="!fixed !inset-0 !left-0 !top-0 !z-[60] !translate-x-0 !translate-y-0 !flex !h-screen !w-screen !max-h-none !max-w-none !flex-col !gap-0 !rounded-none !p-0 bg-card border-border overflow-hidden">
           <DialogHeader className="z-10 shrink-0 bg-card border-b border-border px-6 py-4">
             <DialogTitle className="font-display text-xl tracking-wide">
               PREVIEW: HOW ARTISTS SEE YOUR PROFILE
             </DialogTitle>
           </DialogHeader>
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:py-10 lg:px-10">
-            <div className="mx-auto w-full max-w-7xl">
+            <div className="mx-auto w-full max-w-6xl">
               {previewLoading ? (
                 <div className="space-y-4">
                   <div className="h-48 bg-muted animate-pulse rounded-lg" />
