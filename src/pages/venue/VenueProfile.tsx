@@ -616,7 +616,7 @@ export default function VenueProfile() {
         </div>
 
         {/* Shareable Link */}
-        <div className="space-y-2 pt-3 border-t border-border">
+        <div className="space-y-2 pt-3">
           <Label className="block font-display text-base tracking-wide">SHAREABLE LINK</Label>
           {!editingSlug ? (
             <div className="flex items-center gap-2 flex-wrap">
