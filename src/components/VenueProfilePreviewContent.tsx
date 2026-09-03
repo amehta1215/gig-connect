@@ -78,7 +78,7 @@ export default function VenueProfilePreviewContent({
         <div className="relative group">
           <div ref={galleryScrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth">
             {galleryPictures.map((pic, i) => (
-              <div key={i} className="flex-shrink-0 w-[80vw] md:w-[60vw] lg:w-[45vw] max-w-3xl aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
+              <div key={i} className="flex-shrink-0 w-[55vw] md:w-[38vw] lg:w-[22vw] max-w-md aspect-[4/3] bg-secondary rounded-lg overflow-hidden">
                 <img src={pic} alt={`${venueName} ${i + 1}`} className="w-full h-full object-cover" />
               </div>
             ))}
