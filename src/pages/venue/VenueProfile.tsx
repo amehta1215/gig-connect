@@ -549,21 +549,23 @@ export default function VenueProfile() {
               PREVIEW: HOW ARTISTS SEE YOUR PROFILE
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 p-6 md:p-10">
-            {previewLoading ? (
-              <div className="space-y-4">
-                <div className="h-48 bg-muted animate-pulse rounded-lg" />
-                <div className="h-8 w-48 bg-muted animate-pulse rounded" />
-              </div>
-            ) : !previewData?.listings?.length ? (
-              <div className="text-center py-16">
-                <h3 className="font-display text-xl text-muted-foreground tracking-wide">
-                  ADD AT LEAST ONE ROOM/LISTING TO PREVIEW YOUR PROFILE
-                </h3>
-              </div>
-            ) : (
-              <VenueProfilePreviewContent venueProfile={previewData.profile} listings={previewData.listings} />
-            )}
+          <div className="flex-1 px-4 py-6 sm:px-6 md:py-10 lg:px-10">
+            <div className="mx-auto w-full max-w-7xl">
+              {previewLoading ? (
+                <div className="space-y-4">
+                  <div className="h-48 bg-muted animate-pulse rounded-lg" />
+                  <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+                </div>
+              ) : !previewData?.listings?.length ? (
+                <div className="text-center py-16">
+                  <h3 className="font-display text-xl text-muted-foreground tracking-wide">
+                    ADD AT LEAST ONE ROOM/LISTING TO PREVIEW YOUR PROFILE
+                  </h3>
+                </div>
+              ) : (
+                <VenueProfilePreviewContent venueProfile={previewData.profile} listings={previewData.listings} />
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
