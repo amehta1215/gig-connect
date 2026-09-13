@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ArrowLeftRight, User, LogIn } from 'lucide-react';
 import AuthDialog from '@/components/AuthDialog';
 import Footer from '@/components/Footer';
+import setHoundLogo from '@/assets/set-hound-logo.png';
 
 interface Tab {
   label: string;
@@ -67,7 +68,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <span className="font-display text-3xl tracking-tight text-accent">SET HOUND</span>
+              <img src={setHoundLogo} alt="Set Hound" className="h-14 w-auto py-1" />
             </Link>
 
             {/* Navigation Tabs */}

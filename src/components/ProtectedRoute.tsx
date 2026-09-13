@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import setHoundLogo from '@/assets/set-hound-logo.png';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -33,7 +34,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-primary font-display text-4xl">SET HOUND</div>
+        <img src={setHoundLogo} alt="Set Hound" className="h-10 w-auto animate-pulse" />
       </div>
     );
   }

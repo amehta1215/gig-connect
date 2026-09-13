@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Button } from '@/components/ui/button';
 import { User, LogOut, ArrowLeftRight, Heart } from 'lucide-react';
 import Footer from '@/components/Footer';
+import setHoundLogo from '@/assets/set-hound-logo.png';
 interface Tab {
   label: string;
   href: string;
@@ -43,7 +44,7 @@ export default function DashboardLayout({
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <Link to={activeRole === 'artist' ? '/artist' : '/venue'} className="flex items-center gap-3">
-              <span className="font-display tracking-tight text-orange-600 text-2xl">SET HOUND</span>
+              <img src={setHoundLogo} alt="Set Hound" className="h-14 w-auto py-1" />
               <span className="text-[10px] text-muted-foreground uppercase tracking-[0.3em] hidden sm:block">
                 {activeRole}
               </span>
