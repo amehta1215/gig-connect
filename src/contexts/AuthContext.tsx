@@ -74,6 +74,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Require a fresh login whenever the site is opened in a new browser session.
+    // sessionStorage is cleared when the browser/tab session ends, so its absence
+    // means this is a brand new visit rather than an in-session navigation.
+    const BROWSER_SESSION_KEY = 'sh-browser-session-active';
+
+    const isAuthDeepLink = () => {
+      const hash = window.location.hash || '';
+      const search = window.location.search || '';
+      return (
+        window.location.pathname.startsWith('/reset-password') ||
+        hash.includes('access_token') ||
+        hash.includes('type=recovery') ||
+        search.includes('code=') ||
+        search.includes('type=recovery')
+      );
+    };
+
+    const endStaleBrowserSession = async () => {
+      try {
+        if (sessionStorage.getItem(BROWSER_SESSION_KEY)) return;
+        sessionStorage.setItem(BROWSER_SESSION_KEY, '1');
+        if (isAuthDeepLink()) return;
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          await supabase.auth.signOut();
+        }
+      } catch {
+        // If storage is unavailable, fall back to normal behaviour
+      }
+    };
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -95,15 +126,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
-      setLoading(false);
-    });
+    // THEN clear any stale session from a previous visit, and check what remains
+    endStaleBrowserSession().then(() =>
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        }
+        setLoading(false);
+      })
+    );
 
     return () => subscription.unsubscribe();
   }, []);
