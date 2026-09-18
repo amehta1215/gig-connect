@@ -13,7 +13,7 @@ import { validateImageUpload, validateAudioUpload } from '@/lib/uploadLimits';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ArtistProfilePreviewContent from '@/components/ArtistProfilePreviewContent';
 import { ArtistPhotoCropDialog } from '@/components/ArtistPhotoCropDialog';
-import { ArrowLeft, Music, X, Upload, Eye } from 'lucide-react';
+import { ArrowLeft, Crop, Music, X, Upload, Eye } from 'lucide-react';
 interface ArtistProfile {
   id: string;
   user_id: string;
@@ -56,6 +56,7 @@ export default function ArtistProfile() {
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropImageUrl, setCropImageUrl] = useState('');
   const [pendingCropFiles, setPendingCropFiles] = useState<File[]>([]);
+  const [editingPictureIndex, setEditingPictureIndex] = useState<number | null>(null);
   const [draggedPictureIndex, setDraggedPictureIndex] = useState<number | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -149,6 +150,7 @@ export default function ArtistProfile() {
     setCropImageUrl('');
     setCropFile(null);
     setPendingCropFiles([]);
+    setEditingPictureIndex(null);
     setUploadingPicture(false);
     if (pictureInputRef.current) pictureInputRef.current.value = '';
   };
@@ -166,11 +168,33 @@ export default function ArtistProfile() {
   const handleCroppedPicture = async (croppedFile: File) => {
     try {
       const url = await uploadFile(croppedFile, 'artist-media', 'pictures');
-      setPictures(prev => [...prev, url]);
+      setPictures(prev => editingPictureIndex === null
+        ? [...prev, url]
+        : prev.map((picture, index) => index === editingPictureIndex ? url : picture));
       toast.success('Picture uploaded successfully');
-      advancePictureCrop();
+      if (editingPictureIndex === null) {
+        advancePictureCrop();
+      } else {
+        finishPictureCropping();
+      }
     } catch (error) {
       toast.error('Failed to upload picture');
+    }
+  };
+  const editPictureCrop = async (url: string, index: number) => {
+    setUploadingPicture(true);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Unable to load picture');
+      const blob = await response.blob();
+      const extension = blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : blob.type === 'image/gif' ? 'gif' : 'jpg';
+      const file = new File([blob], `artist-photo.${extension}`, { type: blob.type || 'image/jpeg' });
+      setEditingPictureIndex(index);
+      setCropFile(file);
+      setCropImageUrl(URL.createObjectURL(file));
+    } catch (error) {
+      setUploadingPicture(false);
+      toast.error('Failed to open picture for cropping');
     }
   };
   const handleCropCancel = () => {
@@ -457,10 +481,13 @@ export default function ArtistProfile() {
               {index === 0 && <div className="absolute top-2 left-2 px-2 py-1 bg-primary text-primary-foreground text-xs font-display rounded">
                   MAIN
                 </div>}
-              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => removePicture(index)} className="p-1 bg-destructive rounded-full">
+              <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity">
+                <Button type="button" size="icon" variant="secondary" onClick={() => editPictureCrop(url, index)} disabled={uploadingPicture} className="h-8 w-8 rounded-full" aria-label={`Crop picture ${index + 1}`} title="Crop photo">
+                  <Crop className="h-4 w-4" />
+                </Button>
+                <Button type="button" size="icon" variant="destructive" onClick={() => removePicture(index)} className="h-8 w-8 rounded-full" aria-label={`Remove picture ${index + 1}`} title="Remove photo">
                   <X className="h-4 w-4 text-destructive-foreground" />
-                </button>
+                </Button>
               </div>
             </div>)}
           {pictures.length < 6 && <Button type="button" variant="outline" onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-[4/3] h-auto border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
