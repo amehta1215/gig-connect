@@ -566,6 +566,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      welcome_content: {
+        Args: {
+          p_role: Database["public"]["Enums"]["user_role"]
+          p_user_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       application_status: "in_progress" | "accepted" | "archived"

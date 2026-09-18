@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789749115441,
+      "tag": "0000_welcome_message_set_hound_addressing",
+      "breakpoints": true
+    }
+  ]
+}
