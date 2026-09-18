@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { validateImageUpload, validateAudioUpload } from '@/lib/uploadLimits';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ArtistProfilePreviewContent from '@/components/ArtistProfilePreviewContent';
+import { ArtistPhotoCropDialog } from '@/components/ArtistPhotoCropDialog';
 import { ArrowLeft, Music, X, Upload, Eye } from 'lucide-react';
 interface ArtistProfile {
   id: string;
@@ -52,6 +53,9 @@ export default function ArtistProfile() {
   const [uploadingSample, setUploadingSample] = useState(false);
   const pictureInputRef = useRef<HTMLInputElement>(null);
   const sampleInputRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropImageUrl, setCropImageUrl] = useState('');
+  const [pendingCropFiles, setPendingCropFiles] = useState<File[]>([]);
   const [draggedPictureIndex, setDraggedPictureIndex] = useState<number | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -134,20 +138,47 @@ export default function ArtistProfile() {
       toast.error('Maximum 6 pictures allowed');
       return;
     }
+    const selectedFiles = Array.from(files);
     setUploadingPicture(true);
-    try {
-      const newUrls: string[] = [];
-      for (const file of Array.from(files)) {
-        const url = await uploadFile(file, 'artist-media', 'pictures');
-        newUrls.push(url);
-      }
-      setPictures(prev => [...prev, ...newUrls]);
-      toast.success('Pictures uploaded successfully');
-    } catch (error) {
-      toast.error('Failed to upload pictures');
-    }
+    setPendingCropFiles(selectedFiles.slice(1));
+    setCropFile(selectedFiles[0]);
+    setCropImageUrl(URL.createObjectURL(selectedFiles[0]));
+  };
+  const finishPictureCropping = () => {
+    if (cropImageUrl) URL.revokeObjectURL(cropImageUrl);
+    setCropImageUrl('');
+    setCropFile(null);
+    setPendingCropFiles([]);
     setUploadingPicture(false);
     if (pictureInputRef.current) pictureInputRef.current.value = '';
+  };
+  const advancePictureCrop = () => {
+    if (cropImageUrl) URL.revokeObjectURL(cropImageUrl);
+    const [nextFile, ...remainingFiles] = pendingCropFiles;
+    if (!nextFile) {
+      finishPictureCropping();
+      return;
+    }
+    setCropFile(nextFile);
+    setCropImageUrl(URL.createObjectURL(nextFile));
+    setPendingCropFiles(remainingFiles);
+  };
+  const handleCroppedPicture = async (croppedFile: File) => {
+    try {
+      const url = await uploadFile(croppedFile, 'artist-media', 'pictures');
+      setPictures(prev => [...prev, url]);
+      toast.success('Picture uploaded successfully');
+      advancePictureCrop();
+    } catch (error) {
+      toast.error('Failed to upload picture');
+    }
+  };
+  const handleCropCancel = () => {
+    if (pendingCropFiles.length > 0) {
+      advancePictureCrop();
+    } else {
+      finishPictureCropping();
+    }
   };
   const handleSampleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -258,6 +289,14 @@ export default function ArtistProfile() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in max-w-3xl mx-auto">
+      <ArtistPhotoCropDialog
+        key={cropImageUrl}
+        file={cropFile}
+        imageUrl={cropImageUrl}
+        open={Boolean(cropFile)}
+        onCancel={handleCropCancel}
+        onConfirm={handleCroppedPicture}
+      />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -405,14 +444,14 @@ export default function ArtistProfile() {
           <h2 className="font-display text-xl">PICTURES <span className="text-primary">*</span></h2>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {pictures.map((url, index) => <div
               key={index}
               draggable
               onDragStart={() => handlePictureDragStart(index)}
               onDragOver={(e) => handlePictureDragOver(e, index)}
               onDragEnd={handlePictureDragEnd}
-              className={`relative group aspect-square cursor-grab active:cursor-grabbing ${index === 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${draggedPictureIndex === index ? 'opacity-50' : ''}`}
+              className={`relative group aspect-[4/3] cursor-grab active:cursor-grabbing ${index === 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''} ${draggedPictureIndex === index ? 'opacity-50' : ''}`}
             >
               <img src={url} alt={`Picture ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
               {index === 0 && <div className="absolute top-2 left-2 px-2 py-1 bg-primary text-primary-foreground text-xs font-display rounded">
@@ -424,12 +463,12 @@ export default function ArtistProfile() {
                 </button>
               </div>
             </div>)}
-          {pictures.length < 6 && <button onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
+          {pictures.length < 6 && <Button type="button" variant="outline" onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-[4/3] h-auto border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
               <Upload className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
                 {uploadingPicture ? 'Uploading...' : 'Add Picture'}
               </span>
-            </button>}
+            </Button>}
         </div>
         <input ref={pictureInputRef} type="file" accept=".jpg,.jpeg,.png,.webp,.gif" multiple className="hidden" onChange={handlePictureUpload} />
       </div>
