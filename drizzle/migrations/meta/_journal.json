@@ -15,6 +15,13 @@
       "when": 1789749533912,
       "tag": "0001_venue_slug_default_from_name",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789759965255,
+      "tag": "0002_sync_venue_name_to_listings",
+      "breakpoints": true
     }
   ]
 }
