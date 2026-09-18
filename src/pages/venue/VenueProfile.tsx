@@ -265,10 +265,16 @@ export default function VenueProfile() {
     if (error) {
       toast.error('Failed to save');
     } else {
+      // Keep room listings (shown to artists and on the public page) in sync with the venue name.
+      if (formData.venue_name) {
+        await supabase.from('venue_listings').update({ venue_name: formData.venue_name }).eq('venue_profile_id', profile.id).neq('venue_name', formData.venue_name);
+        setListings(prev => prev.map(l => ({ ...l, venue_name: formData.venue_name })));
+      }
       // The slug trigger may regenerate the shareable link once a name exists.
       const { data: slugRow } = await supabase.from('venue_profiles').select('slug').eq('id', profile.id).maybeSingle();
       if (slugRow?.slug) setSlug((slugRow as any).slug);
     }
+
     setSaving(false);
   }, [user, profile, formData, initialLoadDone]);
 
