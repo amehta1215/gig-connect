@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ensureHttp } from '@/lib/utils';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -932,7 +933,7 @@ export default function VenueApplicationDetail() {
       {socialLinks.length > 0 && <div className="bg-card border border-border p-6">
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">LINKS</h2>
           <div className="flex flex-wrap gap-2">
-            {socialLinks.map(link => <a key={link.key} href={link.value!} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm bg-secondary px-3 py-1.5 hover:bg-secondary/80 transition-colors">
+            {socialLinks.map(link => <a key={link.key} href={ensureHttp(link.value!)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm bg-secondary px-3 py-1.5 hover:bg-secondary/80 transition-colors">
                 {link.label}
                 <ExternalLink className="h-3 w-3" />
               </a>)}
@@ -962,7 +963,7 @@ export default function VenueApplicationDetail() {
           <h2 className="font-display text-sm text-primary tracking-widest mb-3">PRESS</h2>
           <ul className="space-y-1">
             {artistProfile.press_links.map((link, i) => <li key={i}>
-                <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1">
+                <a href={ensureHttp(link)} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1">
                   {link}
                   <ExternalLink className="h-3 w-3" />
                 </a>
