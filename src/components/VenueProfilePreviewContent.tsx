@@ -51,10 +51,8 @@ export default function VenueProfilePreviewContent({
   const venuePics = (venueProfile?.pictures && venueProfile.pictures.length > 0)
     ? venueProfile.pictures
     : (venueProfile?.picture ? [venueProfile.picture] : []);
-  const galleryPictures = Array.from(new Set([
-    ...venuePics,
-    ...listings.flatMap(l => l.pictures || []),
-  ]));
+  // Only venue-level photos appear in the top carousel; room photos stay on the room.
+  const galleryPictures = Array.from(new Set(venuePics));
 
   const scroll = (dir: 'left' | 'right') => {
     if (!galleryScrollRef.current) return;
