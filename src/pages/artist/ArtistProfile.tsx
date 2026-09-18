@@ -490,7 +490,7 @@ export default function ArtistProfile() {
                 </Button>
               </div>
             </div>)}
-          {pictures.length < 6 && <Button type="button" variant="outline" onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-[4/3] h-auto border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer">
+          {pictures.length < 6 && <Button type="button" variant="outline" onClick={() => pictureInputRef.current?.click()} disabled={uploadingPicture} className="aspect-[4/3] h-auto border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer hover:!bg-background hover:!text-muted-foreground">
               <Upload className="h-6 w-6 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
                 {uploadingPicture ? 'Uploading...' : 'Add Picture'}
