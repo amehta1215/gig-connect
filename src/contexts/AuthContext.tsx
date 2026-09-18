@@ -144,14 +144,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, firstName: string, lastName: string, role: UserRole, termsAcceptedAt?: string) => {
     const redirectUrl = `${window.location.origin}/`;
 
+    // Normalize credentials so stray whitespace (common with mobile keyboards
+    // and password managers) can never be baked into the stored password.
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
+      email: email.trim().toLowerCase(),
+      password: password.trim(),
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          first_name: firstName,
-          last_name: lastName,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
           role: role,
           terms_accepted_at: termsAcceptedAt ?? new Date().toISOString(),
         },
@@ -162,10 +164,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
     const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: normalizedEmail,
+      password: trimmedPassword,
     });
+
+    // Fall back to the raw value for accounts created before passwords were
+    // trimmed (where a leading/trailing space is part of the stored password).
+    if (error && trimmedPassword !== password) {
+      const retry = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
+      });
+      return { error: retry.error };
+    }
+
     return { error };
   };
 
