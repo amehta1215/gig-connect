@@ -18,7 +18,7 @@ interface ArtistPhotoCropDialogProps {
   imageUrl: string;
   open: boolean;
   onCancel: () => void;
-  onConfirm: (file: File) => void;
+  onConfirm: (file: File) => Promise<void>;
 }
 
 const MAX_OUTPUT_WIDTH = 1600;
@@ -84,7 +84,12 @@ export function ArtistPhotoCropDialog({
   const handleConfirm = async () => {
     if (!file) return;
     if (isAnimatedGif) {
-      onConfirm(file);
+      setProcessing(true);
+      try {
+        await onConfirm(file);
+      } finally {
+        setProcessing(false);
+      }
       return;
     }
     if (!croppedArea) return;
@@ -92,7 +97,7 @@ export function ArtistPhotoCropDialog({
     setProcessing(true);
     try {
       const croppedFile = await createCroppedFile(file, imageUrl, croppedArea);
-      onConfirm(croppedFile);
+      await onConfirm(croppedFile);
     } finally {
       setProcessing(false);
     }
