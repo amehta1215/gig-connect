@@ -109,7 +109,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
       const { error } = await signIn(email, password);
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
-          toast.error('Wrong credentials');
+          toast.error('That email and password don\'t match. Try again or reset your password.');
         } else {
           toast.error(error.message);
         }
