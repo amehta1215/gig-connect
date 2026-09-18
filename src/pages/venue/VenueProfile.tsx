@@ -264,6 +264,10 @@ export default function VenueProfile() {
     } as any).eq('id', profile.id);
     if (error) {
       toast.error('Failed to save');
+    } else {
+      // The slug trigger may regenerate the shareable link once a name exists.
+      const { data: slugRow } = await supabase.from('venue_profiles').select('slug').eq('id', profile.id).maybeSingle();
+      if (slugRow?.slug) setSlug((slugRow as any).slug);
     }
     setSaving(false);
   }, [user, profile, formData, initialLoadDone]);
