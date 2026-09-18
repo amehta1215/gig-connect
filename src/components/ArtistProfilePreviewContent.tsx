@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { ensureHttp } from '@/lib/utils';
 
 export interface PreviewArtistProfile {
   band_name?: string | null;
@@ -86,7 +87,7 @@ export default function ArtistProfilePreviewContent({ artistProfile }: { artistP
       <h2 className="font-display text-sm text-primary tracking-widest mb-4">LINKS</h2>
       <div className="flex flex-wrap gap-3">
         {socialLinks.map(link => (
-          <a key={link.key} href={link.value!} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-base bg-secondary px-4 py-2 hover:bg-secondary/80 transition-colors">
+          <a key={link.key} href={ensureHttp(link.value!)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-base bg-secondary px-4 py-2 hover:bg-secondary/80 transition-colors">
             {link.label}
             <ExternalLink className="h-4 w-4" />
           </a>
@@ -114,7 +115,7 @@ export default function ArtistProfilePreviewContent({ artistProfile }: { artistP
       <h2 className="font-display text-sm text-primary tracking-widest mb-4">PRESS</h2>
       <ul className="space-y-2">
         {artistProfile.press_links.map((link, i) => <li key={i}>
-          <a href={link} target="_blank" rel="noopener noreferrer" className="text-base text-primary hover:underline flex items-center gap-1">
+          <a href={ensureHttp(link)} target="_blank" rel="noopener noreferrer" className="text-base text-primary hover:underline flex items-center gap-1">
             {link}
             <ExternalLink className="h-4 w-4" />
           </a>
