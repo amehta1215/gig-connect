@@ -533,8 +533,9 @@ export default function VenueCalendar() {
       toast.error('Failed to delete');
       return;
     }
-    if (previewGig.is_confirmed && previewGig.application_id) {
-      await supabase.from('applications').update({ status: 'in_progress' }).eq('id', previewGig.application_id);
+    if (previewGig.application_id) {
+      // Keep the application accepted while any hold or confirmed date remains
+      await reconcileApplicationStatuses([previewGig.application_id], 'in_progress');
     }
     const roomName = previewGig.venue_listing?.room_name || previewGig.venue_listing?.venue_name || 'Venue';
     if (previewGig.artist_id && previewGig.artist_id !== user?.id) {
