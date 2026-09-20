@@ -576,7 +576,8 @@ export default function VenueCalendar() {
     const { error } = await supabase.from('gig_listings').delete().eq('id', holdToDelete.gigId);
     if (error) { toast.error('Failed to delete hold'); setDeletingHold(false); setNotifySending(false); return; }
     if (holdToDelete.applicationId) {
-      await supabase.from('applications').update({ status: 'archived' }).eq('id', holdToDelete.applicationId);
+      // Only archive if no holds or confirmed dates remain for this application
+      await reconcileApplicationStatuses([holdToDelete.applicationId], 'archived');
     }
     if (messageContent) {
       await sendBookingDeletionMessage(holdToDelete.artistId, holdToDelete.gigDate, roomName, gigData?.is_confirmed ?? false, messageContent);
