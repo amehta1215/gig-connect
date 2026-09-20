@@ -21,6 +21,7 @@ import AutoMessageDialog from '@/components/AutoMessageDialog';
 import { sendVenueArtistMessage } from '@/lib/messaging';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { findConfirmedConflicts, findArtistDateConflicts, findVenueDateConflicts, mergeConflicts, describeConflicts } from '@/lib/bookingConflicts';
+import { reconcileApplicationStatuses } from '@/lib/applicationStatus';
 interface GigListing {
   id: string;
   gig_date: string;
@@ -482,12 +483,9 @@ export default function VenueCalendar() {
     // Delete the confirmed artist's OTHER holds (other dates/listings), keep other artists' holds
     if (artistOtherHoldIds.length > 0) {
       const applicationIds = artistOtherApplicationIds.filter(Boolean) as string[];
-      if (applicationIds.length > 0) {
-        await supabase.from('applications').update({
-          status: 'archived'
-        }).in('id', applicationIds);
-      }
       await supabase.from('gig_listings').delete().in('id', artistOtherHoldIds);
+      // Only archive applications with no remaining holds or confirmed dates
+      await reconcileApplicationStatuses(applicationIds, 'archived');
     }
 
     // Send confirmation message if enabled
@@ -535,8 +533,9 @@ export default function VenueCalendar() {
       toast.error('Failed to delete');
       return;
     }
-    if (previewGig.is_confirmed && previewGig.application_id) {
-      await supabase.from('applications').update({ status: 'in_progress' }).eq('id', previewGig.application_id);
+    if (previewGig.application_id) {
+      // Keep the application accepted while any hold or confirmed date remains
+      await reconcileApplicationStatuses([previewGig.application_id], 'in_progress');
     }
     const roomName = previewGig.venue_listing?.room_name || previewGig.venue_listing?.venue_name || 'Venue';
     if (previewGig.artist_id && previewGig.artist_id !== user?.id) {
@@ -577,7 +576,8 @@ export default function VenueCalendar() {
     const { error } = await supabase.from('gig_listings').delete().eq('id', holdToDelete.gigId);
     if (error) { toast.error('Failed to delete hold'); setDeletingHold(false); setNotifySending(false); return; }
     if (holdToDelete.applicationId) {
-      await supabase.from('applications').update({ status: 'archived' }).eq('id', holdToDelete.applicationId);
+      // Only archive if no holds or confirmed dates remain for this application
+      await reconcileApplicationStatuses([holdToDelete.applicationId], 'archived');
     }
     if (messageContent) {
       await sendBookingDeletionMessage(holdToDelete.artistId, holdToDelete.gigDate, roomName, gigData?.is_confirmed ?? false, messageContent);
@@ -620,9 +620,8 @@ export default function VenueCalendar() {
       const holdIds = allHolds.map(h => h.id);
       const appIds = allHolds.map(h => h.application_id).filter(Boolean) as string[];
       await supabase.from('gig_listings').delete().in('id', holdIds);
-      if (appIds.length > 0) {
-        await supabase.from('applications').update({ status: 'archived' }).in('id', appIds);
-      }
+      // Only archive applications with no remaining holds or confirmed dates
+      await reconcileApplicationStatuses(appIds, 'archived');
       // Send a single consolidated notification (if any message provided)
       if (messageContent && holdToDelete.artistId !== user.id) {
         await sendVenueArtistMessage({
