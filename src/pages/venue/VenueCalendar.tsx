@@ -21,6 +21,7 @@ import AutoMessageDialog from '@/components/AutoMessageDialog';
 import { sendVenueArtistMessage } from '@/lib/messaging';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { findConfirmedConflicts, findArtistDateConflicts, findVenueDateConflicts, mergeConflicts, describeConflicts } from '@/lib/bookingConflicts';
+import { reconcileApplicationStatuses } from '@/lib/applicationStatus';
 interface GigListing {
   id: string;
   gig_date: string;
