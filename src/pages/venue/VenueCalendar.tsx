@@ -620,9 +620,8 @@ export default function VenueCalendar() {
       const holdIds = allHolds.map(h => h.id);
       const appIds = allHolds.map(h => h.application_id).filter(Boolean) as string[];
       await supabase.from('gig_listings').delete().in('id', holdIds);
-      if (appIds.length > 0) {
-        await supabase.from('applications').update({ status: 'archived' }).in('id', appIds);
-      }
+      // Only archive applications with no remaining holds or confirmed dates
+      await reconcileApplicationStatuses(appIds, 'archived');
       // Send a single consolidated notification (if any message provided)
       if (messageContent && holdToDelete.artistId !== user.id) {
         await sendVenueArtistMessage({
