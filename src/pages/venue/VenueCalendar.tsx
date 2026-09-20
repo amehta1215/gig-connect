@@ -483,12 +483,9 @@ export default function VenueCalendar() {
     // Delete the confirmed artist's OTHER holds (other dates/listings), keep other artists' holds
     if (artistOtherHoldIds.length > 0) {
       const applicationIds = artistOtherApplicationIds.filter(Boolean) as string[];
-      if (applicationIds.length > 0) {
-        await supabase.from('applications').update({
-          status: 'archived'
-        }).in('id', applicationIds);
-      }
       await supabase.from('gig_listings').delete().in('id', artistOtherHoldIds);
+      // Only archive applications with no remaining holds or confirmed dates
+      await reconcileApplicationStatuses(applicationIds, 'archived');
     }
 
     // Send confirmation message if enabled
