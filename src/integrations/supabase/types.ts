@@ -508,6 +508,7 @@ export type Database = {
           picture: string | null
           pictures: string[]
           slug: string | null
+          slug_is_custom: boolean
           updated_at: string | null
           user_id: string
           venue_name: string | null
@@ -522,6 +523,7 @@ export type Database = {
           picture?: string | null
           pictures?: string[]
           slug?: string | null
+          slug_is_custom?: boolean
           updated_at?: string | null
           user_id: string
           venue_name?: string | null
@@ -536,6 +538,7 @@ export type Database = {
           picture?: string | null
           pictures?: string[]
           slug?: string | null
+          slug_is_custom?: boolean
           updated_at?: string | null
           user_id?: string
           venue_name?: string | null
