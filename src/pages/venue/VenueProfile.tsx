@@ -152,7 +152,7 @@ export default function VenueProfile() {
       setSavingSlug(false);
       return;
     }
-    const { error } = await supabase.from('venue_profiles').update({ slug: value } as any).eq('id', profile.id);
+    const { error } = await supabase.from('venue_profiles').update({ slug: value, slug_is_custom: true } as any).eq('id', profile.id);
     if (error) {
       setSlugError('Could not save link. Try another.');
     } else {
