@@ -12,6 +12,7 @@ import { FormattedMessageContent } from '@/components/FormattedMessageContent';
 import { MessageAttachments } from '@/components/MessageAttachments';
 import { SwipeableThreadRow } from '@/components/SwipeableThreadRow';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 interface Message {
   id: string;
   sender_id: string;
