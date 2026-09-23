@@ -243,14 +243,12 @@ export default function VenueMessages() {
     const thread = threads.find(t => t.thread_id === threadId);
     if (!thread) return;
     const unreadIds = thread.messages.filter(m => !m.is_read && m.receiver_id === user?.id).map(m => m.id);
-    if (unreadIds.length > 0) {
-      await supabase.from('messages').update({
-        is_read: true
-      }).in('id', unreadIds);
-      setMessages(messages.map(m => unreadIds.includes(m.id) ? {
-        ...m,
-        is_read: true
-      } : m));
+    if (unreadIds.length === 0) return;
+    setMessages(prev => prev.map(m => unreadIds.includes(m.id) ? { ...m, is_read: true } : m));
+    const { error } = await supabase.from('messages').update({ is_read: true }).in('id', unreadIds);
+    if (error) {
+      setMessages(prev => prev.map(m => unreadIds.includes(m.id) ? { ...m, is_read: false } : m));
+      toast.error("Couldn't mark as read. Please try again.");
     }
   };
 
@@ -259,14 +257,17 @@ export default function VenueMessages() {
     if (!thread) return;
     // Mark the latest received message as unread
     const latestReceivedMessage = [...thread.messages].reverse().find(m => m.receiver_id === user?.id);
-    if (latestReceivedMessage) {
-      await supabase.from('messages').update({
-        is_read: false
-      }).eq('id', latestReceivedMessage.id);
-      setMessages(messages.map(m => m.id === latestReceivedMessage.id ? {
-        ...m,
-        is_read: false
-      } : m));
+    if (!latestReceivedMessage) {
+      toast.info('Only messages you received can be marked as unread.');
+      return;
+    }
+    // Close the thread first so it isn't immediately marked read again
+    setSelectedThreadId(prev => prev === threadId ? null : prev);
+    setMessages(prev => prev.map(m => m.id === latestReceivedMessage.id ? { ...m, is_read: false } : m));
+    const { error } = await supabase.from('messages').update({ is_read: false }).eq('id', latestReceivedMessage.id);
+    if (error) {
+      setMessages(prev => prev.map(m => m.id === latestReceivedMessage.id ? { ...m, is_read: true } : m));
+      toast.error("Couldn't mark as unread. Please try again.");
     }
   };
   const filteredThreads = threads.filter(thread => {
