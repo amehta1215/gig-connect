@@ -155,7 +155,7 @@ export function ArtistPhotoCropDialog({
           </Button>
           <Button type="button" onClick={handleConfirm} disabled={!file || processing}>
             <Crop className="h-4 w-4" />
-            {processing ? 'Cropping...' : isAnimatedGif ? 'Use GIF' : 'Crop & Upload'}
+            {processing ? 'Cropping...' : isAnimatedGif ? 'Use GIF' : 'Crop'}
           </Button>
         </DialogFooter>
       </DialogContent>
