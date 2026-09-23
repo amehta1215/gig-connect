@@ -42,14 +42,14 @@ interface VenueListing {
   is_published: boolean;
 }
 const eventTypeOptions = [{
+  id: 'live_music',
+  label: 'Live Music'
+}, {
   id: 'dj',
   label: 'DJ'
 }, {
   id: 'comedy',
   label: 'Comedy'
-}, {
-  id: 'live_music',
-  label: 'Live Music'
 }, {
   id: 'open_mic',
   label: 'Open Mic'
