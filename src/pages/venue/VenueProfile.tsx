@@ -739,16 +739,21 @@ export default function VenueProfile() {
                   if (dragIndex !== null) moveVenuePicture(dragIndex, index);
                   setDragIndex(null);
                 }}
-                className={`relative group aspect-square bg-secondary rounded-lg overflow-hidden cursor-move transition-opacity ${dragIndex === index ? 'opacity-40' : ''}`}
+                className={`relative group aspect-[4/3] bg-secondary rounded-lg overflow-hidden cursor-move transition-opacity ${dragIndex === index ? 'opacity-40' : ''}`}
               >
                 <img src={url} alt={`Venue ${index + 1}`} className="w-full h-full object-cover pointer-events-none" />
+                <div className="absolute bottom-2 left-2">
+                  <Button type="button" size="icon" variant="secondary" onClick={() => editVenuePictureCrop(url, index)} disabled={uploadingVenuePicture} className="h-8 w-8 rounded-full" aria-label={`Crop photo ${index + 1}`} title="Crop photo">
+                    <Crop className="h-4 w-4" />
+                  </Button>
+                </div>
                 <button type="button" onClick={() => removeVenuePicture(index)} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors opacity-0 group-hover:opacity-100">
                   <X className="h-4 w-4" />
                 </button>
               </div>
             ))}
             {formData.pictures.length < 6 && (
-              <button type="button" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="aspect-square border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
+              <button type="button" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="aspect-[4/3] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
                 <Upload className="h-5 w-5 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">{uploadingVenuePicture ? 'Uploading...' : 'Upload'}</span>
               </button>
