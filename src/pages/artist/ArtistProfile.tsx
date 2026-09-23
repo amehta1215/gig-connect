@@ -482,7 +482,7 @@ export default function ArtistProfile() {
                   MAIN
                 </div>}
               <div className="absolute top-2 right-2 flex gap-1">
-                <Button type="button" size="icon" variant="secondary" onClick={() => editPictureCrop(url, index)} disabled={uploadingPicture} className="h-8 w-8 rounded-full" aria-label={`Crop picture ${index + 1}`} title="Crop photo">
+                <Button type="button" size="icon" variant="secondary" onClick={() => editPictureCrop(url, index)} disabled={uploadingPicture} className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" aria-label={`Crop picture ${index + 1}`} title="Crop photo">
                   <Crop className="h-4 w-4" />
                 </Button>
                 <Button type="button" size="icon" variant="destructive" onClick={() => removePicture(index)} className="h-8 w-8 rounded-full" aria-label={`Remove picture ${index + 1}`} title="Remove photo">
