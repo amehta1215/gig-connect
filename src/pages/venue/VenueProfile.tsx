@@ -13,9 +13,10 @@ import { LocationAutocomplete } from '@/components/LocationAutocomplete';
 import { AccountInformation } from '@/components/AccountInformation';
 import { toast } from 'sonner';
 import { validateImageUpload } from '@/lib/uploadLimits';
-import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight, Copy } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight, Copy, Crop } from 'lucide-react';
 import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
 import VenueProfilePreviewContent from '@/components/VenueProfilePreviewContent';
+import { ArtistPhotoCropDialog } from '@/components/ArtistPhotoCropDialog';
 interface VenueProfileData {
   id: string;
   user_id: string;
@@ -94,6 +95,10 @@ export default function VenueProfile() {
   const pictureInputRef = useRef<HTMLInputElement>(null);
   const venuePictureInputRef = useRef<HTMLInputElement>(null);
   const [uploadingVenuePicture, setUploadingVenuePicture] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropImageUrl, setCropImageUrl] = useState('');
+  const [pendingCropFiles, setPendingCropFiles] = useState<File[]>([]);
+  const [editingVenuePictureIndex, setEditingVenuePictureIndex] = useState<number | null>(null);
   const previewGalleryRef = useRef<HTMLDivElement>(null);
   const [roomToDelete, setRoomToDelete] = useState<VenueListing | null>(null);
   const [roomFormData, setRoomFormData] = useState({
@@ -404,23 +409,72 @@ export default function VenueProfile() {
       toast.error(`Only ${remaining} more photo${remaining === 1 ? '' : 's'} allowed (max 6).`);
     }
     setUploadingVenuePicture(true);
+    setEditingVenuePictureIndex(null);
+    setPendingCropFiles(toUpload.slice(1));
+    setCropFile(toUpload[0]);
+    setCropImageUrl(URL.createObjectURL(toUpload[0]));
+  };
+  const finishVenueCropping = () => {
+    if (cropImageUrl) URL.revokeObjectURL(cropImageUrl);
+    setCropImageUrl('');
+    setCropFile(null);
+    setPendingCropFiles([]);
+    setEditingVenuePictureIndex(null);
+    setUploadingVenuePicture(false);
+    if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
+  };
+  const advanceVenueCrop = () => {
+    if (cropImageUrl) URL.revokeObjectURL(cropImageUrl);
+    const [nextFile, ...remainingFiles] = pendingCropFiles;
+    if (!nextFile) {
+      finishVenueCropping();
+      return;
+    }
+    setCropFile(nextFile);
+    setCropImageUrl(URL.createObjectURL(nextFile));
+    setPendingCropFiles(remainingFiles);
+  };
+  const handleCroppedVenuePicture = async (croppedFile: File) => {
     try {
-      const newUrls: string[] = [];
-      for (const file of toUpload) {
-        const url = await uploadFile(file);
-        newUrls.push(url);
-      }
-      setFormData(prev => ({
-        ...prev,
-        pictures: [...prev.pictures, ...newUrls],
-        picture: prev.pictures[0] || newUrls[0] || prev.picture
-      }));
+      const url = await uploadFile(croppedFile);
+      setFormData(prev => {
+        const next = editingVenuePictureIndex === null
+          ? [...prev.pictures, url]
+          : prev.pictures.map((picture, index) => index === editingVenuePictureIndex ? url : picture);
+        return { ...prev, pictures: next, picture: next[0] || prev.picture };
+      });
       toast.success('Photo uploaded');
+      if (editingVenuePictureIndex === null) {
+        advanceVenueCrop();
+      } else {
+        finishVenueCropping();
+      }
     } catch (err) {
       toast.error('Upload failed');
     }
-    setUploadingVenuePicture(false);
-    if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
+  };
+  const editVenuePictureCrop = async (url: string, index: number) => {
+    setUploadingVenuePicture(true);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Unable to load photo');
+      const blob = await response.blob();
+      const extension = blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : blob.type === 'image/gif' ? 'gif' : 'jpg';
+      const file = new File([blob], `venue-photo.${extension}`, { type: blob.type || 'image/jpeg' });
+      setEditingVenuePictureIndex(index);
+      setCropFile(file);
+      setCropImageUrl(URL.createObjectURL(file));
+    } catch (error) {
+      setUploadingVenuePicture(false);
+      toast.error('Failed to open photo for cropping');
+    }
+  };
+  const handleVenueCropCancel = () => {
+    if (pendingCropFiles.length > 0) {
+      advanceVenueCrop();
+    } else {
+      finishVenueCropping();
+    }
   };
   const removeVenuePicture = (index: number) => {
     setFormData(prev => {
