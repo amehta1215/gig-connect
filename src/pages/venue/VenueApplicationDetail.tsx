@@ -825,7 +825,7 @@ export default function VenueApplicationDetail() {
             <h1 className="font-display text-4xl md:text-5xl tracking-wide text-primary font-semibold">
               {bandName}
             </h1>
-            <Button variant="ghost" size="icon" onClick={toggleFavorite} className="shrink-0 h-9 w-9">
+            <Button variant="ghost" size="icon" onClick={toggleFavorite} className="shrink-0 h-9 w-9 hover:bg-transparent hover:text-inherit">
               <Heart className={`h-6 w-6 transition-colors ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground hover:text-[#E8556D]'}`} />
             </Button>
           </div>
