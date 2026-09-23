@@ -751,7 +751,7 @@ export default function VenueProfile() {
               >
                 <img src={url} alt={`Venue ${index + 1}`} className="w-full h-full object-cover pointer-events-none" />
                 <div className="absolute bottom-2 left-2">
-                  <Button type="button" size="icon" variant="secondary" onClick={() => editVenuePictureCrop(url, index)} disabled={uploadingVenuePicture} className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" aria-label={`Crop photo ${index + 1}`} title="Crop photo">
+                  <Button type="button" size="icon" variant="ghost" onClick={() => editVenuePictureCrop(url, index)} disabled={uploadingVenuePicture} className="h-8 w-8 rounded-full bg-background/80 text-foreground hover:bg-background hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity" aria-label={`Crop photo ${index + 1}`} title="Crop photo">
                     <Crop className="h-4 w-4" />
                   </Button>
                 </div>
