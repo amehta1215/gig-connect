@@ -1,5 +1,6 @@
 import { File, Download, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface Attachment {
@@ -13,12 +14,19 @@ interface MessageAttachmentsProps {
   attachments: Attachment[] | string | null;
 }
 
+const BUCKET_MARKER = '/message-attachments/';
+const pathFromUrl = (url: string) => {
+  const i = url.indexOf(BUCKET_MARKER);
+  return i >= 0 ? decodeURIComponent(url.slice(i + BUCKET_MARKER.length).split('?')[0]) : null;
+};
+
 export function MessageAttachments({ attachments }: MessageAttachmentsProps) {
   const { toast } = useToast();
   const [downloadingIndex, setDownloadingIndex] = useState<number | null>(null);
+  const [signed, setSigned] = useState<Record<string, string>>({});
 
   // Parse attachments if it's a string
-  const parsedAttachments: Attachment[] = (() => {
+  const rawAttachments: Attachment[] = (() => {
     if (!attachments) return [];
     if (typeof attachments === 'string') {
       try {
@@ -29,6 +37,25 @@ export function MessageAttachments({ attachments }: MessageAttachmentsProps) {
     }
     return attachments;
   })();
+
+  const key = rawAttachments.map((a) => a.url).join('|');
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const next: Record<string, string> = {};
+      for (const a of rawAttachments) {
+        const path = pathFromUrl(a.url);
+        if (!path) continue;
+        const { data } = await supabase.storage.from('message-attachments').createSignedUrl(path, 3600);
+        if (data?.signedUrl) next[a.url] = data.signedUrl;
+      }
+      if (!cancelled) setSigned(next);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  const parsedAttachments = rawAttachments.map((a) => ({ ...a, url: signed[a.url] ?? a.url }));
 
   if (parsedAttachments.length === 0) return null;
 
