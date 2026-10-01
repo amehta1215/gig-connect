@@ -54,12 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfile = async (userId: string, checkNew: boolean = false) => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select('id, first_name, last_name, role, created_at')
       .eq('id', userId)
       .single();
 
     if (data && !error) {
-      setProfile(data as Profile);
+      const { data: userData } = await supabase.auth.getUser();
+      setProfile({ ...(data as any), email: userData.user?.email ?? '' } as Profile);
       // Set default active role based on user's role
       if (data.role === 'venue') {
         setActiveRole('venue');
