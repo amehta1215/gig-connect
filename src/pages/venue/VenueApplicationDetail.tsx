@@ -12,7 +12,7 @@ import { ensureHttp } from '@/lib/utils';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Calendar, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon, PauseCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2, Archive, ExternalLink, MessageSquare, CalendarIcon, PauseCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn, parseLocalDate } from '@/lib/utils';
@@ -889,8 +889,7 @@ export default function VenueApplicationDetail() {
             <p className="text-foreground">
               {application.availability_preference ? availabilityLabels[application.availability_preference] : 'Not specified'}
             </p>
-            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && <p className="text-sm flex items-center gap-1 text-primary">
-                <Calendar className="h-3 w-3" />
+            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && <p className="text-sm text-primary">
                 {format(parseLocalDate(application.availability_start_date), 'MMM d, yyyy')} - {format(parseLocalDate(application.availability_end_date), 'MMM d, yyyy')}
               </p>}
             {application.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0 && <div className="flex flex-wrap gap-1 mt-1">
