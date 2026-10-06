@@ -96,15 +96,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
     };
 
+    const mountedAt = Math.floor(Date.now() / 1000);
+
     const endStaleBrowserSession = async () => {
       try {
         if (sessionStorage.getItem(BROWSER_SESSION_KEY)) return;
         sessionStorage.setItem(BROWSER_SESSION_KEY, '1');
         if (isAuthDeepLink()) return;
         const { data } = await supabase.auth.getSession();
-        if (data.session) {
-          await supabase.auth.signOut();
-        }
+        const session = data.session;
+        if (!session) return;
+        // Never sign out a login that happened during this visit
+        // (e.g. the user logged in before this check finished).
+        if ((window as any).__SH_SIGNED_IN_THIS_VISIT__) return;
+        let issuedAt = 0;
+        try {
+          issuedAt = JSON.parse(atob(session.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).iat ?? 0;
+        } catch { /* ignore */ }
+        if (issuedAt && issuedAt >= mountedAt - 5) return;
+        await supabase.auth.signOut({ scope: 'local' });
       } catch {
         // If storage is unavailable, fall back to normal behaviour
       }
@@ -147,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string, role: UserRole, termsAcceptedAt?: string) => {
+    (window as any).__SH_SIGNED_IN_THIS_VISIT__ = true;
     const redirectUrl = `${window.location.origin}/`;
 
     // Normalize credentials so stray whitespace (common with mobile keyboards
@@ -169,6 +180,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    (window as any).__SH_SIGNED_IN_THIS_VISIT__ = true;
+    try { sessionStorage.setItem('sh-browser-session-active', '1'); } catch { /* ignore */ }
     const normalizedEmail = email.trim().toLowerCase();
     const trimmedPassword = password.trim();
 
