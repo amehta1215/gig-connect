@@ -157,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string, role: UserRole, termsAcceptedAt?: string) => {
+    (window as any).__SH_SIGNED_IN_THIS_VISIT__ = true;
     const redirectUrl = `${window.location.origin}/`;
 
     // Normalize credentials so stray whitespace (common with mobile keyboards
