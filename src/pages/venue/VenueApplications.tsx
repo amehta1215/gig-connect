@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart, RotateCcw, PauseCircle, ChevronDown } from 'lucide-react';
+import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart, RotateCcw, PauseCircle, ChevronDown, Search } from 'lucide-react';
 import { format, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
@@ -105,6 +104,7 @@ export default function VenueApplications() {
   const [filterPayment, setFilterPayment] = useState<string[]>([]);
   const [filterLineup, setFilterLineup] = useState<string[]>([]);
   const [filterRoom, setFilterRoom] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [hasRooms, setHasRooms] = useState<boolean | null>(null);
