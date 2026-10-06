@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart, RotateCcw, PauseCircle, ChevronDown } from 'lucide-react';
+import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart, RotateCcw, PauseCircle, ChevronDown, Search } from 'lucide-react';
 import { format, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
@@ -104,6 +104,7 @@ export default function VenueApplications() {
   const [filterPayment, setFilterPayment] = useState<string[]>([]);
   const [filterLineup, setFilterLineup] = useState<string[]>([]);
   const [filterRoom, setFilterRoom] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [hasRooms, setHasRooms] = useState<boolean | null>(null);
@@ -255,6 +256,18 @@ export default function VenueApplications() {
     }
     if (filterFavorites) {
       filtered = filtered.filter(app => favorites.has(app.id));
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      filtered = filtered.filter(app => {
+        const names = [
+          app.artist_profile?.band_name,
+          app.artist?.first_name,
+          app.artist?.last_name,
+          `${app.artist?.first_name || ''} ${app.artist?.last_name || ''}`
+        ].filter(Boolean).join(' ').toLowerCase();
+        return names.includes(q);
+      });
     }
     if (filterGenre.length > 0) {
       filtered = filtered.filter(app => {
@@ -477,6 +490,26 @@ export default function VenueApplications() {
               ARCHIVED
             </TabsTrigger>
           </TabsList>
+          <div className="relative flex-1 max-w-xs">
+            <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="SEARCH ARTISTS"
+              className="h-8 w-full bg-card border border-border pl-7 pr-7 text-xs font-display tracking-wider placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
+            />
+            {searchQuery && (
+              <span
+                role="button"
+                aria-label="Clear search"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center rounded-full hover:bg-muted-foreground/20 cursor-pointer"
+                onClick={() => setSearchQuery('')}
+              >
+                <X className="h-3 w-3 text-muted-foreground" />
+              </span>
+            )}
+          </div>
           <button onClick={() => setShowFilters(!showFilters)} className={`h-8 px-3 flex items-center justify-center transition-colors text-xs font-display tracking-wider ${showFilters ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}>
             <ListFilter className="h-3 w-3 mr-1" />
             FILTER
