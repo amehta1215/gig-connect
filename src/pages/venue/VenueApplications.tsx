@@ -60,9 +60,6 @@ interface Application {
 type DisplayStatus = 'confirmed' | 'hold' | 'in_progress' | 'archived';
 const genres = ['Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
 const paymentPreferences = [{
-  value: 'all',
-  label: 'All Payments'
-}, {
   value: 'door_split',
   label: 'Door'
 }, {
@@ -107,7 +104,7 @@ export default function VenueApplications() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [sortBy, setSortBy] = useState('newest');
   const [filterGenre, setFilterGenre] = useState<string[]>([]);
-  const [filterPayment, setFilterPayment] = useState('all');
+  const [filterPayment, setFilterPayment] = useState<string[]>([]);
   const [filterLineup, setFilterLineup] = useState('all');
   const [filterRoom, setFilterRoom] = useState('all');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -268,8 +265,8 @@ export default function VenueApplications() {
         return filterGenre.some(selected => artistGenre.includes(selected.toLowerCase()));
       });
     }
-    if (filterPayment !== 'all') {
-      filtered = filtered.filter(app => app.payment_preference === filterPayment);
+    if (filterPayment.length > 0) {
+      filtered = filtered.filter(app => filterPayment.includes(app.payment_preference || ''));
     }
     if (filterLineup !== 'all') {
       filtered = filtered.filter(app => app.lineup_preference === filterLineup);
@@ -523,14 +520,23 @@ export default function VenueApplications() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Select value={filterPayment} onValueChange={setFilterPayment}>
-              <SelectTrigger className="h-8 w-36 bg-card border-border text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentPreferences.map(pref => <SelectItem key={pref.value} value={pref.value}>{pref.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 w-36 justify-between gap-1 bg-card border-border text-xs font-normal">
+                  <span className="truncate">
+                    {filterPayment.length === 0 ? 'All Payments' : filterPayment.length === 1 ? paymentPreferences.find(p => p.value === filterPayment[0])?.label || filterPayment[0] : `Payments (${filterPayment.length})`}
+                  </span>
+                  <ChevronDown className="h-3 w-3 opacity-50 shrink-0" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="max-h-64 overflow-y-auto">
+                {paymentPreferences.map(pref => <DropdownMenuCheckboxItem key={pref.value} checked={filterPayment.includes(pref.value)} onCheckedChange={checked => {
+                  setFilterPayment(prev => checked ? [...prev, pref.value] : prev.filter(p => p !== pref.value));
+                }} onSelect={e => e.preventDefault()}>
+                  {pref.label}
+                </DropdownMenuCheckboxItem>)}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Select value={filterLineup} onValueChange={setFilterLineup}>
               <SelectTrigger className="h-8 w-36 bg-card border-border text-xs">
@@ -575,7 +581,7 @@ export default function VenueApplications() {
             setFilterFavorites(false);
             setSortBy('newest');
             setFilterGenre([]);
-            setFilterPayment('all');
+            setFilterPayment([]);
             setFilterLineup('all');
             setFilterRoom('all');
             setDateRange(undefined);
