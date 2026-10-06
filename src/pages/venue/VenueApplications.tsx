@@ -103,7 +103,7 @@ export default function VenueApplications() {
   const [filterGenre, setFilterGenre] = useState<string[]>([]);
   const [filterPayment, setFilterPayment] = useState<string[]>([]);
   const [filterLineup, setFilterLineup] = useState<string[]>([]);
-  const [filterRoom, setFilterRoom] = useState('all');
+  const [filterRoom, setFilterRoom] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [hasRooms, setHasRooms] = useState<boolean | null>(null);
@@ -268,8 +268,8 @@ export default function VenueApplications() {
     if (filterLineup.length > 0) {
       filtered = filtered.filter(app => filterLineup.includes(app.lineup_preference || ''));
     }
-    if (filterRoom !== 'all') {
-      filtered = filtered.filter(app => app.venue_listing_id === filterRoom);
+    if (filterRoom.length > 0) {
+      filtered = filtered.filter(app => filterRoom.includes(app.venue_listing_id));
     }
     if (dateRange?.from) {
       const filterFrom = startOfDay(dateRange.from);
@@ -553,17 +553,23 @@ export default function VenueApplications() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {venueListings.size > 1 && <Select value={filterRoom} onValueChange={setFilterRoom}>
-                <SelectTrigger className="h-8 w-36 bg-card border-border text-xs">
-                  <SelectValue placeholder="All Rooms" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Rooms</SelectItem>
-                  {Array.from(venueListings.values()).map(listing => <SelectItem key={listing.id} value={listing.id}>
-                      {listing.room_name || listing.venue_name}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>}
+            {venueListings.size > 1 && <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 w-36 justify-between gap-1 bg-card border-border text-xs font-normal">
+                    <span className="truncate">
+                      {filterRoom.length === 0 ? 'All Rooms' : filterRoom.length === 1 ? Array.from(venueListings.values()).find(l => l.id === filterRoom[0])?.room_name || filterRoom.length + ' Room' : `Rooms (${filterRoom.length})`}
+                    </span>
+                    <ChevronDown className="h-3 w-3 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="max-h-64 overflow-y-auto">
+                  {Array.from(venueListings.values()).map(listing => <DropdownMenuCheckboxItem key={listing.id} checked={filterRoom.includes(listing.id)} onCheckedChange={checked => {
+                    setFilterRoom(prev => checked ? [...prev, listing.id] : prev.filter(r => r !== listing.id));
+                  }} onSelect={e => e.preventDefault()}>
+                    {listing.room_name || listing.venue_name}
+                  </DropdownMenuCheckboxItem>)}
+                </DropdownMenuContent>
+              </DropdownMenu>}
 
             <Popover>
               <PopoverTrigger asChild>
@@ -589,7 +595,7 @@ export default function VenueApplications() {
             setFilterGenre([]);
             setFilterPayment([]);
             setFilterLineup([]);
-            setFilterRoom('all');
+            setFilterRoom([]);
             setDateRange(undefined);
           }}>
               <RotateCcw className="h-3 w-3 mr-1" />
