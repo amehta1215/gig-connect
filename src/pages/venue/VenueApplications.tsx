@@ -507,7 +507,7 @@ export default function VenueApplications() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className={cn("h-8 w-32 justify-between gap-1 bg-card border-border text-xs font-normal", filterGenre.length === 0 && "text-muted-foreground")}>
+                <Button variant="outline" size="sm" className="h-8 w-32 justify-between gap-1 bg-card border-border text-xs font-normal">
                   <span className="truncate">
                     {filterGenre.length === 0 ? 'All Genres' : filterGenre.length === 1 ? filterGenre[0] : `Genres (${filterGenre.length})`}
                   </span>
