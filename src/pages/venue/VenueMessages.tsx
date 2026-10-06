@@ -377,7 +377,10 @@ export default function VenueMessages() {
                 <Mail className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
                 <p className="text-muted-foreground text-sm">Empty</p>
               </div> : filteredThreads.map(thread => {
-            const displayName = `${thread.otherParty.name}${thread.otherParty.bandName ? ` (${thread.otherParty.bandName})` : ''}`;
+            const bandName = thread.otherParty.bandName?.trim();
+            const baseName = thread.otherParty.name.trim();
+            const showBand = bandName && bandName.toLowerCase() !== baseName.toLowerCase();
+            const displayName = `${thread.otherParty.name}${showBand ? ` (${thread.otherParty.bandName})` : ''}`;
             const messageCount = thread.messages.length;
             return <SwipeableThreadRow
               key={thread.thread_id}
