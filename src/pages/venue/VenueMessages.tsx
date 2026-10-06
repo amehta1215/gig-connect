@@ -348,7 +348,7 @@ export default function VenueMessages() {
             </div>
             <div className="flex gap-2">
               <Select value={filter} onValueChange={v => setFilter(v as FilterType)}>
-                <SelectTrigger className="flex-1 h-8 text-xs bg-background border-border">
+                <SelectTrigger className="flex-1 h-8 text-xs bg-background border-border focus:outline-none focus:ring-0 focus:ring-offset-0">
                   <SelectValue placeholder="Filter" />
                 </SelectTrigger>
                 <SelectContent>
@@ -359,7 +359,7 @@ export default function VenueMessages() {
                 </SelectContent>
               </Select>
               <Select value={sortBy} onValueChange={v => setSortBy(v as SortType)}>
-                <SelectTrigger className="flex-1 h-8 text-xs bg-background border-border">
+                <SelectTrigger className="flex-1 h-8 text-xs bg-background border-border focus:outline-none focus:ring-0 focus:ring-offset-0">
                   <SelectValue placeholder="Sort" />
                 </SelectTrigger>
                 <SelectContent>
