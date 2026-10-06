@@ -571,25 +571,33 @@ export default function VenueApplications() {
                 </DropdownMenuContent>
               </DropdownMenu>}
 
-            <div className="flex items-center gap-0.5">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className={cn("h-8 w-auto bg-card border-border text-xs justify-start text-left font-normal", !dateRange && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-3 w-3" />
-                    {dateRange?.from ? dateRange.to ? <>
-                          {format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d")}
-                        </> : format(dateRange.from, "MMM d, yyyy") : <span>Date Range</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent initialFocus mode="range" defaultMonth={dateRange?.from} selected={dateRange} onSelect={setDateRange} numberOfMonths={1} className={cn("p-3 pointer-events-auto")} />
-                </PopoverContent>
-              </Popover>
-
-              {dateRange && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDateRange(undefined)}>
-                  <X className="h-3 w-3" />
-                </Button>}
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("h-8 w-auto bg-card border-border text-xs justify-start text-left font-normal", !dateRange && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-3 w-3" />
+                  {dateRange?.from ? dateRange.to ? <>
+                        {format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d")}
+                      </> : format(dateRange.from, "MMM d, yyyy") : <span>Date Range</span>}
+                  {dateRange && (
+                    <span
+                      role="button"
+                      aria-label="Clear date range"
+                      className="ml-2 -mr-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-muted-foreground/20"
+                      onClick={e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setDateRange(undefined);
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent initialFocus mode="range" defaultMonth={dateRange?.from} selected={dateRange} onSelect={setDateRange} numberOfMonths={1} className={cn("p-3 pointer-events-auto")} />
+              </PopoverContent>
+            </Popover>
 
             <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground hover:text-foreground" onClick={() => {
             setFilterFavorites(false);
