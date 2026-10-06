@@ -4,11 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart, RotateCcw, PauseCircle } from 'lucide-react';
+import { Clock, CheckCircle2, Archive, ListFilter, Calendar, Music, CalendarIcon, X, Users, Heart, RotateCcw, PauseCircle, ChevronDown } from 'lucide-react';
 import { format, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { DateRange } from 'react-day-picker';
@@ -105,7 +106,7 @@ export default function VenueApplications() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>('all');
   const [sortBy, setSortBy] = useState('newest');
-  const [filterGenre, setFilterGenre] = useState('all');
+  const [filterGenre, setFilterGenre] = useState<string[]>([]);
   const [filterPayment, setFilterPayment] = useState('all');
   const [filterLineup, setFilterLineup] = useState('all');
   const [filterRoom, setFilterRoom] = useState('all');
@@ -261,8 +262,11 @@ export default function VenueApplications() {
     if (filterFavorites) {
       filtered = filtered.filter(app => favorites.has(app.id));
     }
-    if (filterGenre !== 'all') {
-      filtered = filtered.filter(app => app.artist_profile?.genre?.toLowerCase().includes(filterGenre.toLowerCase()));
+    if (filterGenre.length > 0) {
+      filtered = filtered.filter(app => {
+        const artistGenre = (app.artist_profile?.genre || '').toLowerCase();
+        return filterGenre.some(selected => artistGenre.includes(selected.toLowerCase()));
+      });
     }
     if (filterPayment !== 'all') {
       filtered = filtered.filter(app => app.payment_preference === filterPayment);
@@ -501,15 +505,23 @@ export default function VenueApplications() {
               </SelectContent>
             </Select>
 
-            <Select value={filterGenre} onValueChange={setFilterGenre}>
-              <SelectTrigger className="h-8 w-32 bg-card border-border text-xs">
-                <SelectValue placeholder="Genre" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Genres</SelectItem>
-                {genres.map(genre => <SelectItem key={genre} value={genre}>{genre}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className={cn("h-8 w-32 justify-between gap-1 bg-card border-border text-xs font-normal", filterGenre.length === 0 && "text-muted-foreground")}>
+                  <span className="truncate">
+                    {filterGenre.length === 0 ? 'All Genres' : filterGenre.length === 1 ? filterGenre[0] : `Genres (${filterGenre.length})`}
+                  </span>
+                  <ChevronDown className="h-3 w-3 opacity-50 shrink-0" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="max-h-64 overflow-y-auto">
+                {genres.map(genre => <DropdownMenuCheckboxItem key={genre} checked={filterGenre.includes(genre)} onCheckedChange={checked => {
+                  setFilterGenre(prev => checked ? [...prev, genre] : prev.filter(g => g !== genre));
+                }} onSelect={e => e.preventDefault()}>
+                  {genre}
+                </DropdownMenuCheckboxItem>)}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Select value={filterPayment} onValueChange={setFilterPayment}>
               <SelectTrigger className="h-8 w-36 bg-card border-border text-xs">
@@ -562,7 +574,7 @@ export default function VenueApplications() {
             <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground hover:text-foreground" onClick={() => {
             setFilterFavorites(false);
             setSortBy('newest');
-            setFilterGenre('all');
+            setFilterGenre([]);
             setFilterPayment('all');
             setFilterLineup('all');
             setFilterRoom('all');
