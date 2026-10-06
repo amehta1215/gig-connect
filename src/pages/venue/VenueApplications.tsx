@@ -485,7 +485,7 @@ export default function VenueApplications() {
 
         {/* Filters - hidden by default */}
         {showFilters && <div className="flex flex-wrap gap-2 items-center mt-4">
-            <Button variant="outline" size="sm" onClick={() => setFilterFavorites(!filterFavorites)} className={`h-8 px-2 bg-card border-border ${filterFavorites ? 'text-[#E8556D] hover:text-[#E8556D]' : 'text-muted-foreground hover:text-foreground'}`}>
+            <Button variant="outline" size="sm" onClick={() => setFilterFavorites(!filterFavorites)} className={`h-8 px-2 bg-card border-border hover:bg-card ${filterFavorites ? 'text-[#E8556D] hover:text-[#E8556D]' : 'text-muted-foreground hover:text-foreground'}`}>
               <Heart className={`h-3 w-3 ${filterFavorites ? 'fill-[#E8556D]' : ''}`} />
             </Button>
 
