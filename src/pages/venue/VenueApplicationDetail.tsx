@@ -848,7 +848,7 @@ export default function VenueApplicationDetail() {
           <div className="relative group">
             <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
               {artistProfile.pictures.map((pic, i) => (
-                <div key={i} className="flex-none w-64 aspect-[4/3] bg-secondary overflow-hidden snap-start">
+                <div key={i} className="flex-none w-[70vw] md:w-[calc((100%-1.5rem)/3)] aspect-[4/3] bg-secondary overflow-hidden snap-start">
                   <img src={pic} alt={`${bandName} photo ${i + 1}`} className="w-full h-full object-cover" />
                 </div>
               ))}
