@@ -105,6 +105,7 @@ export default function VenueApplications() {
   const [filterLineup, setFilterLineup] = useState<string[]>([]);
   const [filterRoom, setFilterRoom] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
   const [hasRooms, setHasRooms] = useState<boolean | null>(null);
@@ -490,12 +491,16 @@ export default function VenueApplications() {
               ARCHIVED
             </TabsTrigger>
           </TabsList>
-          <div className="relative flex-1 max-w-xs">
+          {searchOpen ? <div className="relative flex-1 max-w-xs">
             <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <input
               type="text"
+              autoFocus
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
+              onBlur={() => {
+                if (!searchQuery) setSearchOpen(false);
+              }}
               placeholder="SEARCH ARTISTS"
               className="h-8 w-full bg-card border border-border pl-7 pr-7 text-xs font-display tracking-wider placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
             />
@@ -509,7 +514,13 @@ export default function VenueApplications() {
                 <X className="h-3 w-3 text-muted-foreground" />
               </span>
             )}
-          </div>
+          </div> : <button
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search artists"
+            className="h-8 w-8 flex items-center justify-center bg-card border border-border text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Search className="h-4 w-4" />
+          </button>}
           <button onClick={() => setShowFilters(!showFilters)} className={`h-8 px-3 flex items-center justify-center transition-colors text-xs font-display tracking-wider ${showFilters ? 'bg-primary text-primary-foreground' : 'bg-card border border-border text-muted-foreground hover:text-foreground'}`}>
             <ListFilter className="h-3 w-3 mr-1" />
             FILTER
