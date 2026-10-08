@@ -182,7 +182,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     (window as any).__SH_SIGNED_IN_THIS_VISIT__ = true;
     try { sessionStorage.setItem('sh-browser-session-active', '1'); } catch { /* ignore */ }
-    const normalizedEmail = email.trim().toLowerCase();
+    // Login aliases: alternate addresses that sign in to an existing account.
+    const LOGIN_ALIASES: Record<string, string> = {
+      'theparlor@gmail.com': 'examplevenue@gmail.com',
+    };
+    const enteredEmail = email.trim().toLowerCase();
+    const normalizedEmail = LOGIN_ALIASES[enteredEmail] ?? enteredEmail;
     const trimmedPassword = password.trim();
 
     const { error } = await supabase.auth.signInWithPassword({
