@@ -28,8 +28,8 @@ interface AuthDialogProps {
 
 export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', promptMessage }: AuthDialogProps) {
   const [mode, setMode] = useState<AuthMode>(defaultMode);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('examplevenue@gmail.com');
+  const [password, setPassword] = useState('examplevenue!');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -148,7 +148,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
     setErrors({});
     // keep email so it carries across login <-> forgot
     if (newMode === 'signup') setEmail('');
-    setPassword('');
+    if (newMode === 'login') { setEmail('examplevenue@gmail.com'); setPassword('examplevenue!'); } else setPassword('');
     setConfirmPassword('');
     setFirstName('');
     setLastName('');
