@@ -780,19 +780,25 @@ export default function VenueApplicationDetail() {
     label: 'TikTok',
     value: artistProfile?.tiktok_link
   }].filter(link => link.value);
-  return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+  return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto w-full min-w-0 overflow-x-hidden">
       {/* Status Banner with Back, Status, Actions, and Favorite */}
-      <div className={`flex items-center gap-2 px-2 py-2 ${config.bgColor} ${config.color}`}>
+      <div className="space-y-2">
+      <div className={`flex flex-wrap items-center gap-2 px-2 py-2 ${config.bgColor} ${config.color}`}>
         <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0 text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="flex items-center gap-2 font-display tracking-widest text-sm">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-display tracking-widest text-sm min-w-0">
           <StatusIcon className="h-4 w-4" />
           {config.label}
-          <span className="text-muted-foreground ml-2">
+          <span className="text-muted-foreground md:ml-2">
             Submitted {format(new Date(application.created_at), 'MMM d, yyyy')}
           </span>
         </div>
+        <div className="hidden md:flex gap-2 ml-auto">{renderActions()}</div>
+      </div>
+      <div className="flex md:hidden flex-wrap gap-2">{renderActions()}</div>
+      </div>
+      {false && <div>
         <div className="flex gap-2 ml-auto">
           <Button size="sm" onClick={handleMessageClick} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
             <MessageSquare className="h-4 w-4 mr-1" />
