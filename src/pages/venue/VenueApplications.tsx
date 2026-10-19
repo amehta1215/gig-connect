@@ -474,8 +474,8 @@ export default function VenueApplications() {
     <div className="space-y-6 animate-fade-in">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
-          <TabsList className="bg-card border border-border p-0 h-auto w-full flex flex-wrap md:w-auto">
-            <TabsTrigger value="all" className="flex-1 md:flex-none basis-full md:basis-auto justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
+          <TabsList className="bg-card border border-border p-0 h-auto w-full flex md:w-auto">
+            <TabsTrigger value="all" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
               ALL
             </TabsTrigger>
             <TabsTrigger value="in_progress" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
@@ -487,7 +487,7 @@ export default function VenueApplications() {
             <TabsTrigger value="confirmed" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
               CONFIRMED
             </TabsTrigger>
-            <TabsTrigger value="archived" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
+            <TabsTrigger value="archived" className="hidden md:inline-flex md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
               ARCHIVED
             </TabsTrigger>
           </TabsList>
@@ -531,6 +531,16 @@ export default function VenueApplications() {
 
         {/* Filters - hidden by default */}
         {showFilters && <div className="flex flex-wrap gap-2 items-center mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              aria-pressed={activeTab === 'archived'}
+              onClick={() => setActiveTab(activeTab === 'archived' ? 'all' : 'archived')}
+              className={cn('h-8 text-xs md:hidden', activeTab === 'archived' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : 'bg-card border-border')}
+            >
+              <Archive className="h-3 w-3 mr-1" />
+              ARCHIVED APPLICATIONS
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setFilterFavorites(!filterFavorites)} className={`h-8 px-2 bg-card border-border hover:bg-card ${filterFavorites ? 'text-[#E8556D] hover:text-[#E8556D]' : 'text-muted-foreground hover:text-foreground'}`}>
               <Heart className={`h-3 w-3 ${filterFavorites ? 'fill-[#E8556D]' : ''}`} />
             </Button>
@@ -646,6 +656,7 @@ export default function VenueApplications() {
             </Popover>
 
             <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground hover:text-foreground" onClick={() => {
+            if (activeTab === 'archived') setActiveTab('all');
             setFilterFavorites(false);
             setSortBy('newest');
             setFilterGenre([]);
