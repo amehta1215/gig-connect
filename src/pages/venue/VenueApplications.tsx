@@ -531,16 +531,6 @@ export default function VenueApplications() {
 
         {/* Filters - hidden by default */}
         {showFilters && <div className="flex flex-wrap gap-2 items-center mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              aria-pressed={activeTab === 'archived'}
-              onClick={() => setActiveTab(activeTab === 'archived' ? 'all' : 'archived')}
-              className={cn('h-8 text-xs md:hidden', activeTab === 'archived' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : 'bg-card border-border')}
-            >
-              <Archive className="h-3 w-3 mr-1" />
-              ARCHIVED APPLICATIONS
-            </Button>
             <Button variant="outline" size="sm" onClick={() => setFilterFavorites(!filterFavorites)} className={`h-8 px-2 bg-card border-border hover:bg-card ${filterFavorites ? 'text-[#E8556D] hover:text-[#E8556D]' : 'text-muted-foreground hover:text-foreground'}`}>
               <Heart className={`h-3 w-3 ${filterFavorites ? 'fill-[#E8556D]' : ''}`} />
             </Button>
