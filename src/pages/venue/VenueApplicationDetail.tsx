@@ -780,6 +780,26 @@ export default function VenueApplicationDetail() {
     label: 'TikTok',
     value: artistProfile?.tiktok_link
   }].filter(link => link.value);
+  const actionCls = "bg-muted text-foreground border border-border hover:bg-muted-foreground/20";
+  const renderActions = () => <>
+      <Button size="sm" onClick={handleMessageClick} className={actionCls}>
+        <MessageSquare className="h-4 w-4 mr-1" />
+        Message
+      </Button>
+      {application.status === 'in_progress' && <>
+          <Button size="sm" onClick={handleAcceptClick} className={actionCls}>Accept</Button>
+          <Button size="sm" onClick={() => updateStatus('archived')} className={actionCls}>Archive</Button>
+        </>}
+      {application.status === 'accepted' && gigStatus === 'hold' && holdGigs.length > 0 && <Button size="sm" onClick={handleConfirmHoldClick} className={actionCls}>
+          Confirm Gig
+        </Button>}
+      {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} className={actionCls}>
+          {gigStatus === 'hold' ? 'Rescind Hold' : 'Rescind Acceptance'}
+        </Button>}
+      {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} className={actionCls}>
+          Unarchive
+        </Button>}
+    </>;
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto w-full min-w-0 overflow-x-hidden">
       {/* Status Banner with Back, Status, Actions, and Favorite */}
       <div className="space-y-2">
@@ -797,31 +817,6 @@ export default function VenueApplicationDetail() {
         <div className="hidden md:flex gap-2 ml-auto">{renderActions()}</div>
       </div>
       <div className="flex md:hidden flex-wrap gap-2">{renderActions()}</div>
-      </div>
-      {false && <div>
-        <div className="flex gap-2 ml-auto">
-          <Button size="sm" onClick={handleMessageClick} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-            <MessageSquare className="h-4 w-4 mr-1" />
-            Message
-          </Button>
-          {application.status === 'in_progress' && <>
-              <Button size="sm" onClick={handleAcceptClick} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-                Accept
-              </Button>
-              <Button size="sm" onClick={() => updateStatus('archived')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-                Archive
-              </Button>
-            </>}
-          {application.status === 'accepted' && gigStatus === 'hold' && holdGigs.length > 0 && <Button size="sm" onClick={handleConfirmHoldClick} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-              Confirm Gig
-            </Button>}
-          {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-              {gigStatus === 'hold' ? 'Rescind Hold' : 'Rescind Acceptance'}
-            </Button>}
-          {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-              Unarchive
-            </Button>}
-        </div>
       </div>
 
       {/* Artist Header */}
