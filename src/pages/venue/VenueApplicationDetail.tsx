@@ -780,42 +780,43 @@ export default function VenueApplicationDetail() {
     label: 'TikTok',
     value: artistProfile?.tiktok_link
   }].filter(link => link.value);
-  return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+  const actionCls = "bg-muted text-foreground border border-border hover:bg-muted-foreground/20";
+  const renderActions = () => <>
+      <Button size="sm" onClick={handleMessageClick} className={actionCls}>
+        <MessageSquare className="h-4 w-4 mr-1" />
+        Message
+      </Button>
+      {application.status === 'in_progress' && <>
+          <Button size="sm" onClick={handleAcceptClick} className={actionCls}>Accept</Button>
+          <Button size="sm" onClick={() => updateStatus('archived')} className={actionCls}>Archive</Button>
+        </>}
+      {application.status === 'accepted' && gigStatus === 'hold' && holdGigs.length > 0 && <Button size="sm" onClick={handleConfirmHoldClick} className={actionCls}>
+          Confirm Gig
+        </Button>}
+      {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} className={actionCls}>
+          {gigStatus === 'hold' ? 'Rescind Hold' : 'Rescind Acceptance'}
+        </Button>}
+      {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} className={actionCls}>
+          Unarchive
+        </Button>}
+    </>;
+  return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto w-full min-w-0 overflow-x-hidden">
       {/* Status Banner with Back, Status, Actions, and Favorite */}
-      <div className={`flex items-center gap-2 px-2 py-2 ${config.bgColor} ${config.color}`}>
+      <div className="space-y-2">
+      <div className={`flex flex-wrap items-center gap-2 px-2 py-2 ${config.bgColor} ${config.color}`}>
         <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0 text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="flex items-center gap-2 font-display tracking-widest text-sm">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-display tracking-widest text-sm min-w-0">
           <StatusIcon className="h-4 w-4" />
           {config.label}
-          <span className="text-muted-foreground ml-2">
+          <span className="text-muted-foreground md:ml-2">
             Submitted {format(new Date(application.created_at), 'MMM d, yyyy')}
           </span>
         </div>
-        <div className="flex gap-2 ml-auto">
-          <Button size="sm" onClick={handleMessageClick} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-            <MessageSquare className="h-4 w-4 mr-1" />
-            Message
-          </Button>
-          {application.status === 'in_progress' && <>
-              <Button size="sm" onClick={handleAcceptClick} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-                Accept
-              </Button>
-              <Button size="sm" onClick={() => updateStatus('archived')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-                Archive
-              </Button>
-            </>}
-          {application.status === 'accepted' && gigStatus === 'hold' && holdGigs.length > 0 && <Button size="sm" onClick={handleConfirmHoldClick} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-              Confirm Gig
-            </Button>}
-          {application.status === 'accepted' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-              {gigStatus === 'hold' ? 'Rescind Hold' : 'Rescind Acceptance'}
-            </Button>}
-          {application.status === 'archived' && <Button size="sm" onClick={() => updateStatus('in_progress')} className="bg-muted text-foreground border border-border hover:bg-muted-foreground/20">
-              Unarchive
-            </Button>}
-        </div>
+        <div className="hidden md:flex gap-2 ml-auto">{renderActions()}</div>
+      </div>
+      <div className="flex md:hidden flex-wrap gap-2">{renderActions()}</div>
       </div>
 
       {/* Artist Header */}
