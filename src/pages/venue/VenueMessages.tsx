@@ -343,7 +343,7 @@ export default function VenueMessages() {
     return firstMessage.subject?.replace(/^Re:\s*/i, '') || '(No subject)';
   };
   return <div className="space-y-6 animate-fade-in">
-      <div className="flex h-[calc(100vh-220px)] min-h-[400px] border border-border overflow-hidden bg-card">
+      <div className={`flex h-[calc(100vh-220px)] min-h-[400px] border border-border overflow-hidden bg-card ${(selectedThreadId || isComposing) ? 'max-md:h-[calc(100dvh-121px)]' : ''}`}>
         {/* Thread List */}
         <div className={`w-full md:w-1/3 border-r border-border flex flex-col ${selectedThreadId || isComposing ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-3 border-b border-border space-y-2">
