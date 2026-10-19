@@ -100,10 +100,10 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
                 variant="ghost"
                 size="sm"
                 onClick={handleSwitchToVenue}
-                className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 text-muted-foreground hover:text-foreground"
               >
-                <ArrowLeftRight className="h-4 w-4" />
-                <span className="text-xs font-display tracking-widest">SWITCH TO VENUE</span>
+                <ArrowLeftRight className="h-4 w-4 shrink-0" />
+                <span className="text-[10px] sm:text-xs font-display tracking-wider sm:tracking-widest whitespace-nowrap">SWITCH TO VENUE</span>
               </Button>
 
               <DropdownMenu>
