@@ -473,24 +473,25 @@ export default function VenueApplications() {
 
     <div className="space-y-6 animate-fade-in">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex items-center gap-2">
-          <TabsList className="bg-card border border-border p-0 h-auto">
-            <TabsTrigger value="all" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+          <TabsList className="bg-card border border-border p-0 h-auto w-full flex md:w-auto">
+            <TabsTrigger value="all" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
               ALL
             </TabsTrigger>
-            <TabsTrigger value="in_progress" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+            <TabsTrigger value="in_progress" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
               PENDING
             </TabsTrigger>
-            <TabsTrigger value="hold" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+            <TabsTrigger value="hold" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
               HOLD
             </TabsTrigger>
-            <TabsTrigger value="confirmed" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+            <TabsTrigger value="confirmed" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
               CONFIRMED
             </TabsTrigger>
-            <TabsTrigger value="archived" className="font-display tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-4 py-2">
+            <TabsTrigger value="archived" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
               ARCHIVED
             </TabsTrigger>
           </TabsList>
+          <div className="flex items-center gap-2">
           {searchOpen ? <div className="relative flex-1 max-w-xs">
             <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <input
@@ -525,6 +526,7 @@ export default function VenueApplications() {
             <ListFilter className="h-3 w-3 mr-1" />
             FILTER
           </button>
+          </div>
         </div>
 
         {/* Filters - hidden by default */}
