@@ -491,6 +491,7 @@ export default function VenueApplications() {
               ARCHIVED
             </TabsTrigger>
           </TabsList>
+          <div className="flex items-center gap-2">
           {searchOpen ? <div className="relative flex-1 max-w-xs">
             <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <input
@@ -525,6 +526,7 @@ export default function VenueApplications() {
             <ListFilter className="h-3 w-3 mr-1" />
             FILTER
           </button>
+          </div>
         </div>
 
         {/* Filters - hidden by default */}
