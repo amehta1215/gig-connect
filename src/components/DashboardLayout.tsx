@@ -165,6 +165,7 @@ export default function DashboardLayout({
         onOpenChange={setAuthDialogOpen}
         defaultMode={authDialogMode}
         promptMessage={authDialogMessage}
+        allowSignedIn
       />
     </div>;
 }
