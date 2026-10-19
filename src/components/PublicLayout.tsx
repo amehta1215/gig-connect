@@ -143,14 +143,6 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
                 </Link>
               );
             })}
-            {/* Mobile Switch to Venue */}
-            <button
-              onClick={handleSwitchToVenue}
-              className="px-3 py-1.5 text-xs font-display tracking-widest whitespace-nowrap text-muted-foreground hover:text-foreground flex items-center gap-1"
-            >
-              <ArrowLeftRight className="h-3 w-3" />
-              SWITCH TO VENUE
-            </button>
           </nav>
         </div>
       </header>
