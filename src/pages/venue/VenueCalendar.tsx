@@ -762,8 +762,8 @@ export default function VenueCalendar() {
       {/* Right column */}
       <div className="flex flex-col gap-6">
         {/* Events on selected date */}
-        <div className="relative bg-card border border-border flex flex-col" style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
-          <div className="flex-1 overflow-y-auto p-6 pb-2">
+        <div className="relative bg-card border border-border flex flex-col h-auto md:h-[var(--panel-h)] md:min-h-[250px]" style={{ '--panel-h': `${selectedDateBoxHeight}px` } as React.CSSProperties}>
+          <div className="p-6 pb-2 md:flex-1 md:overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
