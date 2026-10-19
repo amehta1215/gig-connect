@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -24,9 +24,10 @@ interface AuthDialogProps {
   onOpenChange: (open: boolean) => void;
   defaultMode?: AuthMode;
   promptMessage?: string;
+  allowSignedIn?: boolean;
 }
 
-export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', promptMessage }: AuthDialogProps) {
+export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', promptMessage, allowSignedIn = false }: AuthDialogProps) {
   const [mode, setMode] = useState<AuthMode>(defaultMode);
   const [email, setEmail] = useState('examplevenue@gmail.com');
   const [password, setPassword] = useState('examplevenue!');
@@ -48,9 +49,14 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   const { signIn, signUp, user, profile, loading, isNewUser, clearNewUserFlag } = useAuth();
   const navigate = useNavigate();
 
+  // Remember who was signed in when the dialog opened, so an already signed-in
+  // session can keep it open when it was opened deliberately (e.g. switching sides).
+  const sessionUidAtOpen = useRef<string | null>(null);
+
   // Reset form when mode changes or dialog opens
   useEffect(() => {
     if (open) {
+      sessionUidAtOpen.current = user?.id ?? null;
       setMode(defaultMode);
       setErrors({});
       setEmailSent(false);
@@ -62,6 +68,9 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   // Handle successful auth - redirect appropriately
   useEffect(() => {
     if (!loading && user && profile && open) {
+      // Opened deliberately while already signed in: keep it open until a
+      // different account signs in.
+      if (allowSignedIn && sessionUidAtOpen.current === user.id) return;
       onOpenChange(false);
       if (isNewUser) {
         setWelcomeOpen(true);
