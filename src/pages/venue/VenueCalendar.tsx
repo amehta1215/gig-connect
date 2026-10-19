@@ -859,7 +859,7 @@ export default function VenueCalendar() {
                 </div>}
             </div>
           </div>
-          <div className="h-4 cursor-ns-resize flex items-center justify-center z-10 transition-colors group flex-shrink-0"
+          <div className="h-4 cursor-ns-resize hidden md:flex items-center justify-center z-10 transition-colors group flex-shrink-0"
             onMouseDown={handleResizeStart}
             onTouchStart={handleResizeStart}
             role="button"
