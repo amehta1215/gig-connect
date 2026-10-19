@@ -803,11 +803,11 @@ export default function VenueApplicationDetail() {
   return <div className="space-y-6 animate-fade-in max-w-4xl mx-auto w-full min-w-0 overflow-x-hidden">
       {/* Status Banner with Back, Status, Actions, and Favorite */}
       <div className="space-y-2">
-      <div className={`flex flex-wrap items-center gap-2 px-2 py-2 ${config.bgColor} ${config.color}`}>
-        <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0 text-foreground">
+      <div className={`flex items-center gap-1 md:gap-2 px-1.5 md:px-2 py-2 ${config.bgColor} ${config.color}`}>
+        <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0 h-8 w-8 md:h-10 md:w-10 text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-display tracking-widest text-sm min-w-0">
+        <div className="flex items-center gap-x-1.5 md:gap-x-2 font-display tracking-wide md:tracking-widest text-sm min-w-0 whitespace-nowrap">
           <StatusIcon className="h-4 w-4" />
           {config.label}
           <span className="text-muted-foreground md:ml-2">
