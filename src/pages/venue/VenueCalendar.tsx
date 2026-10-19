@@ -762,8 +762,8 @@ export default function VenueCalendar() {
       {/* Right column */}
       <div className="flex flex-col gap-6">
         {/* Events on selected date */}
-        <div className="relative bg-card border border-border flex flex-col" style={{ height: selectedDateBoxHeight, minHeight: 250 }}>
-          <div className="flex-1 overflow-y-auto p-6 pb-2">
+        <div className="relative bg-card border border-border flex flex-col h-auto md:h-[var(--panel-h)] md:min-h-[250px]" style={{ '--panel-h': `${selectedDateBoxHeight}px` } as React.CSSProperties}>
+          <div className="p-6 pb-2 md:flex-1 md:overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-sm text-primary tracking-widest font-semibold">
               {selectedDate ? format(selectedDate, 'MMMM d, yyyy').toUpperCase() : 'SELECT A DATE'}
@@ -806,7 +806,7 @@ export default function VenueCalendar() {
                       }
                     }
                   }}
-                  className={`transition-all rounded-sm ${confirmDropHighlight ? 'min-h-[72px] bg-green-600/20 border-2 border-dashed border-green-600 py-4 flex items-center justify-center' : isDraggingHold ? 'min-h-[56px] border-2 border-dashed border-green-600/40 py-3 flex items-center justify-center' : confirmedGigs.length === 0 ? 'min-h-[40px]' : 'min-h-0 h-2'}`}
+                  className={`transition-all rounded-sm ${confirmDropHighlight ? 'min-h-[72px] bg-green-600/20 border-2 border-dashed border-green-600 py-4 flex items-center justify-center' : isDraggingHold ? 'min-h-[56px] border-2 border-dashed border-green-600/40 py-3 flex items-center justify-center' : confirmedGigs.length === 0 ? 'min-h-[40px] max-md:min-h-0' : 'min-h-0 h-2'}`}
                 >
                   {confirmedGigs.length === 0 && !confirmDropHighlight && !isDraggingHold && (
                     <p className="text-muted-foreground text-sm py-2 px-2">No Artists Confirmed Yet</p>
@@ -859,7 +859,7 @@ export default function VenueCalendar() {
                 </div>}
             </div>
           </div>
-          <div className="h-4 cursor-ns-resize flex items-center justify-center z-10 transition-colors group flex-shrink-0"
+          <div className="h-4 cursor-ns-resize hidden md:flex items-center justify-center z-10 transition-colors group flex-shrink-0"
             onMouseDown={handleResizeStart}
             onTouchStart={handleResizeStart}
             role="button"
