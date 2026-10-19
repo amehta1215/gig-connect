@@ -650,7 +650,7 @@ export default function VenueApplications() {
               size="sm"
               aria-pressed={activeTab === 'archived'}
               onClick={() => setActiveTab(activeTab === 'archived' ? 'all' : 'archived')}
-              className={cn('h-8 text-xs font-normal md:hidden', activeTab === 'archived' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : 'bg-card border-border')}
+              className={cn('h-8 text-xs font-normal md:hidden', activeTab === 'archived' ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground' : 'bg-card border-border text-muted-foreground hover:text-foreground')}
             >
               <Archive className="h-3 w-3 mr-1" />
               Archived applications
