@@ -806,7 +806,7 @@ export default function VenueCalendar() {
                       }
                     }
                   }}
-                  className={`transition-all rounded-sm ${confirmDropHighlight ? 'min-h-[72px] bg-green-600/20 border-2 border-dashed border-green-600 py-4 flex items-center justify-center' : isDraggingHold ? 'min-h-[56px] border-2 border-dashed border-green-600/40 py-3 flex items-center justify-center' : confirmedGigs.length === 0 ? 'min-h-[40px]' : 'min-h-0 h-2'}`}
+                  className={`transition-all rounded-sm ${confirmDropHighlight ? 'min-h-[72px] bg-green-600/20 border-2 border-dashed border-green-600 py-4 flex items-center justify-center' : isDraggingHold ? 'min-h-[56px] border-2 border-dashed border-green-600/40 py-3 flex items-center justify-center' : confirmedGigs.length === 0 ? 'min-h-[40px] max-md:min-h-0' : 'min-h-0 h-2'}`}
                 >
                   {confirmedGigs.length === 0 && !confirmDropHighlight && !isDraggingHold && (
                     <p className="text-muted-foreground text-sm py-2 px-2">No Artists Confirmed Yet</p>
