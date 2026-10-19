@@ -85,11 +85,24 @@ export default function VenueMessages() {
   const [threadToRestore, setThreadToRestore] = useState<Thread | null>(null);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom when thread is selected
+  // Scroll the message list (not the page) so the latest message is visible
   useEffect(() => {
-    if (selectedThreadId && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'instant' });
+    if (selectedThreadId) {
+      const container = messagesContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      } else {
+        // Container mounts with the thread panel; wait a frame before scrolling
+        requestAnimationFrame(() => {
+          if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+          }
+        });
+      }
+      // Keep the page itself at the top — footer stays out of view
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [selectedThreadId]);
 
@@ -479,7 +492,7 @@ export default function VenueMessages() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
                 {selectedThread.messages.map(message => {
               const isSent = message.sender_id === user?.id;
               const senderName = isSent ? 'You' : `${message.sender?.first_name} ${message.sender?.last_name}`;
