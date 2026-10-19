@@ -52,11 +52,13 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   // Remember who was signed in when the dialog opened, so an already signed-in
   // session can keep it open when it was opened deliberately (e.g. switching sides).
   const sessionUidAtOpen = useRef<string | null>(null);
+  const loginAttempted = useRef(false);
 
   // Reset form when mode changes or dialog opens
   useEffect(() => {
     if (open) {
       sessionUidAtOpen.current = user?.id ?? null;
+      loginAttempted.current = false;
       setMode(defaultMode);
       setErrors({});
       setEmailSent(false);
@@ -70,7 +72,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
     if (!loading && user && profile && open) {
       // Opened deliberately while already signed in: keep it open until a
       // different account signs in.
-      if (allowSignedIn && sessionUidAtOpen.current === user.id) return;
+      if (allowSignedIn && sessionUidAtOpen.current === user.id && !loginAttempted.current) return;
       onOpenChange(false);
       if (isNewUser) {
         setWelcomeOpen(true);
@@ -116,6 +118,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
     setIsLoading(true);
     try {
       const { error } = await signIn(email, password);
+      loginAttempted.current = true;
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           toast.error('That email and password don\'t match. Try again or reset your password.');
