@@ -475,7 +475,7 @@ export default function VenueApplications() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
           <TabsList className="bg-card border border-border p-0 h-auto w-full flex flex-wrap md:w-auto">
-            <TabsTrigger value="all" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2 w-full md:w-auto">
+            <TabsTrigger value="all" className="flex-1 md:flex-none basis-full md:basis-auto justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
               ALL
             </TabsTrigger>
             <TabsTrigger value="in_progress" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
