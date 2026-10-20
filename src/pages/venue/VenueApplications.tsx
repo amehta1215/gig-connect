@@ -374,27 +374,37 @@ export default function VenueApplications() {
     const availability = formatAvailability(application);
     const isFavorited = favorites.has(application.id);
     const mainPicture = application.artist_profile?.pictures?.[0];
+    const nameTitle = (cls: string) => <h3 className={`font-display text-[22px] md:text-xl text-foreground tracking-wide leading-tight ${cls} ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
+        {bandName}
+      </h3>;
+    const statusPill = (cls: string) => <div className={`items-center gap-1 text-[10px] font-display tracking-wider ${cls} ${config.bgColor} ${config.color}`}>
+        <StatusIcon className="h-3 w-3" />
+        {config.label}
+      </div>;
+    const favoriteButton = <button onClick={e => toggleFavorite(e, application.id)} className="p-1 hover:bg-secondary/50 transition-colors">
+        <Heart className={`h-4 w-4 ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground'}`} />
+      </button>;
     return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className="bg-card border border-border hover:border-primary/30 px-4 py-3 transition-colors cursor-pointer">
+        {/* Phone: artist name + status tag share the top row, picture sits below them */}
+        <div className="md:hidden mb-1.5 min-w-0 overflow-hidden">
+          <div className="float-right">{favoriteButton}</div>
+          {nameTitle('inline')}
+          {statusPill('inline-flex ml-1 align-middle px-1.5 py-0.5')}
+        </div>
         <div className="flex items-start gap-4">
           {/* Artist Picture */}
-          {mainPicture ? <div className="w-[92px] h-[92px] flex-shrink-0 mt-1.5">
+          {mainPicture ? <div className="w-[92px] h-[92px] flex-shrink-0 md:mt-1.5">
               <img src={mainPicture} alt={bandName} className="w-full h-full object-cover" />
-            </div> : <div className="w-[92px] h-[92px] flex-shrink-0 mt-1.5 bg-secondary flex items-center justify-center">
+            </div> : <div className="w-[92px] h-[92px] flex-shrink-0 md:mt-1.5 bg-secondary flex items-center justify-center">
               <Music className="h-8 w-8 text-muted-foreground" />
             </div>}
           
           <div className="flex-1 min-w-0 pt-0.5">
             <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  
-                  <h3 className={`font-display text-xl text-foreground tracking-wide ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
-                    {bandName}
-                  </h3>
-                  <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
-                    <StatusIcon className="h-3 w-3" />
-                    {config.label}
-                  </div>
+              <div className="flex-1 min-w-0">
+                <div className="hidden md:flex items-center gap-2">
+                  {nameTitle('min-w-0')}
+                  {statusPill('flex flex-shrink-0 px-2 py-0.5')}
                 </div>
                 
                 {/* Room/Venue applied to */}
@@ -407,10 +417,8 @@ export default function VenueApplications() {
                     Availability: <span className="text-primary">{availability}</span>
                   </p>}
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button onClick={e => toggleFavorite(e, application.id)} className="p-1 hover:bg-secondary/50 transition-colors">
-                  <Heart className={`h-4 w-4 ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground'}`} />
-                </button>
+              <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+                {favoriteButton}
               </div>
             </div>
 
