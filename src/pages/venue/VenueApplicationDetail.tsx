@@ -875,26 +875,26 @@ export default function VenueApplicationDetail() {
         <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
           {/* Genre */}
           {artistProfile?.genre && <div className="space-y-1">
-              <h3 className="font-display text-xs text-primary tracking-widest">GENRE</h3>
+              <h3 className="font-display text-sm md:text-xs text-primary tracking-widest">GENRE</h3>
               <p className="text-foreground">{artistProfile.genre}</p>
             </div>}
 
           {/* Based In */}
           {artistProfile?.location && <div className="space-y-1">
-              <h3 className="font-display text-xs text-primary tracking-widest">BASED IN</h3>
+              <h3 className="font-display text-sm md:text-xs text-primary tracking-widest">BASED IN</h3>
               <p className="text-foreground">{artistProfile.location}</p>
             </div>}
           {/* Availability */}
           <div className="space-y-1">
-            <h3 className="font-display text-xs text-primary tracking-widest">AVAILABILITY</h3>
+            <h3 className="font-display text-sm md:text-xs text-primary tracking-widest">AVAILABILITY</h3>
             <p className="text-foreground">
               {application.availability_preference ? availabilityLabels[application.availability_preference] : 'Not specified'}
             </p>
-            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && <p className="text-sm text-primary">
+            {application.availability_preference === 'date_range' && application.availability_start_date && application.availability_end_date && <p className="text-base md:text-sm text-primary">
                 {format(parseLocalDate(application.availability_start_date), 'MMM d, yyyy')} - {format(parseLocalDate(application.availability_end_date), 'MMM d, yyyy')}
               </p>}
             {application.availability_preference === 'specific_dates' && application.availability_specific_dates && application.availability_specific_dates.length > 0 && <div className="flex flex-wrap gap-1 mt-1">
-                {application.availability_specific_dates.map((date, i) => <span key={i} className="text-xs bg-secondary px-2 py-0.5">
+                {application.availability_specific_dates.map((date, i) => <span key={i} className="text-sm md:text-xs bg-secondary px-2 py-0.5">
                     {format(parseLocalDate(date), 'MMM d, yyyy')}
                   </span>)}
               </div>}
@@ -902,7 +902,7 @@ export default function VenueApplicationDetail() {
 
           {/* Payment */}
           <div className="space-y-1">
-            <h3 className="font-display text-xs text-primary tracking-widest">PAYMENT PREFERENCE</h3>
+            <h3 className="font-display text-sm md:text-xs text-primary tracking-widest">PAYMENT PREFERENCE</h3>
             <p className="text-foreground">
               {application.payment_preference ? paymentLabels[application.payment_preference] : 'Not specified'}
             </p>
@@ -910,7 +910,7 @@ export default function VenueApplicationDetail() {
 
           {/* Lineup */}
           <div className="space-y-1">
-            <h3 className="font-display text-xs text-primary tracking-widest">LINEUP</h3>
+            <h3 className="font-display text-sm md:text-xs text-primary tracking-widest">LINEUP</h3>
             <p className="text-foreground">
               {application.lineup_preference ? lineupLabels[application.lineup_preference] : 'Not specified'}
             </p>
@@ -918,22 +918,22 @@ export default function VenueApplicationDetail() {
         </div>
 
         {application.message && <div className="space-y-1 pt-2 border-t border-border">
-            <h3 className="font-display text-xs text-primary tracking-widest">MESSAGE</h3>
-            <p className="text-muted-foreground text-sm whitespace-pre-wrap">{application.message}</p>
+            <h3 className="font-display text-sm md:text-xs text-primary tracking-widest">MESSAGE</h3>
+            <p className="text-muted-foreground text-base md:text-sm whitespace-pre-wrap">{application.message}</p>
           </div>}
       </div>
 
       {/* Artist Bio */}
       {artistProfile?.bio && <div className="bg-card border border-border p-6">
-          <h2 className="font-display text-sm text-primary tracking-widest mb-3">BIO</h2>
+          <h2 className="font-display text-base md:text-sm text-primary tracking-widest mb-3">BIO</h2>
           <p className="whitespace-pre-wrap text-primary">{artistProfile.bio}</p>
         </div>}
 
       {/* Social Links */}
       {socialLinks.length > 0 && <div className="bg-card border border-border p-6">
-          <h2 className="font-display text-sm text-primary tracking-widest mb-3">LINKS</h2>
+          <h2 className="font-display text-base md:text-sm text-primary tracking-widest mb-3">LINKS</h2>
           <div className="flex flex-wrap gap-2">
-            {socialLinks.map(link => <a key={link.key} href={ensureHttp(link.value!)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm bg-secondary px-3 py-1.5 hover:bg-secondary/80 transition-colors">
+            {socialLinks.map(link => <a key={link.key} href={ensureHttp(link.value!)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-base md:text-sm bg-secondary px-3 py-1.5 hover:bg-secondary/80 transition-colors">
                 {link.label}
                 <ExternalLink className="h-3 w-3" />
               </a>)}
@@ -942,7 +942,7 @@ export default function VenueApplicationDetail() {
 
       {/* Featured Samples */}
       {artistProfile?.featured_samples && artistProfile.featured_samples.length > 0 && <div className="bg-card border border-border p-6">
-          <h2 className="font-display text-sm text-primary tracking-widest mb-3">FEATURED SAMPLES</h2>
+          <h2 className="font-display text-base md:text-sm text-primary tracking-widest mb-3">FEATURED SAMPLES</h2>
           <div className="space-y-2">
             {artistProfile.featured_samples.map((sample, i) => <audio key={i} controls className="w-full">
                 <source src={sample} />
@@ -952,18 +952,18 @@ export default function VenueApplicationDetail() {
 
       {/* Past Gigs */}
       {artistProfile?.past_gigs && artistProfile.past_gigs.length > 0 && <div className="bg-card border border-border p-6">
-          <h2 className="font-display text-sm text-primary tracking-widest mb-3">PAST GIGS</h2>
+          <h2 className="font-display text-base md:text-sm text-primary tracking-widest mb-3">PAST GIGS</h2>
           <ul className="space-y-1">
-            {artistProfile.past_gigs.map((gig, i) => <li key={i} className="text-sm text-primary">{gig}</li>)}
+            {artistProfile.past_gigs.map((gig, i) => <li key={i} className="text-base md:text-sm text-primary">{gig}</li>)}
           </ul>
         </div>}
 
       {/* Press Links */}
       {artistProfile?.press_links && artistProfile.press_links.length > 0 && <div className="bg-card border border-border p-6">
-          <h2 className="font-display text-sm text-primary tracking-widest mb-3">PRESS</h2>
+          <h2 className="font-display text-base md:text-sm text-primary tracking-widest mb-3">PRESS</h2>
           <ul className="space-y-1">
             {artistProfile.press_links.map((link, i) => <li key={i}>
-                <a href={ensureHttp(link)} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1">
+                <a href={ensureHttp(link)} target="_blank" rel="noopener noreferrer" className="text-base md:text-sm text-primary hover:underline flex items-center gap-1">
                   {link}
                   <ExternalLink className="h-3 w-3" />
                 </a>
