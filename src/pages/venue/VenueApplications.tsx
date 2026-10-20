@@ -386,7 +386,7 @@ export default function VenueApplications() {
       </button>;
     return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className="bg-card border border-border hover:border-primary/30 px-3.5 md:px-4 py-3 transition-colors cursor-pointer">
         {/* Phone: artist name + status tag share the top row, picture sits below them */}
-        <div className="md:hidden mb-1.5 min-w-0 flex items-center gap-0.5">
+        <div className="md:hidden mb-1.5 min-w-0 flex items-center gap-2">
           {nameTitle('min-w-0 truncate')}
           {statusPill('flex-shrink-0 px-1 py-0.5')}
           <div className="ml-auto flex-shrink-0">{favoriteButton}</div>
