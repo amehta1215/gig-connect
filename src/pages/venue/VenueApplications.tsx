@@ -384,11 +384,11 @@ export default function VenueApplications() {
     const favoriteButton = <button onClick={e => toggleFavorite(e, application.id)} className="p-1 hover:bg-secondary/50 transition-colors">
         <Heart className={`h-4 w-4 ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground'}`} />
       </button>;
-    return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className="bg-card border border-border hover:border-primary/30 px-4 py-3 transition-colors cursor-pointer">
+    return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className="bg-card border border-border hover:border-primary/30 px-3.5 md:px-4 py-3 transition-colors cursor-pointer">
         {/* Phone: artist name + status tag share the top row, picture sits below them */}
-        <div className="md:hidden mb-1.5 min-w-0 flex items-center gap-1">
+        <div className="md:hidden mb-1.5 min-w-0 flex items-center gap-0.5">
           {nameTitle('min-w-0 truncate')}
-          {statusPill('flex-shrink-0 px-1.5 py-0.5')}
+          {statusPill('flex-shrink-0 px-1 py-0.5')}
           <div className="ml-auto flex-shrink-0">{favoriteButton}</div>
         </div>
         <div className="flex items-start gap-4">
