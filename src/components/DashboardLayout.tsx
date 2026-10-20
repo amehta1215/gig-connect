@@ -99,7 +99,7 @@ export default function DashboardLayout({
                 variant="ghost"
                 size="sm"
                 onClick={handleSwitchPrompt}
-                className="flex md:hidden items-center gap-1 px-1 text-muted-foreground hover:text-foreground"
+                className="flex md:hidden items-center gap-1 px-1 text-muted-foreground hover:text-foreground hover:bg-transparent active:bg-transparent"
               >
                 <ArrowLeftRight className="h-4 w-4 shrink-0" />
                 <span className="text-[10px] font-display tracking-wider whitespace-nowrap uppercase">
