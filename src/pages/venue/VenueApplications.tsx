@@ -374,7 +374,7 @@ export default function VenueApplications() {
     const availability = formatAvailability(application);
     const isFavorited = favorites.has(application.id);
     const mainPicture = application.artist_profile?.pictures?.[0];
-    const nameTitle = (cls: string) => <h3 className={`font-display text-[26px] md:text-xl text-foreground tracking-wide leading-tight ${cls} ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
+    const nameTitle = (cls: string) => <h3 className={`font-display text-[24px] md:text-xl text-foreground tracking-wide leading-tight ${cls} ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
         {bandName}
       </h3>;
     const statusPill = (cls: string) => <div className={`items-center gap-1 text-[10px] font-display tracking-wider ${cls} ${config.bgColor} ${config.color}`}>
