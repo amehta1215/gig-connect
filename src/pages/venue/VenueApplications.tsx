@@ -374,7 +374,7 @@ export default function VenueApplications() {
     const availability = formatAvailability(application);
     const isFavorited = favorites.has(application.id);
     const mainPicture = application.artist_profile?.pictures?.[0];
-    const nameTitle = (cls: string) => <h3 className={`font-display text-2xl md:text-xl text-foreground tracking-wide leading-tight ${cls} ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
+    const nameTitle = (cls: string) => <h3 className={`font-display text-[22px] md:text-xl text-foreground tracking-wide leading-tight ${cls} ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
         {bandName}
       </h3>;
     const statusPill = (cls: string) => <div className={`items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${cls} ${config.bgColor} ${config.color}`}>
@@ -389,7 +389,7 @@ export default function VenueApplications() {
         <div className="md:hidden mb-1.5 min-w-0 overflow-hidden">
           <div className="float-right ml-1">{favoriteButton}</div>
           {nameTitle('inline')}
-          {statusPill('inline-flex ml-2 align-middle')}
+          {statusPill('inline-flex ml-1.5 align-middle')}
         </div>
         <div className="flex items-start gap-4">
           {/* Artist Picture */}
