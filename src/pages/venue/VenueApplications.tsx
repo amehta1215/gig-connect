@@ -426,20 +426,24 @@ export default function VenueApplications() {
                 {application.message}
               </p>}
 
-            {/* Tags row - Genre, Act Type, Payment, Submitted */}
-            <div className="flex flex-wrap gap-1 mt-3">
-              {application.artist_profile?.genre && <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200">
-                  {application.artist_profile.genre}
-                </span>}
-              {application.lineup_preference && <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200">
-                  {lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}
-                </span>}
-              {application.payment_preference && <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200">
-                  {application.payment_preference.replace('_', ' ')}
-                </span>}
-              <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200">
-                Submitted {format(new Date(application.created_at), 'M/d/yy')}
-              </span>
+            {/* Tags: genre + co-acts share a line, payment + submitted share the next */}
+            <div className="flex flex-col md:flex-row md:flex-wrap gap-1 mt-3">
+              <div className="flex flex-wrap gap-1 md:contents">
+                {application.artist_profile?.genre && <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200 whitespace-nowrap">
+                    {application.artist_profile.genre}
+                  </span>}
+                {application.lineup_preference && <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200 whitespace-nowrap">
+                    {lineupLabels[application.lineup_preference] || application.lineup_preference.replace('_', ' ')}
+                  </span>}
+              </div>
+              <div className="flex flex-wrap gap-1 md:contents">
+                {application.payment_preference && <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200 whitespace-nowrap">
+                    {application.payment_preference.replace('_', ' ')}
+                  </span>}
+                <span className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200 whitespace-nowrap">
+                  Submitted {format(new Date(application.created_at), 'M/d/yy')}
+                </span>
+              </div>
             </div>
           </div>
         </div>
