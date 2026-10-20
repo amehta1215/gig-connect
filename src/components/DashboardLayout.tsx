@@ -110,7 +110,7 @@ export default function DashboardLayout({
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Button variant="ghost" size="icon" className="h-9 w-9 text-foreground hover:bg-transparent hover:text-foreground active:bg-transparent">
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
