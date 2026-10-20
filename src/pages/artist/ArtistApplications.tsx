@@ -131,7 +131,7 @@ export default function ArtistApplications() {
                 {application.venue_listing.location}
               </p>}
           </div>
-          <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
+          <div className={`flex items-center gap-1 whitespace-nowrap flex-shrink-0 px-2 py-0.5 text-[10px] font-display tracking-wider ${config.bgColor} ${config.color}`}>
             <StatusIcon className="h-3 w-3" />
             {displayStatus === 'hold' ? `HOLD #${holdPriority || '—'}` : config.label}
           </div>
