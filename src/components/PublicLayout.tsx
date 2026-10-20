@@ -108,7 +108,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Button variant="ghost" size="icon" className="h-9 w-9 hover:bg-transparent active:bg-transparent">
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
