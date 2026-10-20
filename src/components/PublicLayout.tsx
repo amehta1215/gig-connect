@@ -135,10 +135,10 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
                   onClick={(e) => handleTabClick(e, tab)}
                   className="flex-none flex justify-center"
                 >
-                  <span className={`px-1 py-1.5 text-xs font-display tracking-widest whitespace-nowrap transition-all ${
+                  <span className={`px-1 pt-1.5 pb-1 text-xs font-display tracking-widest whitespace-nowrap transition-all border-b-2 ${
                     isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'border-primary text-foreground'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`}>
                     {tab.label}
                   </span>
