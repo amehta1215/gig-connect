@@ -374,7 +374,7 @@ export default function VenueApplications() {
     const availability = formatAvailability(application);
     const isFavorited = favorites.has(application.id);
     const mainPicture = application.artist_profile?.pictures?.[0];
-    const nameTitle = <h3 className={`font-display text-2xl md:text-xl text-foreground tracking-wide min-w-0 truncate ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
+    const nameTitle = <h3 className={`font-display text-2xl md:text-xl text-foreground tracking-wide min-w-0 leading-tight ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
         {bandName}
       </h3>;
     const statusPill = <div className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider flex-shrink-0 ${config.bgColor} ${config.color}`}>
@@ -386,7 +386,7 @@ export default function VenueApplications() {
       </button>;
     return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className="bg-card border border-border hover:border-primary/30 px-4 py-3 transition-colors cursor-pointer">
         {/* Phone: artist name + status tag form the top row, picture sits below them */}
-        <div className="flex items-center gap-2 min-w-0 md:hidden mb-2">
+        <div className="flex items-start gap-1.5 min-w-0 md:hidden mb-1.5">
           {nameTitle}
           {statusPill}
           <div className="ml-auto flex-shrink-0">{favoriteButton}</div>
