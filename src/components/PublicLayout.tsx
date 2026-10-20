@@ -100,7 +100,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
                 variant="ghost"
                 size="sm"
                 onClick={handleSwitchToVenue}
-                className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 text-muted-foreground hover:text-foreground"
+                className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 text-muted-foreground hover:text-foreground hover:bg-transparent active:bg-transparent"
               >
                 <ArrowLeftRight className="h-4 w-4 shrink-0" />
                 <span className="text-[10px] sm:text-xs font-display tracking-wider sm:tracking-widest whitespace-nowrap">SWITCH TO VENUE</span>
