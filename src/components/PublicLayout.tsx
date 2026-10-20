@@ -123,7 +123,7 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
           </div>
 
           {/* Mobile Navigation */}
-          <nav className="md:hidden flex items-center gap-1 pb-3 overflow-x-auto -mx-4 px-4">
+          <nav className="md:hidden flex items-stretch justify-between pb-3 -mx-4 px-4">
             {tabs.map((tab) => {
               const isActive =
                 location.pathname === tab.href ||
@@ -133,13 +133,15 @@ export default function PublicLayout({ children, tabs }: PublicLayoutProps) {
                   key={tab.href}
                   to={tab.requiresAuth ? '#' : tab.href}
                   onClick={(e) => handleTabClick(e, tab)}
-                  className={`px-3 py-1.5 text-xs font-display tracking-widest whitespace-nowrap transition-all ${
+                  className="flex-none flex justify-center"
+                >
+                  <span className={`px-1 py-1.5 text-xs font-display tracking-widest whitespace-nowrap transition-all ${
                     isActive
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {tab.label}
+                  }`}>
+                    {tab.label}
+                  </span>
                 </Link>
               );
             })}
