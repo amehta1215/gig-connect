@@ -377,7 +377,7 @@ export default function VenueApplications() {
     const nameTitle = (cls: string) => <h3 className={`font-display text-[24px] md:text-xl text-foreground tracking-wide leading-tight ${cls} ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
         {bandName}
       </h3>;
-    const statusPill = (cls: string) => <div className={`items-center gap-1 text-[10px] font-display tracking-wider ${cls} ${config.bgColor} ${config.color}`}>
+    const statusPill = (cls: string) => <div className={`flex items-center gap-1 whitespace-nowrap text-[10px] font-display tracking-wider ${cls} ${config.bgColor} ${config.color}`}>
         <StatusIcon className="h-3 w-3" />
         {config.label}
       </div>;
