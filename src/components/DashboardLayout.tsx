@@ -142,7 +142,7 @@ export default function DashboardLayout({
           </div>
 
           {/* Mobile Navigation */}
-          <nav className="md:hidden flex items-stretch justify-between pb-3 -mx-4 px-4">
+          <nav className={`md:hidden flex items-stretch pb-3 -mx-4 px-4 ${tabs.length <= 3 ? 'justify-center gap-8' : 'justify-between'}`}>
             {tabs.map(tab => {
             const isActive = location.pathname === tab.href || tab.href !== '/artist' && tab.href !== '/venue' && location.pathname.startsWith(tab.href);
             return <Link key={tab.href} to={tab.href} className="flex-none flex justify-center">
