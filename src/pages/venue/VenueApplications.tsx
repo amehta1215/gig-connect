@@ -374,7 +374,7 @@ export default function VenueApplications() {
     const availability = formatAvailability(application);
     const isFavorited = favorites.has(application.id);
     const mainPicture = application.artist_profile?.pictures?.[0];
-    const nameTitle = (cls: string) => <h3 className={`font-display text-[22px] md:text-xl text-foreground tracking-wide leading-tight ${cls} ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
+    const nameTitle = (cls: string) => <h3 className={`font-display text-[24px] md:text-xl text-foreground tracking-wide leading-tight ${cls} ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
         {bandName}
       </h3>;
     const statusPill = (cls: string) => <div className={`items-center gap-1 text-[10px] font-display tracking-wider ${cls} ${config.bgColor} ${config.color}`}>
@@ -384,12 +384,12 @@ export default function VenueApplications() {
     const favoriteButton = <button onClick={e => toggleFavorite(e, application.id)} className="p-1 hover:bg-secondary/50 transition-colors">
         <Heart className={`h-4 w-4 ${isFavorited ? 'fill-[#E8556D] text-[#E8556D]' : 'text-muted-foreground'}`} />
       </button>;
-    return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className="bg-card border border-border hover:border-primary/30 px-4 py-3 transition-colors cursor-pointer">
+    return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className="bg-card border border-border hover:border-primary/30 px-3.5 md:px-4 py-3 transition-colors cursor-pointer">
         {/* Phone: artist name + status tag share the top row, picture sits below them */}
-        <div className="md:hidden mb-1.5 min-w-0 overflow-hidden">
-          <div className="float-right">{favoriteButton}</div>
-          {nameTitle('inline')}
-          {statusPill('inline-flex ml-1 align-middle px-1.5 py-0.5')}
+        <div className="md:hidden mb-1.5 min-w-0 flex items-center gap-0.5">
+          {nameTitle('min-w-0 truncate')}
+          {statusPill('flex-shrink-0 px-1 py-0.5')}
+          <div className="ml-auto flex-shrink-0">{favoriteButton}</div>
         </div>
         <div className="flex items-start gap-4">
           {/* Artist Picture */}
