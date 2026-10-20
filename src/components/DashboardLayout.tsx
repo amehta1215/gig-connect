@@ -146,7 +146,7 @@ export default function DashboardLayout({
             {tabs.map(tab => {
             const isActive = location.pathname === tab.href || tab.href !== '/artist' && tab.href !== '/venue' && location.pathname.startsWith(tab.href);
             return <Link key={tab.href} to={tab.href} className="flex-none flex justify-center">
-                  <span className={`px-1 py-1.5 text-xs font-display tracking-widest whitespace-nowrap transition-all ${isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                  <span className={`px-1 pt-1.5 pb-1 text-xs font-display tracking-widest whitespace-nowrap transition-all border-b-2 ${isActive ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
                     {tab.label}
                   </span>
                 </Link>;
