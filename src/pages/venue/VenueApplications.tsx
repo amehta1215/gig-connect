@@ -377,7 +377,7 @@ export default function VenueApplications() {
     const nameTitle = (cls: string) => <h3 className={`font-display text-[22px] md:text-xl text-foreground tracking-wide leading-tight ${cls} ${!application.is_read ? 'font-bold' : 'font-normal'}`}>
         {bandName}
       </h3>;
-    const statusPill = (cls: string) => <div className={`items-center gap-1 px-2 py-0.5 text-[10px] font-display tracking-wider ${cls} ${config.bgColor} ${config.color}`}>
+    const statusPill = (cls: string) => <div className={`items-center gap-1 text-[10px] font-display tracking-wider ${cls} ${config.bgColor} ${config.color}`}>
         <StatusIcon className="h-3 w-3" />
         {config.label}
       </div>;
@@ -387,9 +387,9 @@ export default function VenueApplications() {
     return <div onClick={() => navigate(`/venue/applications/${application.id}`)} className="bg-card border border-border hover:border-primary/30 px-4 py-3 transition-colors cursor-pointer">
         {/* Phone: artist name + status tag share the top row, picture sits below them */}
         <div className="md:hidden mb-1.5 min-w-0 overflow-hidden">
-          <div className="float-right ml-1">{favoriteButton}</div>
+          <div className="float-right">{favoriteButton}</div>
           {nameTitle('inline')}
-          {statusPill('inline-flex ml-1.5 align-middle')}
+          {statusPill('inline-flex ml-1 align-middle px-1.5 py-0.5')}
         </div>
         <div className="flex items-start gap-4">
           {/* Artist Picture */}
@@ -404,7 +404,7 @@ export default function VenueApplications() {
               <div className="flex-1 min-w-0">
                 <div className="hidden md:flex items-center gap-2">
                   {nameTitle('min-w-0')}
-                  {statusPill('flex flex-shrink-0')}
+                  {statusPill('flex flex-shrink-0 px-2 py-0.5')}
                 </div>
                 
                 {/* Room/Venue applied to */}
