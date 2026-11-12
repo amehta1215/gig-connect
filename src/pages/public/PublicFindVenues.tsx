@@ -8,6 +8,7 @@ import { UnifiedVenueSearch } from '@/components/UnifiedVenueSearch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import AuthDialog from '@/components/AuthDialog';
+import { VenueCardGallery } from '@/components/VenueCardGallery';
 interface VenueListing {
   id: string;
   venue_name: string;
@@ -22,6 +23,7 @@ interface VenueListing {
 interface VenueProfile {
   id: string;
   picture: string | null;
+  pictures?: string[] | null;
   genres?: string[] | null;
 }
 const genres = ['Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Pop', 'Folk', 'Metal', 'Indie', 'Blues', 'Country'];
@@ -72,7 +74,7 @@ export default function PublicFindVenues() {
       if (profileIds.length > 0) {
         const {
           data: profilesData
-        } = await supabase.from('venue_profiles').select('id, picture, genres').in('id', profileIds);
+        } = await supabase.from('venue_profiles').select('id, picture, pictures, genres').in('id', profileIds);
         if (profilesData) {
           const profilesMap: Record<string, VenueProfile> = {};
           profilesData.forEach(p => {
@@ -241,14 +243,7 @@ export default function PublicFindVenues() {
 
               {/* Image */}
               <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
-                {(() => {
-            const venueProfile = venueProfiles[venue.venue_profile_id];
-            const firstRoomPic = venues.find(v => v.venue_profile_id === venue.venue_profile_id && v.pictures && v.pictures.length > 0)?.pictures?.[0] || null;
-            const displayPicture = venueProfile?.picture || firstRoomPic;
-            return displayPicture ? <img src={displayPicture} alt={venue.venue_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="absolute inset-0 flex items-center justify-center bg-heat">
-                      <Music className="h-12 w-12 text-primary/30" />
-                    </div>;
-          })()}
+                <VenueCardGallery venueName={venue.venue_name} pictures={venueProfiles[venue.venue_profile_id]?.pictures} picture={venueProfiles[venue.venue_profile_id]?.picture} />
                 {/* Capacity badge */}
                 {(() => {
                   const range = capacityRangeByVenue[venue.venue_profile_id];
