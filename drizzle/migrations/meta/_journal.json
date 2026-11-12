@@ -43,6 +43,13 @@
       "when": 1794513812278,
       "tag": "0005_scope_media_bucket_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794513977351,
+      "tag": "0006_scope_profiles_select",
+      "breakpoints": true
     }
   ]
 }

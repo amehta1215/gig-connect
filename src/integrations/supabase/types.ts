@@ -558,6 +558,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_view_profile: {
+        Args: { _target: string; _viewer: string }
+        Returns: boolean
+      }
       generate_venue_slug: {
         Args: { _id: string; _name: string }
         Returns: string
