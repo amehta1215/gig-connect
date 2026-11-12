@@ -697,7 +697,7 @@ export default function VenueProfile() {
 
         {/* Shareable Link */}
         <div className="space-y-2 pt-3">
-          <Label className="block font-display text-base tracking-wide">SHAREABLE LINK</Label>
+          <Label className="block">Shareable Link</Label>
           {!editingSlug ? (
             <div className="flex items-center gap-2 flex-wrap">
               <code className="text-xs bg-secondary px-2 py-1.5 rounded break-all">{shareUrl}</code>
