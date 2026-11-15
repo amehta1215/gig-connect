@@ -188,7 +188,7 @@ export default function ArtistGigDetail() {
     // Fetch venue listing
     const {
       data: venueData
-    } = await supabase.from('venue_listings').select('venue_name, room_name, location').eq('id', gigData.venue_listing_id).single();
+    } = !gigData.venue_listing_id ? { data: null } : await supabase.from('venue_listings').select('venue_name, room_name, location').eq('id', gigData.venue_listing_id).single();
     if (venueData) {
       setVenueListing(venueData);
     }
