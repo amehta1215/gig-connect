@@ -90,7 +90,7 @@ export async function findArtistDateConflicts(
   const { data: rows } = await query;
   if (!rows || rows.length === 0) return [];
 
-  const listingIds = Array.from(new Set(rows.map(r => r.venue_listing_id)));
+  const listingIds = Array.from(new Set(rows.map(r => r.venue_listing_id).filter(Boolean) as string[]));
   const { data: listings } = await supabase
     .from('venue_listings')
     .select('id, venue_name, room_name')

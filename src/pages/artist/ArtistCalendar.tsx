@@ -125,7 +125,7 @@ export default function ArtistCalendar() {
       const enrichedGigs = await Promise.all(gigsData.map(async (gig) => {
         const {
           data: venueListing
-        } = await supabase.from('venue_listings').select(`
+        } = !gig.venue_listing_id ? { data: null } : await supabase.from('venue_listings').select(`
             venue_name,
             room_name,
             location,
@@ -168,26 +168,12 @@ export default function ArtistCalendar() {
     }
     setCreating(true);
 
-    // For artists, we need to find or create a placeholder venue listing
-    // Since they may not have venue listings, we'll create a manual event 
-    // that uses a placeholder venue_listing_id (this requires schema flexibility)
-
-    // Get the first venue listing available (for the venue_listing_id requirement)
-    const {
-      data: anyListing
-    } = await supabase.from('venue_listings').select('id').limit(1).single();
-    if (!anyListing) {
-      toast.error('Unable to create event - no venues available');
-      setCreating(false);
-      return;
-    }
-
-    // Create gig listing without application_id, using new columns for manual venue/location
+    // Personal event: not tied to any venue room or application
     const {
       data: newGig,
       error
     } = await supabase.from('gig_listings').insert({
-      venue_listing_id: anyListing.id,
+      venue_listing_id: null,
       artist_id: user!.id,
       gig_date: format(eventDate, 'yyyy-MM-dd'),
       show_time: eventTime || null,
