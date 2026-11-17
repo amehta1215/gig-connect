@@ -1,5 +1,5 @@
 import ReactMarkdown from "react-markdown";
-import privacyPolicy from "@/content/privacy-policy.md?raw";
+import { privacyPolicyMarkdown as privacyPolicy } from "@/content/privacyPolicy";
 
 export default function PrivacyPolicyContent() {
   return (
