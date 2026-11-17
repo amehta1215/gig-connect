@@ -78,6 +78,13 @@
       "when": 1794936839406,
       "tag": "0010_enable_scheduler",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794951540226,
+      "tag": "0011_restrict_deleted_account_labels_to_counterparties",
+      "breakpoints": true
     }
   ]
 }
