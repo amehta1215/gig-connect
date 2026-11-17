@@ -14,9 +14,9 @@
 | Login, email, password | Permanently deleted. Email can sign up again as a brand-new account. |
 | Name, email copy, artist/venue profile, bio, links | Deleted. |
 | Profile photos (artist + venue + room photos) | Files deleted from storage; links stop working (after short caching). |
-| Messages | Kept for the other person. Deleted side shows **"Deleted User"**, no profile link, no replies possible. |
+| Messages | Kept for the other person. Deleted side shows **"Band/Venue Name: Deleted Artist/Venue"** (or "Deleted User" if no name was set), no profile link, no replies possible. |
 | Attachments the deleted user sent/received in kept conversations | Kept privately for the other person only; deleted user can never open them. |
-| Confirmed bookings and holds | Kept with original date, time, status, notes, openers. Shown as **"Deleted Artist"** / **"Deleted Venue"**. Never cancelled automatically. |
+| Confirmed bookings and holds | Kept with original date, time, status, notes, openers. Shown as **"Band Name: Deleted Artist"** / **"Venue Name: Deleted Venue"**. Never cancelled automatically. |
 | Pending booking requests | Kept for the venue, marked "Account deleted"; cannot be accepted or confirmed. |
 | Manual calendar events of the survivor | Kept, untouched; links to deleted people/rooms cleared, a saved name label shown instead. |
 | Favorites, likes | Deleted. |
@@ -31,7 +31,7 @@ A new account with the same email gets a new internal ID, so nothing old reconne
 2. Change link rules (additive, no data loss):
    - messages sender/receiver: stop chaining deletion; on deletion, re-point to the placeholder.
    - applications.artist_id, gig_listings.application_id, venue_listing_id: stop cascading; keep rows.
-   - Add saved display fields on bookings/requests (`artist_display_name`, `venue_display_name`, `room_display_name`) filled at deletion time with "Deleted Artist"/"Deleted Venue" (we will NOT keep the real name — see Decision A).
+   - Add saved display fields on bookings/requests (`artist_display_name`, `venue_display_name`, `room_display_name`) filled at deletion time with the band/venue/room name followed by a colon and the deletion label, e.g. "The Parlor: Deleted Venue" or "Night Owls: Deleted Artist". The person's real first/last name and email are not kept.
    - Add `artist_deleted_at` / `venue_deleted_at` flags on applications and gig listings.
 3. Venue deletion: rooms are hidden (unpublished, details stripped) rather than erased while any booking still refers to them, so the artist keeps their booking history. Removed fully once no bookings refer to them.
 4. Database guard: a pending request from a deleted account cannot change to HOLD/CONFIRMED; messages cannot be sent to a deleted account.
@@ -82,7 +82,7 @@ Step 1 adds a notice: "Your profile, photos and login will be deleted. Messages 
 - Old public photo links in caches/CDNs may show for a short time after deletion.
 
 ## Decisions I need from you
-- **A.** Show "Deleted Artist"/"Deleted Venue" only (recommended, most private), or keep the band/venue name on confirmed bookings?
+- **A.** Decided: keep the band/venue name followed by ": Deleted Artist" or ": Deleted Venue".
 - **B.** Accept the retention periods above, or set your own?
 - **C.** When a venue is deleted, should the artist's confirmed future gigs stay listed as "confirmed" (requirement says yes), with a note that the venue account is gone?
 - **D.** Orphaned files: report only, or delete after you review the list?
