@@ -6,7 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { termsParagraphs } from "@/content/legal";
+import TermsOfServiceContent from "@/components/TermsOfServiceContent";
 import PrivacyPolicyContent from "@/components/PrivacyPolicyContent";
 
 export default function Legal() {
@@ -27,11 +27,7 @@ export default function Legal() {
           <AccordionItem value="terms">
             <AccordionTrigger className="text-left">Terms of Service</AccordionTrigger>
             <AccordionContent>
-              <div className="text-sm text-muted-foreground leading-relaxed space-y-4">
-                {termsParagraphs.map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
-              </div>
+              <TermsOfServiceContent />
             </AccordionContent>
           </AccordionItem>
         </Accordion>

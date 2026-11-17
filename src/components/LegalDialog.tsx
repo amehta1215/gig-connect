@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { termsParagraphs } from '@/content/legal';
+import TermsOfServiceContent from '@/components/TermsOfServiceContent';
 import PrivacyPolicyContent from '@/components/PrivacyPolicyContent';
 
 interface LegalDialogProps {
@@ -21,11 +21,7 @@ export default function LegalDialog({ open, onOpenChange }: LegalDialogProps) {
             <h3 className="font-display uppercase tracking-widest text-xs text-muted-foreground">
               Terms of Service
             </h3>
-            <div className="text-sm text-muted-foreground leading-relaxed space-y-4">
-              {termsParagraphs.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
+            <TermsOfServiceContent />
           </section>
           <section className="space-y-4">
             <h3 className="font-display uppercase tracking-widest text-xs text-muted-foreground">
