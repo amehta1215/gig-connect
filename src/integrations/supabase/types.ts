@@ -227,7 +227,7 @@ export type Database = {
           openers: Json | null
           show_time: string | null
           updated_at: string
-          venue_listing_id: string | null
+          venue_listing_id: string
         }
         Insert: {
           application_id?: string | null
@@ -244,7 +244,7 @@ export type Database = {
           openers?: Json | null
           show_time?: string | null
           updated_at?: string
-          venue_listing_id: string | null
+          venue_listing_id: string
         }
         Update: {
           application_id?: string | null
@@ -261,7 +261,7 @@ export type Database = {
           openers?: Json | null
           show_time?: string | null
           updated_at?: string
-          venue_listing_id?: string | null
+          venue_listing_id?: string
         }
         Relationships: [
           {
