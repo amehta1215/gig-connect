@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchParties } from '@/lib/accountParties';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -213,10 +214,13 @@ export default function VenueApplicationDetail() {
     const {
       data,
       error
-    } = await supabase.from('applications').select(`
-        *,
-        artist:profiles!applications_artist_id_fkey(first_name, last_name)
-      `).eq('id', id).maybeSingle();
+    } = await supabase.from('applications').select('*').eq('id', id).maybeSingle();
+    if (data) {
+      const parties = await fetchParties([data.artist_id]);
+      (data as any).artist = data.artist_deleted_at
+        ? { first_name: data.artist_display_name || 'Deleted Artist', last_name: '' }
+        : parties[data.artist_id] ?? null;
+    }
     if (!data || error) {
       setLoading(false);
       return;

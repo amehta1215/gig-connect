@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       applications: {
         Row: {
+          artist_deleted_at: string | null
+          artist_display_name: string | null
           artist_id: string
           availability_end_date: string | null
           availability_preference:
@@ -33,11 +35,16 @@ export type Database = {
           payment_preference:
             | Database["public"]["Enums"]["payment_preference"]
             | null
+          room_display_name: string | null
           status: Database["public"]["Enums"]["application_status"] | null
           updated_at: string | null
+          venue_deleted_at: string | null
+          venue_display_name: string | null
           venue_listing_id: string
         }
         Insert: {
+          artist_deleted_at?: string | null
+          artist_display_name?: string | null
           artist_id: string
           availability_end_date?: string | null
           availability_preference?:
@@ -55,11 +62,16 @@ export type Database = {
           payment_preference?:
             | Database["public"]["Enums"]["payment_preference"]
             | null
+          room_display_name?: string | null
           status?: Database["public"]["Enums"]["application_status"] | null
           updated_at?: string | null
+          venue_deleted_at?: string | null
+          venue_display_name?: string | null
           venue_listing_id: string
         }
         Update: {
+          artist_deleted_at?: string | null
+          artist_display_name?: string | null
           artist_id?: string
           availability_end_date?: string | null
           availability_preference?:
@@ -77,18 +89,14 @@ export type Database = {
           payment_preference?:
             | Database["public"]["Enums"]["payment_preference"]
             | null
+          room_display_name?: string | null
           status?: Database["public"]["Enums"]["application_status"] | null
           updated_at?: string | null
+          venue_deleted_at?: string | null
+          venue_display_name?: string | null
           venue_listing_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "applications_artist_id_fkey"
-            columns: ["artist_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "applications_venue_listing_id_fkey"
             columns: ["venue_listing_id"]
@@ -211,9 +219,32 @@ export type Database = {
           },
         ]
       }
+      deleted_accounts: {
+        Row: {
+          deleted_at: string
+          display_label: string
+          id: string
+          role: string
+        }
+        Insert: {
+          deleted_at?: string
+          display_label?: string
+          id: string
+          role: string
+        }
+        Update: {
+          deleted_at?: string
+          display_label?: string
+          id?: string
+          role?: string
+        }
+        Relationships: []
+      }
       gig_listings: {
         Row: {
           application_id: string | null
+          artist_deleted_at: string | null
+          artist_display_name: string | null
           artist_id: string
           created_at: string
           gig_date: string
@@ -225,12 +256,17 @@ export type Database = {
           manual_venue_name: string | null
           notes: string | null
           openers: Json | null
+          room_display_name: string | null
           show_time: string | null
           updated_at: string
-          venue_listing_id: string
+          venue_deleted_at: string | null
+          venue_display_name: string | null
+          venue_listing_id: string | null
         }
         Insert: {
           application_id?: string | null
+          artist_deleted_at?: string | null
+          artist_display_name?: string | null
           artist_id: string
           created_at?: string
           gig_date: string
@@ -242,12 +278,17 @@ export type Database = {
           manual_venue_name?: string | null
           notes?: string | null
           openers?: Json | null
+          room_display_name?: string | null
           show_time?: string | null
           updated_at?: string
-          venue_listing_id: string
+          venue_deleted_at?: string | null
+          venue_display_name?: string | null
+          venue_listing_id?: string | null
         }
         Update: {
           application_id?: string | null
+          artist_deleted_at?: string | null
+          artist_display_name?: string | null
           artist_id?: string
           created_at?: string
           gig_date?: string
@@ -259,9 +300,12 @@ export type Database = {
           manual_venue_name?: string | null
           notes?: string | null
           openers?: Json | null
+          room_display_name?: string | null
           show_time?: string | null
           updated_at?: string
-          venue_listing_id?: string
+          venue_deleted_at?: string | null
+          venue_display_name?: string | null
+          venue_listing_id?: string | null
         }
         Relationships: [
           {
@@ -316,22 +360,7 @@ export type Database = {
           subject?: string | null
           thread_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "messages_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -363,6 +392,42 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
           terms_accepted_at?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      storage_deletion_jobs: {
+        Row: {
+          attempts: number
+          buckets: string[]
+          created_at: string
+          extra_paths: Json
+          id: string
+          last_error: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          buckets?: string[]
+          created_at?: string
+          extra_paths?: Json
+          id?: string
+          last_error?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          buckets?: string[]
+          created_at?: string
+          extra_paths?: Json
+          id?: string
+          last_error?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -566,6 +631,8 @@ export type Database = {
         Args: { _id: string; _name: string }
         Returns: string
       }
+      prepare_account_deletion: { Args: { _uid: string }; Returns: undefined }
+      run_retention_cleanup: { Args: never; Returns: Json }
       send_welcome_message: {
         Args: {
           p_role: Database["public"]["Enums"]["user_role"]

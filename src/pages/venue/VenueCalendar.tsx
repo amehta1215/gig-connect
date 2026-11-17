@@ -517,7 +517,7 @@ export default function VenueCalendar() {
   };
 
   const openDeleteDialog = async (gig: GigListing) => {
-    const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'Artist');
+    const artistName = (gig as any).artist_display_name || gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'Artist');
     setHoldToDelete({ gigId: gig.id, applicationId: gig.application_id, artistId: gig.artist_id, artistName, gigDate: gig.gig_date, venueListingId: gig.venue_listing_id });
     setDeleteDialogOpen(true);
   };
@@ -781,7 +781,7 @@ export default function VenueCalendar() {
                   CONFIRMED
                 </p>
                 {confirmedGigs.map(gig => {
-                  const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+                  const artistName = (gig as any).artist_display_name || gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
                   const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
                   const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
                   return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
@@ -829,7 +829,7 @@ export default function VenueCalendar() {
                     </p>
                   </div>
                   {localHoldOrder.map((gig, index) => {
-              const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+              const artistName = (gig as any).artist_display_name || gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
               const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
               const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
               return <div key={gig.id} draggable onDragStart={() => handleHoldDragStart(index)} onDragOver={e => handleHoldDragOver(e, index)} onDragEnd={handleHoldDragEnd} className={`bg-secondary p-4 flex items-center justify-between cursor-grab active:cursor-grabbing transition-opacity ${draggedHoldIndex === index ? 'opacity-50' : ''}`}>
@@ -875,7 +875,7 @@ export default function VenueCalendar() {
           <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
           {gigs.filter(g => parseLocalDate(g.gig_date) >= startOfDay(new Date()) && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
               {gigs.filter(g => parseLocalDate(g.gig_date) >= startOfDay(new Date()) && g.is_confirmed).map(gig => {
-            const artistName = gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
+            const artistName = (gig as any).artist_display_name || gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
             const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
             return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
                     <div>

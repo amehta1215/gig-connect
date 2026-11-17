@@ -279,7 +279,10 @@ export function AccountInformation() {
           <h2 className="font-display text-xl">DELETE ACCOUNT</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Permanently deletes your account and all associated data. This cannot be undone.
+          Permanently deletes your login, profile and photos. This cannot be undone.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Messages, attachments and confirmed bookings you shared with others stay visible to them, labeled with your band or venue name followed by "Deleted Artist" or "Deleted Venue".
         </p>
         <Button
           variant="destructive"
@@ -306,7 +309,7 @@ export function AccountInformation() {
             </DialogTitle>
             <DialogDescription>
               {deleteStep === 1
-                ? 'Enter your current password to continue. This action is permanent.'
+                ? 'Enter your current password to continue. This action is permanent. Messages, attachments and confirmed bookings stay visible to the other people involved.'
                 : `Enter the 6-digit code we sent to ${user?.email}.`}
             </DialogDescription>
           </DialogHeader>

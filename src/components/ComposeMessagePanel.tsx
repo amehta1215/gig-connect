@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchParties } from '@/lib/accountParties';
 import { toast } from 'sonner';
 import { Send, Search, X, ChevronLeft, Paperclip, File, Image } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -80,13 +81,15 @@ export function ComposeMessagePanel({ onSuccess, onClose, initialArtist, initial
     const listingIds = listings.map(l => l.id);
 
     // Get all applications to these listings with artist info
-    const { data: applications } = await supabase
+    const { data: rawApps } = await supabase
       .from('applications')
-      .select(`
-        artist_id,
-        artist:profiles!applications_artist_id_fkey(id, first_name, last_name)
-      `)
+      .select('artist_id, artist_deleted_at')
       .in('venue_listing_id', listingIds);
+    const liveApps = (rawApps ?? []).filter((a) => !a.artist_deleted_at);
+    const partyMap = await fetchParties(liveApps.map((a) => a.artist_id));
+    const applications = liveApps
+      .filter((a) => partyMap[a.artist_id] && !partyMap[a.artist_id].is_deleted)
+      .map((a) => ({ artist_id: a.artist_id, artist: { id: a.artist_id, ...partyMap[a.artist_id] } }));
 
     if (applications) {
       // Get unique artist IDs

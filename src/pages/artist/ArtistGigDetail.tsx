@@ -314,7 +314,7 @@ export default function ArtistGigDetail() {
   }
 
   // Determine venue name and location to display
-  const displayVenueName = isManualEvent && gig.manual_venue_name ? gig.manual_venue_name : venueListing?.room_name ? `${venueListing.room_name} at ${venueListing.venue_name}` : venueListing?.venue_name || 'Venue';
+  const displayVenueName = (gig as any)?.venue_display_name ? `${(gig as any).room_display_name ? (gig as any).room_display_name + ' at ' : ''}${(gig as any).venue_display_name}` : isManualEvent && gig.manual_venue_name ? gig.manual_venue_name : venueListing?.room_name ? `${venueListing.room_name} at ${venueListing.venue_name}` : venueListing?.venue_name || 'Venue';
   const displayLocation = isManualEvent && gig.manual_location ? gig.manual_location : venueListing?.location;
   return <div className="space-y-6 animate-fade-in max-w-3xl mx-auto">
       {/* Header with Back Button and Download */}

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { attachMessageParties } from '@/lib/accountParties';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -118,15 +119,11 @@ export default function ArtistMessages() {
     const {
       data,
       error
-    } = await supabase.from('messages').select(`
-        *,
-        sender:profiles!messages_sender_id_fkey(first_name, last_name, venue_profiles(venue_name)),
-        receiver:profiles!messages_receiver_id_fkey(first_name, last_name, venue_profiles(venue_name))
-      `).or(`receiver_id.eq.${user.id},sender_id.eq.${user.id}`).order('created_at', {
+    } = await supabase.from('messages').select('*').or(`receiver_id.eq.${user.id},sender_id.eq.${user.id}`).order('created_at', {
       ascending: true
     });
     if (data && !error) {
-      setMessages(data as unknown as Message[]);
+      setMessages((await attachMessageParties(data)) as unknown as Message[]);
     }
     setLoading(false);
   };
@@ -186,11 +183,11 @@ export default function ArtistMessages() {
       const isOtherPartySender = otherPartyMessage.sender_id !== user?.id;
       const otherParty = isOtherPartySender ? {
         id: otherPartyMessage.sender_id,
-        name: `${otherPartyMessage.sender?.first_name} ${otherPartyMessage.sender?.last_name}`,
+        name: `${otherPartyMessage.sender?.first_name ?? ''} ${otherPartyMessage.sender?.last_name ?? ''}`.trim() || 'Deleted User',
         venueName: otherPartyMessage.sender?.venue_profiles?.venue_name || undefined
       } : {
         id: otherPartyMessage.receiver_id,
-        name: `${otherPartyMessage.receiver?.first_name} ${otherPartyMessage.receiver?.last_name}`,
+        name: `${otherPartyMessage.receiver?.first_name ?? ''} ${otherPartyMessage.receiver?.last_name ?? ''}`.trim() || 'Deleted User',
         venueName: otherPartyMessage.receiver?.venue_profiles?.venue_name || undefined
       };
       threadList.push({
@@ -448,7 +445,7 @@ export default function ArtistMessages() {
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
                 {selectedThread.messages.map(message => {
               const isSent = message.sender_id === user?.id;
-              const senderName = isSent ? 'You' : `${message.sender?.first_name} ${message.sender?.last_name}`;
+              const senderName = isSent ? 'You' : (`${message.sender?.first_name ?? ''} ${message.sender?.last_name ?? ''}`.trim() || 'Deleted User');
               return <div key={message.id} className={`${isSent ? 'ml-8' : 'mr-8'}`}>
                       <div className={`p-4 rounded-lg ${isSent ? 'bg-primary/10' : 'bg-secondary'}`}>
                         <div className="flex items-center justify-between mb-2">

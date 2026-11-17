@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchParties } from '@/lib/accountParties';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -187,10 +188,7 @@ export default function VenueApplications() {
     const {
       data,
       error
-    } = await supabase.from('applications').select(`
-        *,
-        artist:profiles!applications_artist_id_fkey(first_name, last_name)
-      `).in('venue_listing_id', listingIds).order('created_at', {
+    } = await supabase.from('applications').select('*').in('venue_listing_id', listingIds).order('created_at', {
       ascending: false
     });
     if (error) {
@@ -199,7 +197,14 @@ export default function VenueApplications() {
       setLoading(false);
       return;
     }
-    const apps = (data || []) as unknown as Application[];
+    const rawApps = (data || []) as any[];
+    const parties = await fetchParties(rawApps.map(a => a.artist_id));
+    const apps = rawApps.map(a => ({
+      ...a,
+      artist: a.artist_deleted_at
+        ? { first_name: a.artist_display_name || 'Deleted Artist', last_name: '' }
+        : parties[a.artist_id] ?? null,
+    })) as unknown as Application[];
 
     // Fetch artist profiles
     const artistIds = Array.from(new Set(apps.map(a => a.artist_id)));

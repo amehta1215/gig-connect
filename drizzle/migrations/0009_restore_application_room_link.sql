@@ -1,0 +1,1 @@
+ALTER TABLE public.applications ADD CONSTRAINT applications_venue_listing_id_fkey FOREIGN KEY (venue_listing_id) REFERENCES public.venue_listings(id) ON DELETE CASCADE;

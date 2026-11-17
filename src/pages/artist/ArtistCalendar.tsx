@@ -215,7 +215,7 @@ export default function ArtistCalendar() {
     // Otherwise create a new thread with an initial message
     const threadId = crypto.randomUUID();
     const gigDate = format(parseLocalDate(previewGig.gig_date), 'MMMM d, yyyy');
-    const venueName = previewGig.manual_venue_name || previewGig.venue_listing?.venue_name || 'the venue';
+    const venueName = (previewGig as any).venue_display_name || previewGig.manual_venue_name || previewGig.venue_listing?.venue_name || 'the venue';
     const {
       error
     } = await supabase.from('messages').insert({
@@ -345,7 +345,7 @@ export default function ArtistCalendar() {
                   </p>
                   {confirmedGigs.map((gig) => {
               const isManual = !gig.application_id && gig.manual_venue_name;
-              const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
+              const venueName = (gig as any).venue_display_name ? `${(gig as any).room_display_name ? (gig as any).room_display_name + ' at ' : ''}${(gig as any).venue_display_name}` : isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
               const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
               return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
@@ -363,7 +363,7 @@ export default function ArtistCalendar() {
                   </p>
                   {holdGigs.map((gig) => {
               const isManual = !gig.application_id && gig.manual_venue_name;
-              const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
+              const venueName = (gig as any).venue_display_name ? `${(gig as any).room_display_name ? (gig as any).room_display_name + ' at ' : ''}${(gig as any).venue_display_name}` : isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
               const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
               return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left bg-secondary p-4 hover:bg-secondary/80 transition-colors">
@@ -394,7 +394,7 @@ export default function ArtistCalendar() {
             {upcomingGigs.length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
                 {paginatedGigs.map((gig) => {
               const isManual = !gig.application_id && gig.manual_venue_name;
-              const venueName = isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
+              const venueName = (gig as any).venue_display_name ? `${(gig as any).room_display_name ? (gig as any).room_display_name + ' at ' : ''}${(gig as any).venue_display_name}` : isManual ? gig.manual_venue_name : gig.venue_listing?.room_name ? `${gig.venue_listing.room_name} at ${gig.venue_listing.venue_name}` : gig.venue_listing?.venue_name || 'Venue';
               const location = isManual ? gig.manual_location : gig.venue_listing?.location;
               const timeDisplay = gig.show_time ? new Date(`2000-01-01T${gig.show_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase() : null;
               return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">

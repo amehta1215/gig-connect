@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { processJob } from '../_shared/storageCleanup.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -34,13 +35,22 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // profiles.id -> auth.users ON DELETE CASCADE, and all app tables cascade
-    // off profiles.id, so deleting the auth user removes all related data.
+    // Snapshot names onto shared records, record the deleted account and queue
+    // photo cleanup. Messages and bookings no longer cascade off the profile.
+    const { error: prepError } = await admin.rpc('prepare_account_deletion', { _uid: userId });
+    if (prepError) {
+      console.error('prepare_account_deletion failed', prepError);
+      return json({ error: 'Failed to delete account' }, 500);
+    }
     const { error: deleteError } = await admin.auth.admin.deleteUser(userId);
     if (deleteError) {
       console.error('deleteUser failed', deleteError);
       return json({ error: 'Failed to delete account' }, 500);
     }
+
+    // Delete photos now; failures stay queued and are retried hourly.
+    const { data: jobs } = await admin.from('storage_deletion_jobs').select('*').eq('status', 'pending').limit(20);
+    for (const job of jobs ?? []) await processJob(admin, job);
 
     return json({ success: true });
   } catch (e) {
