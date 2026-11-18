@@ -13,31 +13,21 @@ export default function Contact() {
         <h1 className="font-display uppercase tracking-tight text-3xl md:text-4xl font-black text-primary mb-6">
           Contact Us
         </h1>
-        <p className="text-base text-muted-foreground leading-relaxed mb-6 max-w-md mx-auto">
+        <p className="text-base text-muted-foreground leading-relaxed mb-10 max-w-md mx-auto">
           Have a question, some feedback, or want to say hi? Send us an email at{" "}
           <a
-            href="mailto:hello@riff.com"
+            href="mailto:hello@sethound.com"
             className="text-primary hover:underline font-medium"
           >
-            hello@riff.com
-          </a>{" "}
-          and we'll get back to you within one business day.
-        </p>
-        <p className="text-base text-muted-foreground leading-relaxed mb-10 max-w-md mx-auto">
-          Need to report an account? Reach out to us at{" "}
-          <a
-            href="mailto:hello@riff.com"
-            className="text-primary hover:underline font-medium"
-          >
-            hello@riff.com
+            hello@sethound.com
           </a>
           .
         </p>
         <div className="flex justify-center">
-          <a href="mailto:hello@riff.com">
+          <a href="mailto:hello@sethound.com">
             <Button variant="outline" size="lg">
               <Mail className="h-4 w-4 mr-2" />
-              hello@riff.com
+              hello@sethound.com
             </Button>
           </a>
         </div>
