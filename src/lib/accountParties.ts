@@ -37,7 +37,7 @@ export async function fetchParties(ids: string[]): Promise<Record<string, PartyP
     if (!map[id] && deleted[id]) {
       map[id] = { first_name: deleted[id], last_name: '', artist_profiles: null, venue_profiles: null, is_deleted: true };
     } else if (!map[id] && id === '00000000-0000-0000-0000-000000000000') {
-      map[id] = { first_name: 'SET HOUND', last_name: 'Team', artist_profiles: null, venue_profiles: null };
+      map[id] = { first_name: 'The Set Hound', last_name: 'Team', artist_profiles: null, venue_profiles: null };
     }
   }
   return map;

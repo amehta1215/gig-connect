@@ -85,6 +85,13 @@
       "when": 1794951540226,
       "tag": "0011_restrict_deleted_account_labels_to_counterparties",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795103420909,
+      "tag": "0012_normalize_welcome_message_subject",
+      "breakpoints": true
     }
   ]
 }
