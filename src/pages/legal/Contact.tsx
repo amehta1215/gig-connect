@@ -24,12 +24,12 @@ export default function Contact() {
           .
         </p>
         <div className="flex justify-center">
-          <a href="mailto:hello@sethound.com">
-            <Button variant="outline" size="lg">
+          <Button asChild variant="outline" size="lg" className="font-display tracking-wide uppercase">
+            <a href="mailto:hello@sethound.com?subject=Set%20Hound%20question">
               <Mail className="h-4 w-4 mr-2" />
               hello@sethound.com
-            </Button>
-          </a>
+            </a>
+          </Button>
         </div>
       </div>
     </PublicLayout>
