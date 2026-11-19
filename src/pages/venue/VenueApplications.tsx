@@ -458,33 +458,17 @@ export default function VenueApplications() {
     {/* Profile Incomplete Dialog */}
     <Dialog open={showIncompleteDialog} onOpenChange={setShowIncompleteDialog}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader className="sm:text-left text-center">
-          <DialogTitle className="flex items-center justify-center gap-2 font-display text-xl text-accent">
+        <DialogHeader className="text-center">
+          <DialogTitle className="font-display text-2xl tracking-wide text-accent">
             COMPLETE YOUR PROFILE
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <p className="text-muted-foreground">Complete your profile and add a room to make your venue discoverable to artists!</p>
-          
-          {!isProfileComplete && <div className="text-sm text-muted-foreground">
-              
-              <ul className="list-disc list-inside space-y-1">
-                {!venueProfile?.venue_name && <li>Venue Name</li>}
-                {!venueProfile?.location && <li>Location</li>}
-                {!venueProfile?.bio && <li>Bio</li>}
-                {(!venueProfile?.event_types || venueProfile.event_types.length === 0) && <li>Event Types</li>}
-              </ul>
-            </div>}
-          
-          {!hasRooms && <div className="text-sm text-muted-foreground">
-              <p className="font-medium text-foreground">You need to add at least one room.</p>
-            </div>}
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          {!isProfileComplete && <Button onClick={() => navigate('/venue/profile')} className="flex-1 font-display tracking-widest">
-              EDIT PROFILE
-            </Button>}
-        </div>
+        <p className="text-muted-foreground text-center pb-2">
+          Complete your venue profile and add a room to make your venue discoverable to artists!
+        </p>
+        <Button onClick={() => navigate('/venue/profile')} className="w-full font-display tracking-widest">
+          EDIT PROFILE
+        </Button>
       </DialogContent>
     </Dialog>
 
