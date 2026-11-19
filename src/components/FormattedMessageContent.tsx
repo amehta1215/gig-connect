@@ -64,7 +64,7 @@ export function FormattedMessageContent({ content, className = '' }: FormattedMe
       i++;
     }
 
-    const paragraph = paraLines.join(' ').trim();
+    const paragraph = paraLines.join('\n').trim();
     const isHeading = paragraph.endsWith(':') && paragraph.length <= 40;
 
     blocks.push(
@@ -72,8 +72,8 @@ export function FormattedMessageContent({ content, className = '' }: FormattedMe
         key={`p-${blocks.length}`}
         className={
           isHeading
-            ? 'mb-2 text-sm font-semibold'
-            : 'mb-3 last:mb-0 text-sm'
+            ? 'mb-2 text-sm font-semibold whitespace-pre-line'
+            : 'mb-3 last:mb-0 text-sm whitespace-pre-line'
         }
       >
         {paragraph}
