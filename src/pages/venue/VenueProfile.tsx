@@ -700,7 +700,7 @@ export default function VenueProfile() {
           <Label className="block">Shareable Link</Label>
           {!editingSlug ? (
             <div className="flex items-center gap-2 flex-wrap">
-              <code className="text-xs bg-secondary px-2 py-1.5 rounded break-all">{shareUrl}</code>
+              <code className="text-xs font-sans bg-secondary px-2 py-1.5 rounded break-all">{shareUrl}</code>
               <Button type="button" variant="outline" size="sm" onClick={copyShareLink} className="h-7 px-2 text-xs font-display tracking-widest">
                 <Copy className="h-3 w-3 mr-1" /> COPY LINK
               </Button>
