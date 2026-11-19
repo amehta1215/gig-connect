@@ -48,7 +48,7 @@ export default function ResetPassword() {
   };
 
   const inputClass =
-    'w-full bg-transparent border-0 border-b border-muted-foreground/30 rounded-none px-0 py-3 font-display text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors';
+    'w-full bg-transparent border-0 border-b border-muted-foreground/30 rounded-none px-0 py-3 font-sans text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors';
   const eyeButtonClass =
     'absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors';
 
