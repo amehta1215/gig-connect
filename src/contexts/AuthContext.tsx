@@ -23,7 +23,7 @@ interface AuthContextType {
   loading: boolean;
   isNewUser: boolean;
   clearNewUserFlag: () => void;
-  signUp: (email: string, password: string, firstName: string, lastName: string, role: UserRole, termsAcceptedAt?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, firstName: string, lastName: string, role: UserRole, termsAcceptedAt?: string) => Promise<{ error: any; data?: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -119,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Normalize credentials so stray whitespace (common with mobile keyboards
     // and password managers) can never be baked into the stored password.
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password: password.trim(),
       options: {
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    return { error };
+    return { error, data };
   };
 
   const signIn = async (email: string, password: string) => {

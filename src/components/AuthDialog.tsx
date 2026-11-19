@@ -19,6 +19,19 @@ type AuthMode = 'login' | 'signup' | 'forgot';
 // stricter policy); new passwords are validated with the shared passwordSchema.
 const loginPasswordSchema = z.string().min(1, 'Password is required');
 
+// Supabase reports a taken address as "User already registered"; some builds
+// surface it through an error code instead of the message text.
+const isEmailTakenError = (error: any) =>
+  (typeof error?.message === 'string' && error.message.toLowerCase().includes('already registered')) ||
+  error?.code === 'user_already_exists' ||
+  error?.error_code === 'user_already_exists';
+
+// The backend hides whether an address exists: signing up with a registered
+// email comes back as a success carrying no identities, so the account that
+// already owns the address is left untouched.
+const isEmailTakenResponse = (data: any) =>
+  Array.isArray(data?.user?.identities) && data.user.identities.length === 0;
+
 interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -45,6 +58,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
+  const [emailTakenOpen, setEmailTakenOpen] = useState(false);
 
   const { signIn, signUp, user, profile, loading, isNewUser, clearNewUserFlag } = useAuth();
   const navigate = useNavigate();
@@ -64,6 +78,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
       setEmailSent(false);
       setResetSent(false);
       setTermsAccepted(false);
+      setEmailTakenOpen(false);
     }
   }, [open, defaultMode]);
 
@@ -138,13 +153,15 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
     if (!validateSignUpForm()) return;
     setIsLoading(true);
     try {
-      const { error } = await signUp(email, password, firstName, lastName, role!, new Date().toISOString());
+      const { error, data } = await signUp(email, password, firstName, lastName, role!, new Date().toISOString());
       if (error) {
-        if (error.message.includes('already registered')) {
-          toast.error('Email taken');
+        if (isEmailTakenError(error)) {
+          setEmailTakenOpen(true);
         } else {
           toast.error(error.message);
         }
+      } else if (isEmailTakenResponse(data)) {
+        setEmailTakenOpen(true);
       } else {
         setEmailSent(true);
       }
@@ -518,6 +535,34 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
       </DialogContent>
     </Dialog>
     <LegalDialog open={legalOpen} onOpenChange={setLegalOpen} />
+    <Dialog open={emailTakenOpen} onOpenChange={setEmailTakenOpen}>
+      <DialogContent className="bg-card border-border max-w-md text-center p-8 sm:p-10">
+        <DialogHeader>
+          <DialogTitle className="font-display text-3xl tracking-wide text-foreground">
+            Email already registered
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground mt-4">
+            An account already exists for <span className="text-foreground font-medium">{email}</span>. Log in to continue, or use a different email.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="mt-6 space-y-3">
+          <button
+            type="button"
+            onClick={() => { setEmailTakenOpen(false); switchMode('login'); }}
+            className="w-full h-11 font-display uppercase tracking-widest text-base text-accent-foreground transition-colors bg-accent hover:bg-accent/90"
+          >
+            Log in
+          </button>
+          <button
+            type="button"
+            onClick={() => setEmailTakenOpen(false)}
+            className="w-full h-11 font-display uppercase tracking-widest text-base text-foreground border border-muted-foreground/30 hover:border-foreground transition-colors"
+          >
+            Use another email
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
     {welcome}
     </>
   );
