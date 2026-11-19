@@ -34,7 +34,7 @@ const faqs = [
   },
   {
     q: "How do I get support?",
-    a: "Reach out through the Contact page or email us directly at hello@riff.com. We aim to respond within one business day.",
+    a: "Reach out through the Contact page or email us directly at hello@sethound.com. We aim to respond within one business day.",
   },
 ];
 
