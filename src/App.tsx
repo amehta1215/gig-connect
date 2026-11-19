@@ -1,3 +1,4 @@
+import ConfirmDelete from "./pages/ConfirmDelete";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -67,6 +68,7 @@ const App = () => (
             <Route path="/forgot-password" element={<Navigate to="/" replace />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/account-deleted" element={<AccountDeleted />} />
+            <Route path="/confirm-delete" element={<ConfirmDelete />} />
             <Route path="/demo-venue" element={<DemoVenue />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/contact" element={<Contact />} />
