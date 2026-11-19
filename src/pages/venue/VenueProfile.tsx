@@ -945,7 +945,7 @@ export default function VenueProfile() {
                     <h3 className="font-display text-sm text-primary tracking-widest">GENERAL</h3>
                     <div className="flex gap-3">
                       <div className="space-y-1 w-1/2">
-                        <Label htmlFor="room_name" className="text-xs uppercase tracking-wider text-muted-foreground">Room</Label>
+                        <Label htmlFor="room_name" className="text-xs uppercase tracking-wider text-muted-foreground">Room Name</Label>
                         <Input id="room_name" value={roomFormData.room_name} onChange={e => setRoomFormData({
                         ...roomFormData,
                         room_name: e.target.value
