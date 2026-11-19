@@ -24,7 +24,7 @@ input[type="number"] {
 
 @layer base {
   :root {
-    /* Core palette: Dark green, Orange, Yellow */
+    /* Core palette: neutral surfaces with logo-blue accents */
     --background: 0 0% 100%;
     --foreground: 265 4% 12.9%;
 
@@ -43,7 +43,8 @@ input[type="number"] {
     --muted: 248 0.7% 96.8%;
     --muted-foreground: 257 4.6% 55.4%;
 
-    --accent: 15 81% 52%;
+    --brand-blue: 235.7142857143 50.6024096386% 32.5490196078%;
+    --accent: var(--brand-blue);
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
@@ -58,16 +59,16 @@ input[type="number"] {
     --radius: 0.375rem;
 
     /* SET HOUND brand colors */
-    --riff-orange: 11 80% 55%;
+    --riff-blue: var(--brand-blue);
     --riff-green: 160 40% 12%;
     --riff-yellow: 68 80% 58%;
     --riff-dark: 160 40% 10%;
     --riff-card: 160 35% 14%;
 
     /* Gradients */
-    --gradient-heat: linear-gradient(135deg, hsl(11 80% 55% / 0.4), hsl(68 80% 58% / 0.3));
+    --gradient-heat: linear-gradient(135deg, hsl(var(--brand-blue) / 0.4), hsl(68 80% 58% / 0.3));
     --gradient-hero: linear-gradient(180deg, transparent 0%, hsl(160 40% 12%) 100%);
-    --gradient-glow: radial-gradient(ellipse at center, hsl(11 80% 55% / 0.15), transparent 70%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(var(--brand-blue) / 0.15), transparent 70%);
 
     --sidebar-background: 160 40% 10%;
     --sidebar-foreground: 265 4% 12.9%;
@@ -110,7 +111,7 @@ input[type="number"] {
     --secondary-foreground: 248 0.3% 98.4%;
     --muted: 260 4.1% 27.9%;
     --muted-foreground: 257 4% 70.4%;
-    --accent: 15 81% 52%;
+    --accent: var(--brand-blue);
     --accent-foreground: 0 0% 100%;
     --border: 0 0% 100% / 10%;
     --input: 0 0% 100% / 15%;
@@ -220,14 +221,14 @@ input[type="number"] {
   font-weight: 700;
 }
 
-/* Today indicator: hollow orange circle */
+/* Today indicator: hollow brand-blue circle */
 .rdp-day_today {
   background-color: transparent !important;
   border: 2px solid hsl(var(--accent)) !important;
   border-radius: 50% !important;
 }
 
-/* Gig indicator: small orange dot outside the day circle */
+/* Gig indicator: small brand-blue dot outside the day circle */
 .day-has-gig {
   position: relative;
 }
@@ -244,14 +245,14 @@ input[type="number"] {
   z-index: 10;
 }
 
-/* Hover state: pale orange circle outline */
+/* Hover state: pale brand-blue circle outline */
 .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_today) {
   border: 2px solid hsl(var(--accent) / 0.22) !important;
   border-radius: 50% !important;
   background-color: hsl(var(--accent) / 0.12) !important;
 }
 
-/* Selected day: filled darker orange circle */
+/* Selected day: filled brand-blue circle */
 .rdp-day_selected {
   background-color: hsl(var(--accent)) !important;
   border-radius: 50% !important;
