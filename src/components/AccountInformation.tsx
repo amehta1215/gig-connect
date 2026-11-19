@@ -285,7 +285,7 @@ export function AccountInformation() {
           Messages, attachments and confirmed bookings you shared with others stay visible to them, labeled with your band or venue name followed by "Deleted Artist" or "Deleted Venue".
         </p>
         <Button
-          variant="destructive"
+          variant="destructive-muted"
           onClick={() => {
             resetDeleteFlow();
             setDeleteOpen(true);
