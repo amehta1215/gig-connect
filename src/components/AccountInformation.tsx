@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,8 @@ import { validatePassword } from '@/lib/validation';
 import { PasswordChecklist } from '@/components/PasswordChecklist';
 
 export function AccountInformation() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -32,6 +34,7 @@ export function AccountInformation() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
   const [deletePassword, setDeletePassword] = useState('');
+  const [otpCode, setOtpCode] = useState('');
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -95,6 +98,7 @@ export function AccountInformation() {
   const resetDeleteFlow = () => {
     setDeleteStep(1);
     setDeletePassword('');
+    setOtpCode('');
     setDeleteError(null);
     setDeleting(false);
   };
@@ -117,7 +121,7 @@ export function AccountInformation() {
     }
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: user?.email ?? '',
-      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/confirm-delete` },
+      options: { shouldCreateUser: false },
     });
     setDeleting(false);
     if (otpError) {
@@ -125,7 +129,37 @@ export function AccountInformation() {
       return;
     }
     setDeleteStep(2);
-    toast.success('Deletion link sent to your email');
+    toast.success('Verification code sent to your email');
+  };
+
+  const handleConfirmDeleteCode = async () => {
+    setDeleteError(null);
+    if (otpCode.trim().length < 6) {
+      setDeleteError('Enter the 6-digit code from your email');
+      return;
+    }
+    setDeleting(true);
+    const { error: otpError } = await supabase.auth.verifyOtp({
+      email: user?.email ?? '',
+      token: otpCode.trim(),
+      type: 'email',
+    });
+    if (otpError) {
+      setDeleteError('That code is invalid or expired');
+      setDeleting(false);
+      return;
+    }
+
+    const { error: fnError } = await supabase.functions.invoke('delete-account');
+    if (fnError) {
+      setDeleteError('Failed to delete account. Please try again.');
+      setDeleting(false);
+      return;
+    }
+
+    await signOut();
+    setDeleteOpen(false);
+    navigate('/account-deleted', { replace: true });
   };
 
   return (
@@ -276,7 +310,7 @@ export function AccountInformation() {
             <DialogDescription>
               {deleteStep === 1
                 ? 'Enter your current password to continue. This action is permanent. Messages, attachments and confirmed bookings stay visible to the other people involved.'
-                : `We sent a link to ${user?.email}. Clicking that link will permanently delete your account.`}
+                : `Enter the 6-digit code we sent to ${user?.email}.`}
             </DialogDescription>
           </DialogHeader>
 
@@ -299,10 +333,23 @@ export function AccountInformation() {
               </div>
             </div>
           ) : (
-            <div className="flex justify-end">
-              <Button variant="outline" onClick={() => setDeleteOpen(false)}>
-                Close
-              </Button>
+            <div className="space-y-3">
+              <Input
+                inputMode="numeric"
+                maxLength={6}
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="123456"
+              />
+              {deleteError && <p className="text-destructive text-xs font-display">{deleteError}</p>}
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleting}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleConfirmDeleteCode} disabled={deleting}>
+                  {deleting ? 'Deleting...' : 'Delete Permanently'}
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
