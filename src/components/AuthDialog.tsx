@@ -57,6 +57,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
   const [emailTakenOpen, setEmailTakenOpen] = useState(false);
 
@@ -78,6 +79,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
       setEmailSent(false);
       setResetSent(false);
       setTermsAccepted(false);
+      setAgeConfirmed(false);
       setEmailTakenOpen(false);
     }
   }, [open, defaultMode]);
@@ -122,6 +124,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
     if (!firstName.trim()) newErrors.firstName = 'Required';
     if (!lastName.trim()) newErrors.lastName = 'Required';
     if (!role) newErrors.role = 'Pick one';
+    if (!ageConfirmed) newErrors.age = 'You must be 18 or older to sign up';
     if (!termsAccepted) newErrors.terms = 'You must agree to the Terms of Service and Privacy Policy';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -493,6 +496,21 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
             <div>
               <div className="flex items-start gap-3">
                 <Checkbox
+                  id="age"
+                  checked={ageConfirmed}
+                  onCheckedChange={(checked) => setAgeConfirmed(checked === true)}
+                  className="mt-0.5"
+                />
+                <label htmlFor="age" className="text-sm text-muted-foreground leading-snug cursor-pointer">
+                  I am 18 years of age or older
+                </label>
+              </div>
+              {errors.age && <p className="text-accent text-xs mt-1 font-display">{errors.age}</p>}
+            </div>
+
+            <div>
+              <div className="flex items-start gap-3">
+                <Checkbox
                   id="terms"
                   checked={termsAccepted}
                   onCheckedChange={(checked) => setTermsAccepted(checked === true)}
@@ -515,7 +533,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
             <button
               type="submit"
               className="w-full h-11 font-display uppercase tracking-widest text-base text-accent-foreground transition-colors bg-accent hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isLoading || !termsAccepted}
+              disabled={isLoading || !termsAccepted || !ageConfirmed}
             >
               {isLoading ? '...' : 'SIGN UP'}
             </button>
