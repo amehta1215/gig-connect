@@ -73,6 +73,11 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
 
   // Reset form when mode changes or dialog opens
   useEffect(() => {
+    setPassword('');
+    setConfirmPassword('');
+    setShowPassword(false);
+    setShowSignupPassword(false);
+    setShowConfirmPassword(false);
     if (open) {
       sessionUidAtOpen.current = user?.id ?? null;
       loginAttempted.current = false;
@@ -320,13 +325,14 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
             </form>
           )
         ) : mode === 'login' ? (
-          <form onSubmit={handleLogin} className="space-y-5 mt-3">
+          <form onSubmit={handleLogin} autoComplete="off" className="space-y-5 mt-3">
             <div>
               <label className="font-display text-xs tracking-widest text-muted-foreground uppercase">
                 Email *
               </label>
               <input
                 type="email"
+                autoComplete="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={inputClass}
@@ -341,6 +347,9 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`${inputClass} pr-10`}
