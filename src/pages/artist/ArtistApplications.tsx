@@ -148,7 +148,7 @@ export default function ArtistApplications() {
       
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-card border border-border p-0 h-auto w-full flex md:w-auto">
+        <TabsList className="bg-card border border-border p-0 h-auto w-full inline-flex md:w-fit">
           <TabsTrigger value="all" className="flex-1 md:flex-none justify-center font-display tracking-wide md:tracking-widest text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-none px-1 md:px-4 py-2">
             ALL
           </TabsTrigger>
