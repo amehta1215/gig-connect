@@ -12,6 +12,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import LegalDialog from '@/components/LegalDialog';
 import { Button } from '@/components/ui/button';
+import { SIGNUP_ROLES } from '@/lib/booker';
 
 type UserRole = 'artist' | 'venue' | 'both' | 'booker';
 type AuthMode = 'login' | 'signup' | 'forgot';
@@ -389,8 +390,8 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
           <form onSubmit={handleSignUp} className="space-y-3 mt-2">
             {/* Role selection */}
             <div className="space-y-2">
-              <div className="grid grid-cols-4 gap-2">
-                {(['artist', 'venue', 'booker', 'both'] as UserRole[]).map((r) => (
+              <div className="grid grid-cols-3 gap-2">
+                {SIGNUP_ROLES.map((r) => (
                   <Button
                     key={r}
                     variant="outline"
@@ -402,7 +403,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
                         : 'bg-transparent text-muted-foreground border-muted-foreground/30 hover:border-foreground hover:text-foreground'
                     }`}
                   >
-                    {r === 'both' ? 'BOTH' : r.toUpperCase()}
+                    {r.toUpperCase()}
                   </Button>
                 ))}
               </div>

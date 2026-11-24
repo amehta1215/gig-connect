@@ -1,8 +1,12 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { companyInformation, discoveryKey, canUseDashboard, bookerDiscoverable, missingBookerVenueFields } from './booker';
+import { companyInformation, discoveryKey, canUseDashboard, bookerDiscoverable, missingBookerVenueFields, SIGNUP_ROLES } from './booker';
 
 describe('Booker account rules', () => {
+  it('offers only artist, venue and promoter at signup', () => {
+    assert.deepEqual(SIGNUP_ROLES, ['artist', 'venue', 'booker']);
+    assert.equal(SIGNUP_ROLES.includes('both'), false);
+  });
   it('does not display company information when the checkbox is unchecked', () => {
     assert.equal(companyInformation({ is_booker: true, show_company_info: false, venue_name: 'Stage Collective', bio: 'Independent bookings' }), null);
   });

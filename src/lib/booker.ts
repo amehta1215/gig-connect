@@ -1,5 +1,8 @@
 export type AccountType = 'artist' | 'venue' | 'both' | 'booker';
 
+// Account types offered at signup. 'both' stays in the type for existing accounts only.
+export const SIGNUP_ROLES = ['artist', 'venue', 'booker'] as const;
+
 export function isVenueAccount(role?: string | null) {
   return role === 'venue' || role === 'booker';
 }
