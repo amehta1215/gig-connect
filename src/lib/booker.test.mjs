@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { companyInformation, discoveryKey, canUseDashboard, bookerDiscoverable } from './booker';
+import { companyInformation, discoveryKey, canUseDashboard, bookerDiscoverable, missingBookerVenueFields } from './booker';
 
 describe('Booker account rules', () => {
   it('does not display company information when the checkbox is unchecked', () => {
@@ -37,5 +37,17 @@ describe('Booker account rules', () => {
     assert.equal(bookerDiscoverable('Stage Collective', [{ is_published: false }]), false);
     assert.equal(bookerDiscoverable('Stage Collective', [{ is_published: true }]), true);
     assert.equal(bookerDiscoverable('', [{ is_published: true }]), false);
+  });
+  it('blocks publishing while any Add Venue field is empty', () => {
+    const empty = { venue_name: '', location: '', capacity: '', genres: [], bio: '', backline_info: '', house_rules: '' };
+    assert.deepEqual(missingBookerVenueFields(empty, []), ['Venue Photos', 'Venue Name', 'Capacity', 'Location', 'Genres', 'About', 'Backline', 'Rules']);
+  });
+  it('allows publishing once every Add Venue field is filled', () => {
+    const draft = { venue_name: 'Round Trip Hall', location: 'Brooklyn, NY', capacity: '120', genres: ['Jazz'], bio: 'Intimate room', backline_info: 'House kit', house_rules: 'No filming' };
+    assert.deepEqual(missingBookerVenueFields(draft, ['https://example.com/a.jpg']), []);
+  });
+  it('treats blank text, zero capacity, no photo and no genre as unfilled', () => {
+    const draft = { venue_name: '  ', location: 'Brooklyn, NY', capacity: '0', genres: [], bio: 'Intimate room', backline_info: 'House kit', house_rules: 'No filming' };
+    assert.deepEqual(missingBookerVenueFields(draft, []), ['Venue Photos', 'Venue Name', 'Capacity', 'Genres']);
   });
 });

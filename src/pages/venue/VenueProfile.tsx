@@ -17,6 +17,7 @@ import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil,
 import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
 import VenueProfilePreviewContent from '@/components/VenueProfilePreviewContent';
 import { useIsBooker } from '@/hooks/useIsBooker';
+import { missingBookerVenueFields } from '@/lib/booker';
 import { ManagedBy } from '@/components/ManagedBy';
 import { ArtistPhotoCropDialog } from '@/components/ArtistPhotoCropDialog';
 interface VenueProfileData {
@@ -116,6 +117,7 @@ export default function VenueProfile() {
     house_rules: ''
   });
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [showMissingFields, setShowMissingFields] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewData, setPreviewData] = useState<{ profile: any; listings: any[] } | null>(null);
@@ -328,6 +330,7 @@ export default function VenueProfile() {
     setEditingListing(null);
   };
   const openDialog = (listing?: VenueListing, mode: 'preview' | 'edit' = 'edit') => {
+    setShowMissingFields(false);
     if (listing) {
       setEditingListing(listing);
       setRoomFormData({
@@ -504,7 +507,7 @@ export default function VenueProfile() {
     }
     // For new rooms, show publish confirmation dialog
     if (!editingListing) {
-      setShowPublishDialog(true);
+      openPublishDialog();
       return;
     }
     // For existing rooms, save directly
@@ -513,6 +516,12 @@ export default function VenueProfile() {
   const handleSaveRoom = async (publish: boolean = true) => {
     if (!profile || !roomFormData.venue_name) {
       toast.error('Venue name required');
+      return;
+    }
+    if (publish && isBooker && !editingListing?.is_published && publishMissingFields.length > 0) {
+      setShowPublishDialog(false);
+      setShowMissingFields(true);
+      toast.error(`Add these before publishing: ${publishMissingFields.join(', ')}`);
       return;
     }
     setSavingRoom(true);
@@ -586,8 +595,14 @@ export default function VenueProfile() {
         : [...prev.genres, genre]
     }));
   };
+  const publishMissingFields = isBooker ? missingBookerVenueFields(roomFormData, pictures) : [];
+  const isFieldMissing = (label: string) => showMissingFields && publishMissingFields.includes(label);
+  const openPublishDialog = () => {
+    if (isBooker && publishMissingFields.length > 0) setShowMissingFields(true);
+    setShowPublishDialog(true);
+  };
   const venuePhotoEditor = (<div className="space-y-2">
-          <Label className="block">Venue Photos</Label>
+          <Label className="block">Venue Photos{isBooker && <span className="text-destructive"> *</span>}</Label>
           {venuePictures.length > 1 && <p className="text-xs text-muted-foreground">Drag photos to reorder. The first photo appears in search results.</p>}
           <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleVenuePictureUpload} className="hidden" />
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -617,7 +632,7 @@ export default function VenueProfile() {
               </div>
             ))}
             {venuePictures.length < 6 && (
-              <Button type="button" variant="outline" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="h-auto w-full aspect-[4/3] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
+              <Button type="button" variant="outline" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className={`h-auto w-full aspect-[4/3] border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer ${isFieldMissing('Venue Photos') ? '!border-destructive' : 'border-border'}`}>
                 <Upload className="h-5 w-5 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">{uploadingVenuePicture ? 'Uploading...' : 'Upload'}</span>
               </Button>
@@ -807,8 +822,9 @@ export default function VenueProfile() {
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-xl text-primary">{isBooker ? 'VENUES' : 'ROOMS'} <span className="text-destructive">*</span></h2>
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
               setIsDialogOpen(open);
+              if (!open) setShowMissingFields(false);
               if (!open && profile) {
                 // Refresh listings when closing (picks up auto-saved draft changes)
                 fetchListings(profile.id);
@@ -825,7 +841,7 @@ export default function VenueProfile() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {editingListing && !editingListing.is_published && (
-                      <Button size="sm" onClick={() => setShowPublishDialog(true)} className="font-display tracking-widest bg-primary hover:bg-primary/90">
+                      <Button size="sm" onClick={openPublishDialog} className="font-display tracking-widest bg-primary hover:bg-primary/90">
                         PUBLISH
                       </Button>
                     )}
@@ -974,29 +990,29 @@ export default function VenueProfile() {
                     <h3 className="font-display text-sm text-primary tracking-widest">GENERAL</h3>
                     <div className="flex gap-3">
                       <div className="space-y-1 w-1/2">
-                        <Label htmlFor="room_name" className="text-xs uppercase tracking-wider text-muted-foreground">{isBooker ? 'Venue Name' : 'Room Name'}</Label>
+                        <Label htmlFor="room_name" className={`text-xs uppercase tracking-wider ${isFieldMissing('Venue Name') ? '!text-destructive' : 'text-muted-foreground'}`}>{isBooker ? 'Venue Name' : 'Room Name'}{isBooker && <span className="text-destructive"> *</span>}</Label>
                         <Input id="room_name" value={isBooker ? roomFormData.venue_name : roomFormData.room_name} onChange={e => setRoomFormData({
                         ...roomFormData,
                         [isBooker ? "venue_name" : "room_name"]: e.target.value
-                      })} className="bg-background border-border" />
+                      })} className={`bg-background ${isFieldMissing('Venue Name') ? '!border-destructive' : 'border-border'}`} />
                       </div>
                       <div className="space-y-1 w-32">
-                        <Label htmlFor="room_capacity" className="text-xs uppercase tracking-wider text-muted-foreground">Capacity</Label>
+                        <Label htmlFor="room_capacity" className={`text-xs uppercase tracking-wider ${isFieldMissing('Capacity') ? '!text-destructive' : 'text-muted-foreground'}`}>Capacity{isBooker && <span className="text-destructive"> *</span>}</Label>
                         <Input id="room_capacity" type="number" value={roomFormData.capacity} onChange={e => setRoomFormData({
                         ...roomFormData,
                         capacity: e.target.value
-                      })} className="bg-background border-border" />
+                      })} className={`bg-background ${isFieldMissing('Capacity') ? '!border-destructive' : 'border-border'}`} />
                       </div>
                     </div>
                   </div>
 
                   {isBooker && <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label>Location</Label>
-                      <LocationAutocomplete value={roomFormData.location} onChange={value => setRoomFormData(prev => ({ ...prev, location: value }))} placeholder="New York, NY" />
+                      <Label className={isFieldMissing('Location') ? '!text-destructive' : ''}>Location <span className="text-destructive">*</span></Label>
+                      <LocationAutocomplete value={roomFormData.location} onChange={value => setRoomFormData(prev => ({ ...prev, location: value }))} placeholder="New York, NY" className={isFieldMissing('Location') ? '[&_input]:!border-destructive' : ''} />
                     </div>
                     <div className="space-y-2">
-                      <Label>Genres</Label>
+                      <Label className={isFieldMissing('Genres') ? '!text-destructive' : ''}>Genres <span className="text-destructive">*</span></Label>
                       <div className="flex flex-wrap gap-1">
                         {availableGenres.map(genre => <Button key={genre} type="button" size="sm" variant={roomFormData.genres.includes(genre) ? 'default' : 'secondary'} onClick={() => toggleGenre(genre)} className="font-display text-xs">{genre}</Button>)}
                       </div>
@@ -1006,25 +1022,25 @@ export default function VenueProfile() {
                   <div className="space-y-4">
                     <h3 className="font-display text-sm text-primary tracking-widest">DETAILS</h3>
                     <div className="space-y-1">
-                      <Label htmlFor="bio" className="text-xs uppercase tracking-wider text-muted-foreground">About</Label>
-                      <Textarea id="bio" value={roomFormData.bio} onChange={e => setRoomFormData({
+                      <Label htmlFor="room_bio" className={`text-xs uppercase tracking-wider ${isFieldMissing('About') ? '!text-destructive' : 'text-muted-foreground'}`}>About{isBooker && <span className="text-destructive"> *</span>}</Label>
+                      <Textarea id="room_bio" value={roomFormData.bio} onChange={e => setRoomFormData({
                       ...roomFormData,
                       bio: e.target.value
-                    })} className="bg-background border-border" rows={3} />
+                    })} className={`bg-background ${isFieldMissing('About') ? '!border-destructive' : 'border-border'}`} rows={3} />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="backline_info" className="text-xs uppercase tracking-wider text-muted-foreground">Backline</Label>
+                      <Label htmlFor="backline_info" className={`text-xs uppercase tracking-wider ${isFieldMissing('Backline') ? '!text-destructive' : 'text-muted-foreground'}`}>Backline{isBooker && <span className="text-destructive"> *</span>}</Label>
                       <Textarea id="backline_info" value={roomFormData.backline_info} onChange={e => setRoomFormData({
                       ...roomFormData,
                       backline_info: e.target.value
-                    })} className="bg-background border-border" rows={2} />
+                    })} className={`bg-background ${isFieldMissing('Backline') ? '!border-destructive' : 'border-border'}`} rows={2} />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="house_rules" className="text-xs uppercase tracking-wider text-muted-foreground">Rules</Label>
+                      <Label htmlFor="house_rules" className={`text-xs uppercase tracking-wider ${isFieldMissing('Rules') ? '!text-destructive' : 'text-muted-foreground'}`}>Rules{isBooker && <span className="text-destructive"> *</span>}</Label>
                       <Textarea id="house_rules" value={roomFormData.house_rules} onChange={e => setRoomFormData({
                       ...roomFormData,
                       house_rules: e.target.value
-                    })} className="bg-background border-border" rows={2} />
+                    })} className={`bg-background ${isFieldMissing('Rules') ? '!border-destructive' : 'border-border'}`} rows={2} />
                     </div>
                   </div>
 
@@ -1099,14 +1115,16 @@ export default function VenueProfile() {
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display text-xl text-accent">Ready to go live?</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Listing this {isBooker ? 'venue' : 'room'} makes it publicly available. You can edit or unpublish at any time.
+              {publishMissingFields.length > 0
+                ? `Add these before publishing: ${publishMissingFields.join(', ')}.`
+                : `Listing this ${isBooker ? 'venue' : 'room'} makes it publicly available. You can edit or unpublish at any time.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel onClick={() => handleSaveRoom(false)} className="font-display tracking-widest">
               No, save as draft
             </AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleSaveRoom(true)} className="font-display tracking-widest">
+            <AlertDialogAction onClick={() => handleSaveRoom(true)} disabled={publishMissingFields.length > 0} className="font-display tracking-widest">
               Yes, publish!
             </AlertDialogAction>
           </AlertDialogFooter>
