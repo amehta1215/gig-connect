@@ -1,3 +1,4 @@
+import { discoveryKey } from '@/lib/booker';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +22,7 @@ interface VenueListing {
   venue_profile_id: string;
 }
 interface VenueProfile {
+  is_booker?: boolean;
   id: string;
   picture: string | null;
   pictures?: string[] | null;
@@ -67,14 +69,14 @@ export default function PublicFindVenues() {
     const {
       data: venuesData,
       error: venuesError
-    } = await supabase.from('venue_listings').select('*');
+    } = await supabase.from('venue_listings').select('*').eq('is_published', true);
     if (venuesData && !venuesError) {
       setVenues(venuesData as VenueListing[]);
       const profileIds = [...new Set(venuesData.map(v => v.venue_profile_id))];
       if (profileIds.length > 0) {
         const {
           data: profilesData
-        } = await supabase.from('venue_profiles').select('id, picture, pictures, genres').in('id', profileIds);
+        } = await supabase.from('venue_profiles').select('id, picture, pictures, genres, is_booker').in('id', profileIds);
         if (profilesData) {
           const profilesMap: Record<string, VenueProfile> = {};
           profilesData.forEach(p => {
@@ -118,15 +120,17 @@ export default function PublicFindVenues() {
     setSearchTerm('');
   };
   const handleVenueSelect = (venueProfileId: string) => {
-    navigate(`/venues/${venueProfileId}`);
+    const bookerListing = venues.find(v => v.id === venueProfileId && venueProfiles[v.venue_profile_id]?.is_booker);
+    navigate(bookerListing ? `/booked-venues/${bookerListing.id}` : `/venues/${venueProfileId}`);
   };
   // Deduplicate by venue_profile_id
   const uniqueVenues = (() => {
     const seen = new Set<string>();
     const result: VenueListing[] = [];
     for (const v of filteredVenues) {
-      if (seen.has(v.venue_profile_id)) continue;
-      seen.add(v.venue_profile_id);
+      const key = discoveryKey(v, venueProfiles[v.venue_profile_id]);
+      if (seen.has(key)) continue;
+      seen.add(key);
       result.push(v);
     }
     return result;
@@ -134,8 +138,9 @@ export default function PublicFindVenues() {
   // Capacity range per venue_profile_id (uses all listings, not just filtered)
   const capacityRangeByVenue = venues.reduce((acc, v) => {
     if (v.capacity == null) return acc;
-    const cur = acc[v.venue_profile_id];
-    if (!cur) acc[v.venue_profile_id] = { min: v.capacity, max: v.capacity };
+    const key = discoveryKey(v, venueProfiles[v.venue_profile_id]);
+    const cur = acc[key];
+    if (!cur) acc[key] = { min: v.capacity, max: v.capacity };
     else {
       cur.min = Math.min(cur.min, v.capacity);
       cur.max = Math.max(cur.max, v.capacity);
@@ -195,7 +200,7 @@ export default function PublicFindVenues() {
       <Collapsible open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
         <div className="flex gap-2">
           <div className="flex-1">
-            <UnifiedVenueSearch onLocationSelect={handleLocationSelect} onVenueSelect={handleVenueSelect} onSearchChange={setSearchTerm} venues={venues} className="w-full" />
+            <UnifiedVenueSearch onLocationSelect={handleLocationSelect} onVenueSelect={handleVenueSelect} onSearchChange={setSearchTerm} venues={venues.map(v => ({ ...v, venue_profile_id: venueProfiles[v.venue_profile_id]?.is_booker ? v.id : v.venue_profile_id }))} className="w-full" />
           </div>
 
           {/* Desktop Filters */}
@@ -232,7 +237,7 @@ export default function PublicFindVenues() {
         </div> : uniqueVenues.length === 0 ? <div className="text-center py-20">
           <h3 className="font-display text-2xl text-muted-foreground">NO VENUES</h3>
         </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {uniqueVenues.map(venue => <div key={venue.venue_profile_id} onClick={() => navigate(`/venues/${venue.venue_profile_id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative">
+          {uniqueVenues.map(venue => <div key={discoveryKey(venue, venueProfiles[venue.venue_profile_id])} onClick={() => navigate(venueProfiles[venue.venue_profile_id]?.is_booker ? `/booked-venues/${venue.id}` : `/venues/${venue.venue_profile_id}`)} className="group bg-card border border-border overflow-hidden transition-all hover:border-primary cursor-pointer relative">
               {/* Favorite Heart Button */}
               <button onClick={e => {
           e.stopPropagation();
@@ -243,10 +248,10 @@ export default function PublicFindVenues() {
 
               {/* Image */}
               <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
-                <VenueCardGallery venueName={venue.venue_name} pictures={venueProfiles[venue.venue_profile_id]?.pictures} picture={venueProfiles[venue.venue_profile_id]?.picture} />
+                <VenueCardGallery venueName={venue.venue_name} pictures={venueProfiles[venue.venue_profile_id]?.is_booker ? venue.pictures : venueProfiles[venue.venue_profile_id]?.pictures} picture={venueProfiles[venue.venue_profile_id]?.is_booker ? null : venueProfiles[venue.venue_profile_id]?.picture} />
                 {/* Capacity badge */}
                 {(() => {
-                  const range = capacityRangeByVenue[venue.venue_profile_id];
+                  const range = capacityRangeByVenue[discoveryKey(venue, venueProfiles[venue.venue_profile_id])];
                   if (!range) return null;
                   const label = range.min === range.max ? `${range.min}` : `${range.min}–${range.max}`;
                   return <div className="absolute top-2 left-2 bg-background/90 px-2 py-0.5 text-xs font-display tracking-wider flex items-center gap-1">
@@ -266,7 +271,7 @@ export default function PublicFindVenues() {
                     {venue.location}
                   </p>}
                 {(() => {
-                  const g = venueProfiles[venue.venue_profile_id]?.genres || [];
+                  const g = venueProfiles[venue.venue_profile_id]?.is_booker ? venue.genres : venueProfiles[venue.venue_profile_id]?.genres || [];
                   if (g.length === 0) return null;
                   return <div className="flex flex-wrap gap-1 mt-2">
                     {g.map(genre => <span key={genre} className="text-[10px] px-2 py-0.5 uppercase tracking-wider bg-gray-200 text-primary">

@@ -113,6 +113,20 @@
       "when": 1795108726827,
       "tag": "0015_bind_can_view_profile_to_caller",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1795546113678,
+      "tag": "0016_add_booker_account_type",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1795546164722,
+      "tag": "0017_booker_company_and_independent_venues",
+      "breakpoints": true
     }
   ]
 }

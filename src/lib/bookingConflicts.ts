@@ -161,6 +161,10 @@ export async function findVenueDateConflicts(
     .maybeSingle();
   if (!listing?.venue_profile_id) return [];
 
+  const { data: owner } = await supabase.from('venue_profiles').select('is_booker').eq('id', listing.venue_profile_id).maybeSingle();
+  // Separate Booker venues are not sibling rooms of a single physical venue.
+  if (owner?.is_booker) return findConfirmedConflicts(venueListingId, dateStrs, excludeGigId);
+
   const { data: siblings } = await supabase
     .from('venue_listings')
     .select('id, venue_name, room_name')

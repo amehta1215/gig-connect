@@ -60,6 +60,7 @@ const App = () => (
             <Route path="/" element={<PublicDashboard />}>
               <Route path="venues/:id" element={<PublicVenueDetail />} />
               <Route path="rooms/:id" element={<PublicRoomDetail />} />
+              <Route path="booked-venues/:listingId" element={<PublicVenueDetail />} />
             </Route>
             <Route path="/auth" element={<Navigate to="/" replace />} />
             <Route path="/login" element={<Navigate to="/" replace />} />
@@ -90,6 +91,7 @@ const App = () => (
               <Route path="calendar/:id" element={<ArtistGigDetail />} />
               <Route path="venues/:id" element={<VenueListingDetail />} />
               <Route path="venue/:venueProfileId" element={<VenueDetail />} />
+              <Route path="booked-venues/:listingId" element={<VenueDetail />} />
             </Route>
             <Route
               path="/artist/profile"

@@ -79,7 +79,7 @@ export default function DashboardLayout({
             <Link to={activeRole === 'artist' ? '/artist' : '/venue'} className="flex items-center gap-3 min-w-0">
               <img src={setHoundLogo} alt="Set Hound" className="h-14 w-auto py-1" />
               <span className="text-[10px] text-muted-foreground uppercase tracking-[0.3em] hidden sm:block">
-                {activeRole}
+                {profile?.role === 'booker' ? 'booker' : activeRole}
               </span>
             </Link>
 

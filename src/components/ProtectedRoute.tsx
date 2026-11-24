@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import setHoundLogo from '@/assets/set-hound-logo.png';
+import { canUseDashboard, isVenueAccount } from '@/lib/booker';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -18,13 +19,11 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
         navigate('/');
       } else if (requiredRole && profile) {
         // Check if user has access to required role
-        const hasAccess = 
-          profile.role === 'both' || 
-          profile.role === requiredRole;
+        const hasAccess = canUseDashboard(profile.role, requiredRole);
 
         if (!hasAccess) {
           // Redirect to their appropriate dashboard
-          const targetDashboard = profile.role === 'venue' ? '/venue' : '/artist';
+          const targetDashboard = isVenueAccount(profile.role) ? '/venue' : '/artist';
           navigate(targetDashboard);
         }
       }
@@ -42,6 +41,8 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   if (!user) {
     return null;
   }
+
+  if (!profile || (requiredRole && !canUseDashboard(profile.role, requiredRole))) return null;
 
   return <>{children}</>;
 }

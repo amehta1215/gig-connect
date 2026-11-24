@@ -3,7 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-type UserRole = 'artist' | 'venue' | 'both';
+type UserRole = 'artist' | 'venue' | 'both' | 'booker';
 
 interface Profile {
   id: string;
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: userData } = await supabase.auth.getUser();
       setProfile({ ...(data as any), email: userData.user?.email ?? '' } as Profile);
       // Set default active role based on user's role
-      if (data.role === 'venue') {
+      if (data.role === 'venue' || data.role === 'booker') {
         setActiveRole('venue');
       } else {
         setActiveRole('artist');

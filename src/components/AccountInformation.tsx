@@ -16,8 +16,10 @@ import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { validatePassword } from '@/lib/validation';
 import { PasswordChecklist } from '@/components/PasswordChecklist';
+import { useIsBooker } from '@/hooks/useIsBooker';
 
 export function AccountInformation() {
+  const isBooker = useIsBooker();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -282,7 +284,7 @@ export function AccountInformation() {
           Permanently deletes your login, profile and photos. This cannot be undone.
         </p>
         <p className="text-sm text-muted-foreground">
-          Messages, attachments and confirmed bookings you shared with others stay visible to them, labeled with your band or venue name followed by "Deleted Artist" or "Deleted Venue".
+          {isBooker ? 'Messages, attachments and confirmed bookings you shared with others stay visible to them, with your company labeled "Deleted Booker" and saved venue names retained on bookings.' : 'Messages, attachments and confirmed bookings you shared with others stay visible to them, labeled with your band or venue name followed by "Deleted Artist" or "Deleted Venue".'}
         </p>
         <Button
           variant="destructive-muted"

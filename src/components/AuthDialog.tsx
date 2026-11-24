@@ -11,8 +11,9 @@ import WelcomeDialog from '@/components/WelcomeDialog';
 import { Eye, EyeOff } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import LegalDialog from '@/components/LegalDialog';
+import { Button } from '@/components/ui/button';
 
-type UserRole = 'artist' | 'venue' | 'both';
+type UserRole = 'artist' | 'venue' | 'both' | 'booker';
 type AuthMode = 'login' | 'signup' | 'forgot';
 
 // Login only requires a non-empty password (existing accounts may predate the
@@ -94,7 +95,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
       if (isNewUser) {
         setWelcomeOpen(true);
       } else {
-        const targetDashboard = profile.role === 'venue' ? '/venue' : '/artist';
+        const targetDashboard = profile.role === 'venue' || profile.role === 'booker' ? '/venue' : '/artist';
         navigate(targetDashboard);
       }
     }
@@ -153,10 +154,10 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateSignUpForm()) return;
+    if (!validateSignUpForm() || !role) return;
     setIsLoading(true);
     try {
-      const { error, data } = await signUp(email, password, firstName, lastName, role!, new Date().toISOString());
+      const { error, data } = await signUp(email, password, firstName, lastName, role, new Date().toISOString());
       if (error) {
         if (isEmailTakenError(error)) {
           setEmailTakenOpen(true);
@@ -388,10 +389,11 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
           <form onSubmit={handleSignUp} className="space-y-3 mt-2">
             {/* Role selection */}
             <div className="space-y-2">
-              <div className="grid grid-cols-3 gap-2">
-                {(['artist', 'venue', 'both'] as UserRole[]).map((r) => (
-                  <button
+              <div className="grid grid-cols-4 gap-2">
+                {(['artist', 'venue', 'booker', 'both'] as UserRole[]).map((r) => (
+                  <Button
                     key={r}
+                    variant="outline"
                     type="button"
                     onClick={() => setRole(r)}
                     className={`p-2 text-center font-display uppercase tracking-widest text-xs transition-colors border ${
@@ -401,7 +403,7 @@ export default function AuthDialog({ open, onOpenChange, defaultMode = 'login', 
                     }`}
                   >
                     {r === 'both' ? 'BOTH' : r.toUpperCase()}
-                  </button>
+                  </Button>
                 ))}
               </div>
               {errors.role && <p className="text-accent text-xs font-display">{errors.role}</p>}

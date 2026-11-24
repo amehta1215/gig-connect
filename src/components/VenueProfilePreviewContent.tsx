@@ -1,6 +1,7 @@
 import { ReactNode, useRef } from 'react';
 import { ChevronLeft, ChevronRight, MapPin, Music, Users } from 'lucide-react';
 import VenueShareLink from '@/components/VenueShareLink';
+import { ManagedBy } from '@/components/ManagedBy';
 
 export interface PreviewVenueListing {
   id: string;
@@ -10,6 +11,9 @@ export interface PreviewVenueListing {
   capacity: number | null;
   genres?: string[] | null;
   pictures?: string[] | null;
+  bio?: string | null;
+  backline_info?: string | null;
+  house_rules?: string | null;
 }
 
 export interface PreviewVenueProfile {
@@ -32,6 +36,8 @@ interface Props {
   headerAction?: ReactNode;
   /** Only show the shareable link on actual venue profile pages, not search/listing cards */
   showShareableLink?: boolean;
+  singleVenue?: boolean;
+  companyProfile?: { is_booker?: boolean; show_company_info?: boolean; venue_name?: string | null; bio?: string | null } | null;
 }
 
 export default function VenueProfilePreviewContent({
@@ -41,6 +47,8 @@ export default function VenueProfilePreviewContent({
   onRoomClick,
   headerAction,
   showShareableLink = false,
+  singleVenue = false,
+  companyProfile,
 }: Props) {
   const galleryScrollRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +60,9 @@ export default function VenueProfilePreviewContent({
     ? venueProfile.pictures
     : (venueProfile?.picture ? [venueProfile.picture] : []);
   // Only venue-level photos appear in the top carousel; room photos stay on the room.
-  const galleryPictures = Array.from(new Set(venuePics));
+  const galleryPictures = Array.from(new Set(singleVenue ? shared?.pictures || [] : venuePics));
+  const displayGenres = singleVenue ? shared?.genres : venueProfile?.genres;
+  const displayBio = singleVenue ? shared?.bio : venueProfile?.bio;
 
   const scroll = (dir: 'left' | 'right') => {
     if (!galleryScrollRef.current) return;
@@ -104,9 +114,9 @@ export default function VenueProfilePreviewContent({
         </div>
       )}
     </div>
-    {venueProfile?.genres && venueProfile.genres.length > 0 && (
+    {displayGenres && displayGenres.length > 0 && (
       <div className="flex flex-wrap gap-2 mb-10">
-        {venueProfile.genres.map(genre => (
+        {displayGenres.map(genre => (
           <span key={genre} className="text-sm px-4 py-1.5 uppercase tracking-wider font-display bg-gray-200">
             {genre.toLowerCase() === 'all' ? 'All Genres' : genre}
           </span>
@@ -117,19 +127,25 @@ export default function VenueProfilePreviewContent({
     <div className="flex flex-col lg:flex-row gap-10">
       <div className="flex-1 order-2 lg:order-1">
         <div className="space-y-4">
-          {venueProfile?.bio && (
+          {displayBio && (
             <div className="bg-card border border-border rounded-lg p-6 md:p-8">
-              <h3 className="font-display text-sm text-primary tracking-widest mb-3">BIO</h3>
-              <p className="text-base text-primary whitespace-pre-line leading-relaxed">{venueProfile.bio}</p>
+              <h3 className="font-display text-sm text-primary tracking-widest mb-3">{singleVenue ? 'ABOUT' : 'BIO'}</h3>
+              <p className="text-base text-primary whitespace-pre-line leading-relaxed">{displayBio}</p>
               {showShareableLink && (
                 <div className="mt-5">
-                  <VenueShareLink slug={venueProfile.slug} />
+                  <VenueShareLink slug={venueProfile?.slug} />
                 </div>
               )}
             </div>
           )}
         </div>
-        <div className="mt-12">
+        {singleVenue && <div className="space-y-4">
+          {shared?.capacity && <p className="flex items-center gap-2 text-sm text-foreground pt-4"><Users className="h-4 w-4" />{shared.capacity} capacity</p>}
+          {shared?.backline_info && <section className="py-4 space-y-2"><h3 className="font-display text-sm text-primary tracking-widest">BACKLINE</h3><p className="text-sm text-foreground whitespace-pre-line">{shared.backline_info}</p></section>}
+          {shared?.house_rules && <section className="py-4 space-y-2"><h3 className="font-display text-sm text-primary tracking-widest">HOUSE RULES</h3><p className="text-sm text-foreground whitespace-pre-line">{shared.house_rules}</p></section>}
+          <ManagedBy profile={companyProfile} />
+        </div>}
+        {!singleVenue && <div className="mt-12">
           <h2 className="font-display text-3xl text-black font-bold tracking-wide mb-6">ROOMS</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {listings.map(room => (
@@ -173,7 +189,7 @@ export default function VenueProfilePreviewContent({
               </div>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
 
       {sidebar && (

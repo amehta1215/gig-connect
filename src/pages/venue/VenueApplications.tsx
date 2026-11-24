@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchParties } from '@/lib/accountParties';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsBooker } from '@/hooks/useIsBooker';
+import { bookerDiscoverable } from '@/lib/booker';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
@@ -95,6 +97,7 @@ export default function VenueApplications() {
   const {
     user
   } = useAuth();
+  const isBooker = useIsBooker();
   const navigate = useNavigate();
   const [applications, setApplications] = useState<Application[]>([]);
   const [venueListings, setVenueListings] = useState<Map<string, VenueListing>>(new Map());
@@ -114,7 +117,7 @@ export default function VenueApplications() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const isProfileComplete = venueProfile && venueProfile.venue_name && venueProfile.location && venueProfile.bio && venueProfile.event_types && venueProfile.event_types.length > 0;
+  const isProfileComplete = venueProfile && venueProfile.venue_name && (isBooker || (venueProfile.location && venueProfile.bio && venueProfile.event_types && venueProfile.event_types.length > 0));
   const isVenueDiscoverable = isProfileComplete && hasRooms;
   useEffect(() => {
     if (user) {
@@ -173,8 +176,8 @@ export default function VenueApplications() {
     setVenueProfile(venueProfileData as VenueProfile);
     const {
       data: listings
-    } = await supabase.from('venue_listings').select('id, venue_name, room_name').eq('venue_profile_id', venueProfileData.id);
-    setHasRooms(listings && listings.length > 0);
+    } = await supabase.from('venue_listings').select('id, venue_name, room_name, is_published').eq('venue_profile_id', venueProfileData.id);
+    setHasRooms(listings && (isBooker ? bookerDiscoverable(venueProfileData.venue_name, listings) : listings.length > 0));
     if (!listings || listings.length === 0) {
       setLoading(false);
       return;
@@ -464,7 +467,7 @@ export default function VenueApplications() {
           </DialogTitle>
         </DialogHeader>
         <p className="text-muted-foreground text-center pb-2">
-          Complete your venue profile and add a room to make your venue discoverable to artists!
+          {isBooker ? 'Complete your company profile and publish a venue to make it discoverable to artists!' : 'Complete your venue profile and add a room to make your venue discoverable to artists!'}
         </p>
         <Button onClick={() => navigate('/venue/profile')} className="w-full font-display tracking-widest">
           EDIT PROFILE
@@ -604,7 +607,7 @@ export default function VenueApplications() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 w-36 justify-between gap-1 bg-card border-border text-xs font-normal">
                     <span className="truncate">
-                      {filterRoom.length === 0 ? 'All Rooms' : filterRoom.length === 1 ? Array.from(venueListings.values()).find(l => l.id === filterRoom[0])?.room_name || filterRoom.length + ' Room' : `Rooms (${filterRoom.length})`}
+                      {filterRoom.length === 0 ? (isBooker ? 'All Venues' : 'All Rooms') : filterRoom.length === 1 ? (isBooker ? Array.from(venueListings.values()).find(l => l.id === filterRoom[0])?.venue_name : Array.from(venueListings.values()).find(l => l.id === filterRoom[0])?.room_name) || `${filterRoom.length} ${isBooker ? 'Venue' : 'Room'}` : `${isBooker ? 'Venues' : 'Rooms'} (${filterRoom.length})`}
                     </span>
                     <ChevronDown className="h-3 w-3 opacity-50 shrink-0" />
                   </Button>

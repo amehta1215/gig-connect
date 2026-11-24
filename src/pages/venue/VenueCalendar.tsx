@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { parseLocalDate, cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsBooker } from '@/hooks/useIsBooker';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,8 @@ export default function VenueCalendar() {
   const {
     user
   } = useAuth();
+  const isBooker = useIsBooker();
+  const [venueFilter, setVenueFilter] = useState('all');
   const navigate = useNavigate();
   const [gigs, setGigs] = useState<GigListing[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -346,7 +349,7 @@ export default function VenueCalendar() {
   };
   const handleCreateEvent = async (override = false) => {
     if (!eventDate || !selectedListingId) {
-      toast.error('Please select a date and room');
+      toast.error(`Please select a date and ${isBooker ? 'venue' : 'room'}`);
       return;
     }
     if (!eventArtistName.trim()) {
@@ -640,9 +643,10 @@ export default function VenueCalendar() {
     toast.success('All holds for this artist deleted');
     fetchGigs();
   };
-  const confirmedGigDates = gigs.filter(g => g.is_confirmed).map(g => parseLocalDate(g.gig_date));
-  const holdGigDates = gigs.filter(g => !g.is_confirmed).map(g => parseLocalDate(g.gig_date));
-  const gigsOnSelectedDate = selectedDate ? gigs.filter(g => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
+  const visibleGigs = gigs.filter(g => !isBooker || venueFilter === 'all' || g.venue_listing_id === venueFilter);
+  const confirmedGigDates = visibleGigs.filter(g => g.is_confirmed).map(g => parseLocalDate(g.gig_date));
+  const holdGigDates = visibleGigs.filter(g => !g.is_confirmed).map(g => parseLocalDate(g.gig_date));
+  const gigsOnSelectedDate = selectedDate ? visibleGigs.filter(g => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
   const confirmedGigs = gigsOnSelectedDate
     .filter(g => g.is_confirmed)
     .sort((a, b) => {
@@ -655,7 +659,7 @@ export default function VenueCalendar() {
   // Sync local hold order when holdGigs change
   useEffect(() => {
     setLocalHoldOrder(holdGigs);
-  }, [gigs, selectedDate]);
+  }, [gigs, selectedDate, venueFilter]);
   const handleHoldDragStart = (index: number) => {
     setDraggedHoldIndex(index);
     setIsDraggingHold(true);
@@ -722,6 +726,10 @@ export default function VenueCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
+      {isBooker && <Select value={venueFilter} onValueChange={setVenueFilter}>
+        <SelectTrigger className="w-full sm:w-64" aria-label="Filter calendar by venue"><SelectValue /></SelectTrigger>
+        <SelectContent><SelectItem value="all">All Venues</SelectItem>{venueListings.map(v => <SelectItem key={v.id} value={v.id}>{v.venue_name}</SelectItem>)}</SelectContent>
+      </Select>}
       <div className="grid md:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
         {/* Calendar column */}
         <div className="flex flex-col gap-4 w-full md:w-[320px] md:flex-none">
@@ -873,8 +881,8 @@ export default function VenueCalendar() {
         <div className="bg-card border border-border p-6 transition-all">
 
           <h2 className="font-display text-sm text-primary tracking-widest mb-4 font-semibold">UPCOMING SHOWS</h2>
-          {gigs.filter(g => parseLocalDate(g.gig_date) >= startOfDay(new Date()) && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
-              {gigs.filter(g => parseLocalDate(g.gig_date) >= startOfDay(new Date()) && g.is_confirmed).map(gig => {
+          {visibleGigs.filter(g => parseLocalDate(g.gig_date) >= startOfDay(new Date()) && g.is_confirmed).length === 0 ? <p className="text-muted-foreground text-sm">No upcoming shows booked</p> : <div className="space-y-2">
+              {visibleGigs.filter(g => parseLocalDate(g.gig_date) >= startOfDay(new Date()) && g.is_confirmed).map(gig => {
             const artistName = (gig as any).artist_display_name || gig.manual_artist_name || gig.artist_profile?.band_name || (gig.artist ? `${gig.artist.first_name} ${gig.artist.last_name}` : 'TBA');
             const roomDisplay = gig.venue_listing?.room_name || gig.venue_listing?.venue_name;
             return <button key={gig.id} onClick={() => { setPreviewGig(gig); setPreviewDialogOpen(true); }} className="w-full text-left flex items-center justify-between bg-secondary p-3 hover:bg-secondary/80 transition-colors">
@@ -904,10 +912,10 @@ export default function VenueCalendar() {
 
             {/* Room Selection */}
             {venueListings.length > 1 && <div className="space-y-2">
-                <label className="font-display text-xs text-primary tracking-widest">ROOM</label>
+                <label className="font-display text-xs text-primary tracking-widest">{isBooker ? 'VENUE' : 'ROOM'}</label>
                 <Select value={selectedListingId} onValueChange={setSelectedListingId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a room" />
+                    <SelectValue placeholder={isBooker ? 'Select a venue' : 'Select a room'} />
                   </SelectTrigger>
                   <SelectContent>
                     {venueListings.map(listing => <SelectItem key={listing.id} value={listing.id}>
@@ -1325,7 +1333,7 @@ export default function VenueCalendar() {
 
                 {pRoomDisplay && (
                   <div>
-                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">ROOM</p>
+                    <p className="font-display text-xs text-muted-foreground tracking-widest mb-1">{isBooker ? 'VENUE' : 'ROOM'}</p>
                     <p className="text-sm text-primary">{pRoomDisplay}</p>
                   </div>
                 )}

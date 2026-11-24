@@ -16,6 +16,8 @@ import { validateImageUpload } from '@/lib/uploadLimits';
 import { ArrowLeft, Save, Upload, X, Plus, MapPin, Users, Music, Trash2, Pencil, Eye, ChevronLeft, ChevronRight, Copy, Crop } from 'lucide-react';
 import { RoomPreviewSheet } from '@/components/RoomPreviewSheet';
 import VenueProfilePreviewContent from '@/components/VenueProfilePreviewContent';
+import { useIsBooker } from '@/hooks/useIsBooker';
+import { ManagedBy } from '@/components/ManagedBy';
 import { ArtistPhotoCropDialog } from '@/components/ArtistPhotoCropDialog';
 interface VenueProfileData {
   id: string;
@@ -66,6 +68,7 @@ export default function VenueProfile() {
   const {
     user
   } = useAuth();
+  const isBooker = useIsBooker();
   const navigate = useNavigate();
   const location = useLocation();
   const fromDropdown = location.state?.fromDropdown === true;
@@ -80,7 +83,8 @@ export default function VenueProfile() {
     event_types: [] as string[],
     picture: '' as string,
     pictures: [] as string[],
-    genres: [] as string[]
+    genres: [] as string[],
+    show_company_info: false
   });
 
   // Room management state
@@ -203,12 +207,13 @@ export default function VenueProfile() {
         house_rules: roomFormData.house_rules || null,
         is_published: editingListing.is_published
       };
-      await supabase.from('venue_listings').update(listingData).eq('id', editingListing.id);
+      const { error } = await supabase.from('venue_listings').update(listingData).eq('id', editingListing.id);
+      if (isBooker && error) toast.error('Could not save venue changes');
     }, 1000);
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
-  }, [roomFormData, pictures, editingListing, profile, dialogMode]);
+  }, [roomFormData, pictures, editingListing, profile, dialogMode, isBooker]);
   useEffect(() => {
     if (user) {
       fetchProfile();
@@ -232,7 +237,8 @@ export default function VenueProfile() {
         event_types: data.event_types || [],
         picture: data.picture || '',
         pictures: (data as any).pictures || (data.picture ? [data.picture] : []),
-        genres: (data as any).genres || []
+        genres: (data as any).genres || [],
+        show_company_info: data.show_company_info
       });
       fetchListings(data.id);
       setInitialLoadDone(true);
@@ -265,13 +271,14 @@ export default function VenueProfile() {
       event_types: formData.event_types,
       picture: formData.pictures[0] || formData.picture || null,
       pictures: formData.pictures,
-      genres: formData.genres
+      genres: formData.genres,
+      show_company_info: formData.show_company_info
     } as any).eq('id', profile.id);
     if (error) {
       toast.error('Failed to save');
     } else {
       // Keep room listings (shown to artists and on the public page) in sync with the venue name.
-      if (formData.venue_name) {
+      if (!isBooker && formData.venue_name) {
         await supabase.from('venue_listings').update({ venue_name: formData.venue_name }).eq('venue_profile_id', profile.id).neq('venue_name', formData.venue_name);
         setListings(prev => prev.map(l => ({ ...l, venue_name: formData.venue_name })));
       }
@@ -281,7 +288,7 @@ export default function VenueProfile() {
     }
 
     setSaving(false);
-  }, [user, profile, formData, initialLoadDone]);
+  }, [user, profile, formData, initialLoadDone, isBooker]);
 
   // Debounced auto-save effect
   useEffect(() => {
@@ -308,9 +315,9 @@ export default function VenueProfile() {
   // Room management functions
   const resetRoomForm = () => {
     setRoomFormData({
-      venue_name: formData.venue_name,
+      venue_name: isBooker ? '' : formData.venue_name,
       room_name: '',
-      location: formData.location,
+      location: isBooker ? '' : formData.location,
       capacity: '',
       genres: [],
       bio: '',
@@ -387,6 +394,11 @@ export default function VenueProfile() {
   const removeRoomPicture = (index: number) => {
     setPictures(prev => prev.filter((_, i) => i !== index));
   };
+  const venuePictures = isBooker ? pictures : formData.pictures;
+  const updateVenuePictures = (update: (current: string[]) => string[]) => {
+    if (isBooker) setPictures(update);
+    else setFormData(prev => { const next = update(prev.pictures); return { ...prev, pictures: next, picture: next[0] || '' }; });
+  };
   const handleVenuePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -398,7 +410,7 @@ export default function VenueProfile() {
         return;
       }
     }
-    const remaining = 6 - formData.pictures.length;
+    const remaining = 6 - venuePictures.length;
     if (remaining <= 0) {
       toast.error('You can upload up to 6 venue photos.');
       if (venuePictureInputRef.current) venuePictureInputRef.current.value = '';
@@ -437,12 +449,9 @@ export default function VenueProfile() {
   const handleCroppedVenuePicture = async (croppedFile: File) => {
     try {
       const url = await uploadFile(croppedFile);
-      setFormData(prev => {
-        const next = editingVenuePictureIndex === null
-          ? [...prev.pictures, url]
-          : prev.pictures.map((picture, index) => index === editingVenuePictureIndex ? url : picture);
-        return { ...prev, pictures: next, picture: next[0] || prev.picture };
-      });
+      updateVenuePictures(current => editingVenuePictureIndex === null
+        ? [...current, url]
+        : current.map((picture, index) => index === editingVenuePictureIndex ? url : picture));
       toast.success('Photo uploaded');
       if (editingVenuePictureIndex === null) {
         advanceVenueCrop();
@@ -477,18 +486,15 @@ export default function VenueProfile() {
     }
   };
   const removeVenuePicture = (index: number) => {
-    setFormData(prev => {
-      const next = prev.pictures.filter((_, i) => i !== index);
-      return { ...prev, pictures: next, picture: next[0] || '' };
-    });
+    updateVenuePictures(current => current.filter((_, i) => i !== index));
   };
   const moveVenuePicture = (from: number, to: number) => {
     if (from === to) return;
-    setFormData(prev => {
-      const next = [...prev.pictures];
+    updateVenuePictures(current => {
+      const next = [...current];
       const [moved] = next.splice(from, 1);
       next.splice(to, 0, moved);
-      return { ...prev, pictures: next, picture: next[0] || '' };
+      return next;
     });
   };
   const handleCreateRoomClick = () => {
@@ -535,7 +541,7 @@ export default function VenueProfile() {
     if (error) {
       toast.error('Failed');
     } else {
-      toast.success(editingListing ? 'Updated' : publish ? 'Room published!' : 'Room saved as draft');
+      toast.success(editingListing ? 'Updated' : publish ? `${isBooker ? 'Venue' : 'Room'} published!` : `${isBooker ? 'Venue' : 'Room'} saved as draft`);
       setIsDialogOpen(false);
       resetRoomForm();
       fetchListings(profile.id);
@@ -580,6 +586,44 @@ export default function VenueProfile() {
         : [...prev.genres, genre]
     }));
   };
+  const venuePhotoEditor = (<div className="space-y-2">
+          <Label className="block">Venue Photos</Label>
+          {venuePictures.length > 1 && <p className="text-xs text-muted-foreground">Drag photos to reorder. The first photo appears in search results.</p>}
+          <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleVenuePictureUpload} className="hidden" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {venuePictures.map((url, index) => (
+              <div
+                key={url + index}
+                draggable
+                onDragStart={() => setDragIndex(index)}
+                onDragEnd={() => setDragIndex(null)}
+                onDragOver={e => e.preventDefault()}
+                onDrop={e => {
+                  e.preventDefault();
+                  if (dragIndex !== null) moveVenuePicture(dragIndex, index);
+                  setDragIndex(null);
+                }}
+                className={`relative group aspect-[4/3] bg-secondary rounded-lg overflow-hidden cursor-move transition-opacity ${dragIndex === index ? 'opacity-40' : ''}`}
+              >
+                <img src={url} alt={`Venue ${index + 1}`} className="w-full h-full object-cover pointer-events-none" />
+                <div className="absolute bottom-2 left-2">
+                  <Button type="button" size="icon" variant="ghost" onClick={() => editVenuePictureCrop(url, index)} disabled={uploadingVenuePicture} className="h-8 w-8 rounded-full bg-background/80 text-foreground hover:bg-background hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity" aria-label={`Crop photo ${index + 1}`} title="Crop photo">
+                    <Crop className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Button type="button" variant="ghost" size="icon" aria-label={`Remove photo ${index + 1}`} onClick={() => removeVenuePicture(index)} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors opacity-0 group-hover:opacity-100">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            {venuePictures.length < 6 && (
+              <Button type="button" variant="outline" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="h-auto w-full aspect-[4/3] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
+                <Upload className="h-5 w-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">{uploadingVenuePicture ? 'Uploading...' : 'Upload'}</span>
+              </Button>
+            )}
+          </div>
+        </div>);
   if (loading) {
     return <div className="space-y-6 animate-fade-in">
         <div className="h-8 w-48 bg-card rounded animate-pulse" />
@@ -603,14 +647,14 @@ export default function VenueProfile() {
           {!fromDropdown && <Button variant="ghost" size="icon" onClick={() => navigate('/venue')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>}
-          <h1 className="font-display text-4xl font-bold text-primary">VENUE PROFILE</h1>
+          <h1 className="font-display text-4xl font-bold text-primary">{isBooker ? 'PROFILE' : 'VENUE PROFILE'}</h1>
         </div>
         <div className="flex items-center gap-3">
           {saving && <span className="text-sm text-muted-foreground">Saving...</span>}
-          <Button variant="outline" size="sm" disabled={loading} onClick={openPreview} className="font-display tracking-wider">
+          {!isBooker && <Button variant="outline" size="sm" disabled={loading} onClick={openPreview} className="font-display tracking-wider">
             <Eye className="h-4 w-4 mr-2" />
             Preview Profile
-          </Button>
+          </Button>}
         </div>
       </div>
 
@@ -652,17 +696,18 @@ export default function VenueProfile() {
       {/* Venue Info Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2 text-primary mb-4">
-          <h2 className="font-display text-xl">Venue Info</h2>
+          <h2 className="font-display text-xl">{isBooker ? 'Company Info' : 'Venue Info'}</h2>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="venue_name">Venue Name <span className="text-destructive">*</span></Label>
+          <Label htmlFor="venue_name">{isBooker ? 'Company Name' : 'Venue Name'} <span className="text-destructive">*</span></Label>
           <Input id="venue_name" value={formData.venue_name} onChange={e => setFormData({
           ...formData,
           venue_name: e.target.value
-        })} placeholder="The Blue Note" />
+        })} placeholder={isBooker ? 'Company name' : 'The Blue Note'} />
         </div>
 
+        {!isBooker && <>
         <div className="space-y-2">
           <Label htmlFor="location">Location <span className="text-destructive">*</span></Label>
           <LocationAutocomplete value={formData.location} onChange={value => setFormData({
@@ -687,14 +732,20 @@ export default function VenueProfile() {
           </div>
         </div>
 
+        </>}
         <div className="space-y-2">
-          <Label htmlFor="bio">Bio <span className="text-destructive">*</span></Label>
+          <Label htmlFor="bio">Bio {!isBooker && <span className="text-destructive">*</span>}</Label>
           <Textarea id="bio" value={formData.bio} onChange={e => setFormData({
           ...formData,
           bio: e.target.value
-        })} placeholder="Tell artists about your venue, its vibe, and what makes it special..." rows={4} />
+        })} placeholder={isBooker ? "Tell artists about your booking company and the types of events you organize... (optional)" : "Tell artists about your venue, its vibe, and what makes it special..."} rows={4} />
         </div>
 
+        {isBooker && <div className="flex items-start gap-3">
+          <Checkbox id="show-company-info" checked={formData.show_company_info} onCheckedChange={value => setFormData(prev => ({ ...prev, show_company_info: value === true }))} />
+          <Label htmlFor="show-company-info" className="font-sans text-sm leading-snug cursor-pointer">Display booking company information to artists.</Label>
+        </div>}
+        {!isBooker && <>
         {/* Shareable Link */}
         <div className="space-y-2 pt-3">
           <Label className="block">Shareable Link</Label>
@@ -730,44 +781,8 @@ export default function VenueProfile() {
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label className="block">Venue Photos</Label>
-          {formData.pictures.length > 1 && <p className="text-xs text-muted-foreground">Drag photos to reorder. The first photo appears in search results.</p>}
-          <input ref={venuePictureInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleVenuePictureUpload} className="hidden" />
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {formData.pictures.map((url, index) => (
-              <div
-                key={url + index}
-                draggable
-                onDragStart={() => setDragIndex(index)}
-                onDragEnd={() => setDragIndex(null)}
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => {
-                  e.preventDefault();
-                  if (dragIndex !== null) moveVenuePicture(dragIndex, index);
-                  setDragIndex(null);
-                }}
-                className={`relative group aspect-[4/3] bg-secondary rounded-lg overflow-hidden cursor-move transition-opacity ${dragIndex === index ? 'opacity-40' : ''}`}
-              >
-                <img src={url} alt={`Venue ${index + 1}`} className="w-full h-full object-cover pointer-events-none" />
-                <div className="absolute bottom-2 left-2">
-                  <Button type="button" size="icon" variant="ghost" onClick={() => editVenuePictureCrop(url, index)} disabled={uploadingVenuePicture} className="h-8 w-8 rounded-full bg-background/80 text-foreground hover:bg-background hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity" aria-label={`Crop photo ${index + 1}`} title="Crop photo">
-                    <Crop className="h-4 w-4" />
-                  </Button>
-                </div>
-                <button type="button" onClick={() => removeVenuePicture(index)} className="absolute top-2 right-2 p-1.5 bg-background/80 rounded-full hover:bg-background transition-colors opacity-0 group-hover:opacity-100">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-            {formData.pictures.length < 6 && (
-              <button type="button" onClick={() => venuePictureInputRef.current?.click()} disabled={uploadingVenuePicture} className="aspect-[4/3] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary transition-colors cursor-pointer">
-                <Upload className="h-5 w-5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{uploadingVenuePicture ? 'Uploading...' : 'Upload'}</span>
-              </button>
-            )}
-          </div>
-        </div>
+        </>}
+        {!isBooker && venuePhotoEditor}
 
       
 
@@ -791,7 +806,7 @@ export default function VenueProfile() {
       {/* Rooms Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-xl text-primary">ROOMS <span className="text-destructive">*</span></h2>
+          <h2 className="font-display text-xl text-primary">{isBooker ? 'VENUES' : 'ROOMS'} <span className="text-destructive">*</span></h2>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
               setIsDialogOpen(open);
               if (!open && profile) {
@@ -800,12 +815,13 @@ export default function VenueProfile() {
               }
             }}>
             {listings.length > 0 && <DialogTrigger asChild>
-              <Button onClick={() => openDialog(undefined, 'edit')} size="icon" variant="outline">
-                <Plus className="h-4 w-4" />
+              <Button onClick={() => openDialog(undefined, 'edit')} size={isBooker ? "sm" : "icon"} variant="outline" aria-label={isBooker ? "Add Venue" : "Add Room"}>
+                <Plus className="h-4 w-4" />{isBooker && <span className="ml-2">Add Venue</span>}
               </Button>
             </DialogTrigger>}
             <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 bg-card border-border">
               <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0 pr-12">
+                {isBooker && <DialogTitle className="font-display text-xl text-foreground">{dialogMode === 'preview' ? 'Preview Venue' : editingListing ? 'Edit Venue' : 'Add Venue'}</DialogTitle>}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {editingListing && !editingListing.is_published && (
@@ -813,13 +829,16 @@ export default function VenueProfile() {
                         PUBLISH
                       </Button>
                     )}
+                    {isBooker && editingListing?.is_published && (
+                      <Button variant="outline" size="sm" onClick={() => handleSaveRoom(false)} disabled={savingRoom}>Unpublish</Button>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     {editingListing && <>
                       <div className="flex gap-2">
                         <Button variant={dialogMode === 'edit' ? 'default' : 'outline'} size="sm" onClick={() => setDialogMode('edit')} className="font-display tracking-widest">
                           <Pencil className="h-4 w-4 mr-2" />
-                          EDIT
+                          {isBooker ? 'EDIT VENUE' : 'EDIT'}
                         </Button>
                         <Button variant={dialogMode === 'preview' ? 'default' : 'outline'} size="sm" onClick={() => setDialogMode('preview')} className="font-display tracking-widest">
                           <Eye className="h-4 w-4 mr-2" />
@@ -829,7 +848,7 @@ export default function VenueProfile() {
                     </>}
                     {dialogMode === 'edit' && !editingListing && (
                       <Button size="sm" onClick={handleCreateRoomClick} disabled={savingRoom} className="font-display tracking-widest">
-                        {savingRoom ? '...' : 'CREATE ROOM'}
+                        {savingRoom ? '...' : isBooker ? 'CREATE VENUE' : 'CREATE ROOM'}
                       </Button>
                     )}
                   </div>
@@ -838,6 +857,12 @@ export default function VenueProfile() {
 
               {dialogMode === 'preview' && editingListing ? (/* Preview Content - Inline version of RoomPreviewSheet */
             <div className="flex-1 overflow-y-auto px-6 py-6">
+                  {isBooker ? <VenueProfilePreviewContent
+                    venueProfile={null}
+                    listings={[{ ...editingListing, ...roomFormData, capacity: roomFormData.capacity ? Number(roomFormData.capacity) : null, pictures }]}
+                    singleVenue
+                    companyProfile={{ ...formData, is_booker: true }}
+                  /> : <>
                   {/* Pictures Gallery - horizontal carousel */}
                   <div className="mb-6">
                     {(() => {
@@ -884,9 +909,9 @@ export default function VenueProfile() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-                      {formData.location && <span className="flex items-center gap-2 text-primary">
+                      {(isBooker ? roomFormData.location : formData.location) && <span className="flex items-center gap-2 text-primary">
                           <MapPin className="h-4 w-4" />
-                          {formData.location}
+                          {isBooker ? roomFormData.location : formData.location}
                         </span>}
                       {roomFormData.capacity && <span className="flex items-center gap-2 text-primary">
                           <Users className="h-4 w-4" />
@@ -901,6 +926,7 @@ export default function VenueProfile() {
                       </div>}
                   </div>
 
+                  {isBooker && <ManagedBy profile={{ ...formData, is_booker: true }} />}
                   {/* Room Details */}
                   <div className="space-y-4">
                     {roomFormData.bio && <div className="bg-card border border-border rounded-lg p-4">
@@ -916,10 +942,12 @@ export default function VenueProfile() {
                         <p className="text-sm text-primary whitespace-pre-line">{roomFormData.house_rules}</p>
                       </div>}
                   </div>
+                  </>}
                 </div>) : (/* Edit Content */
             <div className="flex-1 overflow-y-auto">
                   
                   <div className="px-6 py-6 space-y-6">
+                  {isBooker ? venuePhotoEditor : <>
                   {/* Photo Upload */}
                   <div className="space-y-4">
                     <h3 className="font-display text-sm text-primary tracking-widest">PHOTOS</h3>
@@ -940,15 +968,16 @@ export default function VenueProfile() {
                     <input ref={pictureInputRef} type="file" accept=".jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={handleRoomPictureUpload} />
                   </div>
 
+                  </>}
                   {/* General Info */}
                   <div className="space-y-4">
                     <h3 className="font-display text-sm text-primary tracking-widest">GENERAL</h3>
                     <div className="flex gap-3">
                       <div className="space-y-1 w-1/2">
-                        <Label htmlFor="room_name" className="text-xs uppercase tracking-wider text-muted-foreground">Room Name</Label>
-                        <Input id="room_name" value={roomFormData.room_name} onChange={e => setRoomFormData({
+                        <Label htmlFor="room_name" className="text-xs uppercase tracking-wider text-muted-foreground">{isBooker ? 'Venue Name' : 'Room Name'}</Label>
+                        <Input id="room_name" value={isBooker ? roomFormData.venue_name : roomFormData.room_name} onChange={e => setRoomFormData({
                         ...roomFormData,
-                        room_name: e.target.value
+                        [isBooker ? "venue_name" : "room_name"]: e.target.value
                       })} className="bg-background border-border" />
                       </div>
                       <div className="space-y-1 w-32">
@@ -961,6 +990,18 @@ export default function VenueProfile() {
                     </div>
                   </div>
 
+                  {isBooker && <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Location</Label>
+                      <LocationAutocomplete value={roomFormData.location} onChange={value => setRoomFormData(prev => ({ ...prev, location: value }))} placeholder="New York, NY" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Genres</Label>
+                      <div className="flex flex-wrap gap-1">
+                        {availableGenres.map(genre => <Button key={genre} type="button" size="sm" variant={roomFormData.genres.includes(genre) ? 'default' : 'secondary'} onClick={() => toggleGenre(genre)} className="font-display text-xs">{genre}</Button>)}
+                      </div>
+                    </div>
+                  </div>}
                   {/* Additional Info */}
                   <div className="space-y-4">
                     <h3 className="font-display text-sm text-primary tracking-widest">DETAILS</h3>
@@ -1007,7 +1048,7 @@ export default function VenueProfile() {
         {listings.length === 0 ? <div className="text-center py-8 border border-dashed border-border rounded-lg">
             <Button onClick={() => openDialog(undefined, 'edit')} className="font-display tracking-widest">
               <Plus className="h-4 w-4 mr-2" />
-              ADD ROOM
+              {isBooker ? 'ADD VENUE' : 'ADD ROOM'}
             </Button>
           </div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {listings.map(listing => <div key={listing.id} className="bg-background border border-border overflow-hidden hover:border-primary/50 transition-colors rounded-lg cursor-pointer" onClick={() => openDialog(listing, 'preview')}>
@@ -1030,7 +1071,7 @@ export default function VenueProfile() {
                   <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                     {(formData.location || listing.location) && <span className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
-                        {formData.location || listing.location}
+                        {isBooker ? listing.location : formData.location || listing.location}
                       </span>}
                     {listing.capacity && <span className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
@@ -1058,7 +1099,7 @@ export default function VenueProfile() {
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display text-xl text-accent">Ready to go live?</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Listing this room makes it publicly available. You can edit or unpublish at any time.
+              Listing this {isBooker ? 'venue' : 'room'} makes it publicly available. You can edit or unpublish at any time.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
@@ -1076,7 +1117,7 @@ export default function VenueProfile() {
       <AlertDialog open={!!roomToDelete} onOpenChange={(open) => { if (!open) setRoomToDelete(null); }}>
         <AlertDialogContent className="bg-card border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-display text-xl text-destructive">DELETE ROOM?</AlertDialogTitle>
+            <AlertDialogTitle className="font-display text-xl text-destructive">{isBooker ? 'DELETE VENUE?' : 'DELETE ROOM?'}</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
               {roomToDelete ? `Are you sure you want to delete "${roomToDelete.room_name || roomToDelete.venue_name}"? This cannot be undone.` : 'Are you sure you want to delete this room? This cannot be undone.'}
             </AlertDialogDescription>

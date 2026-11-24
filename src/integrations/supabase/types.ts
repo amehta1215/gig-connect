@@ -569,9 +569,11 @@ export type Database = {
           event_types: string[] | null
           genres: string[]
           id: string
+          is_booker: boolean
           location: string | null
           picture: string | null
           pictures: string[]
+          show_company_info: boolean
           slug: string | null
           slug_is_custom: boolean
           updated_at: string | null
@@ -584,9 +586,11 @@ export type Database = {
           event_types?: string[] | null
           genres?: string[]
           id?: string
+          is_booker?: boolean
           location?: string | null
           picture?: string | null
           pictures?: string[]
+          show_company_info?: boolean
           slug?: string | null
           slug_is_custom?: boolean
           updated_at?: string | null
@@ -599,9 +603,11 @@ export type Database = {
           event_types?: string[] | null
           genres?: string[]
           id?: string
+          is_booker?: boolean
           location?: string | null
           picture?: string | null
           pictures?: string[]
+          show_company_info?: boolean
           slug?: string | null
           slug_is_custom?: boolean
           updated_at?: string | null
@@ -632,6 +638,10 @@ export type Database = {
         Returns: string
       }
       prepare_account_deletion: { Args: { _uid: string }; Returns: undefined }
+      prepare_account_deletion_existing_accounts: {
+        Args: { _uid: string }
+        Returns: undefined
+      }
       run_retention_cleanup: { Args: never; Returns: Json }
       send_welcome_message: {
         Args: {
@@ -641,6 +651,13 @@ export type Database = {
         Returns: undefined
       }
       welcome_content: {
+        Args: {
+          p_role: Database["public"]["Enums"]["user_role"]
+          p_user_id: string
+        }
+        Returns: string
+      }
+      welcome_content_existing_accounts: {
         Args: {
           p_role: Database["public"]["Enums"]["user_role"]
           p_user_id: string
@@ -663,7 +680,7 @@ export type Database = {
         | "flat_fee"
         | "rental"
         | "no_preference"
-      user_role: "artist" | "venue" | "both"
+      user_role: "artist" | "venue" | "both" | "booker"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -807,7 +824,7 @@ export const Constants = {
         "rental",
         "no_preference",
       ],
-      user_role: ["artist", "venue", "both"],
+      user_role: ["artist", "venue", "both", "booker"],
     },
   },
 } as const

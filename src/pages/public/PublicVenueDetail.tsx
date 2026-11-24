@@ -47,13 +47,16 @@ interface VenueListing {
 interface VenueProfile {
   id: string;
   slug?: string | null;
+  is_booker?: boolean;
+  show_company_info?: boolean;
+  venue_name?: string | null;
   picture: string | null;
   pictures?: string[] | null;
   genres?: string[] | null;
   bio?: string | null;
 }
 export default function PublicVenueDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { id, listingId } = useParams<{ id: string; listingId: string }>();
   const navigate = useNavigate();
   const { profile, activeRole } = useAuth();
   const [listings, setListings] = useState<VenueListing[]>([]);
@@ -62,34 +65,46 @@ export default function PublicVenueDetail() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (id) fetchData();
-  }, [id]);
+    if (id || listingId) fetchData();
+  }, [id, listingId]);
 
   // Route authenticated artists to the artist venue detail page so they can apply.
   useEffect(() => {
     if (!venueProfile?.id || !profile) return;
     const isArtist = profile.role === 'artist' || (profile.role === 'both' && activeRole === 'artist');
     if (isArtist) {
-      navigate(`/artist/venue/${venueProfile.id}`, { replace: true });
+      navigate(listingId ? `/artist/booked-venues/${listingId}` : `/artist/venue/${venueProfile.id}`, { replace: true });
     }
-  }, [venueProfile?.id, profile, activeRole, navigate]);
+  }, [venueProfile?.id, profile, activeRole, navigate, listingId]);
 
 
   const fetchData = async () => {
     setLoading(true);
+    setListings([]);
+    setVenueProfile(null);
+    if (listingId) {
+      const { data: listing } = await supabase.from('venue_listings').select('*').eq('id', listingId).eq('is_published', true).maybeSingle();
+      if (listing) {
+        const { data: company } = await supabase.from('venue_profiles').select('id, slug, picture, pictures, genres, bio, is_booker, show_company_info, venue_name').eq('id', listing.venue_profile_id).maybeSingle();
+        if (company?.is_booker) { setListings([listing]); setVenueProfile(company); }
+      }
+      setLoading(false);
+      return;
+    }
+    if (!id) { setLoading(false); return; }
     // Resolve by slug first, then fall back to raw id (legacy UUID links).
     let { data: profileData } = await supabase
       .from('venue_profiles')
-      .select('id, slug, picture, pictures, genres, bio')
-      .eq('slug', id!)
+      .select('id, slug, picture, pictures, genres, bio, is_booker, show_company_info, venue_name').eq('is_booker', false)
+      .eq('slug', id)
       .maybeSingle();
     if (!profileData) {
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
       if (isUuid) {
         const fallback = await supabase
           .from('venue_profiles')
-          .select('id, slug, picture, pictures, genres, bio')
-          .eq('id', id!)
+          .select('id, slug, picture, pictures, genres, bio, is_booker, show_company_info, venue_name').eq('is_booker', false)
+          .eq('id', id)
           .maybeSingle();
         profileData = fallback.data;
       }
@@ -99,7 +114,7 @@ export default function PublicVenueDetail() {
       const { data: listingsData } = await supabase
         .from('venue_listings')
         .select('*')
-        .eq('venue_profile_id', profileData.id);
+        .eq('venue_profile_id', profileData.id).eq('is_published', true);
       if (listingsData) setListings(listingsData as VenueListing[]);
     }
     setLoading(false);
@@ -206,6 +221,8 @@ export default function PublicVenueDetail() {
     <VenueProfilePreviewContent
       venueProfile={venueProfile}
       listings={listings}
+      singleVenue={Boolean(listingId)}
+      companyProfile={venueProfile}
       sidebar={applyPanel}
       onRoomClick={(room) => navigate(`/rooms/${room.id}`)}
     />

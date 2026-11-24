@@ -4,13 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 interface WelcomeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  role: 'artist' | 'venue' | 'both';
+  role: 'artist' | 'venue' | 'both' | 'booker';
   onDismiss: () => void;
 }
 
 export default function WelcomeDialog({ open, onOpenChange, role, onDismiss }: WelcomeDialogProps) {
   const navigate = useNavigate();
-  const isVenue = role === 'venue';
+  const isVenue = role === 'venue' || role === 'booker';
   const profilePath = isVenue ? '/venue/profile' : '/artist/profile';
 
   const handleOpenChange = (next: boolean) => {

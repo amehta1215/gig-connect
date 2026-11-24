@@ -9,6 +9,7 @@ import { parseLocalDate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useRef } from 'react';
+import VenueProfilePreviewContent from '@/components/VenueProfilePreviewContent';
 
 interface GigListing {
   id: string;
@@ -44,6 +45,9 @@ interface ApplicationData {
 }
 
 interface VenueProfile {
+  is_booker?: boolean;
+  show_company_info?: boolean;
+  venue_name?: string | null;
   id: string;
   picture: string | null;
   pictures: string[] | null;
@@ -163,7 +167,7 @@ export default function ApplicationDetail() {
       // Fetch venue profile (for bio, pictures, genres)
       const { data: profileData } = await supabase
         .from('venue_profiles')
-        .select('id, picture, pictures, genres, bio')
+        .select('id, picture, pictures, genres, bio, is_booker, show_company_info, venue_name')
         .eq('id', appData.venue_listing.venue_profile_id)
         .maybeSingle();
       if (profileData) setVenueProfile(profileData as VenueProfile);
@@ -242,6 +246,7 @@ export default function ApplicationDetail() {
       </div>
 
       {/* Pictures Gallery */}
+      {venueProfile?.is_booker ? <VenueProfilePreviewContent venueProfile={venueProfile} listings={[listing]} companyProfile={venueProfile} singleVenue /> : <>
       <div className="mb-6">
         {galleryPictures.length === 0 ? (
           <div className="aspect-[4/3] max-w-xs bg-secondary rounded-lg overflow-hidden">
@@ -341,6 +346,7 @@ export default function ApplicationDetail() {
       )}
 
       {/* Your Application */}
+      </>}
       <div className="bg-card border border-border rounded-lg p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl text-accent font-bold">YOUR APPLICATION</h2>

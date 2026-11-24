@@ -38,6 +38,8 @@ export default function VenueListingDetail() {
       .eq('id', id)
       .maybeSingle();
     if (data && !error) {
+      const { data: owner } = await supabase.from('venue_profiles').select('is_booker').eq('id', data.venue_profile_id).maybeSingle();
+      if (owner?.is_booker) { navigate(`/artist/booked-venues/${data.id}`, { replace: true }); return; }
       setListing(data as VenueListing);
     }
     setLoading(false);

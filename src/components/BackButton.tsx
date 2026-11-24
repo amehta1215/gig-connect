@@ -8,7 +8,7 @@ export default function BackButton() {
   const { profile } = useAuth();
 
   const handleClick = () => {
-    if (profile?.role === "venue") {
+    if (profile?.role === "venue" || profile?.role === "booker") {
       navigate("/venue");
     } else if (profile?.role === "artist") {
       navigate("/artist/applications");
