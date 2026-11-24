@@ -10,7 +10,6 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import AccountDeleted from "./pages/AccountDeleted";
-import DemoVenue from "./pages/DemoVenue";
 
 // Public pages
 import PublicDashboard from "./pages/public/PublicDashboard";
@@ -68,7 +67,7 @@ const App = () => (
             <Route path="/forgot-password" element={<Navigate to="/" replace />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/account-deleted" element={<AccountDeleted />} />
-            <Route path="/demo-venue" element={<DemoVenue />} />
+            <Route path="/demo-venue" element={<Navigate to="/?auth=login" replace />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />

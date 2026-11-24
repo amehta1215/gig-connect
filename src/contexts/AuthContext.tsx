@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { canUseVisitSession, isAuthEmailLink } from '@/lib/authVisit';
 
 type UserRole = 'artist' | 'venue' | 'both' | 'booker';
 
@@ -33,6 +33,26 @@ interface AuthContextType {
 const globalAny = globalThis as any;
 const AuthContext: React.Context<AuthContextType | undefined> =
   globalAny.__SH_AUTH_CONTEXT__ ?? (globalAny.__SH_AUTH_CONTEXT__ = createContext<AuthContextType | undefined>(undefined));
+
+// Memory-only permission: a new document (including a reopened tab) starts
+// signed out. Keep this across hot reloads, never in persistent browser storage.
+const visit: { explicitSignIn: boolean; emailLink: boolean; ready: Promise<void> | null } =
+  globalAny.__SH_AUTH_VISIT__ ?? (globalAny.__SH_AUTH_VISIT__ = {
+    explicitSignIn: false,
+    emailLink: isAuthEmailLink(window.location.href),
+    ready: null,
+  });
+
+function initializeVisit() {
+  if (!visit.ready) {
+    visit.ready = (async () => {
+      if (!canUseVisitSession(visit.explicitSignIn, visit.emailLink)) {
+        await supabase.auth.signOut({ scope: 'local' });
+      }
+    })();
+  }
+  return visit.ready;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -79,9 +99,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    let disposed = false;
+    let initialized = false;
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!initialized || disposed) return;
+        if (session && !canUseVisitSession(visit.explicitSignIn, visit.emailLink)) return;
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -90,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Check for new user on SIGNED_IN event (happens after email verification)
           const shouldCheckNew = event === 'SIGNED_IN';
           setTimeout(() => {
-            fetchProfile(session.user.id, shouldCheckNew);
+            if (!disposed) fetchProfile(session.user.id, shouldCheckNew);
           }, 0);
         } else {
           setProfile(null);
@@ -100,21 +124,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN restore any saved session so users stay logged in between visits
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
+    // Clear saved accounts before exposing auth state to any page.
+    initializeVisit().then(async () => {
+      if (disposed) return;
+      if (!canUseVisitSession(visit.explicitSignIn, visit.emailLink)) {
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        setIsNewUser(false);
+      } else {
+        const { data, error } = await supabase.auth.getUser();
+        if (!disposed && !error && data.user) {
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (disposed) return;
+          setSession(sessionData.session);
+          setUser(data.user);
+          fetchProfile(data.user.id);
+        }
       }
-      setLoading(false);
+    }).finally(() => {
+      if (!disposed) {
+        initialized = true;
+        setLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => { disposed = true; subscription.unsubscribe(); };
   }, []);
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string, role: UserRole, termsAcceptedAt?: string) => {
-    (window as any).__SH_SIGNED_IN_THIS_VISIT__ = true;
+    await initializeVisit();
+    visit.explicitSignIn = true;
     const redirectUrl = `${window.location.origin}/`;
 
     // Normalize credentials so stray whitespace (common with mobile keyboards
@@ -133,11 +173,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
 
+    if (error || !data.session) visit.explicitSignIn = false;
     return { error, data };
   };
 
   const signIn = async (email: string, password: string) => {
-    (window as any).__SH_SIGNED_IN_THIS_VISIT__ = true;
+    await initializeVisit();
+    visit.explicitSignIn = true;
     // Login aliases: alternate addresses that sign in to an existing account.
     const LOGIN_ALIASES: Record<string, string> = {
       'theparlor@gmail.com': 'examplevenue@gmail.com',
@@ -158,13 +200,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: normalizedEmail,
         password,
       });
+      if (retry.error) visit.explicitSignIn = false;
       return { error: retry.error };
     }
 
+    if (error) visit.explicitSignIn = false;
     return { error };
   };
 
   const signOut = async () => {
+    visit.explicitSignIn = false;
+    visit.emailLink = false;
     await supabase.auth.signOut();
     setProfile(null);
     setUser(null);
