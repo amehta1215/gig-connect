@@ -57,7 +57,7 @@ export default function VenueCalendar() {
     user
   } = useAuth();
   const isBooker = useIsBooker();
-  const [venueFilter, setVenueFilter] = useState('all');
+  const [hiddenVenueIds, setHiddenVenueIds] = useState<string[]>([]);
   const navigate = useNavigate();
   const [gigs, setGigs] = useState<GigListing[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -643,7 +643,7 @@ export default function VenueCalendar() {
     toast.success('All holds for this artist deleted');
     fetchGigs();
   };
-  const visibleGigs = gigs.filter(g => !isBooker || venueFilter === 'all' || g.venue_listing_id === venueFilter);
+  const visibleGigs = gigs.filter(g => !isBooker || !hiddenVenueIds.includes(g.venue_listing_id));
   const confirmedGigDates = visibleGigs.filter(g => g.is_confirmed).map(g => parseLocalDate(g.gig_date));
   const holdGigDates = visibleGigs.filter(g => !g.is_confirmed).map(g => parseLocalDate(g.gig_date));
   const gigsOnSelectedDate = selectedDate ? visibleGigs.filter(g => format(parseLocalDate(g.gig_date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) : [];
@@ -659,7 +659,7 @@ export default function VenueCalendar() {
   // Sync local hold order when holdGigs change
   useEffect(() => {
     setLocalHoldOrder(holdGigs);
-  }, [gigs, selectedDate, venueFilter]);
+  }, [gigs, selectedDate, hiddenVenueIds]);
   const handleHoldDragStart = (index: number) => {
     setDraggedHoldIndex(index);
     setIsDraggingHold(true);
@@ -726,10 +726,6 @@ export default function VenueCalendar() {
       </div>;
   }
   return <div className="space-y-6 animate-fade-in">
-      {isBooker && <Select value={venueFilter} onValueChange={setVenueFilter}>
-        <SelectTrigger className="w-full sm:w-64" aria-label="Filter calendar by venue"><SelectValue /></SelectTrigger>
-        <SelectContent><SelectItem value="all">All Venues</SelectItem>{venueListings.map(v => <SelectItem key={v.id} value={v.id}>{v.venue_name}</SelectItem>)}</SelectContent>
-      </Select>}
       <div className="grid md:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
         {/* Calendar column */}
         <div className="flex flex-col gap-4 w-full md:w-[320px] md:flex-none">
@@ -765,6 +761,12 @@ export default function VenueCalendar() {
             <Switch id="venue-show-hold-dots" checked={showHoldDots} onCheckedChange={setShowHoldDots} />
           </div>
         </div>
+        {isBooker && venueListings.length > 1 && <div className="bg-card border border-border p-3 space-y-3">
+          {venueListings.map(v => <div key={v.id} className="flex items-center justify-between gap-3">
+            <Label htmlFor={`venue-filter-${v.id}`} className="font-display text-xs tracking-widest text-primary uppercase truncate">{v.venue_name}</Label>
+            <Switch id={`venue-filter-${v.id}`} checked={!hiddenVenueIds.includes(v.id)} onCheckedChange={on => setHiddenVenueIds(prev => on ? prev.filter(id => id !== v.id) : [...prev, v.id])} />
+          </div>)}
+        </div>}
         </div>
 
       {/* Right column */}
