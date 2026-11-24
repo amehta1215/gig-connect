@@ -457,6 +457,24 @@ export default function VenueApplications() {
         </div>
       </div>;
   };
+  const venueFilterDropdown = (venueListings.size > 1 && <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 w-36 justify-between gap-1 bg-card border-border text-xs font-normal">
+                    <span className="truncate">
+                      {filterRoom.length === 0 ? (isBooker ? 'All Venues' : 'All Rooms') : filterRoom.length === 1 ? (isBooker ? Array.from(venueListings.values()).find(l => l.id === filterRoom[0])?.venue_name : Array.from(venueListings.values()).find(l => l.id === filterRoom[0])?.room_name) || `${filterRoom.length} ${isBooker ? 'Venue' : 'Room'}` : `${isBooker ? 'Venues' : 'Rooms'} (${filterRoom.length})`}
+                    </span>
+                    <ChevronDown className="h-3 w-3 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="max-h-64 overflow-y-auto">
+                  {Array.from(venueListings.values()).map(listing => <DropdownMenuCheckboxItem key={listing.id} checked={filterRoom.includes(listing.id)} onCheckedChange={checked => {
+                    setFilterRoom(prev => checked ? [...prev, listing.id] : prev.filter(r => r !== listing.id));
+                  }} onSelect={e => e.preventDefault()}>
+                    {listing.room_name || listing.venue_name}
+                  </DropdownMenuCheckboxItem>)}
+                </DropdownMenuContent>
+              </DropdownMenu>);
+
   return <>
     {/* Profile Incomplete Dialog */}
     <Dialog open={showIncompleteDialog} onOpenChange={setShowIncompleteDialog}>
@@ -549,6 +567,8 @@ export default function VenueApplications() {
               </SelectContent>
             </Select>
 
+            {isBooker && venueFilterDropdown}
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 w-32 justify-between gap-1 bg-card border-border text-xs font-normal">
@@ -603,23 +623,7 @@ export default function VenueApplications() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {venueListings.size > 1 && <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 w-36 justify-between gap-1 bg-card border-border text-xs font-normal">
-                    <span className="truncate">
-                      {filterRoom.length === 0 ? (isBooker ? 'All Venues' : 'All Rooms') : filterRoom.length === 1 ? (isBooker ? Array.from(venueListings.values()).find(l => l.id === filterRoom[0])?.venue_name : Array.from(venueListings.values()).find(l => l.id === filterRoom[0])?.room_name) || `${filterRoom.length} ${isBooker ? 'Venue' : 'Room'}` : `${isBooker ? 'Venues' : 'Rooms'} (${filterRoom.length})`}
-                    </span>
-                    <ChevronDown className="h-3 w-3 opacity-50 shrink-0" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="max-h-64 overflow-y-auto">
-                  {Array.from(venueListings.values()).map(listing => <DropdownMenuCheckboxItem key={listing.id} checked={filterRoom.includes(listing.id)} onCheckedChange={checked => {
-                    setFilterRoom(prev => checked ? [...prev, listing.id] : prev.filter(r => r !== listing.id));
-                  }} onSelect={e => e.preventDefault()}>
-                    {listing.room_name || listing.venue_name}
-                  </DropdownMenuCheckboxItem>)}
-                </DropdownMenuContent>
-              </DropdownMenu>}
+            {!isBooker && venueFilterDropdown}
 
             <Popover>
               <PopoverTrigger asChild>
