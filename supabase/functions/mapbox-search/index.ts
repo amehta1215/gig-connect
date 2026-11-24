@@ -97,6 +97,23 @@ const searchNominatim = async (query: string): Promise<Suggestion[]> => {
   return dedupe(suggestions).slice(0, 6);
 };
 
+const searchOpenMeteo = async (query: string): Promise<Suggestion[]> => {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=15&language=en&countryCode=US`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Open-Meteo HTTP ${response.status}`);
+  const data = await response.json();
+  const results = Array.isArray(data?.results) ? data.results : [];
+  const suggestions: Suggestion[] = results
+    .filter((r: any) => !r.country_code || r.country_code === "US")
+    .map((r: any) => {
+      const state = r.admin1 || "";
+      const text = state && state !== r.name ? `${r.name}, ${state}` : r.name;
+      return { id: String(r.id), name: text, text };
+    })
+    .filter((s: Suggestion) => !!s.text);
+  return dedupe(suggestions).slice(0, 6);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -115,7 +132,7 @@ serve(async (req) => {
     }
     const q = String(query).trim();
 
-    const providers = [searchPhoton, searchNominatim];
+    const providers = [searchOpenMeteo, searchPhoton, searchNominatim];
     for (const provider of providers) {
       try {
         const suggestions = await provider(q);
