@@ -1,7 +1,7 @@
 # Booker / Promoter account type
 
 ## What the user gets
-- A third sign-up option, **BOOKER / PROMOTER**, next to Artist, Venue and Both.
+- A third sign-up option, **BOOKER**, next to Artist, Venue and Both.
 - The same dashboard as a venue (Applications, Inbox, Calendar, Profile), with these differences:
   - Profile page titled **PROFILE**; "Company Name" instead of "Venue Name"; new bio placeholder; an unchecked "Display booking company information to artists" checkbox under the bio.
   - No location, genres, photos or overall Preview Profile button on the main profile.
