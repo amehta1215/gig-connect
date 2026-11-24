@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchParties } from '@/lib/accountParties';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsBooker } from '@/hooks/useIsBooker';
-import { bookerDiscoverable } from '@/lib/booker';
+import { shouldShowVenueCompletionReminder } from '@/lib/booker';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
@@ -112,13 +112,11 @@ export default function VenueApplications() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null);
-  const [hasRooms, setHasRooms] = useState<boolean | null>(null);
+  const [listingCount, setListingCount] = useState<number | null>(null);
   const [showIncompleteDialog, setShowIncompleteDialog] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const isProfileComplete = venueProfile && venueProfile.venue_name && (isBooker || (venueProfile.location && venueProfile.bio && venueProfile.event_types && venueProfile.event_types.length > 0));
-  const isVenueDiscoverable = isProfileComplete && hasRooms;
   useEffect(() => {
     if (user) {
       fetchApplications();
@@ -154,11 +152,11 @@ export default function VenueApplications() {
     }
   };
   useEffect(() => {
-    // Show dialog after data is loaded and if venue is not discoverable
-    if (venueProfile !== null && hasRooms !== null && !isVenueDiscoverable) {
-      setShowIncompleteDialog(true);
+    // Existing rooms/venues suppress this reminder, even if saved as drafts.
+    if (listingCount !== null) {
+      setShowIncompleteDialog(shouldShowVenueCompletionReminder(listingCount));
     }
-  }, [venueProfile, hasRooms, isVenueDiscoverable]);
+  }, [listingCount]);
   const fetchApplications = async () => {
     if (!user) return;
     setLoading(true);
@@ -170,14 +168,14 @@ export default function VenueApplications() {
     if (!venueProfileData) {
       setLoading(false);
       setVenueProfile(null);
-      setHasRooms(false);
+      setListingCount(null);
       return;
     }
     setVenueProfile(venueProfileData as VenueProfile);
     const {
-      data: listings
+      data: listings, error: listingsError
     } = await supabase.from('venue_listings').select('id, venue_name, room_name, is_published').eq('venue_profile_id', venueProfileData.id);
-    setHasRooms(listings && (isBooker ? bookerDiscoverable(venueProfileData.venue_name, listings) : listings.length > 0));
+    setListingCount(listingsError ? null : (listings?.length ?? 0));
     if (!listings || listings.length === 0) {
       setLoading(false);
       return;

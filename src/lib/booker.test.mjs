@@ -1,8 +1,16 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { companyInformation, discoveryKey, canUseDashboard, bookerDiscoverable, missingBookerVenueFields, SIGNUP_ROLES } from './booker';
+import { companyInformation, discoveryKey, canUseDashboard, bookerDiscoverable, missingBookerVenueFields, SIGNUP_ROLES, shouldShowVenueCompletionReminder } from './booker';
 
 describe('Booker account rules', () => {
+  it('does not remind venues or Bookers who already have at least one room or venue', () => {
+    assert.equal(shouldShowVenueCompletionReminder(1), false);
+    assert.equal(shouldShowVenueCompletionReminder(2), false);
+  });
+  it('only reminds accounts with a successfully loaded empty listing list', () => {
+    assert.equal(shouldShowVenueCompletionReminder(0), true);
+    assert.equal(shouldShowVenueCompletionReminder(null), false);
+  });
   it('offers only artist, venue and promoter at signup', () => {
     assert.deepEqual(SIGNUP_ROLES, ['artist', 'venue', 'booker']);
     assert.equal(SIGNUP_ROLES.includes('both'), false);

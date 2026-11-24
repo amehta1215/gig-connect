@@ -24,6 +24,11 @@ export function bookerDiscoverable(companyName: string | null | undefined, listi
   return Boolean(companyName?.trim()) && listings.some(l => l.is_published);
 }
 
+// Reminder eligibility is separate from public discovery/publishing requirements.
+export function shouldShowVenueCompletionReminder(listingCount: number | null) {
+  return listingCount === 0;
+}
+
 export interface BookerVenueDraft {
   venue_name: string;
   location: string;
