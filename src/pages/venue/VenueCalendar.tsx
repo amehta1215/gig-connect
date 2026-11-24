@@ -23,6 +23,7 @@ import { sendVenueArtistMessage } from '@/lib/messaging';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { findConfirmedConflicts, findArtistDateConflicts, findVenueDateConflicts, mergeConflicts, describeConflicts } from '@/lib/bookingConflicts';
 import { reconcileApplicationStatuses } from '@/lib/applicationStatus';
+import { fetchParties } from '@/lib/accountParties';
 interface GigListing {
   id: string;
   gig_date: string;
@@ -62,6 +63,7 @@ export default function VenueCalendar() {
   const [gigs, setGigs] = useState<GigListing[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [showEventDots, setShowEventDots] = useState(true);
   const [showHoldDots, setShowHoldDots] = useState(true);
   const [selectedDateBoxHeight, setSelectedDateBoxHeight] = useState(400);
@@ -143,7 +145,6 @@ export default function VenueCalendar() {
   useEffect(() => {
     if (user) {
       fetchGigs();
-      fetchVenueListings();
     }
   }, [user]);
   // Debounced artist search for the create-event dialog
@@ -180,47 +181,42 @@ export default function VenueCalendar() {
     return () => clearTimeout(handle);
   }, [eventArtistName, createDialogOpen, selectedArtistUserId]);
   const fetchGigs = async () => {
+    if (!user) return;
     setLoading(true);
-
-    // First get venue profile
-    const {
-      data: venueProfile
-    } = await supabase.from('venue_profiles').select('id').eq('user_id', user!.id).single();
-    if (!venueProfile) {
+    setLoadError(false);
+    try {
+      const { data: venueProfile, error: profileError } = await supabase.from('venue_profiles').select('id').eq('user_id', user.id).maybeSingle();
+      if (profileError) throw profileError;
+      if (!venueProfile) {
+        setGigs([]);
+        setVenueListings([]);
+        return;
+      }
+      const { data: listings, error: listingsError } = await supabase.from('venue_listings').select('id, venue_name, room_name').eq('venue_profile_id', venueProfile.id);
+      if (listingsError) throw listingsError;
+      setVenueListings(listings ?? []);
+      if (!listings?.length) {
+        setGigs([]);
+        return;
+      }
+      if (listings.length === 1) setSelectedListingId(listings[0].id);
+      const { data: gigsData, error: gigsError } = await supabase.from('gig_listings').select('*').in('venue_listing_id', listings.map(l => l.id)).order('gig_date', { ascending: true });
+      if (gigsError) throw gigsError;
+      // Resolve each artist once, rather than sending three requests per gig.
+      const parties = await fetchParties((gigsData ?? []).map(g => g.artist_id));
+      const listingMap = new Map(listings.map(l => [l.id, l]));
+      setGigs((gigsData ?? []).map(gig => ({
+        ...gig,
+        venue_listing: listingMap.get(gig.venue_listing_id ?? '') ?? undefined,
+        artist_profile: parties[gig.artist_id]?.artist_profiles ?? undefined,
+        artist: parties[gig.artist_id],
+      })) as GigListing[]);
+    } catch (error) {
+      console.error('Calendar loading failed', error);
+      setLoadError(true);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Get venue listings
-    const {
-      data: listings
-    } = await supabase.from('venue_listings').select('id').eq('venue_profile_id', venueProfile.id);
-    if (!listings || listings.length === 0) {
-      setLoading(false);
-      return;
-    }
-    const listingIds = listings.map(l => l.id);
-
-    // Get gigs for these listings
-    const {
-      data: gigsData
-    } = await supabase.from('gig_listings').select('*').in('venue_listing_id', listingIds).order('gig_date', {
-      ascending: true
-    });
-    if (gigsData) {
-      // Fetch additional data for each gig
-      const enrichedGigs = await Promise.all(gigsData.map(async gig => {
-        const [venueListingRes, artistProfileRes, artistRes] = await Promise.all([supabase.from('venue_listings').select('venue_name, room_name').eq('id', gig.venue_listing_id).single(), supabase.from('artist_profiles').select('band_name').eq('user_id', gig.artist_id).maybeSingle(), supabase.from('profiles').select('first_name, last_name').eq('id', gig.artist_id).maybeSingle()]);
-        return {
-          ...gig,
-          venue_listing: venueListingRes.data,
-          artist_profile: artistProfileRes.data,
-          artist: artistRes.data
-        };
-      }));
-      setGigs(enrichedGigs as GigListing[]);
-    }
-    setLoading(false);
   };
 
   const handleResizeStart = (e: React.MouseEvent | React.TouchEvent) => {
@@ -263,16 +259,15 @@ export default function VenueCalendar() {
   const fetchSingleGig = async (gigId: string): Promise<GigListing | null> => {
     const { data: gig } = await supabase.from('gig_listings').select('*').eq('id', gigId).single();
     if (!gig) return null;
-    const [venueListingRes, artistProfileRes, artistRes] = await Promise.all([
+    const [venueListingRes, parties] = await Promise.all([
       supabase.from('venue_listings').select('venue_name, room_name').eq('id', gig.venue_listing_id).single(),
-      supabase.from('artist_profiles').select('band_name').eq('user_id', gig.artist_id).maybeSingle(),
-      supabase.from('profiles').select('first_name, last_name').eq('id', gig.artist_id).maybeSingle(),
+      fetchParties([gig.artist_id]),
     ]);
     return {
       ...gig,
       venue_listing: venueListingRes.data,
-      artist_profile: artistProfileRes.data,
-      artist: artistRes.data
+      artist_profile: parties[gig.artist_id]?.artist_profiles,
+      artist: parties[gig.artist_id]
     } as GigListing;
   };
 
@@ -306,21 +301,6 @@ export default function VenueCalendar() {
     fetchGigs();
   };
 
-  const fetchVenueListings = async () => {
-    const {
-      data: venueProfile
-    } = await supabase.from('venue_profiles').select('id').eq('user_id', user!.id).single();
-    if (!venueProfile) return;
-    const {
-      data: listings
-    } = await supabase.from('venue_listings').select('id, venue_name, room_name').eq('venue_profile_id', venueProfile.id);
-    if (listings) {
-      setVenueListings(listings);
-      if (listings.length === 1) {
-        setSelectedListingId(listings[0].id);
-      }
-    }
-  };
   const handleCreateEventClick = async () => {
     setEventDate(selectedDate);
     setEventTime('');
@@ -348,6 +328,7 @@ export default function VenueCalendar() {
     setCreateDialogOpen(true);
   };
   const handleCreateEvent = async (override = false) => {
+    if (!user) return;
     if (!eventDate || !selectedListingId) {
       toast.error(`Please select a date and ${isBooker ? 'venue' : 'room'}`);
       return;
@@ -377,7 +358,7 @@ export default function VenueCalendar() {
       error
     } = await supabase.from('gig_listings').insert({
       venue_listing_id: selectedListingId,
-      artist_id: selectedArtistUserId || user!.id,
+      artist_id: selectedArtistUserId || user.id,
       // If a platform artist was picked, link them; otherwise use venue user as placeholder for manual events
       gig_date: format(eventDate, 'yyyy-MM-dd'),
       show_time: eventTime || null,
@@ -724,6 +705,12 @@ export default function VenueCalendar() {
         <div className="h-8 w-48 bg-card animate-pulse" />
         <div className="h-64 bg-card animate-pulse" />
       </div>;
+  }
+  if (loadError) {
+    return <div className="space-y-4 py-6">
+      <p className="text-foreground">Your calendar couldn’t load.</p>
+      <Button variant="outline" onClick={fetchGigs}>Try again</Button>
+    </div>;
   }
   return <div className="space-y-6 animate-fade-in">
       <div className="grid md:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
