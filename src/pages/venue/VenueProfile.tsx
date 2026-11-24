@@ -696,7 +696,7 @@ export default function VenueProfile() {
       {/* Venue Info Section */}
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2 text-primary mb-4">
-          <h2 className="font-display text-xl">{isBooker ? 'Company Info' : 'Venue Info'}</h2>
+          <h2 className="font-display text-xl">{isBooker ? 'Info' : 'Venue Info'}</h2>
         </div>
 
         <div className="space-y-2">
@@ -704,7 +704,7 @@ export default function VenueProfile() {
           <Input id="venue_name" value={formData.venue_name} onChange={e => setFormData({
           ...formData,
           venue_name: e.target.value
-        })} placeholder={isBooker ? 'Company name' : 'The Blue Note'} />
+        })} placeholder={isBooker ? 'New York Music Presents' : 'The Blue Note'} />
         </div>
 
         {!isBooker && <>
