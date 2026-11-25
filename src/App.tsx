@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,42 +9,42 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Pages
 import NotFound from "./pages/NotFound";
-import ResetPassword from "./pages/ResetPassword";
-import AccountDeleted from "./pages/AccountDeleted";
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const AccountDeleted = lazy(() => import("./pages/AccountDeleted"));
 
 // Public pages
 import PublicDashboard from "./pages/public/PublicDashboard";
-import PublicVenueDetail from "./pages/public/PublicVenueDetail";
-import PublicRoomDetail from "./pages/public/PublicRoomDetail";
+const PublicVenueDetail = lazy(() => import("./pages/public/PublicVenueDetail"));
+const PublicRoomDetail = lazy(() => import("./pages/public/PublicRoomDetail"));
 
 // Legal pages
-import FAQ from "./pages/legal/FAQ";
-import Contact from "./pages/legal/Contact";
-import About from "./pages/legal/About";
-import Legal from "./pages/legal/Legal";
+const FAQ = lazy(() => import("./pages/legal/FAQ"));
+const Contact = lazy(() => import("./pages/legal/Contact"));
+const About = lazy(() => import("./pages/legal/About"));
+const Legal = lazy(() => import("./pages/legal/Legal"));
 
 // Artist pages
-import ArtistDashboard from "./pages/artist/ArtistDashboard";
-import ArtistMessages from "./pages/artist/ArtistMessages";
-import ArtistApplications from "./pages/artist/ArtistApplications";
-import ArtistProfile from "./pages/artist/ArtistProfile";
-import ArtistCalendar from "./pages/artist/ArtistCalendar";
-import ArtistGigDetail from "./pages/artist/ArtistGigDetail";
-import ArtistFavorites from "./pages/artist/ArtistFavorites";
-import FindVenues from "./pages/artist/FindVenues";
-import VenueListingDetail from "./pages/artist/VenueListingDetail";
-import VenueDetail from "./pages/artist/VenueDetail";
-import ApplicationDetail from "./pages/artist/ApplicationDetail";
+const ArtistDashboard = lazy(() => import("./pages/artist/ArtistDashboard"));
+const ArtistMessages = lazy(() => import("./pages/artist/ArtistMessages"));
+const ArtistApplications = lazy(() => import("./pages/artist/ArtistApplications"));
+const ArtistProfile = lazy(() => import("./pages/artist/ArtistProfile"));
+const ArtistCalendar = lazy(() => import("./pages/artist/ArtistCalendar"));
+const ArtistGigDetail = lazy(() => import("./pages/artist/ArtistGigDetail"));
+const ArtistFavorites = lazy(() => import("./pages/artist/ArtistFavorites"));
+const FindVenues = lazy(() => import("./pages/artist/FindVenues"));
+const VenueListingDetail = lazy(() => import("./pages/artist/VenueListingDetail"));
+const VenueDetail = lazy(() => import("./pages/artist/VenueDetail"));
+const ApplicationDetail = lazy(() => import("./pages/artist/ApplicationDetail"));
 
 // Venue pages
-import VenueDashboard from "./pages/venue/VenueDashboard";
-import VenueMessages from "./pages/venue/VenueMessages";
+const VenueDashboard = lazy(() => import("./pages/venue/VenueDashboard"));
+const VenueMessages = lazy(() => import("./pages/venue/VenueMessages"));
 
-import VenueApplications from "./pages/venue/VenueApplications";
-import VenueApplicationDetail from "./pages/venue/VenueApplicationDetail";
-import VenueCalendar from "./pages/venue/VenueCalendar";
-import GigDetail from "./pages/venue/GigDetail";
-import VenueProfile from "./pages/venue/VenueProfile";
+const VenueApplications = lazy(() => import("./pages/venue/VenueApplications"));
+const VenueApplicationDetail = lazy(() => import("./pages/venue/VenueApplicationDetail"));
+const VenueCalendar = lazy(() => import("./pages/venue/VenueCalendar"));
+const GigDetail = lazy(() => import("./pages/venue/GigDetail"));
+const VenueProfile = lazy(() => import("./pages/venue/VenueProfile"));
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <Suspense fallback={null}>
           <Routes>
             {/* Public routes - accessible to everyone */}
             <Route path="/" element={<PublicDashboard />}>
@@ -143,6 +145,7 @@ const App = () => (
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

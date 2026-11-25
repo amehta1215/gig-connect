@@ -127,6 +127,13 @@
       "when": 1795546164722,
       "tag": "0017_booker_company_and_independent_venues",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1795634458368,
+      "tag": "0018_add_performance_indexes",
+      "breakpoints": true
     }
   ]
 }
