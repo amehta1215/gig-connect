@@ -30,6 +30,19 @@ Deno.serve(async (req) => {
     }
     const userId = data.claims.sub as string;
 
+    // Verify the emailed code here so the browser session never changes mid-flow.
+    const body = await req.json().catch(() => ({}));
+    const code = typeof body?.code === 'string' ? body.code.trim() : '';
+    const email = typeof data.claims.email === 'string' ? data.claims.email : '';
+    if (!code || !email) return json({ error: 'invalid_code' }, 400);
+    const verifier = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    );
+    const { data: otp, error: otpError } = await verifier.auth.verifyOtp({ email, token: code, type: 'email' });
+    if (otpError || otp?.user?.id !== userId) return json({ error: 'invalid_code' }, 400);
+
     const admin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!

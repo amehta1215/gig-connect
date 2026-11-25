@@ -141,20 +141,15 @@ export function AccountInformation() {
       return;
     }
     setDeleting(true);
-    const { error: otpError } = await supabase.auth.verifyOtp({
-      email: user?.email ?? '',
-      token: otpCode.trim(),
-      type: 'email',
+    const { data: fnData, error: fnError } = await supabase.functions.invoke('delete-account', {
+      body: { code: otpCode.trim() },
     });
-    if (otpError) {
-      setDeleteError('That code is invalid or expired');
-      setDeleting(false);
-      return;
-    }
-
-    const { error: fnError } = await supabase.functions.invoke('delete-account');
-    if (fnError) {
-      setDeleteError('Failed to delete account. Please try again.');
+    if (fnError || !fnData?.success) {
+      const ctx = (fnError as { context?: Response } | null)?.context;
+      const detail = ctx ? await ctx.json().catch(() => null) : null;
+      setDeleteError(detail?.error === 'invalid_code'
+        ? 'That code is invalid or expired'
+        : 'Failed to delete account. Please try again.');
       setDeleting(false);
       return;
     }
