@@ -11,3 +11,5 @@
 - Derive venue_profiles.is_booker from its owner's account category in a database trigger and skip venue-name synchronization for bookers, so company edits cannot rename independently managed venues.
 - Gate account sessions with document-memory-only explicit sign-in permission and clear saved sessions locally before rendering account pages; this prevents automatic login on a new visit while preserving in-visit navigation and deliberate verification/recovery links. Never embed demo login credentials or auto-sign-in routes.
 - Load venue calendars with batched listing and counterparty lookups, and always finish loading with a retryable error state on failure; per-gig lookups multiply requests for multi-venue accounts.
+
+- Keep authentication emails on the managed SDK handler and its scaffolded templates; managed delivery does not use application email queues.
